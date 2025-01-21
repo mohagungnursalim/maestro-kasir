@@ -541,10 +541,7 @@
     </div>
 </div>
 
-
-
-
-
+<audio id="success-audio" src="{{ asset('audio/send.mp3') }}" preload="auto"></audio>
 
 
 
@@ -558,7 +555,10 @@
                 const modal = new Modal(modalElement);
                 modal.hide(); // Menutup modal
             }
-
+            // Dapatkan elemen audio
+            var audio = document.getElementById('success-audio');
+            // Putar audio
+            audio.play();
             Livewire.dispatch('resetForm'); // Mereset form di Livewire
         });
 
@@ -674,6 +674,10 @@
         Livewire.on('updatedSuccess', (event) => {
             const modal = new Modal(document.getElementById('editModal'));
             modal.hide(); // Menutup modal setelah data berhasil ditambahkan
+            // Dapatkan elemen audio
+            var audio = document.getElementById('success-audio');
+            // Putar audio
+            audio.play();
             Livewire.dispatch('resetFormEdit');
         });
 
@@ -836,6 +840,11 @@
                 icon: "success",
                 title: "Produk berhasil dihapus!"
             });
+
+            // Dapatkan elemen audio
+            var audio = document.getElementById('success-audio');
+            // Putar audio
+            audio.play();
     });
 </script>
 
@@ -859,6 +868,11 @@
                 icon: "success",
                 title: "Produk berhasil ditambahkan!"
             });
+
+            // Dapatkan elemen audio
+            var audio = document.getElementById('success-audio');
+            // Putar audio
+            audio.play();
         });
 </script>
 
@@ -880,7 +894,17 @@
                 icon: "success",
                 title: "Produk berhasil diperbarui!"
             });
-    });
+
+            // Dapatkan elemen audio
+            var audio = document.getElementById('success-audio');
+                    
+                    // Pastikan file audio valid dan siap diputar
+                    if (audio) {
+                        audio.play().catch((error) => {
+                            console.error("Error playing audio:", error);
+                        });
+                    }
+            });
 
 </script>
 
