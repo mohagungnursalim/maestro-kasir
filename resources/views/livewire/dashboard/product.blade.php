@@ -217,7 +217,7 @@
                     Tambah Produk
                 </h3>
 
-                <button type="button" class="closeButtonAddModal" >
+                <button type="button" id="closeButtonAddModal" >
                     <svg aria-hidden="true" class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"
                         xmlns="http://www.w3.org/2000/svg">
                         <path fill-rule="evenodd"
@@ -550,41 +550,46 @@
 
 {{-- Script modal tambah --}}
 <script>
-    $(document).ready(function () {
-    // Menangkap event Livewire dan menutup modal
-    window.addEventListener('addedSuccess', () => {
-        const modalElement = document.getElementById('addModal');
-        if (modalElement) {
-            const modal = new Modal(modalElement);
-            modal.hide(); // Menutup modal
+    document.addEventListener('livewire:navigated', () => {
+        // Menangkap event Livewire dan menutup modal
+        Livewire.on('addedSuccess', () => {
+            const modalElement = document.getElementById('addModal');
+            if (modalElement) {
+                const modal = new Modal(modalElement);
+                modal.hide(); // Menutup modal
+            }
+
+            Livewire.dispatch('resetForm'); // Mereset form di Livewire
+        });
+
+        // Tombol untuk membuka modal
+        const addProductButton = document.getElementById('addProductButton');
+        if (addProductButton) {
+            addProductButton.addEventListener('click', () => {
+                const modalElement = document.getElementById('addModal');
+                if (modalElement) {
+                    const modal = new Modal(modalElement);
+                    modal.show(); // Membuka modal
+                }
+            });
         }
 
-        @this.call('resetForm'); // Mereset form di Livewire
-    });
+        // Event listener untuk tombol close
+        const closeButtonAddModal = document.getElementById('closeButtonAddModal');
+        if (closeButtonAddModal) {
+            closeButtonAddModal.addEventListener('click', () => {
+                const modalElement = document.getElementById('addModal');
+                if (modalElement) {
+                    const modal = new Modal(modalElement);
+                    modal.hide(); // Menutup modal
+                }
 
-    // Tombol untuk membuka modal
-    $('#addProductButton').on('click', function () {
-        const modalElement = document.getElementById('addModal');
-        if (modalElement) {
-            const modal = new Modal(modalElement);
-            modal.show(); // Membuka modal
+                Livewire.dispatch('resetForm'); // Mereset form di Livewire
+            });
         }
     });
-
-    // Tombol untuk menutup modal dan mereset form
-    $('.closeButtonAddModal').on('click', function () {
-        const modalElement = document.getElementById('addModal');
-        if (modalElement) {
-            const modal = new Modal(modalElement);
-            modal.hide(); // Menutup modal
-        }
-
-        @this.call('resetForm'); // Mereset form di Livewire
-    });
-});
-
-
 </script>
+
 
 {{-- Alpine FileUpload Form Add --}}
 <script>
@@ -665,30 +670,35 @@
 
 {{-- Script modal edit --}}
 <script>
-    $(document).ready(function () {
-
-        window.addEventListener('updatedSuccess', function () {
+    document.addEventListener('livewire:navigated', () => { 
+        Livewire.on('updatedSuccess', (event) => {
             const modal = new Modal(document.getElementById('editModal'));
             modal.hide(); // Menutup modal setelah data berhasil ditambahkan
-            @this.call('resetFormEdit');
+            Livewire.dispatch('resetFormEdit');
         });
 
-
-        window.addEventListener('showEditModal', function () {
+        Livewire.on('showEditModal', (event) => {
             const modal = new Modal(document.getElementById('editModal'));
             modal.show(); // Menampilkan modal saat tombol ditekan
         });
 
 
-        // Event listener untuk menutup modal dan mereset form ketika tombol close ditekan
-        $('#closeButtonEditModal').on('click', function () {
-            const modal = new Modal(document.getElementById('editModal'));
-            modal.hide(); // Menutup modal
-            @this.call('resetFormEdit');
-        });
+       // Event listener untuk tombol close
+       const closeButtonEditModal = document.getElementById('closeButtonEditModal');
+        
+        if (closeButtonEditModal) {
+            closeButtonEditModal.addEventListener('click', () => {
+                const modalElement = document.getElementById('editModal');
+                if (modalElement) {
+                    const modal = new Modal(modalElement);
+                    modal.hide(); // Menutup modal
+                }
 
+                // Dispatch event untuk mereset form di Livewire
+                Livewire.dispatch('resetFormEdit'); // Panggil metode resetFormEdit di Livewire
+            });
+        }
     });
-
 </script>
 
 {{-- Alpine FileUpload From Update --}}
@@ -784,7 +794,6 @@
                 // Listener untuk event updatedSuccess dari Livewire
                 Livewire.on('updatedSuccess', () => {
                     this.resetPreview(); // Panggil untuk clear preview
-                    this.existingImage = @this.get('currentImage'); // Sinkronkan gambar baru dari Livewire
                 });
             },
         };
@@ -794,7 +803,7 @@
 
 {{-- Script modal delete --}}
 <script>
-    window.addEventListener('showDeleteConfirmation', event => {
+    Livewire.on('showDeleteConfirmation', (event) => {
         Swal.fire({
             title: 'Apakah Anda yakin?',
             text: "Produk ini akan dihapus?",
@@ -810,14 +819,23 @@
             }
         });
     });
-    window.addEventListener('deleteSuccess', event => {
-        Swal.fire({
-            title: 'Berhasil',
-            text: 'Kategori produk berhasil dihapus.',
-            icon: 'success',
-            confirmButtonText: 'OK',
-            confirmButtonColor: '#1E40AF', // Mengatur warna tombol menjadi biru
-        });
+    
+    Livewire.on('deleteSuccess', (event) => {
+        const Toast = Swal.mixin({
+                toast: true,
+                position: "top-end",
+                showConfirmButton: false,
+                timer: 3000,
+                timerProgressBar: true,
+                didOpen: (toast) => {
+                    toast.onmouseenter = Swal.stopTimer;
+                    toast.onmouseleave = Swal.resumeTimer;
+                }
+            });
+            Toast.fire({
+                icon: "success",
+                title: "Produk berhasil dihapus!"
+            });
     });
 </script>
 
@@ -825,8 +843,7 @@
 
 {{-- Sweet alert,added success --}}
 <script>
-    $(document).ready(function () {
-        window.addEventListener('addedSuccess', function (event) {
+        Livewire.on('addedSuccess', (event) => {
             const Toast = Swal.mixin({
                 toast: true,
                 position: "top-end",
@@ -840,17 +857,14 @@
             });
             Toast.fire({
                 icon: "success",
-                title: "Produk berhasil ditambahkan"
+                title: "Produk berhasil ditambahkan!"
             });
         });
-    })
-
 </script>
 
 {{-- Sweet alert,updated success --}}
 <script>
-    $(document).ready(function () {
-        window.addEventListener('updatedSuccess', function (event) {
+   Livewire.on('updatedSuccess', (event) => {
             const Toast = Swal.mixin({
                 toast: true,
                 position: "top-end",
@@ -864,34 +878,10 @@
             });
             Toast.fire({
                 icon: "success",
-                title: "Produk berhasil diperbarui"
+                title: "Produk berhasil diperbarui!"
             });
-        });
-    })
+    });
 
 </script>
 
-{{-- Sweet alert,delete success --}}
-<script>
-    $(document).ready(function () {
-        window.addEventListener('deleteSuccess', function (event) {
-            const Toast = Swal.mixin({
-                toast: true,
-                position: "top-end",
-                showConfirmButton: false,
-                timer: 3000,
-                timerProgressBar: true,
-                didOpen: (toast) => {
-                    toast.onmouseenter = Swal.stopTimer;
-                    toast.onmouseleave = Swal.resumeTimer;
-                }
-            });
-            Toast.fire({
-                icon: "success",
-                title: "Produk berhasil dihapus dari database!"
-            });
-        });
-    })
-
-</script>
 </div>

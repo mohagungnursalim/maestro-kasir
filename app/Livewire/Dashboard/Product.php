@@ -4,6 +4,7 @@ namespace App\Livewire\Dashboard;
 
 use App\Models\Product as ModelsProduct;
 use Illuminate\Database\Events\ModelsPruned;
+use Livewire\Attributes\On;
 use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\WithFileUploads;
@@ -67,11 +68,13 @@ class Product extends Component
         $this->loadInitialProducts();
     }
 
+    #[On('resetForm')] 
     public function resetForm()
     {
         $this->reset(['name', 'sku', 'image', 'price', 'description', 'stock', 'unit']);
     }
 
+    #[On('resetFormEdit')] 
     public function resetFormEdit()
     {
         $this->reset(['nameUpdate','skuUpdate','imageUpdate','priceUpdate', 'descriptionUpdate', 'stockUpdate', 'unitUpdate']);
