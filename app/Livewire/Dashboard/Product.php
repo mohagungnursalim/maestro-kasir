@@ -20,7 +20,7 @@ class Product extends Component
     public $productId, $nameUpdate, $skuUpdate, $currentImage, $imageUpdate, $priceUpdate, $descriptionUpdate, $stockUpdate, $unitUpdate;
 
     // Detail
-    public $selectedProduct = null;
+    public $nameDetail, $skuDetail, $imageDetail, $priceDetail, $descriptionDetail, $stockDetail, $unitDetail;
 
     // List Products
     public $products, $totalProducts;
@@ -166,6 +166,19 @@ class Product extends Component
         $this->dispatch('updatedSuccess');
     }
 
+    public function detailModal($id)
+    {
+        $product = ModelsProduct::findOrFail($id);
+        $this->nameDetail = $product->name;
+        $this->skuDetail = $product->sku;
+        $this->imageDetail = $product->image;
+        $this->priceDetail = $product->price;
+        $this->descriptionDetail = $product->description;
+        $this->stockDetail = $product->stock;
+        $this->unitDetail = $product->unit;
+
+        $this->dispatch('showDetailModal');
+    }
 
     public function deleteConfirmation($id)
     {

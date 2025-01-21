@@ -82,7 +82,7 @@
                                 <th scope="col" class="px-6 py-3">Gambar</th>
                                 <th scope="col" class="px-6 py-3">Nama Produk</th>
                                 <th scope="col" class="px-6 py-3">Sku</th>
-                                <th scope="col" class="px-6 py-3">Kategori</th>
+                                <th scope="col" class="px-6 py-3">Seller</th>
                                 <th scope="col" class="px-6 py-3">Harga</th>
                                 <th scope="col" class="px-6 py-3">Stok</th>
                                 <th scope="col" class="px-6 py-3">Satuan</th>
@@ -137,8 +137,8 @@
                                     {{ $product->name }}
                                 </td>
                                 <td class="px-6 py-4">{{ $product->sku }}</td>
-                                <td class="px-6 py-4">Kategori disini</td>
-                                <td class="px-6 py-4">Rp{{ $product->price }}</td>
+                                <td class="px-6 py-4">Seller Disini</td>
+                                <td class="px-6 py-4">Rp{{ number_format($product->price, 0, ',', '.') }}</td>
                                 <td class="px-6 py-4">{{ $product->stock }}</td>
                                 <td class="px-6 py-4">{{ $product->unit }}</td>
                                 <td class="px-6 py-4">
@@ -154,7 +154,7 @@
                                         </button>
                                     </div>
                                     <div>
-                                        <button
+                                        <button wire:click="detailModal({{ $product->id }})"
                                             class="bg-blue-100 hover:bg-blue-200 text-blue-800 text-xs font-semibold me-2 px-2.5 py-0.5 rounded border border-blue-400 inline-flex items-center justify-center">
                                             Detail
                                         </button>
@@ -205,7 +205,7 @@
 
 
 {{-- Modal Create --}}
-<div id="addModal" tabindex="-1" aria-hidden="true" data-modal-backdrop="addModal"
+<div id="addModal" tabindex="-1"  data-modal-backdrop="addModal"
     class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-modal md:h-full"
     wire:ignore.self>
     <div class="relative p-4 w-full max-w-2xl h-full md:h-auto">
@@ -216,25 +216,7 @@
                 <h3 class="text-lg font-semibold text-gray-900">
                     Tambah Produk
                 </h3>
-
-                <button type="button" id="closeButtonAddModal" >
-                    <svg aria-hidden="true" class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"
-                        xmlns="http://www.w3.org/2000/svg">
-                        <path fill-rule="evenodd"
-                            d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
-                            clip-rule="evenodd"></path>
-                    </svg>
-                    <span class="sr-only">Close modal</span>
-                </button>
             </div>
-
-            @if ($errors->any())
-            <ul class="text-red-500">
-                @foreach ($errors->all() as $error)
-                    <li>{{ $error }}</li>
-                @endforeach
-            </ul>
-            @endif
             <!-- Modal body -->
             <form wire:submit.prevent="store">
                 <div class="grid gap-4 mb-4 sm:grid-cols-2" style="max-height: 60vh; overflow-y: auto;">
@@ -263,7 +245,7 @@
                         @error('price') <span class="text-red-500 text-sm">{{ $message }} @enderror
                     </div>
                     <div>
-                        <label for="stok"
+                        <label for="stock"
                             class="block mb-2 text-sm font-medium text-gray-900">Stok</label>
                         <input wire:model='stock' type="number" name="stock" id="stock"
                             class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full"
@@ -350,11 +332,11 @@
                 </div>
                 <div class="flex items-center justify-center">
                     <button wire:loading.remove wire:target='store' type="submit"
-                        class="text-white bg-gradient-to-r from-purple-500 to-pink-500 hover:bg-gradient-to-l focus:ring-4 focus:outline-none focus:ring-purple-200 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2">
+                        class="text-white bg-gradient-to-r from-purple-500 to-pink-500 hover:bg-gradient-to-l focus:ring-4 focus:outline-none focus:ring-purple-200 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2">
                         Simpan
                     </button>
                     <button disabled wire:loading wire:target='store' 
-                        class="text-white bg-gradient-to-r from-purple-500 to-pink-500 hover:bg-gradient-to-l focus:ring-4 focus:outline-none focus:ring-purple-200 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2">
+                        class="text-white bg-gradient-to-r from-purple-500 to-pink-500 hover:bg-gradient-to-l focus:ring-4 focus:outline-none focus:ring-purple-200 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2">
                         Menyimpan..
                         <svg class="inline w-5 h-5 text-white animate-spin ml-2" xmlns="http://www.w3.org/2000/svg"
                             fill="none" viewBox="0 0 24 24">
@@ -363,6 +345,11 @@
                             <path class="opacity-75" fill="currentColor"
                                 d="M4 12a8 8 0 018-8v4a4 4 0 100 8v4a8 8 0 01-8-8z"></path>
                         </svg>
+                    </button>
+
+                    <button wire:loading.remove wire:target='store' id="closeButtonAddModal"
+                    type="button" class="py-2.5 px-5 ms-3 text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-100">
+                        Tutup
                     </button>
                 </div>
             </form>
@@ -373,7 +360,7 @@
 
 
 {{-- Modal Edit --}}
-<div id="editModal" tabindex="-1" aria-hidden="true" data-modal-backdrop="editModal"
+<div id="editModal" tabindex="-1"  data-modal-backdrop="editModal"
     class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-modal md:h-full"
     wire:ignore.self>
     <div class="relative p-4 w-full max-w-2xl h-full md:h-auto">
@@ -385,25 +372,7 @@
                     Edit Produk {{ $nameUpdate }}
 
                 </h3>
-
-                <button type="button" id="closeButtonEditModal">
-                    <svg aria-hidden="true" class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"
-                        xmlns="http://www.w3.org/2000/svg">
-                        <path fill-rule="evenodd"
-                            d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
-                            clip-rule="evenodd"></path>
-                    </svg>
-                    <span class="sr-only">Close modal</span>
-                </button>
             </div>
-
-            {{-- @if ($errors->any())
-                <ul class="text-red-500">
-                    @foreach ($errors->all() as $error)
-                        <li>{{ $error }}</li>
-                    @endforeach
-                </ul>
-            @endif --}}
             <!-- Modal body -->
             <form wire:submit.prevent="update">
                 <div class="grid gap-4 mb-4 sm:grid-cols-2" style="max-height: 60vh; overflow-y: auto;">
@@ -520,11 +489,11 @@
                 </div>
                 <div class="flex items-center justify-center">
                     <button wire:loading.remove wire:target='update' wire:click='update' type="submit"
-                        class="text-white bg-gradient-to-r from-purple-500 to-pink-500 hover:bg-gradient-to-l focus:ring-4 focus:outline-none focus:ring-purple-200 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2">
+                        class="text-white bg-gradient-to-r from-purple-500 to-pink-500 hover:bg-gradient-to-l focus:ring-4 focus:outline-none focus:ring-purple-200 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2">
                         Simpan
                     </button>
                     <button disabled wire:loading wire:target='update' 
-                        class="text-white bg-gradient-to-r from-purple-500 to-pink-500 hover:bg-gradient-to-l focus:ring-4 focus:outline-none focus:ring-purple-200 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2">
+                        class="text-white bg-gradient-to-r from-purple-500 to-pink-500 hover:bg-gradient-to-l focus:ring-4 focus:outline-none focus:ring-purple-200 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2">
                         Menyimpan..
                         <svg class="inline w-5 h-5 text-white animate-spin ml-2" xmlns="http://www.w3.org/2000/svg"
                             fill="none" viewBox="0 0 24 24">
@@ -534,6 +503,11 @@
                                 d="M4 12a8 8 0 018-8v4a4 4 0 100 8v4a8 8 0 01-8-8z"></path>
                         </svg>
                     </button>
+
+                    <button wire:loading.remove wire:target='update' id="closeButtonEditModal"
+                    type="button" class="py-2.5 px-5 ms-3 text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-100">
+                        Tutup
+                    </button>
                 </div>
             </form>
 
@@ -541,10 +515,76 @@
     </div>
 </div>
 
+
+
+{{-- Modal Detail --}}
+<div id="detailModal" tabindex="-1" data-modal-backdrop="detailModal"
+    class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-modal md:h-full"
+    wire:ignore.self>
+    <div class="relative p-4 w-full max-w-2xl h-full md:h-auto">
+        <!-- Modal content -->
+        <div class="relative p-4 bg-white rounded-lg shadow sm:p-5">
+            <!-- Modal header -->
+            <div class="flex justify-between items-center pb-4 mb-4 rounded-t border-b sm:mb-5">
+                <h3 class="text-lg font-semibold text-gray-900">
+                   {{ $nameDetail }}
+                </h3>
+            </div>
+            
+            <div class="container mx-auto p-4">
+                <div class="flex flex-col md:flex-row gap-4">
+                    @if ($imageDetail)    
+                    <!-- Container untuk gambar dan stock (fixed di sebelah kiri) -->
+                    <div class="md:sticky md:top-4 md:w-1/3">
+                        <div class="bg-white rounded-lg p-4">
+                            <!-- Image container -->
+                            <div class="flex justify-center">
+                                <img class="h-36 w-36 rounded-lg object-cover" src="{{ asset('storage/' . $imageDetail) }}">
+                            </div>
+                           
+                            <div class="mt-4">
+                                <p class="text-xs text-gray-600">Produk: {{ $nameDetail }}</p>
+                                <p class="text-xs text-gray-600">SKU: {{ $stockDetail }}</p>
+                                <p class="text-xs text-gray-600">Seller: Seller disini</p>
+                                <p class="text-xs text-gray-600">Harga: Rp {{ number_format($priceDetail, 0, ',', '.') }}</p>
+                                <p class="text-xs text-gray-600">Stok: {{ $stockDetail }}</p>
+                                <p class="text-xs text-gray-600">Satuan: {{ $unitDetail }}</p>
+                            </div>
+                            <div class="mt-4">
+                                <p class="text-xs text-gray-600">Ditambahkan: <br>{{ $product ? $product->created_at : '' }}</p>
+                                <p class="text-xs text-gray-600">Diperbarui: <br>{{ $product ? $product->updated_at : '' }}</p>
+                               
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Container untuk description (di sebelah kanan) -->
+                    <div class="md:w-2/3 max-h-[60vh] overflow-y-auto">
+                        <div class="bg-white rounded-lg p-4">
+                            <p class="text-gray-700">
+                                {{ $descriptionDetail }}
+                            </p>
+                        </div>
+                    </div>
+                    @endif
+                </div>
+            </div>
+            
+            
+                <div class="flex items-center justify-center">
+                    <button id="closeButtonDetailModal"
+                    type="button" class="py-2.5 px-5 ms-3 text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-100">
+                        Tutup
+                    </button>
+                </div>
+        </div>
+    </div>
+</div>
+
+
+
+
 <audio id="success-audio" src="{{ asset('audio/send.mp3') }}" preload="auto"></audio>
-
-
-
 {{-- Script modal tambah --}}
 <script>
     document.addEventListener('livewire:navigated', () => {
@@ -574,8 +614,8 @@
             });
         }
 
-        // Event listener untuk tombol close
-        const closeButtonAddModal = document.getElementById('closeButtonAddModal');
+       const closeButtonAddModal = document.getElementById('closeButtonAddModal');
+        
         if (closeButtonAddModal) {
             closeButtonAddModal.addEventListener('click', () => {
                 const modalElement = document.getElementById('addModal');
@@ -667,7 +707,6 @@
 </script>
 
 
-
 {{-- Script modal edit --}}
 <script>
     document.addEventListener('livewire:navigated', () => { 
@@ -678,7 +717,6 @@
             var audio = document.getElementById('success-audio');
             // Putar audio
             audio.play();
-            Livewire.dispatch('resetFormEdit');
         });
 
         Livewire.on('showEditModal', (event) => {
@@ -697,9 +735,6 @@
                     const modal = new Modal(modalElement);
                     modal.hide(); // Menutup modal
                 }
-
-                // Dispatch event untuk mereset form di Livewire
-                Livewire.dispatch('resetFormEdit'); // Panggil metode resetFormEdit di Livewire
             });
         }
     });
@@ -804,51 +839,28 @@
     }
 </script>
 
-
-{{-- Script modal delete --}}
+{{-- Script modal detail --}}
 <script>
-    Livewire.on('showDeleteConfirmation', (event) => {
-        Swal.fire({
-            title: 'Apakah Anda yakin?',
-            text: "Produk ini akan dihapus?",
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#3085d6',
-            cancelButtonColor: '#d33',
-            confirmButtonText: 'Ya, hapus!',
-            cancelButtonText: 'Batal'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                Livewire.dispatch('deleteConfirmed');
-            }
+    document.addEventListener('livewire:navigated', () => { 
+        Livewire.on('showDetailModal', (event) => {
+            const modal = new Modal(document.getElementById('detailModal'));
+            modal.show(); // Menampilkan modal saat tombol ditekan
         });
-    });
-    
-    Livewire.on('deleteSuccess', (event) => {
-        const Toast = Swal.mixin({
-                toast: true,
-                position: "top-end",
-                showConfirmButton: false,
-                timer: 3000,
-                timerProgressBar: true,
-                didOpen: (toast) => {
-                    toast.onmouseenter = Swal.stopTimer;
-                    toast.onmouseleave = Swal.resumeTimer;
+
+        // Event listener untuk tombol close
+       const closeButtonDetailModal = document.getElementById('closeButtonDetailModal');
+        
+        if (closeButtonDetailModal) {
+            closeButtonDetailModal.addEventListener('click', () => {
+                const modalElement = document.getElementById('detailModal');
+                if (modalElement) {
+                    const modal = new Modal(modalElement);
+                    modal.hide(); // Menutup modal
                 }
             });
-            Toast.fire({
-                icon: "success",
-                title: "Produk berhasil dihapus!"
-            });
-
-            // Dapatkan elemen audio
-            var audio = document.getElementById('success-audio');
-            // Putar audio
-            audio.play();
+        }
     });
 </script>
-
-
 
 {{-- Sweet alert,added success --}}
 <script>
@@ -906,6 +918,49 @@
                     }
             });
 
+</script>
+
+{{-- Script modal delete --}}
+<script>
+    Livewire.on('showDeleteConfirmation', (event) => {
+        Swal.fire({
+            title: 'Apakah Anda yakin?',
+            text: "Produk ini akan dihapus?",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Ya, hapus!',
+            cancelButtonText: 'Batal'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                Livewire.dispatch('deleteConfirmed');
+            }
+        });
+    });
+    
+    Livewire.on('deleteSuccess', (event) => {
+        const Toast = Swal.mixin({
+                toast: true,
+                position: "top-end",
+                showConfirmButton: false,
+                timer: 3000,
+                timerProgressBar: true,
+                didOpen: (toast) => {
+                    toast.onmouseenter = Swal.stopTimer;
+                    toast.onmouseleave = Swal.resumeTimer;
+                }
+            });
+            Toast.fire({
+                icon: "success",
+                title: "Produk berhasil dihapus!"
+            });
+
+            // Dapatkan elemen audio
+            var audio = document.getElementById('success-audio');
+            // Putar audio
+            audio.play();
+    });
 </script>
 
 </div>
