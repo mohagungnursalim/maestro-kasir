@@ -126,10 +126,10 @@
                                 @else
                                 {{-- Tampilkan data asli setelah dimuat --}}
                                 @forelse ($products as $product)
-                                <tr class="bg-white border-b hover:bg-gray-300">
+                                <tr class="bg-white border-b hover:bg-gray-300 text-gray-900">
 
-                                <th scope="row" class="flex items-center px-6 py-4 text-gray-900 whitespace-nowrap">
-                                    <div class="image flex items-center px-6 py-4 text-gray-900">
+                                <th scope="row" class="flex items-center px-6 py-4 whitespace-nowrap">
+                                    <div class="image flex items-center px-6 py-4">
                                         <img src="{{ asset('storage/' . $product->image) }}" class="lazy-img w-10 h-10 rounded-full">
                                     </div>
                                 </th>
