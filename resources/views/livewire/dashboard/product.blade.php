@@ -130,7 +130,9 @@
 
                                 <th scope="row" class="flex items-center px-6 py-4 whitespace-nowrap">
                                     <div class="image flex items-center px-6 py-4">
-                                        <img src="{{ asset('storage/' . $product->image) }}" class="lazy-img w-10 h-10 rounded-full">
+                                        @if ($product->image)
+                                        <img src="{{ asset('storage/' . $product->image) }}" class="lazy-img w-10 h-10 rounded-full">    
+                                        @endif
                                     </div>
                                 </th>
                                 <td scope="row" class="px-6 py-4 font-medium text-gray-900 ">
