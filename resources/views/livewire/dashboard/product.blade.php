@@ -82,7 +82,7 @@
                                 <th scope="col" class="px-6 py-3">Gambar</th>
                                 <th scope="col" class="px-6 py-3">Nama Produk</th>
                                 <th scope="col" class="px-6 py-3">Sku</th>
-                                <th scope="col" class="px-6 py-3">Seller</th>
+                                <th scope="col" class="px-6 py-3">Supplier</th>
                                 <th scope="col" class="px-6 py-3">Harga</th>
                                 <th scope="col" class="px-6 py-3">Stok</th>
                                 <th scope="col" class="px-6 py-3">Satuan</th>
@@ -139,7 +139,7 @@
                                     {{ $product->name }}
                                 </td>
                                 <td class="px-6 py-4">{{ $product->sku }}</td>
-                                <td class="px-6 py-4">Seller Disini</td>
+                                <td class="px-6 py-4">Supplier Disini</td>
                                 <td class="px-6 py-4">Rp{{ number_format($product->price, 0, ',', '.') }}</td>
                                 <td class="px-6 py-4">{{ $product->stock }}</td>
                                 <td class="px-6 py-4">{{ $product->unit }}</td>
@@ -228,15 +228,15 @@
                         <input wire:model='name' type="text" name="name" id="name"
                             class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full"
                             placeholder="Masukan Nama Produk">
-                        @error('name') <span class="text-red-500 text-sm">{{ $message }} @enderror
+                        @error('name') <span class="text-red-500 text-xs">{{ $message }} @enderror
                     </div>
                     <div>
-                        <label for="skuUpdate"
+                        <label for="sku"
                             class="block mb-2 Updatetext-sm font-medium text-gray-900">SKU</label>
                         <input wire:model='sku' type="text" name="sku" id="sku"
                             class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full"
                             placeholder="Masukan SKU">
-                        @error('sku') <span class="text-red-500 text-sm">{{ $message }} @enderror
+                        @error('sku') <span class="text-red-500 text-xs">{{ $message }} @enderror
                     </div>
                     <div>
                         <label for="price"
@@ -244,7 +244,7 @@
                         <input wire:model='price' type="number" name="price" id="price"
                             class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full"
                             placeholder="Masukan Harga">
-                        @error('price') <span class="text-red-500 text-sm">{{ $message }} @enderror
+                        @error('price') <span class="text-red-500 text-xs">{{ $message }} @enderror
                     </div>
                     <div>
                         <label for="stock"
@@ -252,7 +252,7 @@
                         <input wire:model='stock' type="number" name="stock" id="stock"
                             class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full"
                             placeholder="Masukan Stok">
-                        @error('stock') <span class="text-red-500 text-sm">{{ $message }} @enderror
+                        @error('stock') <span class="text-red-500 text-xs">{{ $message }} @enderror
                     </div>
 
                     <div>
@@ -266,7 +266,7 @@
                             <option value="Box">Box</option>
                             <option value="Pack">Pack</option>
                         </select>
-                        @error('unit') <span class="text-red-500 text-sm">{{ $message }} @enderror
+                        @error('unit') <span class="text-red-500 text-xs">{{ $message }} @enderror
                     </div>
 
                     <div class="sm:col-span-2" x-data="imageUploader()">
@@ -301,9 +301,9 @@
                         </div>
                     
                         <!-- Error Message -->
-                        @error('image') <span class="text-red-500 text-sm">{{ $message }} @enderror
+                        @error('image') <span class="text-red-500 text-xs">{{ $message }} @enderror
                         <template x-if="error">
-                            <span class="text-red-500 text-sm" x-text="error"></span>
+                            <span class="text-red-500 text-xs" x-text="error"></span>
                         </template>
                     
                         <!-- Image Preview -->
@@ -329,7 +329,7 @@
                         <textarea wire:model='description' id="description" rows="4"
                             class="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-primary-500 focus:border-primary-500"
                             placeholder="Masukan deskripsi disini"></textarea>
-                        @error('description') <span class="text-red-500 text-sm">{{ $message }} @enderror
+                        @error('description') <span class="text-red-500 text-xs">{{ $message }} @enderror
                     </div>
                 </div>
                 <div class="flex items-center justify-center">
@@ -383,28 +383,28 @@
                         <input wire:model='nameUpdate' type="text" name="nameUpdate" id="nameUpdate"
                             class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full"
                             placeholder="Masukan Nama Produk">
-                        @error('nameUpdate') <span class="text-red-500 text-sm">{{ $message }} @enderror
+                        @error('nameUpdate') <span class="text-red-500 text-xs">{{ $message }} @enderror
                     </div>
                     <div>
                         <label for="skuUpdate" class="block mb-2 text-sm font-medium text-gray-900">SKU</label>
                         <input wire:model='skuUpdate' type="text" name="skuUpdate" id="skuUpdate"
                             class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full"
                             placeholder="Masukan SKU">
-                        @error('skuUpdate') <span class="text-red-500 text-sm">{{ $message }} @enderror
+                        @error('skuUpdate') <span class="text-red-500 text-xs">{{ $message }} @enderror
                     </div>
                     <div>
                         <label for="priceUpdate" class="block mb-2 text-sm font-medium text-gray-900">Harga</label>
                         <input wire:model='priceUpdate' type="number" name="priceUpdate" id="priceUpdate"
                             class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full"
                             placeholder="Masukan Harga">
-                        @error('priceUpdate') <span class="text-red-500 text-sm">{{ $message }} @enderror
+                        @error('priceUpdate') <span class="text-red-500 text-xs">{{ $message }} @enderror
                     </div>
                     <div>
                         <label for="stockUpdate" class="block mb-2 text-sm font-medium text-gray-900">Stok</label>
                         <input wire:model='stockUpdate' type="number" name="stockUpdate" id="stockUpdate"
                             class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full"
                             placeholder="Masukan Stok">
-                        @error('stockUpdate') <span class="text-red-500 text-sm">{{ $message }} @enderror
+                        @error('stockUpdate') <span class="text-red-500 text-xs">{{ $message }} @enderror
                     </div>
 
                     <div>
@@ -417,7 +417,7 @@
                             <option value="Box">Box</option>
                             <option value="Pack">Pack</option>
                         </select>
-                        @error('unitUpdate') <span class="text-red-500 text-sm">{{ $message }} @enderror
+                        @error('unitUpdate') <span class="text-red-500 text-xs">{{ $message }} @enderror
                     </div>
 
                     <div class="sm:col-span-2" x-data="imageUploader()" x-init="init()">
@@ -453,9 +453,9 @@
                         </div>
 
                         <!-- Error Message -->
-                        @error('imageUpdate') <span class="text-red-500 text-sm">{{ $message }} @enderror
+                        @error('imageUpdate') <span class="text-red-500 text-xs">{{ $message }} @enderror
                         <template x-if="error">
-                            <span class="text-red-500 text-sm" x-text="error"></span>
+                            <span class="text-red-500 text-xs" x-text="error"></span>
                         </template>
                     
                         <!-- Tampilkan gambar preview atau gambar lama -->
@@ -486,7 +486,7 @@
                         <textarea wire:model='descriptionUpdate' id="descriptionUpdate" rows="4"
                             class="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-primary-500 focus:border-primary-500"
                             placeholder="Masukan deskripsi disini"></textarea>
-                        @error('descriptionUpdate') <span class="text-red-500 text-sm">{{ $message }} @enderror
+                        @error('descriptionUpdate') <span class="text-red-500 text-xs">{{ $message }} @enderror
                     </div>
                 </div>
                 <div class="flex items-center justify-center">
@@ -547,14 +547,14 @@
                             <div class="mt-4">
                                 <p class="text-xs text-gray-600">Produk: {{ $nameDetail }}</p>
                                 <p class="text-xs text-gray-600">SKU: {{ $stockDetail }}</p>
-                                <p class="text-xs text-gray-600">Seller: Seller disini</p>
+                                <p class="text-xs text-gray-600">Supplier: Supplier disini</p>
                                 <p class="text-xs text-gray-600">Harga: Rp {{ number_format($priceDetail, 0, ',', '.') }}</p>
                                 <p class="text-xs text-gray-600">Stok: {{ $stockDetail }}</p>
                                 <p class="text-xs text-gray-600">Satuan: {{ $unitDetail }}</p>
                             </div>
                             <div class="mt-4">
-                                <p class="text-xs text-gray-600">Ditambahkan: <br>{{ $product ? $product->created_at : '' }}</p>
-                                <p class="text-xs text-gray-600">Diperbarui: <br>{{ $product ? $product->updated_at : '' }}</p>
+                                <p class="text-xs text-gray-600">Ditambahkan: <br>{{ $created_at }}</p>
+                                <p class="text-xs text-gray-600">Diperbarui: <br>{{ $updated_at }}</p>
                                
                             </div>
                         </div>
@@ -586,7 +586,6 @@
 
 
 
-<audio id="success-audio" src="{{ asset('audio/send.mp3') }}" preload="auto"></audio>
 {{-- Script modal tambah --}}
 <script>
     document.addEventListener('livewire:navigated', () => {
@@ -597,10 +596,6 @@
                 const modal = new Modal(modalElement);
                 modal.hide(); // Menutup modal
             }
-            // Dapatkan elemen audio
-            var audio = document.getElementById('success-audio');
-            // Putar audio
-            audio.play();
             Livewire.dispatch('resetForm'); // Mereset form di Livewire
         });
 
@@ -653,12 +648,12 @@
                 }
 
                 if (!['image/png', 'image/jpeg', 'image/jpg', 'image/gif', 'image/svg+xml'].includes(file.type)) {
-                    this.error = "Image must be an image (PNG, JPG, GIF, SVG).";
+                    this.error = "Gambar harus berupa gambar (PNG, JPG, GIF, SVG).";
                     return;
                 }
 
                 if (file.size > 5 * 1024 * 1024) {
-                    this.error = "Image cannot be more than 5MB";
+                    this.error = "Gambar tidak boleh lebih dari 5MB";
                     return;
                 }
 
@@ -715,10 +710,7 @@
         Livewire.on('updatedSuccess', (event) => {
             const modal = new Modal(document.getElementById('editModal'));
             modal.hide(); // Menutup modal setelah data berhasil ditambahkan
-            // Dapatkan elemen audio
-            var audio = document.getElementById('success-audio');
-            // Putar audio
-            audio.play();
+        
         });
 
         Livewire.on('showEditModal', (event) => {
@@ -766,12 +758,12 @@
                 }
 
                 if (!['image/png', 'image/jpeg', 'image/jpg', 'image/gif', 'image/svg+xml'].includes(file.type)) {
-                    this.error = "Image must be an image (PNG, JPG, GIF, SVG).";
+                    this.error = "Gambar harus berupa gambar (PNG, JPG, GIF, SVG).";
                     return;
                 }
 
                 if (file.size > 5 * 1024 * 1024) {
-                    this.error = "Image cannot be more than 5MB";
+                    this.error = "Gambar tidak boleh lebih dari 5MB";
                     return;
                 }
 
@@ -883,10 +875,6 @@
                 title: "Produk berhasil ditambahkan!"
             });
 
-            // Dapatkan elemen audio
-            var audio = document.getElementById('success-audio');
-            // Putar audio
-            audio.play();
         });
 </script>
 
@@ -909,16 +897,7 @@
                 title: "Produk berhasil diperbarui!"
             });
 
-            // Dapatkan elemen audio
-            var audio = document.getElementById('success-audio');
-                    
-                    // Pastikan file audio valid dan siap diputar
-                    if (audio) {
-                        audio.play().catch((error) => {
-                            console.error("Error playing audio:", error);
-                        });
-                    }
-            });
+    });
 
 </script>
 
@@ -958,10 +937,6 @@
                 title: "Produk berhasil dihapus!"
             });
 
-            // Dapatkan elemen audio
-            var audio = document.getElementById('success-audio');
-            // Putar audio
-            audio.play();
     });
 </script>
 

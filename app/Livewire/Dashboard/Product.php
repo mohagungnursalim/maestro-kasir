@@ -20,7 +20,7 @@ class Product extends Component
     public $productId, $nameUpdate, $skuUpdate, $currentImage, $imageUpdate, $priceUpdate, $descriptionUpdate, $stockUpdate, $unitUpdate;
 
     // Detail
-    public $nameDetail, $skuDetail, $imageDetail, $priceDetail, $descriptionDetail, $stockDetail, $unitDetail;
+    public $nameDetail, $skuDetail, $imageDetail, $priceDetail, $descriptionDetail, $stockDetail, $unitDetail, $created_at, $updated_at;
 
     // List Products
     public $products, $totalProducts;
@@ -91,7 +91,29 @@ class Product extends Component
             'description' => 'required|string',
             'stock' => 'required|numeric|min:0',
             'unit' => 'required|string|max:10',
+        ], [
+            'name.required' => 'Nama produk wajib diisi.',
+            'name.string' => 'Nama produk harus berupa teks.',
+            'name.max' => 'Nama produk maksimal 30 karakter.',
+            'sku.required' => 'SKU produk wajib diisi.',
+            'sku.string' => 'SKU produk harus berupa teks.',
+            'sku.max' => 'SKU produk maksimal 30 karakter.',
+            'image.required' => 'Gambar produk wajib diunggah.',
+            'image.image' => 'File yang diunggah harus berupa gambar.',
+            'image.max' => 'Ukuran gambar maksimal 5 MB.',
+            'price.required' => 'Harga produk wajib diisi.',
+            'price.numeric' => 'Harga produk harus berupa angka.',
+            'price.min' => 'Harga produk tidak boleh kurang dari 0.',
+            'description.required' => 'Deskripsi produk wajib diisi.',
+            'description.string' => 'Deskripsi produk harus berupa teks.',
+            'stock.required' => 'Stok produk wajib diisi.',
+            'stock.numeric' => 'Stok produk harus berupa angka.',
+            'stock.min' => 'Stok produk tidak boleh kurang dari 0.',
+            'unit.required' => 'Satuan produk wajib diisi.',
+            'unit.string' => 'Satuan produk harus berupa teks.',
+            'unit.max' => 'Satuan produk maksimal 10 karakter.',
         ]);
+        
 
         $imagePath = $this->image->store('product-image', 'public');
 
@@ -135,7 +157,28 @@ class Product extends Component
             'descriptionUpdate' => 'required|string',
             'stockUpdate' => 'required|numeric|min:0',
             'unitUpdate' => 'required|string|max:10',
+        ], [
+            'nameUpdate.required' => 'Nama produk wajib diisi.',
+            'nameUpdate.string' => 'Nama produk harus berupa teks.',
+            'nameUpdate.max' => 'Nama produk maksimal 30 karakter.',
+            'skuUpdate.required' => 'SKU produk wajib diisi.',
+            'skuUpdate.string' => 'SKU produk harus berupa teks.',
+            'skuUpdate.max' => 'SKU produk maksimal 30 karakter.',
+            'imageUpdate.image' => 'File yang diunggah harus berupa gambar.',
+            'imageUpdate.max' => 'Ukuran gambar maksimal 5 MB.',
+            'priceUpdate.required' => 'Harga produk wajib diisi.',
+            'priceUpdate.numeric' => 'Harga produk harus berupa angka.',
+            'priceUpdate.min' => 'Harga produk tidak boleh kurang dari 0.',
+            'descriptionUpdate.required' => 'Deskripsi produk wajib diisi.',
+            'descriptionUpdate.string' => 'Deskripsi produk harus berupa teks.',
+            'stockUpdate.required' => 'Stok produk wajib diisi.',
+            'stockUpdate.numeric' => 'Stok produk harus berupa angka.',
+            'stockUpdate.min' => 'Stok produk tidak boleh kurang dari 0.',
+            'unitUpdate.required' => 'Satuan produk wajib diisi.',
+            'unitUpdate.string' => 'Satuan produk harus berupa teks.',
+            'unitUpdate.max' => 'Satuan produk maksimal 10 karakter.',
         ]);
+        
 
         $product = ModelsProduct::findOrFail($this->productId);
 
@@ -176,6 +219,8 @@ class Product extends Component
         $this->descriptionDetail = $product->description;
         $this->stockDetail = $product->stock;
         $this->unitDetail = $product->unit;
+        $this->created_at = $product->created_at;
+        $this->updated_at = $product->updated_at;
 
         $this->dispatch('showDetailModal');
     }
