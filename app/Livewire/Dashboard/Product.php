@@ -4,6 +4,7 @@ namespace App\Livewire\Dashboard;
 
 use App\Models\Product as ModelsProduct;
 use Illuminate\Database\Events\ModelsPruned;
+use Illuminate\Support\Facades\Cache;
 use Livewire\Attributes\On;
 use Livewire\Attributes\Url;
 use Livewire\Component;
@@ -38,8 +39,14 @@ class Product extends Component
     
 
     public function mount() 
-    {
-        $this->totalProducts = ModelsProduct::count();
+    {  
+        $ttl = 31536000; // TTL cache selama 1 tahun (dalam detik)
+
+        // Ambil total produk dari cache atau database
+        $this->totalProducts = Cache::remember('total_products', $ttl, function () {
+            return ModelsProduct::count();
+        });
+    
         $this->products = collect();
     }
 
@@ -56,11 +63,17 @@ class Product extends Component
 
     public function loadInitialProducts()
     {
+        $ttl = 31536000; // TTL cache selama 1 tahun
         $this->loaded = true;
-        $this->products = ModelsProduct::where('name', 'like', '%'.$this->search.'%')
-            ->latest()
-            ->take($this->limit)
-            ->get();
+
+        // Ambil produk sesuai pencarian dan limit dari cache atau database
+        $cacheKey = "products_{$this->search}_{$this->limit}";
+        $this->products = Cache::remember($cacheKey, $ttl, function () {
+            return ModelsProduct::where('name', 'like', '%' . $this->search . '%')
+                ->latest()
+                ->take($this->limit)
+                ->get();
+        });
     }
 
     public function loadMore()
@@ -113,7 +126,6 @@ class Product extends Component
             'unit.string' => 'Satuan produk harus berupa teks.',
             'unit.max' => 'Satuan produk maksimal 10 karakter.',
         ]);
-        
 
         $imagePath = $this->image->store('product-image', 'public');
 
@@ -127,7 +139,10 @@ class Product extends Component
             'unit' => $this->unit,
         ]);
 
-        $this->dispatch('productUpdated'); // dispatch event untuk data ter refresh tanpa reload page
+        // Refresh cache setelah data ditambahkan
+        $this->refreshCache();
+
+        $this->dispatch('productUpdated'); // dispatch event untuk data ter-refresh tanpa reload page
         $this->dispatch('addedSuccess');
     }
 
@@ -204,10 +219,14 @@ class Product extends Component
             'stock' => $this->stockUpdate,
             'unit' => $this->unitUpdate,
         ]);
-
+        
+        // Refresh cache setelah data diperbarui
+        $this->refreshCache();
+        
         $this->dispatch('productUpdated'); // Dispatch event untuk refresh data
         $this->dispatch('updatedSuccess');
     }
+
 
     public function detailModal($id)
     {
@@ -234,6 +253,7 @@ class Product extends Component
     }
 
 
+
     public function delete()
     {
         $product = ModelsProduct::findOrFail($this->productId);
@@ -247,9 +267,46 @@ class Product extends Component
         // Hapus data 
         $product->delete();
 
+        // Hapus cache terkait produk yang dihapus
+        $this->removeCache();
+        
         $this->dispatch('productUpdated'); // dispatch event untuk data ter refresh tanpa reload page 
         $this->dispatch('deleteSuccess'); 
     }
+
+    
+    protected function refreshCache()
+    {
+        $ttl = 31536000; // TTL cache selama 1 tahun
+
+        // Perbarui total produk
+        Cache::put('total_products', ModelsProduct::count(), $ttl);
+
+        // Perbarui cache produk sesuai pencarian (opsional, jika perlu di-refresh seluruhnya)
+        $cacheKey = "products_{$this->search}_{$this->limit}";
+        Cache::put($cacheKey, ModelsProduct::where('name', 'like', '%' . $this->search . '%')
+            ->latest()
+            ->take($this->limit)
+            ->get(), $ttl);
+    }
+
+    protected function removeCache()
+    {
+        // Key cache produk yang relevan
+        $cacheKey = "products_{$this->search}_{$this->limit}";
+
+        // Hapus cache produk
+        if (Cache::has($cacheKey)) {
+            Cache::forget($cacheKey);
+        }
+
+        // Hapus cache total produk
+        if (Cache::has('total_products')) {
+            Cache::forget('total_products');
+        }
+
+    }
+
 
 
     public function render()
