@@ -43,7 +43,7 @@ class Product extends Component
         $ttl = 31536000; // TTL cache selama 1 tahun (dalam detik)
 
         // Ambil total produk dari cache atau database
-        $this->totalProducts = Cache::remember('total_products', $ttl, function () {
+        $this->totalProducts = Cache::remember('totalProducts', $ttl, function () {
             return ModelsProduct::count();
         });
     
@@ -286,7 +286,7 @@ class Product extends Component
         $ttl = 31536000; // TTL cache selama 1 tahun
 
         // Perbarui total produk
-        Cache::put('total_products', ModelsProduct::count(), $ttl);
+        Cache::put('totalProducts', ModelsProduct::count(), $ttl);
 
         // Perbarui cache produk sesuai pencarian (opsional, jika perlu di-refresh seluruhnya)
         $cacheKey = "products_{$this->search}_{$this->limit}";
@@ -312,8 +312,8 @@ class Product extends Component
         }
 
         // Hapus cache total produk
-        if (Cache::has('total_products')) {
-            Cache::forget('total_products');
+        if (Cache::has('totalProducts')) {
+            Cache::forget('totalProducts');
         }
 
     }
