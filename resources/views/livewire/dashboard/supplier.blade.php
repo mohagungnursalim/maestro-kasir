@@ -450,6 +450,27 @@
 </script>
 
 
+{{-- Script modal delete --}}
+<script>
+    Livewire.on('showDeleteConfirmation', (event) => {
+        Swal.fire({
+            title: 'Apakah Anda yakin?',
+            text: "Supplier ini akan dihapus?",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Ya, hapus!',
+            cancelButtonText: 'Batal'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                Livewire.dispatch('deleteConfirmed');
+            }
+        });
+    });
+    
+</script>
+
 {{-- Sweet alert,added success --}}
 <script>
         Livewire.on('addedSuccess', (event) => {
@@ -495,42 +516,26 @@
 
 </script>
 
-{{-- Script modal delete --}}
+{{-- Sweet alert,deleted success --}}
 <script>
-    Livewire.on('showDeleteConfirmation', (event) => {
-        Swal.fire({
-            title: 'Apakah Anda yakin?',
-            text: "Supplier ini akan dihapus?",
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#3085d6',
-            cancelButtonColor: '#d33',
-            confirmButtonText: 'Ya, hapus!',
-            cancelButtonText: 'Batal'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                Livewire.dispatch('deleteConfirmed');
-            }
-        });
-    });
-    
-    Livewire.on('deleteSuccess', (event) => {
-        const Toast = Swal.mixin({
-                toast: true,
-                position: "top-end",
-                showConfirmButton: false,
-                timer: 3000,
-                timerProgressBar: true,
-                didOpen: (toast) => {
-                    toast.onmouseenter = Swal.stopTimer;
-                    toast.onmouseleave = Swal.resumeTimer;
-                }
-            });
-            Toast.fire({
-                icon: "success",
-                title: "Supplier berhasil dihapus!"
-            }); 
-    });
-</script>
-
+    Livewire.on('deletedSuccess', (event) => {
+             const Toast = Swal.mixin({
+                 toast: true,
+                 position: "top-end",
+                 showConfirmButton: false,
+                 timer: 3000,
+                 timerProgressBar: true,
+                 didOpen: (toast) => {
+                     toast.onmouseenter = Swal.stopTimer;
+                     toast.onmouseleave = Swal.resumeTimer;
+                 }
+             });
+             Toast.fire({
+                 icon: "success",
+                 title: "Supplier berhasil dihapus!"
+             });
+ 
+     });
+ 
+ </script>
 </div>
