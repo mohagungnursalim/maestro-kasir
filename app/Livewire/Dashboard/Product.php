@@ -290,7 +290,12 @@ class Product extends Component
 
         // Perbarui cache produk sesuai pencarian (opsional, jika perlu di-refresh seluruhnya)
         $cacheKey = "products_{$this->search}_{$this->limit}";
-        Cache::put($cacheKey, ModelsProduct::where('name', 'like', '%' . $this->search . '%')
+        Cache::put($cacheKey, ModelsProduct::where(function ($query) {
+                $query->where('name', 'like', '%' . $this->search . '%')
+                      ->orWhere('sku', 'like', '%' . $this->search . '%')
+                      ->orWhere('price', 'like', '%' . $this->search . '%')
+                      ->orWhere('description', 'like', '%' . $this->search . '%');
+            })
             ->latest()
             ->take($this->limit)
             ->get(), $ttl);

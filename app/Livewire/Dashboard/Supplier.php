@@ -54,24 +54,29 @@ class Supplier extends Component
 
     public function loadInitialSuppliers()
     {
-        $ttl = 31536000; // 1 year
+        $ttl = 31536000; // TTL cache selama 1 tahun
         $this->loaded = true;
-     
-        $cacheKey = "suppliers.{$this->search}.{$this->limit}";
+    
+        // Cache key untuk menyimpan data supplier
+        $cacheKey = "suppliers_{$this->search}_{$this->limit}";
+    
         $this->suppliers = Cache::remember($cacheKey, $ttl, function () {
-            return ModelsSupplier::where('name', 'like', '%' . $this->search . '%')
-                ->orWhere('email', 'like', '%' . $this->search . '%')
-                ->orWhere('phone', 'like', '%' . $this->search . '%')
-                ->orWhere('address', 'like', '%' . $this->search . '%')
-                ->orWhere('city', 'like', '%' . $this->search . '%')
-                ->orWhere('state', 'like', '%' . $this->search . '%')
-                ->orWhere('zip', 'like', '%' . $this->search . '%')
-                ->orWhere('country', 'like', '%' . $this->search . '%')
+            return ModelsSupplier::where(function ($query) {
+                    $query->where('name', 'like', '%' . $this->search . '%')
+                          ->orWhere('email', 'like', '%' . $this->search . '%')
+                          ->orWhere('phone', 'like', '%' . $this->search . '%')
+                          ->orWhere('address', 'like', '%' . $this->search . '%')
+                          ->orWhere('city', 'like', '%' . $this->search . '%')
+                          ->orWhere('state', 'like', '%' . $this->search . '%')
+                          ->orWhere('zip', 'like', '%' . $this->search . '%')
+                          ->orWhere('country', 'like', '%' . $this->search . '%');
+                })
                 ->latest()
                 ->take($this->limit)
                 ->get();
         });
     }
+    
 
     public function loadMore()
     {
@@ -215,27 +220,32 @@ class Supplier extends Component
 
     protected function refreshCache()
     {
-        $ttl = 31536000; // 1 year
-
+        $ttl = 31536000; // TTL cache selama 1 tahun
+    
+        // Refresh total suppliers 
         Cache::put('totalSuppliers', ModelsSupplier::count(), $ttl);
-
-        $cacheKey = "suppliers.{$this->search}.{$this->limit}";
-        Cache::put($cacheKey, ModelsSupplier::where('name', 'like', '%' . $this->search . '%')
-            ->orWhere('email', 'like', '%' . $this->search . '%')
-            ->orWhere('phone', 'like', '%' . $this->search . '%')
-            ->orWhere('address', 'like', '%' . $this->search . '%')
-            ->orWhere('city', 'like', '%' . $this->search . '%')
-            ->orWhere('state', 'like', '%' . $this->search . '%')
-            ->orWhere('zip', 'like', '%' . $this->search . '%')
-            ->orWhere('country', 'like', '%' . $this->search . '%')
-            ->latest()
-            ->take($this->limit)
-            ->get(), $ttl);
+    
+        // Refresh cache supplier sesuai pencarian
+        $cacheKey = "suppliers_{$this->search}_{$this->limit}";
+        Cache::put($cacheKey, ModelsSupplier::where(function ($query) {
+            $query->where('name', 'like', '%' . $this->search . '%')
+                  ->orWhere('email', 'like', '%' . $this->search . '%')
+                  ->orWhere('phone', 'like', '%' . $this->search . '%')
+                  ->orWhere('address', 'like', '%' . $this->search . '%')
+                  ->orWhere('city', 'like', '%' . $this->search . '%')
+                  ->orWhere('state', 'like', '%' . $this->search . '%')
+                  ->orWhere('zip', 'like', '%' . $this->search . '%')
+                  ->orWhere('country', 'like', '%' . $this->search . '%');
+        })
+        ->latest()
+        ->take($this->limit)
+        ->get(), $ttl);
     }
+    
 
     protected function removeCache()
     {
-        $cacheKey = "suppliers.{$this->search}.{$this->limit}";
+        $cacheKey = "suppliers_{$this->search}_{$this->limit}";
 
         // Hapus cache supplier yang dihapus
         if (Cache::has($cacheKey)) {
