@@ -65,16 +65,22 @@ class Product extends Component
     {
         $ttl = 31536000; // TTL cache selama 1 tahun
         $this->loaded = true;
-
+    
         // Ambil produk sesuai pencarian dan limit dari cache atau database
         $cacheKey = "products_{$this->search}_{$this->limit}";
         $this->products = Cache::remember($cacheKey, $ttl, function () {
-            return ModelsProduct::where('name', 'like', '%' . $this->search . '%')
+            return ModelsProduct::where(function ($query) {
+                    $query->where('name', 'like', '%' . $this->search . '%')
+                          ->orWhere('sku', 'like', '%' . $this->search . '%')
+                          ->orWhere('price', 'like', '%' . $this->search . '%')
+                          ->orWhere('description', 'like', '%' . $this->search . '%');
+                })
                 ->latest()
                 ->take($this->limit)
                 ->get();
         });
     }
+    
 
     public function loadMore()
     {
