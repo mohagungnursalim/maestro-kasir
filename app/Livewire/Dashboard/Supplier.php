@@ -3,6 +3,7 @@
 namespace App\Livewire\Dashboard;
 
 use App\Models\Supplier as ModelsSupplier;
+use Illuminate\Support\Facades\Cache;
 use Livewire\Attributes\On;
 use Livewire\Attributes\Url;
 use Livewire\Component;
@@ -31,8 +32,12 @@ class Supplier extends Component
 
     public function mount()
     {
+        $ttl = 31536000;
 
-        $this->totalSuppliers = ModelsSupplier::count(); 
+        $this->totalSuppliers = Cache::remember('totalSuppliers', $ttl, function () {
+            return ModelsSupplier::count();
+        });
+         
         $this->suppliers = collect();
     }
 
@@ -49,11 +54,23 @@ class Supplier extends Component
 
     public function loadInitialSuppliers()
     {
+        $ttl = 31536000; // 1 year
         $this->loaded = true;
-        $this->suppliers = ModelsSupplier::where('name', 'like', '%'.$this->search.'%')
-            ->latest()
-            ->take($this->limit)
-            ->get();
+     
+        $cacheKey = "suppliers.{$this->search}.{$this->limit}";
+        $this->suppliers = Cache::remember($cacheKey, $ttl, function () {
+            return ModelsSupplier::where('name', 'like', '%' . $this->search . '%')
+                ->orWhere('email', 'like', '%' . $this->search . '%')
+                ->orWhere('phone', 'like', '%' . $this->search . '%')
+                ->orWhere('address', 'like', '%' . $this->search . '%')
+                ->orWhere('city', 'like', '%' . $this->search . '%')
+                ->orWhere('state', 'like', '%' . $this->search . '%')
+                ->orWhere('zip', 'like', '%' . $this->search . '%')
+                ->orWhere('country', 'like', '%' . $this->search . '%')
+                ->latest()
+                ->take($this->limit)
+                ->get();
+        });
     }
 
     public function loadMore()
@@ -109,6 +126,9 @@ class Supplier extends Component
             'zip' => $this->zip,
             'country' => $this->country,
         ]);
+
+        // Refresh cache setelah ditambahkan
+        $this->refreshCache();
 
         $this->dispatch('supplierUpdated');
         $this->dispatch('addedSuccess');
@@ -166,13 +186,17 @@ class Supplier extends Component
             'country' => $this->countryUpdate,
         ]);
 
+        // Refresh cache setelah data diperbarui
+        $this->refreshCache();
+
         $this->dispatch('supplierUpdated');
         $this->dispatch('updatedSuccess');
     }
 
     public function deleteConfirmation($id)
     {
-       $supplier = ModelsSupplier::findOrFail($id);
+        $supplier = ModelsSupplier::findOrFail($id);
+
         $this->supplierId = $supplier->id;
         $this->dispatch('showDeleteConfirmation');
     }
@@ -182,10 +206,47 @@ class Supplier extends Component
         $supplier = ModelsSupplier::findOrFail($this->supplierId);
         $supplier->delete();
 
+        // Hapus cache terkait produk yang dihapus
+        $this->removeCache();
+
         $this->dispatch('supplierUpdated');
         $this->dispatch('deletedSuccess');
     }
 
+    protected function refreshCache()
+    {
+        $ttl = 31536000; // 1 year
+
+        Cache::put('totalSuppliers', ModelsSupplier::count(), $ttl);
+
+        $cacheKey = "suppliers.{$this->search}.{$this->limit}";
+        Cache::put($cacheKey, ModelsSupplier::where('name', 'like', '%' . $this->search . '%')
+            ->orWhere('email', 'like', '%' . $this->search . '%')
+            ->orWhere('phone', 'like', '%' . $this->search . '%')
+            ->orWhere('address', 'like', '%' . $this->search . '%')
+            ->orWhere('city', 'like', '%' . $this->search . '%')
+            ->orWhere('state', 'like', '%' . $this->search . '%')
+            ->orWhere('zip', 'like', '%' . $this->search . '%')
+            ->orWhere('country', 'like', '%' . $this->search . '%')
+            ->latest()
+            ->take($this->limit)
+            ->get(), $ttl);
+    }
+
+    protected function removeCache()
+    {
+        $cacheKey = "suppliers.{$this->search}.{$this->limit}";
+
+        // Hapus cache supplier yang dihapus
+        if (Cache::has($cacheKey)) {
+            Cache::forget($cacheKey);
+        }
+
+        // Hapus cache total supplier
+        if (Cache::has('totalSuppliers')) {
+            Cache::forget('totalSuppliers');
+        }
+    }
     public function render()
     {
         return view('livewire.dashboard.supplier');
