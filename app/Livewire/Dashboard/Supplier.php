@@ -48,7 +48,6 @@ class Supplier extends Component
 
     public function updatedSearch()
     {
-        usleep(500000);
         $this->loadInitialSuppliers();
     }
 
