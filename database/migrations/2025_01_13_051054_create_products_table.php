@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->string('sku');
+            $table->foreignId('supplier_id');
             $table->string('image');
             $table->decimal('price');
             $table->longText('description');

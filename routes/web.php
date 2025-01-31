@@ -1,9 +1,11 @@
 <?php
 
+use App\Http\Controllers\SupplierController;
 use App\Livewire\Dashboard\Product;
 use Illuminate\Support\Facades\Auth;
 use App\Livewire\Dashboard\Dashboard;
 use App\Livewire\Dashboard\Supplier;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 Route::view('/', 'welcome');
@@ -19,6 +21,9 @@ Route::get('/dashboard/products', Product::class)
 Route::get('/dashboard/suppliers', Supplier::class)
     ->middleware(['auth'])
     ->name('suppliers');
+
+
+Route::get('/api/suppliers', [SupplierController::class, 'index'])->name('api.suppliers');
 
     
 

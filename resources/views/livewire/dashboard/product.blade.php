@@ -22,7 +22,9 @@
             }
 
         </style>
-    </head>
+    
+</head>
+
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
@@ -50,7 +52,7 @@
                                                 clip-rule="evenodd" />
                                         </svg>
                                     </div>
-                                    <input wire:model.live="search" type="text" id="simple-search"
+                                    <input wire:model.live.debounce.500ms="search" type="text" id="simple-search"
                                         class="block w-full p-2 pl-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-primary-500 focus:border-primary-500"
                                         placeholder="Search">
                                 </div>
@@ -79,14 +81,14 @@
                     <table class="w-full text-sm text-left rtl:text-right text-gray-500">
                         <thead class="text-xs text-white uppercase bg-gray-500">
                             <tr>
-                                <th scope="col" class="px-6 py-3">Gambar</th>
-                                <th scope="col" class="px-6 py-3">Nama Produk</th>
-                                <th scope="col" class="px-6 py-3">Sku</th>
-                                <th scope="col" class="px-6 py-3">Supplier</th>
-                                <th scope="col" class="px-6 py-3">Harga</th>
-                                <th scope="col" class="px-6 py-3">Stok</th>
-                                <th scope="col" class="px-6 py-3">Satuan</th>
-                                <th scope="col" class="px-6 py-3">Aksi</th>
+                                <th scope="col" class="px-6 py-3 text-center">Gambar</th>
+                                <th scope="col" class="px-6 py-3 text-center">Nama Produk</th>
+                                <th scope="col" class="px-6 py-3 text-center">Sku</th>
+                                <th scope="col" class="px-6 py-3 text-center">Supplier</th>
+                                <th scope="col" class="px-6 py-3 text-center">Harga</th>
+                                <th scope="col" class="px-6 py-3 text-center">Stok</th>
+                                <th scope="col" class="px-6 py-3 text-center">Satuan</th>
+                                <th scope="col" class="px-6 py-3 text-center">Aksi</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -94,26 +96,26 @@
                             {{-- Tampilkan skeleton saat data belum dimuat --}}
                             @for ($i = 0; $i < 8; $i++) <tr
                                 class="bg-white border-b">
-                                <td class="px-6 py-4">
+                                <td class="px-6 py-4 text-center">
                                     <div class="w-10 h-10 bg-gray-300 rounded-full animate-pulse">
                                     </div>
                                 </td>
-                                <td class="px-6 py-4">
+                                <td class="px-6 py-4 text-center">
                                     <div class="h-4 bg-gray-300 rounded animate-pulse"></div>
                                 </td>
-                                <td class="px-6 py-4">
+                                <td class="px-6 py-4 text-center">
                                     <div class="h-4 bg-gray-300 rounded animate-pulse"></div>
                                 </td>
-                                <td class="px-6 py-4">
+                                <td class="px-6 py-4 text-center">
                                     <div class="h-4 bg-gray-300 rounded animate-pulse"></div>
                                 </td>
-                                <td class="px-6 py-4">
+                                <td class="px-6 py-4 text-center">
                                     <div class="h-4 bg-gray-300 rounded animate-pulse"></div>
                                 </td>
-                                <td class="px-6 py-4">
+                                <td class="px-6 py-4 text-center">
                                     <div class="h-4 bg-gray-300 rounded animate-pulse"></div>
                                 </td>
-                                <td class="px-6 py-4">
+                                <td class="px-6 py-4 text-center">
                                     <div class="h-4 w-10 bg-gray-300 rounded animate-pulse"></div>
                                 </td>
                                 <td class="px-6 py-4">
@@ -138,16 +140,17 @@
                                 <td scope="row" class="px-6 py-4 font-medium text-gray-900 ">
                                     {{ $product->name }}
                                 </td>
-                                <td class="px-6 py-4">{{ $product->sku }}</td>
-                                <td class="px-6 py-4">Supplier Disini</td>
-                                <td class="px-6 py-4">Rp{{ number_format($product->price, 0, ',', '.') }}</td>
-                                <td class="px-6 py-4">{{ $product->stock }}</td>
-                                <td class="px-6 py-4">{{ $product->unit }}</td>
+                                <td class="px-6 py-4 text-center">{{ $product->sku }}</td>
+                                <td class="px-6 py-4 text-center">{{ optional($product->supplier)->name ?? '-' }}</td>
+                                <td class="px-6 py-4 text-center">Rp{{ number_format($product->price, 0, ',', '.') }}</td>
+                                <td class="px-6 py-4 text-center">{{ $product->stock }}</td>
+                                <td class="px-6 py-4 text-center">{{ $product->unit }}</td>
                                 <td class="px-6 py-4">
                                     <div>
                                         <button wire:click="editModal({{ $product->id }})"
                                             class="mb-2 bg-green-100 hover:bg-green-200 text-green-800 text-xs font-semibold me-2 px-2.5 py-0.5 rounded  border border-green-400 inline-flex items-center justify-center">
-                                            Ubah</button>
+                                            Ubah
+                                        </button>                                        
                                     </div>
                                     <div>
                                         <button wire:click="deleteConfirmation({{ $product->id }})"
@@ -268,6 +271,42 @@
                         </select>
                         @error('unit') <span class="text-red-500 text-xs">{{ $message }} @enderror
                     </div>
+                    
+                    <div x-data="supplierSelect()" 
+                        x-init="fetchSuppliers(); window.addEventListener('addedSuccess', () => resetSupplier())" 
+                        class="relative">
+                        
+                        
+                        <label for="supplier_id" class="block mb-2 text-sm font-medium text-gray-900">Supplier</label>
+
+                        <!-- Input Pencarian -->
+                        <input id="supplier_id" type="text" x-model="search" @input.debounce="fetchSuppliers()" placeholder="Cari Supplier..."
+                            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full">
+
+                        <!-- Pesan Loading -->
+                        <div x-show="loading" class="text-sm text-gray-500 mt-1">
+                            Mencari..
+                        </div>
+
+                        <!-- Dropdown Pilihan Supplier -->
+                        <ul x-show="suppliers.length > 0" @click.outside="suppliers = []"
+                            class="absolute z-10 bg-white border rounded-md w-full mt-1 max-h-48 overflow-auto shadow-lg">
+                            <template x-for="supplier in suppliers" :key="supplier.id">
+                                <li @click="selectSupplier(supplier)" 
+                                    x-text="supplier.name" 
+                                    class="cursor-pointer hover:bg-gray-200 px-4 py-2">
+                                </li>
+                            </template>
+                        </ul>
+
+                        <!-- Hidden Input untuk Livewire -->
+                        <input type="hidden" x-model="selectedSupplierId" name="supplier_id" wire:model="supplier_id">
+
+                        @error('supplier_id') 
+                            <span class="text-red-500 text-xs">{{ $message }}</span>
+                        @enderror
+                    </div>
+                    
 
                     <div class="sm:col-span-2" x-data="imageUploader()">
                         <!-- Input Upload -->
@@ -420,6 +459,42 @@
                         @error('unitUpdate') <span class="text-red-500 text-xs">{{ $message }} @enderror
                     </div>
 
+
+                    
+                <div x-data="supplierSelectUpdate()" 
+                    x-init='updateSupplier(@json(["id" => $supplier_idUpdate, "name" => $supplierName]))'
+                    class="relative">
+                   <label for="supplier_idUpdate" class="block mb-2 text-sm font-medium text-gray-900">Supplier</label>
+               
+                   <!-- Input Pencarian -->
+                   <input id="supplier_idUpdate" type="text" x-model="search" @input.debounce="fetchSuppliers()" placeholder="Cari Supplier..."
+                       class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full">
+               
+                   <!-- Pesan Loading -->
+                   <div x-show="loading" class="text-sm text-gray-500 mt-1">
+                       Mencari..
+                   </div>
+               
+                   <!-- Dropdown Pilihan Supplier -->
+                   <ul x-show="suppliers.length > 0" @click.outside="suppliers = []"
+                       class="absolute z-10 bg-white border rounded-md w-full mt-1 max-h-48 overflow-auto shadow-lg">
+                       <template x-for="supplier in suppliers" :key="supplier.id">
+                           <li @click="selectSupplier(supplier)" 
+                               x-text="supplier.name" 
+                               class="cursor-pointer hover:bg-gray-200 px-4 py-2">  
+                           </li>
+                       </template>
+                   </ul>
+               
+                   <!-- Hidden Input untuk Livewire -->
+                   <input type="hidden" x-model="selectedSupplierId" name="supplier_idUpdate" wire:model="supplier_idUpdate">
+               
+                   @error('supplier_idUpdate') 
+                       <span class="text-red-500 text-xs">{{ $message }}</span>
+                   @enderror
+                </div>
+                   
+
                     <div class="sm:col-span-2" x-data="imageUploader()" x-init="init()">
                         <!-- Input Upload -->
                         <label class="block mb-2 text-sm font-medium text-gray-900" for="image">Upload Gambar</label>
@@ -547,7 +622,7 @@
                             <div class="mt-4">
                                 <p class="text-xs text-gray-600">Produk: {{ $nameDetail }}</p>
                                 <p class="text-xs text-gray-600">SKU: {{ $stockDetail }}</p>
-                                <p class="text-xs text-gray-600">Supplier: Supplier disini</p>
+                                <p class="text-xs text-gray-600">Supplier: {{ optional($product->supplier)->name ?? '-' }}</p>
                                 <p class="text-xs text-gray-600">Harga: Rp {{ number_format($priceDetail, 0, ',', '.') }}</p>
                                 <p class="text-xs text-gray-600">Stok: {{ $stockDetail }}</p>
                                 <p class="text-xs text-gray-600">Satuan: {{ $unitDetail }}</p>
@@ -586,7 +661,7 @@
 
 
 
-{{-- Script modal tambah --}}
+{{-- Script modal Add --}}
 <script>
     document.addEventListener('livewire:navigated', () => {
         // Menangkap event Livewire dan menutup modal
@@ -704,7 +779,57 @@
 </script>
 
 
-{{-- Script modal edit --}}
+{{-- Script search supplier modal Add --}}
+<script>
+    function supplierSelect() {
+        return {
+            suppliers: [],
+            search: '',
+            selectedSupplierId: null,
+            loading: false,
+            timeout: null, // Variabel untuk menyimpan timeout
+
+            fetchSuppliers() {
+                // Hapus request sebelumnya jika masih dalam antrian
+                clearTimeout(this.timeout);
+
+                // Set delay 300ms sebelum request dilakukan
+                this.timeout = setTimeout(async () => {
+                    if (this.search.length < 1) {
+                        this.suppliers = [];
+                        return;
+                    }
+
+                    this.loading = true;
+
+                    try {
+                        let response = await fetch(`/api/suppliers?search=${this.search}`);
+                        this.suppliers = await response.json();
+                    } catch (error) {
+                        console.error('Error fetching suppliers:', error);
+                    }
+
+                    this.loading = false;
+                }, 500); // Delay 500ms
+            },
+
+            selectSupplier(supplier) {
+                this.selectedSupplierId = supplier.id;
+                this.search = supplier.name;
+                this.suppliers = [];
+                @this.set('supplier_id', supplier.id); // Update Livewire
+            },
+            resetSupplier() {
+                this.selectedSupplierId = null;
+                this.search = '';
+            }
+        };
+    
+    }
+</script>
+
+
+{{-- Script modal Edit --}}
 <script>
     document.addEventListener('livewire:navigated', () => { 
         Livewire.on('updatedSuccess', (event) => {
@@ -829,6 +954,58 @@
                     this.resetPreview(); // Panggil untuk clear preview
                 });
             },
+        };
+    }
+</script>
+
+{{-- Script search supplier modal Edit --}}
+<script>
+    function supplierSelectUpdate() {
+        return {
+            suppliers: [],
+            search: '',
+            selectedSupplierId: null,
+            loading: false,
+            timeout: null,
+
+            updateSupplier(supplier) {
+                console.log('Supplier received in Alpine:', supplier);
+
+                this.selectedSupplierId = supplier.id ?? null;
+                this.search = supplier.name ?? '';
+            },
+
+            fetchSuppliers() {
+                clearTimeout(this.timeout);
+
+                this.timeout = setTimeout(async () => {
+                    if (this.search.length < 1) {
+                        this.suppliers = [];
+                        return;
+                    }
+
+                    this.loading = true;
+
+                    try {
+                        let response = await fetch(`/api/suppliers?search=${this.search}`);
+                        this.suppliers = await response.json();
+                    } catch (error) {
+                        console.error('Error fetching suppliers:', error);
+                    }
+
+                    this.loading = false;
+                }, 300);
+            },
+
+            selectSupplier(supplier) {
+                this.selectedSupplierId = supplier.id;
+                this.search = supplier.name;
+                this.suppliers = [];
+
+                // Mengupdate data Livewire
+                @this.set('supplier_idUpdate', supplier.id); // Mengirim id baru ke Livewire
+                @this.set('supplierName', supplier.name);   // Mengirim nama baru ke Livewire (Jika perlu)
+            }
         };
     }
 </script>

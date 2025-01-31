@@ -3,7 +3,6 @@
 namespace App\Livewire\Dashboard;
 
 use App\Models\Product as ModelsProduct;
-use Illuminate\Database\Events\ModelsPruned;
 use Illuminate\Support\Facades\Cache;
 use Livewire\Attributes\On;
 use Livewire\Attributes\Url;
@@ -14,19 +13,22 @@ class Product extends Component
 {
     use WithFileUploads;
 
-    // Store
-    public $name,$sku, $image, $price, $description, $stock, $unit;
+    // Store Product
+    public $name, $sku, $image, $price, $description, $stock, $unit, $supplier_id;
 
-    // Update
-    public $productId, $nameUpdate, $skuUpdate, $currentImage, $imageUpdate, $priceUpdate, $descriptionUpdate, $stockUpdate, $unitUpdate;
+    // Update Product
+    public $productId, $nameUpdate, $skuUpdate, $currentImage, $imageUpdate, $priceUpdate, $descriptionUpdate, $stockUpdate, $unitUpdate, $supplier_idUpdate, $supplierName;
 
     // Detail
     public $nameDetail, $skuDetail, $imageDetail, $priceDetail, $descriptionDetail, $stockDetail, $unitDetail, $created_at, $updated_at;
 
+    // Select Product
+    public $selectedProduct;
+
     // List Products
     public $products, $totalProducts;
 
-    // Search
+    // Search Product
     #[Url()]
     public $search = '';
     public $limit = 8; 
@@ -36,7 +38,6 @@ class Product extends Component
         'productUpdated' => 'loadInitialProducts',
         'deleteConfirmed' => 'delete',
     ];
-    
 
     public function mount() 
     {  
@@ -44,7 +45,7 @@ class Product extends Component
 
         // Ambil total produk dari cache atau database
         $this->totalProducts = Cache::remember('totalProducts', $ttl, function () {
-            return ModelsProduct::count();
+            return ModelsProduct::with('supplier')->count();
         });
     
         $this->products = collect();
@@ -57,30 +58,29 @@ class Product extends Component
 
     public function updatedSearch()
     {
-        usleep(500000);
         $this->loadInitialProducts();
     }
-
+    
     public function loadInitialProducts()
     {
-        $ttl = 31536000; // TTL cache selama 1 tahun
-        $this->loaded = true;
-    
-        // Ambil produk sesuai pencarian dan limit dari cache atau database
-        $cacheKey = "products_{$this->search}_{$this->limit}";
-        $this->products = Cache::remember($cacheKey, $ttl, function () {
-            return ModelsProduct::where(function ($query) {
-                    $query->where('name', 'like', '%' . $this->search . '%')
-                          ->orWhere('sku', 'like', '%' . $this->search . '%')
-                          ->orWhere('price', 'like', '%' . $this->search . '%')
-                          ->orWhere('description', 'like', '%' . $this->search . '%');
-                })
-                ->latest()
-                ->take($this->limit)
-                ->get();
-        });
+            $ttl = 31536000; // TTL cache selama 1 tahun
+            $this->loaded = true;
+        
+            
+            // Ambil produk sesuai pencarian dan limit dari cache atau database
+            $cacheKey = "products_{$this->search}_{$this->limit}";
+            $this->products = Cache::remember($cacheKey, $ttl, function () {
+                return ModelsProduct::with('supplier')->where(function ($query) {
+                        $query->where('name', 'like', '%' . $this->search . '%')
+                            ->orWhere('sku', 'like', '%' . $this->search . '%')
+                            ->orWhere('price', 'like', '%' . $this->search . '%')
+                            ->orWhere('description', 'like', '%' . $this->search . '%');
+                    })
+                    ->latest()
+                    ->take($this->limit)
+                    ->get();
+            });
     }
-    
 
     public function loadMore()
     {
@@ -110,7 +110,8 @@ class Product extends Component
             'description' => 'required|string',
             'stock' => 'required|numeric|min:0',
             'unit' => 'required|string|max:10',
-        ], [
+            'supplier_id' => 'nullable|exists:suppliers,id',
+            ], [
             'name.required' => 'Nama produk wajib diisi.',
             'name.string' => 'Nama produk harus berupa teks.',
             'name.max' => 'Nama produk maksimal 30 karakter.',
@@ -131,6 +132,8 @@ class Product extends Component
             'unit.required' => 'Satuan produk wajib diisi.',
             'unit.string' => 'Satuan produk harus berupa teks.',
             'unit.max' => 'Satuan produk maksimal 10 karakter.',
+            'supplier_id.exists' => 'Supplier tidak ditemukan.',
+
         ]);
 
         $imagePath = $this->image->store('product-image', 'public');
@@ -143,18 +146,30 @@ class Product extends Component
             'description' => $this->description,
             'stock' => $this->stock,
             'unit' => $this->unit,
+            'supplier_id' => $this->supplier_id ?? null,
         ]);
 
-        // Refresh cache setelah data ditambahkan
         $this->refreshCache();
 
-        $this->dispatch('productUpdated'); // dispatch event untuk data ter-refresh tanpa reload page
+        $this->dispatch('productUpdated');
         $this->dispatch('addedSuccess');
     }
 
+ 
+    
     public function editModal($id)
     {
-        $product = ModelsProduct::findOrFail($id);
+        
+        // Cari produk dari daftar yang sudah di-cache di Livewire
+        $product = collect($this->products)->firstWhere('id', $id);
+    
+        // Jika produk tidak ditemukan di cache, baru ambil dari database (fallback)
+        if (!$product) {
+            $product = ModelsProduct::with('supplier')->findOrFail($id);
+        }
+    
+        // Simpan produk dalam properti agar tidak perlu query ulang
+        $this->selectedProduct = $product;
 
         $this->productId = $product->id;
         $this->nameUpdate = $product->name;
@@ -163,11 +178,13 @@ class Product extends Component
         $this->descriptionUpdate = $product->description;
         $this->stockUpdate = $product->stock;
         $this->unitUpdate = $product->unit;
-        $this->currentImage = $product->image; // Set gambar lama
-
+        $this->currentImage = $product->image;
+        $this->supplier_idUpdate = $product->supplier_id;
+        $this->supplierName = $product->supplier->name ?? '';
+    
         $this->dispatch('showEditModal');
     }
-
+    
     public function update()
     {
         $this->validate([
@@ -178,6 +195,7 @@ class Product extends Component
             'descriptionUpdate' => 'required|string',
             'stockUpdate' => 'required|numeric|min:0',
             'unitUpdate' => 'required|string|max:10',
+            'supplier_idUpdate' => 'nullable|exists:suppliers,id',
         ], [
             'nameUpdate.required' => 'Nama produk wajib diisi.',
             'nameUpdate.string' => 'Nama produk harus berupa teks.',
@@ -198,10 +216,16 @@ class Product extends Component
             'unitUpdate.required' => 'Satuan produk wajib diisi.',
             'unitUpdate.string' => 'Satuan produk harus berupa teks.',
             'unitUpdate.max' => 'Satuan produk maksimal 10 karakter.',
+            'supplier_idUpdate.exists' => 'Supplier tidak ditemukan.',
         ]);
-        
 
-        $product = ModelsProduct::findOrFail($this->productId);
+        // Gunakan produk yang sudah disimpan di properti agar tidak query ulang
+        if (!$this->selectedProduct) {
+            return;
+        }
+
+        $product = $this->selectedProduct;
+
 
         // Jika ada gambar baru diunggah, proses upload
         if ($this->imageUpdate) {
@@ -224,19 +248,25 @@ class Product extends Component
             'description' => $this->descriptionUpdate,
             'stock' => $this->stockUpdate,
             'unit' => $this->unitUpdate,
+            'supplier_id' => $this->supplier_idUpdate,
         ]);
-        
-        // Refresh cache setelah data diperbarui
+
         $this->refreshCache();
-        
-        $this->dispatch('productUpdated'); // Dispatch event untuk refresh data
+
+        $this->dispatch('productUpdated');
         $this->dispatch('updatedSuccess');
     }
 
-
     public function detailModal($id)
     {
-        $product = ModelsProduct::findOrFail($id);
+        // Cari produk dari daftar yang sudah di-cache di Livewire
+        $product = collect($this->products)->firstWhere('id', $id);
+    
+        // Jika produk tidak ditemukan di cache, baru ambil dari database (fallback)
+        if (!$product) {
+              $product = ModelsProduct::with('supplier')->findOrFail($id);
+        }
+
         $this->nameDetail = $product->name;
         $this->skuDetail = $product->sku;
         $this->imageDetail = $product->image;
@@ -252,45 +282,52 @@ class Product extends Component
 
     public function deleteConfirmation($id)
     {
-        $product = ModelsProduct::findOrFail($id);
-
-        $this->productId = $product->id;
+        // Cari produk dari daftar yang sudah di-cache di Livewire
+        $product = collect($this->products)->firstWhere('id', $id);
+    
+        // Jika produk tidak ditemukan di cache, baru ambil dari database (fallback)
+        if (!$product) {
+            $product = ModelsProduct::with('supplier')->findOrFail($id);
+        }
+    
+        // Simpan produk dalam properti agar tidak perlu query ulang
+        $this->selectedProduct = $product;
         $this->dispatch('showDeleteConfirmation');
     }
-
-
-
+    
     public function delete()
     {
-        $product = ModelsProduct::findOrFail($this->productId);
-        $imagePath = $product->image;
-
-        // Hapus file gambar jika ada
+        // Pastikan produk tersedia sebelum dihapus
+        if (!$this->selectedProduct) {
+            return;
+        }
+    
+        $imagePath = $this->selectedProduct->image;
+    
+        // Hapus gambar jika ada
         if (file_exists(public_path('storage/' . $imagePath))) {
             unlink(public_path('storage/' . $imagePath));
         }
     
-        // Hapus data 
-        $product->delete();
-
-        // Hapus cache terkait produk yang dihapus
+        // Hapus produk
+        $this->selectedProduct->delete();
+            
         $this->removeCache();
-        
-        $this->dispatch('productUpdated'); // dispatch event untuk data ter refresh tanpa reload page 
-        $this->dispatch('deleteSuccess'); 
+        $this->dispatch('productUpdated');
+        $this->dispatch('deleteSuccess');
     }
-
     
+
     protected function refreshCache()
     {
         $ttl = 31536000; // TTL cache selama 1 tahun
 
         // Perbarui total produk
-        Cache::put('totalProducts', ModelsProduct::count(), $ttl);
+        Cache::put('totalProducts', ModelsProduct::with('supplier')->count(), $ttl);
 
         // Perbarui cache produk sesuai pencarian (opsional, jika perlu di-refresh seluruhnya)
         $cacheKey = "products_{$this->search}_{$this->limit}";
-        Cache::put($cacheKey, ModelsProduct::where(function ($query) {
+        Cache::put($cacheKey, ModelsProduct::with('supplier')->where(function ($query) {
                 $query->where('name', 'like', '%' . $this->search . '%')
                       ->orWhere('sku', 'like', '%' . $this->search . '%')
                       ->orWhere('price', 'like', '%' . $this->search . '%')
@@ -300,6 +337,7 @@ class Product extends Component
             ->take($this->limit)
             ->get(), $ttl);
     }
+
 
     protected function removeCache()
     {
@@ -317,8 +355,6 @@ class Product extends Component
         }
 
     }
-
-
 
     public function render()
     {
