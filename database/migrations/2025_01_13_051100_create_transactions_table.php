@@ -15,12 +15,12 @@ return new class extends Migration
 
         Schema::create('transactions', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id');
-            $table->string('total');
-            $table->enum('payment_method', ["cash", "card", "ewallet"]);
-            $table->enum('status', ["completed", "pending", "cancelled"]);
-            $table->timestamp('created_at')->nullable();
-            $table->timestamp('updated_at')->nullable();
+            $table->foreignId('product_id'); // Ini akan memastikan foreign key ke tabel products
+            $table->integer('quantity');
+            $table->decimal('price');
+            $table->decimal('subtotal');
+            $table->decimal('grandtotal');
+            $table->timestamps(); // Gunakan timestamps() untuk created_at dan updated_at
         });
 
         Schema::enableForeignKeyConstraints();

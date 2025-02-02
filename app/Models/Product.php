@@ -11,8 +11,15 @@ class Product extends Model
     protected $table = 'products';
     protected $with = ['supplier']; // Auto-load relasi supplier
 
+    // Relasi ke model Supplier
     public function supplier()
     {
         return $this->belongsTo(Supplier::class);
+    }
+
+    // Relasi ke model Transaction
+    public function transactions()
+    {
+        return $this->hasMany(Transaction::class);
     }
 }
