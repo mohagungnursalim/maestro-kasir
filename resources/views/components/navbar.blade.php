@@ -1,7 +1,7 @@
 <div>
    {{-- Navbar Section --}}
    <div class="flex items-center">
-    <div class="flex items-center ms-3">
+    <div class="flex items-center mr-5 ms-7">
         <div>
             <button type="button"
                 class="flex text-sm bg-gray-800 rounded-full focus:ring-4 focus:ring-gray-300"
@@ -52,5 +52,6 @@
             </ul>
         </div>
     </div>
+    
 </div>
 </div>
