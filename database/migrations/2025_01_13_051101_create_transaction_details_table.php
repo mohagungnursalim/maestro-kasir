@@ -17,9 +17,6 @@ return new class extends Migration
             $table->id();
             $table->foreignId('transaction_id');
             $table->foreignId('product_id');
-            $table->integer('quantity');
-            $table->decimal('price');
-            $table->decimal('subtotal');
             $table->timestamp('created_at');
             $table->timestamp('updated_at');
         });
