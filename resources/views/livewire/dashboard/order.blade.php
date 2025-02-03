@@ -30,7 +30,7 @@
                                 @php
                                     $isInCart = collect($cart)->contains('id', $product->id);
                                 @endphp
-                                <button {{ $isInCart ? 'disabled' : '' }} wire:loading.remove wire:target='addToCart({{ $product->id }})' wire:click="addToCart({{ $product->id }})" class="px-2 py-1 {{ $isInCart ? 'bg-gray-200' : 'bg-gray-900' }} text-white rounded">Pilih</button>
+                                <button {{ $isInCart ? 'disabled' : '' }} wire:loading.remove wire:target='addToCart({{ $product->id }})' wire:click="addToCart({{ $product->id }})" onclick="playSelectSound()"  class="px-2 py-1 {{ $isInCart ? 'bg-gray-200' : 'bg-gray-900' }} text-white rounded">Pilih</button>
                                 <button {{ $isInCart ? 'disabled' : '' }} wire:loading wire:target='addToCart({{ $product->id }})' class="px-2 py-1 bg-gray-900 opacity-50 text-white rounded">
                                     Pilih
                                     <svg class="inline w-4 h-4 text-white animate-spin ml-2" xmlns="http://www.w3.org/2000/svg"
@@ -59,7 +59,7 @@
                                         <div class="flex-1">
                                             <span class="text-base font-medium text-gray-900 dark:text-white">{{ $item['name'] }}</span>
                                             <div class="flex items-center gap-4 mt-2">
-                                                <button wire:loading.remove wire:target='removeFromCart({{ $index }})' wire:click="removeFromCart({{ $index }})" type="button" class="text-sm text-red-600 hover:underline dark:text-red-500">Hapus</button>
+                                                <button wire:loading.remove wire:target='removeFromCart({{ $index }})' wire:click="removeFromCart({{ $index }})" onclick="playSelectSound()" type="button" class="text-sm text-red-600 hover:underline dark:text-red-500">Hapus</button>
                                                 <button wire:loading wire:target='removeFromCart({{ $index }})' type="button" class="text-sm text-red-600 hover:underline dark:text-red-500">
                                                     Hapus
                                                     <svg class="inline w-4 h-4 text-gray-900 animate-spin ml-2" xmlns="http://www.w3.org/2000/svg"
@@ -75,14 +75,14 @@
                                         <div class="flex items-center justify-between md:order-3 md:justify-end">
                                             <div class="flex items-center">
                                                 @if ($item['quantity'] > 1)
-                                                    <button wire:click="updateQuantity({{ $index }}, {{ $item['quantity'] - 1 }})" type="button" class="inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-md border border-gray-300 bg-gray-100 hover:bg-gray-200 focus:outline-none focus:ring-0 dark:border-gray-600 dark:bg-gray-700 dark:hover:bg-gray-600 dark:focus:ring-gray-700">
+                                                    <button wire:click="updateQuantity({{ $index }}, {{ $item['quantity'] - 1 }})" onclick="playSelectSound()" type="button" class="inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-md border border-gray-300 bg-gray-100 hover:bg-gray-200 focus:outline-none focus:ring-0 dark:border-gray-600 dark:bg-gray-700 dark:hover:bg-gray-600 dark:focus:ring-gray-700">
                                                         <svg class="h-2.5 w-2.5 text-gray-900 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 18 18">
                                                             <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M1 9h16"></path>
                                                         </svg>
                                                     </button>
                                                 @endif
                                                 <input disabled type="text" wire:model="cart.{{ $index }}.quantity" class="w-10 shrink-0 border-0 bg-transparent text-center text-sm font-medium text-gray-900 focus:outline-none focus:ring-0 dark:text-white" value="{{ $item['quantity'] }}">
-                                                <button wire:click="updateQuantity({{ $index }}, {{ $item['quantity'] + 1 }})" type="button" class="inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-md border border-gray-300 bg-gray-100 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-100 dark:border-gray-600 dark:bg-gray-700 dark:hover:bg-gray-600 dark:focus:ring-gray-700">
+                                                <button wire:click="updateQuantity({{ $index }}, {{ $item['quantity'] + 1 }})" onclick="playSelectSound()" type="button" class="inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-md border border-gray-300 bg-gray-100 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-100 dark:border-gray-600 dark:bg-gray-700 dark:hover:bg-gray-600 dark:focus:ring-gray-700">
                                                     <svg class="h-2.5 w-2.5 text-gray-900 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 18 18">
                                                         <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 1v16M1 9h16"></path>
                                                     </svg>
@@ -157,7 +157,7 @@
 
                                 @if (!empty($cart))
                                     <button wire:loading.remove
-                                        wire:click="resetCart" 
+                                        wire:click="resetCart" onclick="playSelectSound()"
                                         type="button" 
                                         class="focus:outline-none text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2">
                                         Bersihkan Pesanan
@@ -194,7 +194,13 @@
 {{-- Sweet alert,payment success --}}
 <script>
     Livewire.on('successPayment', (event) => {
-             const Toast = Swal.mixin({
+         // Buat elemen audio
+         let audio = new Audio("{{ asset('audio/success-sound.mp3') }}"); 
+
+        // Putar audio
+        audio.play().catch(error => console.error("Gagal memutar audio:", error));  
+
+        const Toast = Swal.mixin({
                  toast: true,
                  position: "top-end",
                  showConfirmButton: false,
@@ -217,7 +223,14 @@
  {{-- Sweet alert,payment null --}}
 <script>
     Livewire.on('nullPaymentSelected', (event) => {
-             const Toast = Swal.mixin({
+        
+        // Buat elemen audio
+        let audio = new Audio("{{ asset('audio/error-sound.mp3') }}"); 
+
+        // Putar audio
+        audio.play().catch(error => console.error("Gagal memutar audio:", error)); 
+
+        const Toast = Swal.mixin({
                  toast: true,
                  position: "top-end",
                  showConfirmButton: false,
@@ -237,7 +250,7 @@
  
  </script>
 
- {{-- Sweet alert,payment null --}}
+ {{-- Sweet alert,payment error --}}
 <script>
     Livewire.on('errorPayment', (event) => {
              const Toast = Swal.mixin({
@@ -259,8 +272,15 @@
      });
  </script>
  
+ {{-- Sweet alert,uang kurang --}}
  <script>
     Livewire.on('insufficientPayment', (shortage) => {
+        // Buat elemen audio
+        let audio = new Audio("{{ asset('audio/error-sound.mp3') }}"); 
+
+        // Putar audio
+        audio.play().catch(error => console.error("Gagal memutar audio:", error)); 
+
         Swal.fire({
             title: "Pembayaran Kurang!",
             text: `Uang pelanggan kurang Rp${shortage.toLocaleString('id-ID')}.Tetap lanjutkan?`,
@@ -277,6 +297,18 @@
     });
 </script>
 
+<script>
+    
+    function playSelectSound() {
+            // Buat elemen audio
+            let audio = new Audio("{{ asset('audio/click-sound.mp3') }}"); 
+
+            audio.currentTime = 0; // Set ulang waktu audio
+            
+            // Putar audio
+            audio.play().catch(error => console.error("Gagal memutar audio:", error)); 
+        }
+</script>
 
     
 </div>
