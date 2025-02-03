@@ -20,12 +20,12 @@ aria-label="Sidebar">
         
         <li>
             <a 
-                class="flex items-center p-2 rounded-lg {{ Request::is('dashboard/transactions') ? 'bg-purple-300 text-dark' : 'hover:bg-gray-200' }}"
-                @if (!Request::is('dashboard/transactions'))
-                    wire:navigate href="/dashboard/transactions"
+                class="flex items-center p-2 rounded-lg {{ Request::is('dashboard/orders') ? 'bg-purple-300 text-dark' : 'hover:bg-gray-200' }}"
+                @if (!Request::is('dashboard/orders'))
+                    wire:navigate href="/dashboard/orders"
                 @endif>
                 <i class="bi bi-bag-check-fill"></i>
-                <span class="flex-1 ms-3 whitespace-nowrap">Transaksi</span>
+                <span class="flex-1 ms-3 whitespace-nowrap">Kasir</span>
             </a>
         </li>
         

@@ -4,6 +4,7 @@ use App\Http\Controllers\SupplierController;
 use App\Livewire\Dashboard\Product;
 use Illuminate\Support\Facades\Auth;
 use App\Livewire\Dashboard\Dashboard;
+use App\Livewire\Dashboard\Order;
 use App\Livewire\Dashboard\Supplier;
 use App\Livewire\Dashboard\Transaction;
 use Illuminate\Http\Request;
@@ -15,9 +16,9 @@ Route::get('/dashboard', Dashboard::class)
     ->middleware(['auth'])
     ->name('dashboard');
 
-Route::get('/dashboard/transactions', Transaction::class)
+Route::get('/dashboard/orders', Order::class)
     ->middleware(['auth'])
-    ->name('transactions');
+    ->name('orders');
 
 Route::get('/dashboard/products', Product::class)
     ->middleware(['auth'])

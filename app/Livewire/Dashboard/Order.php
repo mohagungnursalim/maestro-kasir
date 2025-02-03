@@ -4,10 +4,11 @@ namespace App\Livewire\Dashboard;
 
 use Livewire\Component;
 use App\Models\Product;
-use App\Models\Transaction as ModelsTransaction;
+use App\Models\Order as ModelsOrder;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
-class Transaction extends Component
+class Order extends Component
 {
     public $search = '';
     public $products = [];
@@ -77,18 +78,17 @@ class Transaction extends Component
         $this->change = $this->customerMoney - $this->total;
     }
 
-    // Proses transaksi
-    public function processTransaction()
+    public function processOrder()
     {
         if (empty($this->cart)) {
             $this->dispatch('nullPaymentSelected');
             return;
         }
-
+    
         DB::beginTransaction();
         try {
             foreach ($this->cart as $item) {
-                ModelsTransaction::create([
+                ModelsOrder::create([
                     'product_id' => $item['id'],
                     'quantity' => $item['quantity'],
                     'price' => $item['price'],
@@ -101,10 +101,12 @@ class Transaction extends Component
             $this->dispatch('successPayment');
         } catch (\Exception $e) {
             DB::rollBack();
+            Log::error($e->getMessage()); // Perbaikan di sini
             $this->dispatch('errorPayment');
             return redirect()->back();
         }
     }
+    
 
 
     // Reset keranjang
@@ -120,6 +122,6 @@ class Transaction extends Component
 
     public function render()
     {
-        return view('livewire.dashboard.transaction');
+        return view('livewire.dashboard.order');
     }
 }
