@@ -22,13 +22,19 @@
                 <!-- Daftar Produk Hasil Pencarian -->
                 @if ($products)
                     <div class="mt-4">
-                        @foreach ($products as $product)
+                        @forelse ($products as $product)
                             <div class="flex items-center justify-between p-2 border-b">
                                 <img width="50px" src="{{ asset('storage/' . $product->image ) }}" alt="">
                                 <span>{{ $product->name }} - Rp{{ number_format($product->price, 0, ',', '.') }}</span>
-                                <button wire:click="addToCart({{ $product->id }})" class="px-2 py-1 bg-gray-900 text-white rounded">Pilih</button>
+                                
+                                @php
+                                    $isInCart = collect($cart)->contains('id', $product->id);
+                                @endphp
+                                <button {{ $isInCart ? 'disabled' : '' }}  wire:click="addToCart({{ $product->id }})" class="px-2 py-1 {{ $isInCart ? 'bg-gray-200' : 'bg-gray-900' }} text-white rounded">Pilih</button>
                             </div>
-                        @endforeach
+                        @empty
+                            <p class="text-center text-gray-900">Produk tidak ditemukan.</p>
+                        @endforelse
                     </div>
                 @endif
 
@@ -48,7 +54,7 @@
                                         </div>
                                         <div class="flex items-center justify-between md:order-3 md:justify-end">
                                             <div class="flex items-center">
-                                                <button wire:click="updateQuantity({{ $index }}, {{ $item['quantity'] - 1 }})" type="button" class="inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-md border border-gray-300 bg-gray-100 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-100 dark:border-gray-600 dark:bg-gray-700 dark:hover:bg-gray-600 dark:focus:ring-gray-700">
+                                                <button {{ $item['quantity'] == 1 ? 'disabled' : ''}} wire:click="updateQuantity({{ $index }}, {{ $item['quantity'] - 1 }})" type="button" class="inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-md border border-gray-300 bg-gray-100 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-100 dark:border-gray-600 dark:bg-gray-700 dark:hover:bg-gray-600 dark:focus:ring-gray-700">
                                                     <svg class="h-2.5 w-2.5 text-gray-900 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 18 2">
                                                         <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M1 1h16"></path>
                                                     </svg>

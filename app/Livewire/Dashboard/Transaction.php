@@ -11,6 +11,7 @@ class Transaction extends Component
 {
     public $search = '';
     public $products = [];
+    public $limitProducts = 5;
     public $cart = [];
     public $customerMoney;
     public $subtotal = 0;
@@ -21,7 +22,7 @@ class Transaction extends Component
     // Pencarian produk
     public function searchProduct()
     {
-        $this->products = Product::where('name', 'like', '%' . $this->search . '%')->get();
+        $this->products = Product::where('name', 'like', '%' . $this->search . '%')->take($this->limitProducts)->get();
     }
 
     // Tambahkan produk ke keranjang
