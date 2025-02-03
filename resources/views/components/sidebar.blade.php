@@ -24,7 +24,7 @@ aria-label="Sidebar">
                 @if (!Request::is('dashboard/orders'))
                     wire:navigate href="/dashboard/orders"
                 @endif>
-                <i class="bi bi-bag-check-fill"></i>
+                <i class="bi bi-cash-coin"></i>
                 <span class="flex-1 ms-3 whitespace-nowrap">Kasir</span>
             </a>
         </li>

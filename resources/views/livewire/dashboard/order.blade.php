@@ -33,7 +33,7 @@
                                 <button {{ $isInCart ? 'disabled' : '' }}  wire:click="addToCart({{ $product->id }})" class="px-2 py-1 {{ $isInCart ? 'bg-gray-200' : 'bg-gray-900' }} text-white rounded">Pilih</button>
                             </div>
                         @empty
-                            <p class="text-center text-gray-900">Produk tidak ditemukan.</p>
+                            <p class="text-center text-gray-400">Produk tidak ditemukan.</p>
                         @endforelse
                     </div>
                 @endif
@@ -98,7 +98,7 @@
                                     <dd class="text-gray-900">Rp{{ number_format($subtotal, 0, ',', '.') }}</dd>
                                 </dl>
                                 <dl class="flex justify-between">
-                                    <dt class="text-gray-500">PPN (12%)</dt>
+                                    <dt class="text-gray-500">PPN (11%)</dt>
                                     <dd class="text-gray-900">Rp{{ number_format($tax, 0, ',', '.') }}</dd>
                                 </dl>
                                 <dl class="flex justify-between border-t pt-2">
@@ -237,8 +237,27 @@
              });
  
      });
- 
  </script>
+ 
+ <script>
+    Livewire.on('insufficientPayment', (shortage) => {
+        Swal.fire({
+            title: "Pembayaran Kurang!",
+            text: `Uang pelanggan kurang Rp${shortage.toLocaleString('id-ID')}.Tetap lanjutkan?`,
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#3085d6",
+            cancelButtonColor: "#d33",
+            confirmButtonText: "Ya, Lanjutkan!",
+        }).then((result) => {
+            if (result.isConfirmed) {
+                Livewire.dispatch('forceProcessOrder'); // Memanggil method Livewire
+            }
+        });
+    });
+</script>
+
+
     
 </div>
 

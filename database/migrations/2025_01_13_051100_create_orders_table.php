@@ -19,6 +19,10 @@ return new class extends Migration
             $table->integer('quantity');
             $table->decimal('price');
             $table->decimal('subtotal');
+            $table->decimal('tax');
+            $table->decimal('discount')->nullable();
+            $table->decimal('customer_money')->nullable();
+            $table->decimal('change')->nullable();
             $table->decimal('grandtotal');
             $table->timestamps(); // Gunakan timestamps() untuk created_at dan updated_at
         });
