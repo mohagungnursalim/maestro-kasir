@@ -30,7 +30,17 @@
                                 @php
                                     $isInCart = collect($cart)->contains('id', $product->id);
                                 @endphp
-                                <button {{ $isInCart ? 'disabled' : '' }}  wire:click="addToCart({{ $product->id }})" class="px-2 py-1 {{ $isInCart ? 'bg-gray-200' : 'bg-gray-900' }} text-white rounded">Pilih</button>
+                                <button {{ $isInCart ? 'disabled' : '' }} wire:loading.remove wire:target='addToCart({{ $product->id }})' wire:click="addToCart({{ $product->id }})" class="px-2 py-1 {{ $isInCart ? 'bg-gray-200' : 'bg-gray-900' }} text-white rounded">Pilih</button>
+                                <button {{ $isInCart ? 'disabled' : '' }} wire:loading wire:target='addToCart({{ $product->id }})' class="px-2 py-1 bg-gray-900 opacity-50 text-white rounded">
+                                    Pilih
+                                    <svg class="inline w-4 h-4 text-white animate-spin ml-2" xmlns="http://www.w3.org/2000/svg"
+                                        fill="none" viewBox="0 0 24 24">
+                                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4">
+                                        </circle>
+                                        <path class="opacity-75" fill="currentColor"
+                                            d="M4 12a8 8 0 018-8v4a4 4 0 100 8v4a8 8 0 01-8-8z"></path>
+                                    </svg>
+                                </button>
                             </div>
                         @empty
                             <p class="text-center text-gray-400">Produk tidak ditemukan.</p>
@@ -49,7 +59,17 @@
                                         <div class="flex-1">
                                             <span class="text-base font-medium text-gray-900 dark:text-white">{{ $item['name'] }}</span>
                                             <div class="flex items-center gap-4 mt-2">
-                                                <button wire:click="removeFromCart({{ $index }})" type="button" class="text-sm text-red-600 hover:underline dark:text-red-500">Hapus</button>
+                                                <button wire:loading.remove wire:target='removeFromCart({{ $index }})' wire:click="removeFromCart({{ $index }})" type="button" class="text-sm text-red-600 hover:underline dark:text-red-500">Hapus</button>
+                                                <button wire:loading wire:target='removeFromCart({{ $index }})' type="button" class="text-sm text-red-600 hover:underline dark:text-red-500">
+                                                    Hapus
+                                                    <svg class="inline w-4 h-4 text-gray-900 animate-spin ml-2" xmlns="http://www.w3.org/2000/svg"
+                                                        fill="none" viewBox="0 0 24 24">
+                                                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4">
+                                                        </circle>
+                                                        <path class="opacity-75" fill="currentColor"
+                                                            d="M4 12a8 8 0 018-8v4a4 4 0 100 8v4a8 8 0 01-8-8z"></path>
+                                                    </svg>
+                                                </button>
                                             </div>
                                         </div>
                                         <div class="flex items-center justify-between md:order-3 md:justify-end">
