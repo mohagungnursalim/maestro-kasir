@@ -298,17 +298,16 @@
 </script>
 
 <script>
-    
-    function playSelectSound() {
-            // Buat elemen audio
-            let audio = new Audio("{{ asset('audio/click-sound.mp3') }}"); 
+    // Inisialisasi audio sekali di luar function
+    let selectSound = new Audio("{{ asset('audio/click-sound.mp3') }}");
+    selectSound.preload = "auto"; // Preload agar tidak ada delay
 
-            audio.currentTime = 0; // Set ulang waktu audio
-            
-            // Putar audio
-            audio.play().catch(error => console.error("Gagal memutar audio:", error)); 
-        }
+    function playSelectSound() {
+        selectSound.currentTime = 0; // Agar selalu mulai dari awal
+        selectSound.play().catch(error => console.error("Gagal memutar audio:", error));
+    }
 </script>
+
 
     
 </div>
