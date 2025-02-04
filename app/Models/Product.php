@@ -17,9 +17,9 @@ class Product extends Model
         return $this->belongsTo(Supplier::class);
     }
 
-    // Relasi ke model Transaction
-    public function transactions()
+    // Relasi ke model Order
+    public function orders()
     {
-        return $this->hasMany(Transaction::class);
+        return $this->hasMany(Order::class);
     }
 }

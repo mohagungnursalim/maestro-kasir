@@ -25,7 +25,7 @@
                         @forelse ($products as $product)
                             <div class="flex items-center justify-between p-2 border-b">
                                 <img width="50px" src="{{ asset('storage/' . $product->image ) }}" alt="">
-                                <span>{{ $product->name }} - Rp{{ number_format($product->price, 0, ',', '.') }}</span>
+                                <span><a class="text-bold">{{ $product->name }}</a> - Rp{{ number_format($product->price, 0, ',', '.') }} | Stok: <span class=" @if($product->stock < 1) bg-red-100 text-red-800 @elseif($product->stock < 10) bg-blue-100 text-dark @else bg-green-100 text-green-800 @endif text-xs font-medium me-2 px-2.5 py-0.5 rounded-full"> {{ $product->stock }}</span></span>
                                 
                                 @php
                                     $isInCart = collect($cart)->contains('id', $product->id);
@@ -296,6 +296,28 @@
         });
     });
 </script>
+
+
+{{-- Sweet Alert untuk stok produk kurang --}}
+<script>
+    Livewire.on('insufficientStock', (insufficientProducts) => {
+        if (!Array.isArray(insufficientProducts) || insufficientProducts.length === 0) return;
+
+        let audio = new Audio("{{ asset('audio/error-sound.mp3') }}");
+        audio.play().catch(error => console.error("Gagal memutar audio:", error));
+
+        Swal.fire({
+            title: "Stok Tidak Cukup!",
+            text: "Stok tidak cukup untuk produk berikut:\n\n" + insufficientProducts.join("\n"),
+            icon: "warning",
+            confirmButtonText: "OK"
+        });
+    });
+</script>
+
+
+
+
 
 <script>
     // Inisialisasi audio sekali di luar function
