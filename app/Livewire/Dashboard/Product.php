@@ -103,7 +103,7 @@ class Product extends Component
     public function store()
     {
         $this->validate([
-            'name' => 'required|string|max:30',
+            'name' => 'required|string|max:60',
             'sku' => 'required|string|max:30',
             'image' => 'required|image|max:5120',
             'price' => 'required|numeric|min:0',
@@ -188,7 +188,7 @@ class Product extends Component
     public function update()
     {
         $this->validate([
-            'nameUpdate' => 'required|string|max:30',
+            'nameUpdate' => 'required|string|max:60',
             'skuUpdate' => 'required|string|max:30',
             'imageUpdate' => 'nullable|image|max:5120',
             'priceUpdate' => 'required|numeric|min:0',

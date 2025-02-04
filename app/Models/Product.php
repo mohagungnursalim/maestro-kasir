@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\Cache;
 
 class Product extends Model
@@ -11,15 +12,15 @@ class Product extends Model
     protected $table = 'products';
     protected $with = ['supplier']; // Auto-load relasi supplier
 
-    // Relasi ke model Supplier
+    // Relasi ke Supplier
     public function supplier()
     {
         return $this->belongsTo(Supplier::class);
     }
 
-    // Relasi ke model Order
-    public function orders()
+    // Relasi ke TransactionDetail (1 produk bisa muncul di banyak detail transaksi)
+    public function transactionDetails(): HasMany
     {
-        return $this->hasMany(Order::class);
+        return $this->hasMany(TransactionDetail::class, 'product_id');
     }
 }

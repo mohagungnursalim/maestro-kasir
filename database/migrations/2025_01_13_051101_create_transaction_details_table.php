@@ -15,11 +15,14 @@ return new class extends Migration
 
         Schema::create('transaction_details', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('transaction_id');
-            $table->foreignId('product_id');
-            $table->timestamp('created_at');
-            $table->timestamp('updated_at');
+            $table->foreignId('order_id')->constrained('orders')->onDelete('cascade');
+            $table->foreignId('product_id')->constrained('products')->onDelete('cascade');
+            $table->integer('quantity'); // Jumlah produk yang dipesan
+            $table->decimal('price', 10, 2); // Harga produk saat transaksi
+            $table->decimal('subtotal', 12, 2); // Total harga produk * quantity
+            $table->timestamps(); // created_at & updated_at otomatis
         });
+        
 
         Schema::enableForeignKeyConstraints();
     }

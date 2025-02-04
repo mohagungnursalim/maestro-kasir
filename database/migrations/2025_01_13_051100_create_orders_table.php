@@ -15,17 +15,14 @@ return new class extends Migration
 
         Schema::create('orders', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('product_id'); // Ini akan memastikan foreign key ke tabel products
-            $table->integer('quantity');
-            $table->decimal('price');
-            $table->decimal('subtotal');
-            $table->decimal('tax');
-            $table->decimal('discount')->nullable();
-            $table->decimal('customer_money')->nullable();
-            $table->decimal('change')->nullable();
-            $table->decimal('grandtotal');
-            $table->timestamps(); // Gunakan timestamps() untuk created_at dan updated_at
+            $table->decimal('tax', 10, 2);
+            $table->decimal('discount', 10, 2)->nullable();
+            $table->decimal('customer_money', 12, 2)->nullable();
+            $table->decimal('change', 12, 2)->nullable();
+            $table->decimal('grandtotal', 12, 2); // Total dari semua subtotal di transaction_details
+            $table->timestamps(); // created_at & updated_at otomatis
         });
+        
 
         Schema::enableForeignKeyConstraints();
     }
