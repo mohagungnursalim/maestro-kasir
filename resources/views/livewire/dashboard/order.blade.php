@@ -5,14 +5,14 @@
                 <!-- Pencarian Produk -->
                 <div>
                     <form wire:submit.prevent="searchProduct" class="max-w-md mx-auto">
-                        <label for="default-search" class="mb-2 text-sm font-medium text-gray-900 sr-only dark:text-white">Search</label>
+                        <label for="search" class="mb-2 text-sm font-medium text-gray-900 sr-only dark:text-white">Search</label>
                         <div class="relative">
                             <div class="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
                                 <svg class="w-4 h-4 text-gray-500 dark:text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20">
                                     <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"/>
                                 </svg>
                             </div>
-                            <input wire:model="search" type="search" id="default-search" class="block w-full p-4 ps-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Cari produk.." />
+                            <input wire:model="search" type="search" id="search" name="search" class="block w-full p-4 ps-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Cari produk.." />
                             <button wire:loading.remove wire:target='search' type="submit" class="text-white absolute end-2.5 bottom-2.5 bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-4 py-2">Cari</button>
                             <button disabled wire:loading wire:target='search' class="text-white absolute end-2.5 bottom-2.5 bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-4 py-2">Mencari..</button>
                         </div>
@@ -81,7 +81,7 @@
                                                         </svg>
                                                     </button>
                                                 @endif
-                                                <input disabled type="text" wire:model="cart.{{ $index }}.quantity" class="w-10 shrink-0 border-0 bg-transparent text-center text-sm font-medium text-gray-900 focus:outline-none focus:ring-0 dark:text-white" value="{{ $item['quantity'] }}">
+                                                <input id="cart.{{ $index }}.quantity" name="cart.{{ $index }}.quantity" disabled type="text" wire:model="cart.{{ $index }}.quantity" class="w-10 shrink-0 border-0 bg-transparent text-center text-sm font-medium text-gray-900 focus:outline-none focus:ring-0 dark:text-white" value="{{ $item['quantity'] }}">
                                                 <button wire:click="updateQuantity({{ $index }}, {{ $item['quantity'] + 1 }})" onclick="playSelectSound()" type="button" class="inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-md border border-gray-300 bg-gray-100 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-100 dark:border-gray-600 dark:bg-gray-700 dark:hover:bg-gray-600 dark:focus:ring-gray-700">
                                                     <svg class="h-2.5 w-2.5 text-gray-900 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 18 18">
                                                         <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 1v16M1 9h16"></path>
@@ -104,10 +104,11 @@
                             <p class="text-red-500 text-sm">*Harap terima dahulu uangnya baru proses pembayaran!</p>
                             <div class="space-y-4 mt-4">
                                 <div>
-                                    <label for="customer-money" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Uang Pelanggan</label>
+                                    <label for="customerMoney" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Uang Pelanggan</label>
                                     <input
                                         type="number" 
-                                        id="customer-money" 
+                                        id="customerMoney" 
+                                        name="customerMoney"
                                         wire:model="customerMoney"
                                         class="block w-full p-2 text-gray-900 border border-gray-300 rounded-lg bg-gray-50 text-xs focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                                         placeholder="Masukkan uang pelanggan..."
@@ -184,7 +185,7 @@
             </div>
         </section>
     </div>
-
+</div>
 
 
 
@@ -248,7 +249,7 @@
  
      });
  
- </script>
+</script>
 
  {{-- Sweet alert,payment error --}}
 <script>
@@ -315,20 +316,23 @@
     });
 </script>
 
-
-
-
-
 <script>
-    // Inisialisasi audio sekali di luar function
-    let selectSound = new Audio("{{ asset('audio/click-sound.mp3') }}");
-    selectSound.preload = "auto"; // Preload agar tidak ada delay
+        let selectSound = new Audio("{{ asset('audio/click-sound.mp3') }}");
 
-    function playSelectSound() {
-        selectSound.currentTime = 0; // Agar selalu mulai dari awal
-        selectSound.play().catch(error => console.error("Gagal memutar audio:", error));
-    }
+        // Preload audio agar tidak delay saat pertama diputar
+        selectSound.preload = "auto";
+        
+
+        // Simpan fungsi ke dalam window agar bisa dipanggil dari HTML
+        window.playSelectSound = function () {
+            selectSound.currentTime = 0;
+            selectSound.play().catch(error => {
+                console.error("Gagal memutar audio:", error);
+            });
+        };
 </script>
+
+
 
 
     

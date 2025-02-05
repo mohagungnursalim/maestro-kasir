@@ -20,6 +20,10 @@ Route::get('/dashboard/orders', Order::class)
     ->middleware(['auth'])
     ->name('orders');
 
+Route::get('/dashboard/transactions' , Transaction::class)
+    ->middleware(['auth'])
+    ->name('transactions');
+
 Route::get('/dashboard/products', Product::class)
     ->middleware(['auth'])
     ->name('products');
