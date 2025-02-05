@@ -28,7 +28,17 @@ aria-label="Sidebar">
                 <span class="flex-1 ms-3 whitespace-nowrap">Kasir</span>
             </a>
         </li>
-        
+
+        <li>
+            <a 
+                class="flex items-center p-2 rounded-lg {{ Request::is('dashboard/transactions') ? 'bg-purple-300 text-dark' : 'hover:bg-gray-200' }}"
+                @if (!Request::is('dashboard/transactions'))
+                    wire:navigate href="/dashboard/transactions"
+                @endif>
+                <i class="bi bi-wallet2"></i>
+                <span class="flex-1 ms-3 whitespace-nowrap">Rekap Transaksi</span>
+            </a>
+        </li>
         
         
 

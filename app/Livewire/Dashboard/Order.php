@@ -161,7 +161,7 @@ class Order extends Component
                         'product_id' => $item['id'],
                         'quantity' => $item['quantity'],
                         'price' => $item['price'],
-                        'subtotal' => $item['subtotal'],
+                        'subtotal' => $this->subtotal,
                         'created_at' => now(),
                         'updated_at' => now(),
                     ];
@@ -183,8 +183,9 @@ class Order extends Component
             $updateStockQuery .= " END WHERE id IN (" . implode(',', array_keys($productUpdates)) . ")";
             DB::statement($updateStockQuery);
 
-            $this->refreshCache();
             DB::commit();
+            $this->refreshCacheStock();
+            $this->refreshCacheTransactionDetail();
 
             // 6. Dispatch event ke frontend
             $this->dispatch('refreshProductStock');
@@ -246,8 +247,9 @@ class Order extends Component
             $updateStockQuery .= " END WHERE id IN (" . implode(',', array_keys($productUpdates)) . ")";
             DB::statement($updateStockQuery);
 
-            $this->refreshCache();
             DB::commit();
+            $this->refreshCacheStock();
+            $this->refreshCacheTransactionDetail();
 
             // 6. Dispatch event ke frontend
             $this->dispatch('refreshProductStock');
@@ -270,8 +272,25 @@ class Order extends Component
         $this->change = 0;
     }
 
-      // Refresh Cache saat update stok produk
-    protected function refreshCache()
+
+    public function refreshCacheTransactionDetail()
+    {
+        // Ambil daftar semua cache key transaksi
+        $cacheKeys = Cache::get('transaction_cache_keys', []);
+
+        // Hapus cache transaksi terkait
+        foreach ($cacheKeys as $cacheKey) {
+            Cache::forget($cacheKey);
+        }
+
+        // Hapus cache total transaksi jika diperlukan
+        Cache::forget('totalTransactions');
+
+        // Untuk lebih memastikan cache total transaksi diperbarui, kamu bisa melakukan reset cache lainnya jika diperlukan
+    }
+    
+    // Refresh Cache saat update stok produk
+    protected function refreshCacheStock()
     {
           $ttl = 31536000; // TTL cache selama 1 tahun
   
@@ -287,6 +306,11 @@ class Order extends Component
               ->take($this->limitProducts)
               ->get(), $ttl);
     }
+
+
+ 
+
+
 
     public function render()
     {
