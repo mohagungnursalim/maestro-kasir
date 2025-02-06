@@ -125,7 +125,7 @@
                                 </dl>
                                 <dl class="flex justify-between">
                                     <dt class="text-gray-500">PPN (11%)</dt>
-                                    <dd class="text-gray-900">Rp{{ number_format($tax, 0, ',', '.') }}</dd>
+                                    <dd class="text-red-500">Rp{{ number_format($tax, 0, ',', '.') }}</dd>
                                 </dl>
                                 <dl class="flex justify-between border-t pt-2">
                                     <dt class="font-bold text-gray-900">Total</dt>
