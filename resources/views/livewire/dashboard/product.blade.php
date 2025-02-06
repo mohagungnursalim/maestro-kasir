@@ -969,8 +969,6 @@
             timeout: null,
 
             updateSupplier(supplier) {
-                console.log('Supplier received in Alpine:', supplier);
-
                 this.selectedSupplierId = supplier.id ?? null;
                 this.search = supplier.name ?? '';
             },
