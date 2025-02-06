@@ -23,11 +23,9 @@ class Order extends Component
     public $change = 0;
 
     protected $listeners = [
-        'forceProcessOrder' => 'forceProcessOrder',
         'refreshProductStock' => 'searchProduct',
     ];
 
-    // Pencarian produk (Cache)
     public function searchProduct()
     {
         $ttl = 31536000;
@@ -40,11 +38,13 @@ class Order extends Component
                         ->orWhere('price', 'like', '%' . $this->search . '%')
                         ->orWhere('description', 'like', '%' . $this->search . '%');
                 })
-                ->latest()
-                ->take($this->limitProducts)
+                ->orderByDesc('sold_count') // 🔥 Urutkan berdasarkan produk terlaris
+                ->take($this->limitProducts) // Batas produk yang akan ditampilkan
                 ->get();
         });
     }
+
+
 
     // Tambahkan produk ke keranjang (Cache)
     public function addToCart($productId)
@@ -81,8 +81,6 @@ class Order extends Component
         }
     }
     
-    
-
 
     // Hapus produk dari keranjang
     public function removeFromCart($index)
@@ -188,95 +186,18 @@ class Order extends Component
 
             $this->calculateChange();
 
-            // 5. Kurangi stok dalam satu query
-            $updateStockQuery = "UPDATE products SET stock = CASE";
+            $updateQuery = "UPDATE products SET stock = CASE";
+            $updateSoldCount = ", sold_count = CASE"; // Gabungkan update stock & sold_count
+            
             foreach ($productUpdates as $productId => $quantity) {
-                $updateStockQuery .= " WHEN id = $productId THEN stock - $quantity";
+                $updateQuery .= " WHEN id = $productId THEN stock - $quantity";
+                $updateSoldCount .= " WHEN id = $productId THEN sold_count + $quantity"; 
             }
-            $updateStockQuery .= " END WHERE id IN (" . implode(',', array_keys($productUpdates)) . ")";
-            DB::statement($updateStockQuery);
+            $updateQuery .= " END" . $updateSoldCount . " END WHERE id IN (" . implode(',', array_keys($productUpdates)) . ")";
+            
+            DB::statement($updateQuery);
+            
 
-            DB::commit();
-            $this->refreshCacheStock();
-            $this->refreshCacheTransactionDetail();
-
-            // 6. Dispatch event ke frontend
-            $this->dispatch('refreshProductStock');
-            $this->dispatch('successPayment');
-        } catch (\Exception $e) {
-            DB::rollBack();
-            Log::error($e->getMessage());
-            $this->dispatch('errorPayment');
-        }
-    }
-
-    
-    public function forceProcessOrder()
-    {
-        if (empty($this->cart)) {
-            $this->dispatch('nullPaymentSelected');
-            return;
-        }
-
-        DB::beginTransaction();
-        try {
-            $productUpdates = [];
-            $insufficientProducts = [];
-
-             // 1. Ambil semua produk dalam satu query
-             $productIds = collect($this->cart)->pluck('id');
-             $products = Product::with('supplier')->whereIn('id', $productIds)->get()->keyBy('id');
- 
-             // 2. Periksa stok sebelum memproses order
-             foreach ($this->cart as $item) {
-                 if (!isset($products[$item['id']]) || $products[$item['id']]->stock < $item['quantity']) {
-                     $insufficientProducts[] = $products[$item['id']]->name ?? 'Produk Tidak Ditemukan';
-                 }
-             }
- 
-             if (!empty($insufficientProducts)) {
-                 DB::rollBack();
-                 $this->dispatch('insufficientStock', $insufficientProducts);
-                 return;
-             }
-             
-            // 1. Simpan data order (tanpa detail produk)
-            $order = ModelsOrder::create([
-                'tax' => $this->tax,
-                'discount' => 0,
-                'customer_money' => $this->customerMoney,
-                'change' => $this->change,
-                'grandtotal' => $this->total,
-            ]);
-
-            $transactionDetails = [];
-                foreach ($this->cart as $item) {
-                    $transactionDetails[] = [
-                        'order_id' => $order->id,
-                        'product_id' => $item['id'],
-                        'quantity' => $item['quantity'],
-                        'price' => $item['price'],
-                        'subtotal' => $item['subtotal'],
-                        'created_at' => now(),
-                        'updated_at' => now(),
-                    ];
-
-                    $productUpdates[$item['id']] = $item['quantity'];
-                }
-
-                // Gunakan batch insert
-                TransactionDetail::insert($transactionDetails);
-
-
-            $this->calculateChange();
-
-            // 5. Kurangi stok dalam satu query
-            $updateStockQuery = "UPDATE products SET stock = CASE";
-            foreach ($productUpdates as $productId => $quantity) {
-                $updateStockQuery .= " WHEN id = $productId THEN stock - $quantity";
-            }
-            $updateStockQuery .= " END WHERE id IN (" . implode(',', array_keys($productUpdates)) . ")";
-            DB::statement($updateStockQuery);
 
             DB::commit();
             $this->refreshCacheStock();
@@ -333,15 +254,10 @@ class Order extends Component
                         ->orWhere('price', 'like', '%' . $this->search . '%')
                         ->orWhere('description', 'like', '%' . $this->search . '%');
               })
-              ->latest()
+              ->orderByDesc('sold_count')
               ->take($this->limitProducts)
               ->get(), $ttl);
     }
-
-
- 
-
-
 
     public function render()
     {

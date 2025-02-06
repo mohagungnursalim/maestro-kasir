@@ -21,6 +21,7 @@ return new class extends Migration
             $table->longText('description');
             $table->integer('stock')->default(0);
             $table->string('unit');
+            $table->integer('sold_count')->default(0);
             $table->timestamp('created_at')->nullable();
             $table->timestamp('updated_at')->nullable();
         });
