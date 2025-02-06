@@ -19,33 +19,33 @@
                     </form>
                 </div>
 
-                <!-- Daftar Produk Hasil Pencarian -->
-                @if ($products)
-                <div class="mt-4">
-                    @foreach ($products as $product)
-                        <div class="flex items-center justify-between p-2 border-b">
-                            <img width="50px" src="{{ asset('storage/' . $product->image) }}" alt="">
-                            <span class="flex items-center">
-                                <a class="text-bold">{{ $product->name }}</a> - Rp{{ number_format($product->price, 0, ',', '.') }} | Stok: 
-                                <span class="bg-blue-100 text-dark text-xs font-medium me-2 px-2.5 py-0.5 rounded-full">
-                                    {{ $product->stock }}
-                                </span>
-                            </span>
-                            
-                            @php
-                                $isInCart = collect($cart)->contains('id', $product->id);
-                            @endphp
-                            <button {{ $isInCart ? 'disabled' : '' }} wire:loading.remove wire:target='addToCart({{ $product->id }})' wire:click="addToCart({{ $product->id }})" onclick="playSelectSound()"  class="px-2 py-1 {{ $isInCart ? 'bg-gray-200' : 'bg-gray-900' }} text-white rounded">Pilih</button>
-                            <button {{ $isInCart ? 'disabled' : '' }} wire:loading wire:target='addToCart({{ $product->id }})' class="px-2 py-1 bg-gray-900 opacity-50 text-white rounded">
-                                Pilih
-                                <svg class="inline w-4 h-4 text-white animate-spin ml-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 100 8v4a8 8 0 01-8-8z"></path>
-                                </svg>
-                            </button>
-                        </div>
-                    @endforeach
-                </div>
+               <!-- Daftar Produk Hasil Pencarian -->
+               @if ($products)
+               <div class="mt-4">
+                   @forelse ($products as $product)
+                       <div class="flex items-center justify-between p-2 border-b">
+                           <img width="50px" src="{{ asset('storage/' . $product->image ) }}" alt="">
+                           <span><a class="text-bold">{{ $product->name }}</a> - Rp{{ number_format($product->price, 0, ',', '.') }} | Stok: <span class=" @if($product->stock < 1) bg-red-100 text-red-800 @elseif($product->stock < 10) bg-blue-100 text-dark @else bg-green-100 text-green-800 @endif text-xs font-medium me-2 px-2.5 py-0.5 rounded-full"> {{ $product->stock }}</span></span>
+                           
+                           @php
+                               $isInCart = collect($cart)->contains('id', $product->id);
+                           @endphp
+                           <button {{ $isInCart ? 'disabled' : '' }} wire:loading.remove wire:target='addToCart({{ $product->id }})' wire:click="addToCart({{ $product->id }})" onclick="playSelectSound()"  class="px-2 py-1 {{ $isInCart ? 'bg-gray-200' : 'bg-gray-900' }} text-white rounded">Pilih</button>
+                           <button {{ $isInCart ? 'disabled' : '' }} wire:loading wire:target='addToCart({{ $product->id }})' class="px-2 py-1 bg-gray-900 opacity-50 text-white rounded">
+                               Pilih
+                               <svg class="inline w-4 h-4 text-white animate-spin ml-2" xmlns="http://www.w3.org/2000/svg"
+                                   fill="none" viewBox="0 0 24 24">
+                                   <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4">
+                                   </circle>
+                                   <path class="opacity-75" fill="currentColor"
+                                       d="M4 12a8 8 0 018-8v4a4 4 0 100 8v4a8 8 0 01-8-8z"></path>
+                               </svg>
+                           </button>
+                       </div>
+                   @empty
+                       <p class="text-center text-gray-400">Produk tidak ditemukan.</p>
+                   @endforelse
+               </div>
                 @endif
 
                 <!-- Keranjang Belanja -->
@@ -83,7 +83,7 @@
                                                 @endif
                                                 <input id="cart.{{ $index }}.quantity" name="cart.{{ $index }}.quantity"
                                                     type="number" min="1"
-                                                    wire:model.live.debounce.500ms="cart.{{ $index }}.quantity"
+                                                    wire:model.live.debounce.900ms="cart.{{ $index }}.quantity"
                                                     class="w-14 border-0 bg-transparent text-center text-sm font-medium text-gray-900 focus:outline-none focus:ring-0 dark:text-white">
 
 
