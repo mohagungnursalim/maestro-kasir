@@ -61,10 +61,6 @@ class Transaction extends Component
                 $data = TransactionDetail::with(['product','order']) // Pastikan relasi product di-load
                     ->where(function ($query) {
                         $query->where('order_id', 'like', '%' . $this->search . '%')
-                            ->orWhere('product_id', 'like', '%' . $this->search . '%')
-                            ->orWhere('quantity', 'like', '%' . $this->search . '%')
-                            ->orWhere('price', 'like', '%' . $this->search . '%')
-                            ->orWhere('subtotal', 'like', '%' . $this->search . '%')
                             ->orWhere('created_at', 'like', '%' . $this->search . '%');
                     })
                     ->latest()
