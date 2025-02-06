@@ -161,7 +161,7 @@ class Order extends Component
                         'product_id' => $item['id'],
                         'quantity' => $item['quantity'],
                         'price' => $item['price'],
-                        'subtotal' => $this->subtotal,
+                        'subtotal' => $item['subtotal'],
                         'created_at' => now(),
                         'updated_at' => now(),
                     ];

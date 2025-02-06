@@ -106,7 +106,8 @@
                                     @endfor
                             @endfor
 
-                                @else
+                            @else
+                            
                             @forelse ($transactions as $orderId => $orderTransactions)
                                 {{-- Tampilkan Order ID hanya sekali --}}
                                 <tr class="bg-gray-200 font-bold">
@@ -119,7 +120,10 @@
                                         <td class="px-6 py-4">{{ $transaction->product->name ?? '-' }}</td>
                                         <td class="px-6 py-4">{{ $transaction->quantity ?? '-' }}</td>
                                         <td class="px-6 py-4">{{ number_format($transaction->price, 0, ',', '.') ?? '-' }}</td>
-                                        <td class="px-6 py-4">{{ number_format($transaction->subtotal, 0, ',', '.') ?? '-' }}</td>
+                                        
+                                        {{-- Hitung subtotal dengan mengalikan quantity dengan price --}}
+                                        <td class="px-6 py-4">{{ number_format($transaction->quantity * $transaction->price, 0, ',', '.') ?? '-' }}</td>
+                                        
                                         <td class="px-6 py-4">{{ $transaction->created_at->format('d-m-Y H:i') ?? '-' }}</td>
                                     </tr>
                                 @endforeach
@@ -130,6 +134,7 @@
                                     </td>
                                 </tr>
                             @endforelse
+                            
                             
 
                             
