@@ -62,14 +62,27 @@ class Order extends Component
         }
     }
 
-    // Update quantity produk di keranjang
+    public function updatedCart($value, $key)
+    {
+        list($index, $field) = explode('.', $key);
+    
+        if ($field === 'quantity' && isset($this->cart[$index])) {
+            $this->updateQuantity($index, $value);
+        }
+    }
+    
     public function updateQuantity($index, $quantity)
     {
         if (isset($this->cart[$index])) {
-            $this->cart[$index]['quantity'] = max(1, $quantity);
+            $quantity = max(1, (int) $quantity); // Pastikan quantity minimal 1
+            $this->cart[$index]['quantity'] = $quantity;
+            $this->cart[$index]['subtotal'] = $quantity * $this->cart[$index]['price'];
             $this->calculateTotal();
         }
     }
+    
+    
+
 
     // Hapus produk dari keranjang
     public function removeFromCart($index)
@@ -208,7 +221,25 @@ class Order extends Component
         DB::beginTransaction();
         try {
             $productUpdates = [];
+            $insufficientProducts = [];
 
+             // 1. Ambil semua produk dalam satu query
+             $productIds = collect($this->cart)->pluck('id');
+             $products = Product::with('supplier')->whereIn('id', $productIds)->get()->keyBy('id');
+ 
+             // 2. Periksa stok sebelum memproses order
+             foreach ($this->cart as $item) {
+                 if (!isset($products[$item['id']]) || $products[$item['id']]->stock < $item['quantity']) {
+                     $insufficientProducts[] = $products[$item['id']]->name ?? 'Produk Tidak Ditemukan';
+                 }
+             }
+ 
+             if (!empty($insufficientProducts)) {
+                 DB::rollBack();
+                 $this->dispatch('insufficientStock', $insufficientProducts);
+                 return;
+             }
+             
             // 1. Simpan data order (tanpa detail produk)
             $order = ModelsOrder::create([
                 'tax' => $this->tax,
