@@ -315,26 +315,6 @@
         });
     });
 </script>
-
-<script>
-        let selectSound = new Audio("{{ asset('audio/click-sound.mp3') }}");
-
-        // Preload audio agar tidak delay saat pertama diputar
-        selectSound.preload = "auto";
-        
-
-        // Simpan fungsi ke dalam window agar bisa dipanggil dari HTML
-        window.playSelectSound = function () {
-            selectSound.currentTime = 0;
-            selectSound.play().catch(error => {
-                console.error("Gagal memutar audio:", error);
-            });
-        };
-</script>
-
-
-
-
     
 </div>
 
