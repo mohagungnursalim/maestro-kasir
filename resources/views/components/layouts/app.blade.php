@@ -15,28 +15,10 @@
         'resources/css/app.css', 
         'resources/js/app.js',
     ])
-        <style>
-            /* Styling untuk tema dark */
-            .dark-toast {
-                background-color: #333; /* Warna dasar gelap */
-                color: #fff; /* Warna teks */
-                border-radius: 8px; /* Sudut melengkung */
-                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Efek bayangan */
-            }
-        
-            .dark-toast-title {
-                font-size: 14px;
-                font-weight: bold;
-                color: #f5f5f5; /* Warna teks judul */
-            }
-        </style>
-
+    
     <script src="https://cdn.jsdelivr.net/npm/flowbite@2.5.2/dist/flowbite.min.js"></script>
     <link href="https://cdn.jsdelivr.net/npm/flowbite@2.5.2/dist/flowbite.min.css" rel="stylesheet" />
-    {{-- <script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js"></script> --}}
-    {{-- SweetAlert --}}
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <link href="https://cdn.jsdelivr.net/npm/@sweetalert2/theme-dark@4/dark.css" rel="stylesheet">
     @livewireScripts()
     @livewireStyles()
 </head>
