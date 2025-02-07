@@ -91,88 +91,87 @@
                             <tr>
                                 <th scope="col" class="px-6 py-3">ID Order</th>
                                 <th scope="col" class="px-6 py-3">Nama Produk</th>
-                                <th scope="col" class="px-6 py-3">Jumlah</th>
-                                <th scope="col" class="px-6 py-3">Harga</th>
-                                <th scope="col" class="px-6 py-3">Sub Total</th>
-                                <th scope="col" class="px-6 py-3">Tanggal/Jam</th>
-
+                                <th scope="col" class="px-6 py-3 text-center">Jumlah</th>
+                                <th scope="col" class="px-6 py-3 text-right">Harga</th>
+                                <th scope="col" class="px-6 py-3 text-right">Sub Total</th>
+                                <th scope="col" class="px-6 py-3 text-center">Tanggal/Jam</th>
+                                <th scope="col" class="px-6 py-3 text-right">Total</th>
                             </tr>
                         </thead>
                         <tbody>
                             @if (!$loaded)
-                            {{-- Tampilkan skeleton saat data belum dimuat --}}
-                            @for ($i = 0; $i < 8; $i++)
-                                    {{-- Skeleton untuk Order ID --}}
+                                {{-- Skeleton untuk data transaksi saat masih loading --}}
+                                @for ($i = 0; $i < 8; $i++) 
                                     <tr class="bg-gray-200 font-bold">
-                                        <td class="px-6 py-4" colspan="6">
+                                        <td class="px-6 py-4" colspan="5">
+                                            <div class="h-4 w-20 bg-gray-500 rounded animate-pulse"></div>
+                                        </td>
+                                        <td class="px-6 py-4"></td>
+                                        <td class="px-6 py-4 text-right">
                                             <div class="h-4 w-20 bg-gray-500 rounded animate-pulse"></div>
                                         </td>
                                     </tr>
-
-                                    {{-- Skeleton untuk transaksi --}}
-                                    @for ($j = 0; $j < 3; $j++) {{-- Anggap 3 transaksi per Order ID --}}
+                
+                                    @for ($j = 0; $j < 3; $j++) {{-- 3 transaksi per Order ID --}}
                                         <tr class="bg-white border-b hover:bg-gray-300 text-gray-900">
-                                            <td class="px-6 py-4"></td> {{-- Kosongkan kolom Order ID untuk data berikutnya --}}
+                                            <td class="px-6 py-4"></td>
                                             <td class="px-6 py-4">
                                                 <div class="h-4 bg-gray-300 rounded animate-pulse"></div>
                                             </td>
-                                            <td class="px-6 py-4">
+                                            <td class="px-6 py-4 text-center">
+                                                <div class="h-4 w-10 bg-gray-300 rounded animate-pulse"></div>
+                                            </td>
+                                            <td class="px-6 py-4 text-center">
                                                 <div class="h-4 bg-gray-300 rounded animate-pulse"></div>
                                             </td>
-                                            <td class="px-6 py-4">
+                                            <td class="px-6 py-4 text-center">
                                                 <div class="h-4 bg-gray-300 rounded animate-pulse"></div>
                                             </td>
-                                            <td class="px-6 py-4">
+                                            <td class="px-6 py-4 text-center">
                                                 <div class="h-4 bg-gray-300 rounded animate-pulse"></div>
                                             </td>
-                                            <td class="px-6 py-4">
-                                                <div class="h-4 bg-gray-300 rounded animate-pulse"></div>
-                                            </td>
+                                            <td class="px-6 py-4"></td>
                                         </tr>
                                     @endfor
-                            @endfor
-
+                                @endfor
                             @else
-                            
-                            @forelse ($transactions as $orderId => $orderTransactions)
-                                {{-- Tampilkan Order ID hanya sekali --}}
-                                <tr class="bg-gray-200 font-bold">
-                                    <td class="px-6 py-4" colspan="6">ID Order: {{ $orderId }}</td>
-                                </tr>
-                            
-                                @foreach ($orderTransactions as $transaction)
-                                    <tr class="bg-white border-b hover:bg-gray-300 text-gray-900">
-                                        <td class="px-6 py-4"></td> {{-- Kosongkan kolom Order ID untuk data berikutnya --}}
-                                        <td class="px-6 py-4">{{ $transaction->product->name ?? '-' }}</td>
-                                        <td class="px-6 py-4">{{ $transaction->quantity ?? '-' }}</td>
-                                        <td class="px-6 py-4">{{ number_format($transaction->price, 0, ',', '.') ?? '-' }}</td>
-                                        
-                                        {{-- Hitung subtotal dengan mengalikan quantity dengan price --}}
-                                        <td class="px-6 py-4">{{ number_format($transaction->quantity * $transaction->price, 0, ',', '.') ?? '-' }}</td>
-                                        
-                                        <td class="px-6 py-4">{{ $transaction->created_at->format('d-m-Y H:i') ?? '-' }}</td>
+                                @forelse ($transactions as $orderId => $orderTransactions)
+                                    @php
+                                        // Hitung total transaksi per Order ID
+                                        $orderTotal = collect($orderTransactions)->sum(fn($transaction) => $transaction->quantity * $transaction->price);
+                                    @endphp
+                
+                                    {{-- Tampilkan ID Order hanya sekali --}}
+                                    <tr class="bg-gray-200 font-bold">
+                                        <td class="px-6 py-4" colspan="5">ID Order: {{ $orderId }}</td>
+                                        <td class="px-6 py-4"></td>
+                                        <td class="px-6 py-4 text-right font-bold">Rp{{ number_format($orderTotal, 0, ',', '.') }}</td>
                                     </tr>
-                                @endforeach
-                            @empty
-                                <tr>
-                                    <td colspan="6" class="text-center align-middle h-20">
-                                        Tidak ada data ditemukan!
-                                    </td>
-                                </tr>
-                            @endforelse
-                            
-                            
-
-                            
-
-
-
+                
+                                    @foreach ($orderTransactions as $transaction)
+                                        <tr class="bg-white border-b hover:bg-gray-300 text-gray-900">
+                                            <td class="px-6 py-4"></td>
+                                            <td class="px-6 py-4">{{ $transaction->product->name ?? '-' }}</td>
+                                            <td class="px-6 py-4 text-center">{{ $transaction->quantity ?? '-' }}</td>
+                                            <td class="px-6 py-4 text-right">Rp{{ number_format($transaction->price, 0, ',', '.') ?? '-' }}</td>
+                                            <td class="px-6 py-4 text-right">Rp{{ number_format($transaction->quantity * $transaction->price, 0, ',', '.') ?? '-' }}</td>
+                                            <td class="px-6 py-4 text-center">{{ $transaction->created_at->format('d-m-Y H:i') ?? '-' }}</td>
+                                            <td class="px-6 py-4"></td>
+                                        </tr>
+                                    @endforeach
+                                @empty
+                                    <tr>
+                                        <td colspan="7" class="text-center align-middle h-20">
+                                            Tidak ada data ditemukan!
+                                        </td>
+                                    </tr>
+                                @endforelse
                             @endif
-                            </tbody>
-                            </table>
-
-
-            </div>
+                        </tbody>
+                    </table>
+                </div>
+                
+                
             {{-- Tombol Load More --}}
             {{-- @if($transactions->count() >= $limit && $totalTransactions > $limit) --}}
             @if(count($transactions->flatten()) >= $limit && $totalTransactions > $limit)
