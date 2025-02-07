@@ -3,12 +3,12 @@
    <div class="flex items-center">
     <div class="flex items-center mr-5 ms-7">
         <div>
-            {{-- Tombol Fullscreen --}}
-            <button type="button" id="fullscreenBtn" aria-de
-                class="flex mr-6 text-sm rounded-full focus:ring-4 focus:ring-gray-300"
-                aria-expanded="false" data-dropdown-toggle="dropdown-user">
-                <i class="bi bi-arrows-fullscreen"></i>
-            </button>
+            <!-- Tombol Fullscreen -->
+        <button type="button" id="fullscreenBtn"
+            class="hidden sm:flex mr-6 text-sm rounded-full focus:ring-4 focus:ring-gray-300">
+        <i class="bi bi-arrows-fullscreen"></i>
+        </button>
+
         </div>
         <div>
             <button type="button"
