@@ -14,5 +14,13 @@ document.addEventListener('livewire:navigated', () => {
             console.error("Gagal memutar audio:", error);
         });
     };
+
+    document.getElementById("fullscreenBtn").addEventListener("click", function () {
+        if (!document.fullscreenElement) {
+            document.documentElement.requestFullscreen();
+        } else {
+            document.exitFullscreen();
+        }
+    });
     
 });
