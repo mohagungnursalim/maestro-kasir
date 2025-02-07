@@ -259,6 +259,12 @@
  {{-- Sweet alert,payment error --}}
 <script>
     Livewire.on('errorPayment', (event) => {
+
+         // Buat elemen audio
+         let audio = new Audio("{{ asset('audio/error-sound.mp3') }}"); 
+
+         // Putar audio
+         audio.play().catch(error => console.error("Gagal memutar audio:", error)); 
              const Toast = Swal.mixin({
                  toast: true,
                  position: "top-end",
@@ -291,14 +297,8 @@
             title: "Pembayaran Kurang!",
             text: `Uang pelanggan kurang Rp${shortage.toLocaleString('id-ID')}.Tetap lanjutkan?`,
             icon: "warning",
-            showCancelButton: true,
-            confirmButtonColor: "#3085d6",
-            cancelButtonColor: "#d33",
-            confirmButtonText: "Oke",
-        }).then((result) => {
-            if (result.isConfirmed) {
-                Livewire.dispatch('forceProcessOrder'); // Memanggil method Livewire
-            }
+           confirmButtonText: "Oke!",
+           confirmButtonColor: "#3085d6"
         });
     });
 </script>
@@ -316,7 +316,8 @@
             title: "Stok Tidak Cukup!",
             text: "Stok tidak cukup untuk produk berikut:\n\n" + insufficientProducts.join("\n"),
             icon: "warning",
-            confirmButtonText: "OK"
+            confirmButtonText: "Oke!",
+            confirmButtonColor: "#3085d6"
         });
     });
 </script>
