@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use App\Models\StoreSetting;
+use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -19,6 +21,9 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        $settings = StoreSetting::first(); // Ambil pengaturan aplikasi pertama
+
+        // Share pengaturan ke seluruh tampilan
+        View::share('settings', $settings);
     }
 }

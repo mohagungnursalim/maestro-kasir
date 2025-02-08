@@ -39,8 +39,6 @@ aria-label="Sidebar">
                 <span class="flex-1 ms-3 whitespace-nowrap">Rekap Transaksi</span>
             </a>
         </li>
-        
-        
 
         <li>
             <button 
@@ -84,6 +82,16 @@ aria-label="Sidebar">
             </ul>
         </li>
         
+        <li>
+            <a 
+                class="flex items-center p-2 rounded-lg {{ Request::is('dashboard/store-settings') ? 'bg-purple-300 text-dark' : 'hover:bg-gray-200' }}"
+                @if (!Request::is('dashboard/store-settings'))
+                    wire:navigate href="/dashboard/store-settings"
+                @endif>
+                <i class="bi bi-shop"></i>
+                <span class="flex-1 ms-3 whitespace-nowrap">Pengaturan Toko</span>
+            </a>
+        </li>
         
 
 

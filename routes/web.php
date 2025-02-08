@@ -1,12 +1,14 @@
 <?php
 
 use App\Http\Controllers\SupplierController;
+use App\Livewire\Dashboard\Settings;
 use App\Livewire\Dashboard\Product;
 use Illuminate\Support\Facades\Auth;
 use App\Livewire\Dashboard\Dashboard;
 use App\Livewire\Dashboard\Order;
 use App\Livewire\Dashboard\Supplier;
 use App\Livewire\Dashboard\Transaction;
+
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -33,7 +35,12 @@ Route::get('/dashboard/suppliers', Supplier::class)
     ->name('suppliers');
 
 
-Route::get('/api/suppliers', [SupplierController::class, 'index'])->name('api.suppliers');
+Route::get('/dashboard/store-settings', Settings::class)
+    ->middleware(['auth'])
+    ->name('settings');
+
+Route::get('/api/suppliers', [SupplierController::class, 'index'])->name('api.suppliers')
+    ->middleware(['auth']);
 
     
 

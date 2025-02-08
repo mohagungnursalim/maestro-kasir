@@ -224,7 +224,7 @@
  
      });
  
- </script>
+</script>
 
  {{-- Sweet alert,payment null --}}
 <script>
@@ -295,7 +295,7 @@
 
         Swal.fire({
             title: "Pembayaran Kurang!",
-            text: `Uang pelanggan kurang Rp${shortage.toLocaleString('id-ID')}.Tetap lanjutkan?`,
+            text: `Uang pelanggan kurang Rp${shortage.toLocaleString('id-ID')}!`,
             icon: "warning",
            confirmButtonText: "Oke!",
            confirmButtonColor: "#3085d6"
