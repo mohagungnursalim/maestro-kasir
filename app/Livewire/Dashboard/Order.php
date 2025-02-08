@@ -81,7 +81,6 @@ class Order extends Component
         }
     }
     
-
     // Hapus produk dari keranjang
     public function removeFromCart($index)
     {

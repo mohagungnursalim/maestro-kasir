@@ -59,13 +59,15 @@
                                         <div class="flex-1">
                                             <span class="text-base font-medium text-gray-900 dark:text-white">{{ $item['name'] }}</span>
                                             <div class="flex items-center gap-4 mt-2">
-                                                <button wire:loading.remove wire:target='removeFromCart({{ $index }})' wire:click="removeFromCart({{ $index }})" onclick="playSelectSound()" type="button" class="text-sm text-red-600 hover:underline dark:text-red-500">Hapus</button>
-                                                <button wire:loading wire:target='removeFromCart({{ $index }})' type="button" class="text-sm text-red-600 hover:underline dark:text-red-500">
+                                                <button wire:loading.remove wire:target='removeFromCart({{ $index }})' 
+                                                    wire:click="removeFromCart({{ $index }})" onclick="playSelectSound()" 
+                                                    type="button" class="text-sm text-red-600 hover:underline dark:text-red-500">Hapus</button>
+                                                <button wire:loading wire:target='removeFromCart({{ $index }})' 
+                                                    type="button" class="text-sm text-red-600 hover:underline dark:text-red-500">
                                                     Hapus
                                                     <svg class="inline w-4 h-4 text-gray-900 animate-spin ml-2" xmlns="http://www.w3.org/2000/svg"
                                                         fill="none" viewBox="0 0 24 24">
-                                                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4">
-                                                        </circle>
+                                                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                                                         <path class="opacity-75" fill="currentColor"
                                                             d="M4 12a8 8 0 018-8v4a4 4 0 100 8v4a8 8 0 01-8-8z"></path>
                                                     </svg>
@@ -73,28 +75,58 @@
                                             </div>
                                         </div>
                                         <div class="flex items-center justify-between md:order-3 md:justify-end">
-                                            <div class="flex items-center">
-                                                @if ($item['quantity'] > 1)
-                                                    <button wire:click="updateQuantity({{ $index }}, {{ $item['quantity'] - 1 }})" onclick="playSelectSound()" type="button" class="inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-md border border-gray-300 bg-gray-100 hover:bg-gray-200 focus:outline-none focus:ring-0 dark:border-gray-600 dark:bg-gray-700 dark:hover:bg-gray-600 dark:focus:ring-gray-700">
-                                                        <svg class="h-2.5 w-2.5 text-gray-900 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 18 18">
-                                                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M1 9h16"></path>
-                                                        </svg>
-                                                    </button>
-                                                @endif
+                                            
+                                            <div x-data="{ quantity: {{ $item['quantity'] }} }" class="flex items-center">
+                                                <!-- Tombol Kurangi (-) dengan delay 600ms -->
+                                            <button type="button" 
+                                                x-on:click="
+                                                    if (quantity > 1) { 
+                                                        quantity--; 
+                                                        clearTimeout(window.qtyTimeout);
+                                                        window.qtyTimeout = setTimeout(() => { 
+                                                            $wire.updateQuantity({{ $index }}, quantity); 
+                                                        }, 600);
+                                                    }"
+                                                onclick="playSelectSound()"
+                                                class="inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-md border border-gray-300 bg-gray-100 hover:bg-gray-200 focus:outline-none">
+                                                <svg class="h-2.5 w-2.5 text-gray-900 dark:text-white" aria-hidden="true" 
+                                                    xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 18 18">
+                                                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M1 9h16"></path>
+                                                </svg>
+                                            </button>
+
+                    
+                                                <!-- Input Jumlah -->
                                                 <input id="cart.{{ $index }}.quantity" name="cart.{{ $index }}.quantity"
                                                     type="number" min="1"
-                                                    wire:model.live.debounce.900ms="cart.{{ $index }}.quantity"
-                                                    class="w-14 border-0 bg-transparent text-center text-sm font-medium text-gray-900 focus:outline-none focus:ring-0 dark:text-white">
+                                                    x-model="quantity"
+                                                    x-on:input.debounce.600ms="$wire.updateQuantity({{ $index }}, quantity)"
+                                                    class="w-14 border-0 bg-transparent text-center text-sm font-medium text-gray-900 focus:outline-none">
+                                                
+                                                <!-- Tombol Tambah (+) dengan delay 600ms -->
+                                            <button type="button" 
+                                                        x-on:click="
+                                                            quantity++;
+                                                            clearTimeout(window.qtyTimeout);
+                                                            window.qtyTimeout = setTimeout(() => { 
+                                                                $wire.updateQuantity({{ $index }}, quantity); 
+                                                            }, 600);
+                                                        "
+                                                        onclick="playSelectSound()"
+                                                        class="inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-md border border-gray-300 bg-gray-100 hover:bg-gray-200 focus:outline-none">
+                                                        <svg class="h-2.5 w-2.5 text-gray-900 dark:text-white" aria-hidden="true" 
+                                                            xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 18 18">
+                                                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                                                d="M9 1v16M1 9h16"></path>
+                                                        </svg>
+                                            </button>
 
-
-                                                <button wire:click="updateQuantity({{ $index }}, {{ $item['quantity'] + 1 }})" onclick="playSelectSound()" type="button" class="inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-md border border-gray-300 bg-gray-100 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-100 dark:border-gray-600 dark:bg-gray-700 dark:hover:bg-gray-600 dark:focus:ring-gray-700">
-                                                    <svg class="h-2.5 w-2.5 text-gray-900 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 18 18">
-                                                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 1v16M1 9h16"></path>
-                                                    </svg>
-                                                </button>
                                             </div>
+                    
                                             <div class="text-end md:order-4 md:w-32">
-                                                <p class="text-base font-bold text-gray-900 dark:text-white">Rp{{ number_format($item['price'] * $item['quantity'], 0, ',', '.') }}</p>
+                                                <p class="text-base font-bold text-gray-900 dark:text-white">
+                                                    Rp{{ number_format($item['price'] * $item['quantity'], 0, ',', '.') }}
+                                                </p>
                                             </div>
                                         </div>
                                     </div>
@@ -102,6 +134,7 @@
                             @endforeach
                         </div>
                     </div>
+                    
 
                    <!-- Total dan Pembayaran -->
                     <div class="w-full lg:w-1/3 mt-6 lg:mt-0">
