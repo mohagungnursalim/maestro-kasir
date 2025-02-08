@@ -77,7 +77,7 @@
                                         <div class="flex items-center justify-between md:order-3 md:justify-end">
                                             
                                             <div x-data="{ quantity: {{ $item['quantity'] }} }" class="flex items-center">
-                                                <!-- Tombol Kurangi (-) dengan delay 600ms -->
+                                                <!-- Tombol Kurangi (-) dengan delay 500ms -->
                                             <button type="button" 
                                                 x-on:click="
                                                     if (quantity > 1) { 
@@ -85,7 +85,7 @@
                                                         clearTimeout(window.qtyTimeout);
                                                         window.qtyTimeout = setTimeout(() => { 
                                                             $wire.updateQuantity({{ $index }}, quantity); 
-                                                        }, 600);
+                                                        }, 500);
                                                     }"
                                                 onclick="playSelectSound()"
                                                 class="inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-md border border-gray-300 bg-gray-100 hover:bg-gray-200 focus:outline-none">
@@ -100,17 +100,17 @@
                                                 <input id="cart.{{ $index }}.quantity" name="cart.{{ $index }}.quantity"
                                                     type="number" min="1"
                                                     x-model="quantity"
-                                                    x-on:input.debounce.600ms="$wire.updateQuantity({{ $index }}, quantity)"
+                                                    x-on:input.debounce.500ms="$wire.updateQuantity({{ $index }}, quantity)"
                                                     class="w-14 border-0 bg-transparent text-center text-sm font-medium text-gray-900 focus:outline-none">
                                                 
-                                                <!-- Tombol Tambah (+) dengan delay 600ms -->
+                                                <!-- Tombol Tambah (+) dengan delay 500ms -->
                                             <button type="button" 
                                                         x-on:click="
                                                             quantity++;
                                                             clearTimeout(window.qtyTimeout);
                                                             window.qtyTimeout = setTimeout(() => { 
                                                                 $wire.updateQuantity({{ $index }}, quantity); 
-                                                            }, 600);
+                                                            }, 500);
                                                         "
                                                         onclick="playSelectSound()"
                                                         class="inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-md border border-gray-300 bg-gray-100 hover:bg-gray-200 focus:outline-none">

@@ -88,6 +88,8 @@ class Order extends Component
             unset($this->cart[$index]);
             $this->cart = array_values($this->cart);
             $this->calculateTotal();
+            $this->customerMoney = 0;
+            $this->change = 0;
         }
     }
 
