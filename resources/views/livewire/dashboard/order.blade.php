@@ -87,7 +87,6 @@
                                                             $wire.updateQuantity({{ $index }}, quantity); 
                                                         }, 500);
                                                     }"
-                                                onclick="playSelectSound()"
                                                 class="inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-md border border-gray-300 bg-gray-100 hover:bg-gray-200 focus:outline-none">
                                                 <svg class="h-2.5 w-2.5 text-gray-900 dark:text-white" aria-hidden="true" 
                                                     xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 18 18">
@@ -112,7 +111,6 @@
                                                                 $wire.updateQuantity({{ $index }}, quantity); 
                                                             }, 500);
                                                         "
-                                                        onclick="playSelectSound()"
                                                         class="inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-md border border-gray-300 bg-gray-100 hover:bg-gray-200 focus:outline-none">
                                                         <svg class="h-2.5 w-2.5 text-gray-900 dark:text-white" aria-hidden="true" 
                                                             xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 18 18">
