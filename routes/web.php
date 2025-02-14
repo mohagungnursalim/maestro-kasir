@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\OrderController;
 use App\Http\Controllers\SupplierController;
 use App\Livewire\Dashboard\Settings;
 use App\Livewire\Dashboard\Product;
@@ -21,6 +22,10 @@ Route::get('/dashboard', Dashboard::class)
 Route::get('/dashboard/orders', Order::class)
     ->middleware(['auth'])
     ->name('orders');
+
+Route::get('/dashboard/order-receipt/{orderId}', [OrderController::class, 'receipt'])
+    ->middleware(['auth'])
+    ->name('order.receipt');
 
 Route::get('/dashboard/transactions' , Transaction::class)
     ->middleware(['auth'])

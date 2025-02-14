@@ -221,6 +221,19 @@
             </div>
         </section>
     </div>
+    <script>
+        Livewire.on('printReceipt', orderId => {
+            let receiptUrl = `/dashboard/order-receipt/${orderId}`;
+            let printWindow = window.open(receiptUrl, '_blank', 'width=640,height=600');
+    
+            if (printWindow) {
+                printWindow.focus();
+            } else {
+                alert("Popup blocked! Please allow popups for this site.");
+            }
+        });
+    </script>
+    
 </div>
 </div>
 

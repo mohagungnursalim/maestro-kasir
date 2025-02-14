@@ -157,6 +157,8 @@ class Order extends Component
                 return;
             }
 
+            $this->calculateChange();
+
             // 3. Simpan data order (tanpa detail produk)
             $order = ModelsOrder::create([
                 'tax' => $this->tax,
@@ -185,7 +187,6 @@ class Order extends Component
                 TransactionDetail::insert($transactionDetails);
 
 
-            $this->calculateChange();
 
             $updateQuery = "UPDATE products SET stock = CASE";
             $updateSoldCount = ", sold_count = CASE"; // Gabungkan update stock & sold_count
@@ -207,6 +208,9 @@ class Order extends Component
             // 6. Dispatch event ke frontend
             $this->dispatch('refreshProductStock');
             $this->dispatch('successPayment');
+
+            $this->dispatch('printReceipt', $order->id);
+
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error($e->getMessage());

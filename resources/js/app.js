@@ -3,6 +3,16 @@ import './bootstrap';
 document.addEventListener('livewire:navigated', () => {
     window.initFlowbite();
 
+    document.getElementById('fullscreenBtn').addEventListener('click', function () {
+        if (!document.fullscreenElement) {
+            document.documentElement.requestFullscreen().catch(err => {
+                alert(`Error attempting to enable full-screen mode: ${err.message}`);
+            });
+        } else {
+            document.exitFullscreen();
+        }
+    });
+    
     // Pastikan hanya menginisialisasi audio sekali
     if (!window.selectSound) {
         window.selectSound = new Audio("/audio/click-sound.mp3");

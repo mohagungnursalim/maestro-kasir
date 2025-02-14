@@ -3,7 +3,7 @@
    <div class="flex items-center">
     <div class="flex items-center mr-5 ms-7">
         <div>
-            <!-- Tombol Fullscreen -->
+        <!-- Tombol Fullscreen -->
         <button type="button" id="fullscreenBtn"
             class="hidden sm:flex mr-6 text-sm rounded-full focus:ring-4 focus:ring-gray-300">
         <i class="bi bi-arrows-fullscreen"></i>
