@@ -5,13 +5,14 @@ namespace App\Livewire\Dashboard;
 use App\Models\StoreSetting;
 use Livewire\Component;
 use Livewire\WithFileUploads;
-use App\Models\StoreSetting as ModelsStoreSetting;
 
 class Settings extends Component
 {
     use WithFileUploads;
 
     public $store_name;
+    public $store_address;
+    public $store_phone;
     public $store_logo;
     public $store_footer;
     public $new_logo;
@@ -19,33 +20,42 @@ class Settings extends Component
     public function mount()
     {
         $settings = StoreSetting::first();
-        $this->store_name = $settings->store_name;
-        $this->store_logo = $settings->store_logo;
-        $this->store_footer = $settings->store_footer;
+
+        $this->store_name = $settings->store_name ?? 'Default Name';
+        $this->store_address = $settings->store_address ?? 'Default Address';
+        $this->store_phone = $settings->store_phone ?? '085756000000';
+        $this->store_logo = $settings->store_logo ?? 'Default Logo';
+        $this->store_footer = $settings->store_footer ?? 'Default Footer';
     }
 
     public function updateSettings()
     {
         $this->validate([
-            'store_name' => 'required|string|max:255',
-            'store_footer' => 'required|string|max:255',
+            'store_name' => 'nullable|string|max:80',
+            'store_address' => 'nullable|string|max:100',
+            'store_phone' => 'nullable|digits_between:10,14',
+            'store_footer' => 'nullable|string|max:100',
             'new_logo' => 'nullable|image|max:2048',
         ]);
 
-        $settings = StoreSetting::first();
+        $settings = StoreSetting::firstOrNew([]);
 
+        // Handle logo upload
         if ($this->new_logo) {
             $imagePath = $this->new_logo->store('logos', 'public');
 
-            if ($settings->store_logo && file_exists(public_path('storage/' . $settings->store_logo))) {
-                unlink(public_path('storage/' . $settings->store_logo));
+            if (!empty($settings->store_logo) && file_exists(public_path('storage/' . $settings->store_logo))) {
+                @unlink(public_path('storage/' . $settings->store_logo));
             }
 
-            $settings->store_logo = "/storage/{$imagePath}";
+            $settings->store_logo = "storage/{$imagePath}";
         }
 
-        $settings->store_name = $this->store_name;
-        $settings->store_footer = $this->store_footer;
+        // Update store settings
+        $settings->store_name = $this->store_name ?? 'Default Name';
+        $settings->store_address = $this->store_address ?? 'Default Address';
+        $settings->store_phone = $this->store_phone ?? '085756000000';
+        $settings->store_footer = $this->store_footer ?? 'Default Footer';
         $settings->save();
 
         $this->dispatch('successUpdate');
