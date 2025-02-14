@@ -3,11 +3,24 @@ import './bootstrap';
 document.addEventListener('livewire:navigated', () => {
     window.initFlowbite();
 
+    // Pastikan hanya menginisialisasi audio sekali
     if (!window.selectSound) {
         window.selectSound = new Audio("/audio/click-sound.mp3");
         window.selectSound.preload = "auto";
     }
-    
+
+    if (!window.successSound) {
+        window.successSound = new Audio("/audio/success-sound.mp3");
+        window.successSound.volume = 1.0;
+        window.successSound.preload = "auto";
+    }
+
+    if (!window.errorSound) {
+        window.errorSound = new Audio("/audio/error-sound.mp3");
+        window.errorSound.volume = 1.0;
+        window.errorSound.preload = "auto";
+    }
+
     window.playSelectSound = function () {
         window.selectSound.currentTime = 0;
         window.selectSound.play().catch(error => {
@@ -15,89 +28,71 @@ document.addEventListener('livewire:navigated', () => {
         });
     };
 
-    document.getElementById("fullscreenBtn").addEventListener("click", function () {
-        if (!document.fullscreenElement) {
-            document.documentElement.requestFullscreen();
-        } else {
-            document.exitFullscreen();
-        }
-    });
+    window.playSuccessSound = function () {
+        window.successSound.currentTime = 0;
+        window.successSound.play().catch(error => {
+            console.error("Gagal memutar audio:", error);
+        });
+    };
 
-    Livewire.on('successPayment', (event) => {
-        playSuccessSound();
-       const Toast = Swal.mixin({
+    window.playErrorSound = function () {
+        window.errorSound.currentTime = 0;
+        window.errorSound.play().catch(error => {
+            console.error("Gagal memutar audio:", error);
+        });
+    };
+
+    // Hindari duplikasi event listener dengan mengecek apakah sudah terdaftar
+    if (!window.livewireEventRegistered) {
+        window.livewireEventRegistered = true;
+
+        Livewire.on('successPayment', () => {
+            playSuccessSound();
+            Swal.fire({
                 toast: true,
                 position: "top-end",
-                showConfirmButton: false,
-                timer: 10000,
-                timerProgressBar: true,
-                didOpen: (toast) => {
-                    toast.onmouseenter = Swal.stopTimer;
-                    toast.onmouseleave = Swal.resumeTimer;
-                }
-            });
-            Toast.fire({
                 icon: "success",
-                title: "Pembayaran berhasil 🙌!"
-            });
-
-    });
-
-    function playSuccessSound() {
-        let audio = new Audio("/audio/success-sound.mp3"); // Buat objek audio baru setiap kali diputar
-        audio.volume = 1.0; // Atur volume penuh
-        audio.play().catch(error => console.error("Gagal memutar audio:", error)); // Tangkap error jika ada
-    }
-
-    Livewire.on('errorPayment', (event) => {
-        playErrorSound(); // Panggil fungsi pemutaran audio 
-            const Toast = Swal.mixin({
-                toast: true,
-                position: "top-end",
+                title: "Pembayaran berhasil 🙌!",
                 showConfirmButton: false,
                 timer: 10000,
-                timerProgressBar: true,
-                didOpen: (toast) => {
-                    toast.onmouseenter = Swal.stopTimer;
-                    toast.onmouseleave = Swal.resumeTimer;
-                }
+                timerProgressBar: true
             });
-            Toast.fire({
+        });
+
+        Livewire.on('errorPayment', () => {
+            playErrorSound();
+            Swal.fire({
+                toast: true,
+                position: "top-end",
                 icon: "error",
-                title: "Pembayaran gagal 🥲!"
+                title: "Pembayaran gagal 🥲!",
+                showConfirmButton: false,
+                timer: 10000,
+                timerProgressBar: true
             });
-
-    });
-
-    Livewire.on('insufficientPayment', (shortage) => {
-        playErrorSound(); // Panggil fungsi pemutaran audio
-
-        Swal.fire({
-            title: "Pembayaran Kurang!",
-            text: `Uang pelanggan kurang Rp${shortage.toLocaleString('id-ID')}!`,
-            icon: "warning",
-            confirmButtonText: "Oke!",
-            confirmButtonColor: "#3085d6"
         });
-    });
 
-    Livewire.on('insufficientStock', (insufficientProducts) => {
-        if (!Array.isArray(insufficientProducts) || insufficientProducts.length === 0) return;
-
-        playErrorSound(); // Panggil fungsi pemutaran audio
-
-        Swal.fire({
-            title: "Stok Tidak Cukup!",
-            text: "Stok tidak cukup untuk produk berikut:\n\n" + insufficientProducts.join("\n"),
-            icon: "warning",
-            confirmButtonText: "Oke!",
-            confirmButtonColor: "#3085d6"
+        Livewire.on('insufficientPayment', (shortage) => {
+            playErrorSound();
+            Swal.fire({
+                title: "Pembayaran Kurang!",
+                text: `Uang pelanggan kurang Rp${shortage.toLocaleString('id-ID')}!`,
+                icon: "warning",
+                confirmButtonText: "Oke!",
+                confirmButtonColor: "#3085d6"
+            });
         });
-    });
 
-    function playErrorSound() {
-        let audio = new Audio("/audio/error-sound.mp3"); // Buat objek audio baru setiap kali diputar
-        audio.volume = 1.0; // Atur volume penuh
-        audio.play().catch(error => console.error("Gagal memutar audio:", error)); // Tangkap error jika ada
+        Livewire.on('insufficientStock', (insufficientProducts) => {
+            if (!Array.isArray(insufficientProducts) || insufficientProducts.length === 0) return;
+            playErrorSound();
+            Swal.fire({
+                title: "Stok Tidak Cukup!",
+                text: "Stok tidak cukup untuk produk berikut:\n\n" + insufficientProducts.join("\n"),
+                icon: "warning",
+                confirmButtonText: "Oke!",
+                confirmButtonColor: "#3085d6"
+            });
+        });
     }
 });
