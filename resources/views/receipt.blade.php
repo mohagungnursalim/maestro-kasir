@@ -27,6 +27,11 @@
             border-top: 1px dashed black;
             margin: 5px 0;
         }
+        .receipt img {
+        max-height: 50px; /* Logo lebih kecil */
+        display: block;
+        margin: 0 auto 5px;
+        }
         table {
             width: 100%;
             font-size: 12px;
@@ -60,9 +65,16 @@
     </script>
 
     <div class="receipt">
-        <h2>{{ $settings->store_name ?? 'Nama Toko Default' }}</h2>
-        <p>{{ $settings->store_address ?? 'Alamat Tidak Ditemukan' }}</p>
-        <p>Tanggal: {{ now()->format('d-m-Y H:i') }}</p>
+        @if ($settings->store_logo)
+            <img src="{{ asset($settings->store_logo) }}" 
+                alt="{{ $settings->store_name }}" 
+                class="h-16 mx-auto mb-2">
+        @endif
+        
+        <h2 class="text-center">{{ $settings->store_name }}</h2>
+        <p class="text-center">{{ $settings->store_address }}</p>
+        <p class="text-center">Telp: {{ $settings->store_phone }}</p>
+        <p class="text-center">Tanggal: {{ now()->format('d-m-Y H:i') }}</p>
         <div class="line"></div>
 
         <table>
@@ -103,7 +115,7 @@
         </table>
 
         <div class="line"></div>
-        <p>Terima kasih telah berbelanja!</p>
+        <p>{{ $settings->store_footer }}</p>
     </div>
 </body>
 
