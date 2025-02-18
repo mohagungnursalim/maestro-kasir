@@ -1,6 +1,27 @@
 <div> 
    
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">     
+            @if (session('success'))
+                <div 
+                    x-data="{ show: true }" 
+                    x-init="setTimeout(() => show = false, 1500)" 
+                    x-show="show"
+                    x-transition.duration.500ms
+                    class="flex items-center p-4 mb-4 text-sm text-green-800 border border-green-300 rounded-lg bg-green-50 dark:bg-gray-800 dark:text-green-400 dark:border-green-800"
+                    role="alert"
+                >
+                    <svg class="shrink-0 inline w-4 h-4 me-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5ZM9.5 4a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3ZM12 15H8a1 1 0 0 1 0-2h1v-3H8a1 1 0 0 1 0-2h2a1 1 0 1 1 1 1v4h1a1 1 0 1 1 0 2Z"/>
+                    </svg>
+                    <span class="sr-only">Info</span>
+                    <div>
+                    <span class="font-medium">{{ session('success') }}</span>
+                    </div>
+                </div>
+            @endif
+            
+            
+            
             <form wire:submit.prevent="updateSettings" class="space-y-4">
                 <!-- Nama Toko -->
                 <div>
@@ -29,7 +50,7 @@
                 @endif
             
                 <!-- Upload Logo -->
-                <div class="sm:col-span-2" x-data="imageUploader()" x-init="init()">
+                <div class="sm:col-span-2" x-data="imageUploader()">
                     <label class="block mb-2 text-sm font-medium text-gray-900" for="new_logo">Unggah Logo</label>
                     <input wire:model="new_logo"
                         type="file"
@@ -104,17 +125,8 @@
             
         </div>
 
-<script>
-        Livewire.on('successUpdate', () => {
-            Swal.fire({
-                title: "Success",
-                text: "Data berhasil diperbarui!",
-                icon: "success",
-                confirmButtonText: "Oke!",
-                confirmButtonColor: "#3085d6" // Warna biru dalam format hex
-            });
-        });
-</script>
+
+
     
 {{-- Alpine FileUpload Form Update --}}
 <script>
@@ -179,38 +191,6 @@
                 }, 200);
             },
 
-            resetPreview() {
-                this.imagePreview = null;
-                this.fileName = '';
-                this.fileSize = '';
-                this.error = null;
-                this.uploading = false;
-                this.progress = 0;
-                
-                // Also reset the file input
-                const fileInput = document.getElementById('image');
-                if (fileInput) {
-                    fileInput.value = '';
-                }
-            },
-
-
-            init() {
-                // Jika ada gambar yang sudah ada (misalnya saat edit), tampilkan gambar tersebut
-                if (this.existingImage) {
-                    this.hasImage = true;
-                }
-
-                 // Listener untuk event addedSuccess dari Livewire
-                 Livewire.on('addedSuccess', () => {
-                    this.resetPreview(); // Panggil untuk clear preview
-                   
-                });
-                // Listener untuk event updatedSuccess dari Livewire
-                Livewire.on('updatedSuccess', () => {
-                    this.resetPreview(); // Panggil untuk clear preview
-                });
-            },
         };
     }
 </script>
