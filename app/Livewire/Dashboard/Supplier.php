@@ -80,8 +80,7 @@ class Supplier extends Component
 
     public function loadMore()
     {
-        $this->limit += 8; // Perbaikan
-        Log::info("Load More Clicked: Limit is now " . $this->limit);
+        $this->limit += 8;
         $this->loadInitialSuppliers();
     }
     
