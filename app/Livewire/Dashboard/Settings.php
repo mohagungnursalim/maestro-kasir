@@ -58,7 +58,7 @@ class Settings extends Component
         $settings->store_footer = $this->store_footer ?? 'Default Footer';
         $settings->save();
 
-        $this->dispatch('successUpdate');
+        session()->flash('success', 'Pengaturan berhasil diperbarui!');
         return $this->redirect('/dashboard/store-settings', navigate: true);
     }
 

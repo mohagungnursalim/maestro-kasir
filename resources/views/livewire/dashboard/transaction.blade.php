@@ -66,7 +66,7 @@
                         </div>
 
                          <!-- Tombol Refresh Page -->
-                        <a wire:navigate href="/dashboard/transactions" onclick="showLoading()"
+                        <a href="{{ route('transactions') }}" onclick="showLoading()"
                             class="px-4 py-2 text-white bg-blue-600 rounded-lg hover:bg-blue-700 focus:ring-2 focus:ring-blue-500">
                             Refresh
                             <svg id="loading-progress" role="status"

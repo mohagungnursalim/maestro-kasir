@@ -31,20 +31,21 @@
                 <div class="mt-4">
                     @forelse ($products as $product)
                     @php
-                        $isInCart = collect($cart)->contains('id', $product->id);
+                    $isInCart = collect($cart)->contains('id', $product->id);
                     @endphp
-                    <div wire:click="addToCart({{ $product->id }})" onclick="event.stopPropagation(); playSelectSound()"
-                        class="flex items-center justify-between p-2 border-b cursor-pointer hover:bg-gray-100 transition">
+                    <div @if (!$isInCart) wire:click="addToCart({{ $product->id }})" onclick="playSelectSound()" @endif
+                        class="flex items-center justify-between p-2 border-b transition 
+                                    {{ $isInCart ? 'opacity-50' : 'cursor-pointer hover:bg-gray-100' }}">
                         <img width="50px" src="{{ asset('storage/' . $product->image ) }}" alt="">
                         <span class="{{ $isInCart ? 'text-gray-400' : '' }}">
                             <a class="font-bold">{{ $product->name }}</a> -
                             Rp{{ number_format($product->price, 0, ',', '.') }}
                             | Stok:
                             <span class="@if($product->stock < 1) bg-red-100 text-red-800 
-                                   @elseif($product->stock < 10) bg-blue-100 text-dark 
-                                   @else bg-green-100 text-green-800 
-                                   @endif 
-                                   text-xs font-medium me-2 px-2.5 py-0.5 rounded-full">
+                                        @elseif($product->stock < 10) bg-blue-100 text-dark 
+                                        @else bg-green-100 text-green-800 
+                                        @endif 
+                                        text-xs font-medium me-2 px-2.5 py-0.5 rounded-full">
                                 {{ $product->stock }}
                             </span>
                         </span>
@@ -76,6 +77,7 @@
                 @endif
 
 
+
                 <!-- Keranjang Belanja -->
                 <h2 class="text-xl font-semibold text-gray-900 dark:text-white sm:text-2xl mt-6">Pesanan</h2>
                 <div class="mt-6 sm:mt-8 md:gap-6 lg:flex lg:items-start">
@@ -90,8 +92,8 @@
                                             class="text-base font-medium text-gray-900 dark:text-white">{{ $item['name'] }}</span>
                                         <div class="flex items-center gap-4 mt-2">
                                             <button wire:loading.remove wire:target='removeFromCart({{ $index }})'
-                                                wire:click="removeFromCart({{ $index }})" onclick="event.stopPropagation(); playSelectSound()"
-                                                type="button"
+                                                wire:click="removeFromCart({{ $index }})"
+                                                onclick="event.stopPropagation(); playSelectSound()" type="button"
                                                 class="text-sm text-red-600 hover:underline dark:text-red-500">Hapus</button>
                                             <button wire:loading wire:target='removeFromCart({{ $index }})'
                                                 type="button"
@@ -227,8 +229,8 @@
 
 
                                 @if (!empty($cart))
-                                <button wire:loading.remove wire:click="resetCart" onclick="event.stopPropagation(); playSelectSound()"
-                                    type="button"
+                                <button wire:loading.remove wire:click="resetCart"
+                                    onclick="event.stopPropagation(); playSelectSound()" type="button"
                                     class="focus:outline-none text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2">
                                     Bersihkan Pesanan
                                 </button>
