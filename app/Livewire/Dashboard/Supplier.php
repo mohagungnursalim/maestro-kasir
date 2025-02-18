@@ -4,6 +4,7 @@ namespace App\Livewire\Dashboard;
 
 use App\Models\Supplier as ModelsSupplier;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Log;
 use Livewire\Attributes\On;
 use Livewire\Attributes\Url;
 use Livewire\Component;
@@ -79,9 +80,11 @@ class Supplier extends Component
 
     public function loadMore()
     {
-        $this->limit =+ 8;
+        $this->limit += 8; // Perbaikan
+        Log::info("Load More Clicked: Limit is now " . $this->limit);
         $this->loadInitialSuppliers();
     }
+    
 
     #[On('resetForm')]
     public function resetForm()
