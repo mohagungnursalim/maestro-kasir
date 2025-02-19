@@ -10,7 +10,6 @@ class Product extends Model
 {
     protected $guarded = ['id'];
     protected $table = 'products';
-    protected $with = ['supplier']; // Auto-load relasi supplier
 
     // Relasi ke Supplier
     public function supplier()
