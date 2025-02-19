@@ -21,14 +21,17 @@
                                     <input type="datetime-local" id="search-date" x-model="date"
                                         x-on:input.debounce.500ms="
                                             let date = new Date($event.target.value);
-                                            // Adjust to Asia/Makassar time zone by adding the correct offset
-                                            let timeZoneOffset = 8 * 60; // Asia/Makassar is UTC+8
-                                            let localTime = new Date(date.getTime() + (timeZoneOffset - date.getTimezoneOffset()) * 60000);
-                                            // Format date to 'YYYY-MM-DD'
-                                            let formattedDate = localTime.toISOString().split('T')[0];
-                                            $wire.set('search', formattedDate)
+                                            
+                                            // Konversi ke waktu Asia/Makassar dengan Intl.DateTimeFormat
+                                            let formatter = new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Makassar', year: 'numeric', month: '2-digit', day: '2-digit' });
+                                            let parts = formatter.formatToParts(date);
+                                            
+                                            // Format ke 'YYYY-MM-DD'
+                                            let formattedDate = `${parts[0].value}-${parts[2].value}-${parts[4].value}`;
+                                            $wire.set('search', formattedDate);
                                         "
                                         class="block w-full p-2 pl-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-primary-500 focus:border-primary-500">
+
                                 </div>
                             
                                 <!-- Input Text with Search Icon -->

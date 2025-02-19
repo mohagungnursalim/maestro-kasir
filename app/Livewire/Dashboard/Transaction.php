@@ -45,48 +45,45 @@ class Transaction extends Component
         {
             $ttl = 31536000; // TTL cache selama 1 tahun
             $this->loaded = true;
-
+        
             // Cache key unik berdasarkan search dan limit
             $cacheKey = "transactions_{$this->search}_{$this->limit}";
-
+        
             // Simpan daftar cache key untuk memudahkan refresh nanti
             $cacheKeys = Cache::get('transaction_cache_keys', []);
             if (!in_array($cacheKey, $cacheKeys)) {
                 $cacheKeys[] = $cacheKey;
                 Cache::put('transaction_cache_keys', $cacheKeys, $ttl);
             }
-
-            // Ambil transaksi dari cache, jika tidak ada maka query database
+        
+            // Ambil transaksi dari cache atau query database jika tidak ada
             $transactions = Cache::remember($cacheKey, $ttl, function () {
-                $data = TransactionDetail::with(['product','order']) // Pastikan relasi product di-load
+                return TransactionDetail::with(['product', 'order']) // Pastikan relasi di-load
                     ->where(function ($query) {
                         $query->where('order_id', 'like', '%' . $this->search . '%')
-                            ->orWhere('created_at', 'like', '%' . $this->search . '%');
+                              ->orWhere('created_at', 'like', '%' . $this->search . '%');
                     })
                     ->latest()
                     ->take($this->limit)
                     ->get();
-
-                // Debug: Pastikan hasil dari query bukan boolean
-                if (!is_a($data, \Illuminate\Support\Collection::class)) {
-                    return collect(); // Hindari menyimpan nilai boolean atau data salah
-                }
-
-                return $data;
             });
-
-            // Debug: Pastikan hasil transaksi valid sebelum digunakan
-            if ($transactions->isEmpty()) {
-                Log::warning("Transactions are empty after cache retrieval: {$cacheKey}");
+        
+            // Debug: Pastikan hasil dari cache adalah Collection dan bukan array
+            if (!($transactions instanceof \Illuminate\Support\Collection)) {
+                Log::error("Cache returned unexpected data type: ", ['data' => $transactions]);
+                $transactions = collect(); // Pastikan tetap Collection kosong jika terjadi kesalahan
             }
-
-            // Pastikan data dikelompokkan dengan benar
-            $this->transactions = $transactions->groupBy('order_id')->map(function ($group) {
-                return $group->all(); // Pastikan tetap dalam bentuk array yang bisa diakses
+        
+            // Debug: Pastikan setiap item tetap instance dari TransactionDetail
+            $transactions = $transactions->map(function ($transaction) {
+                return is_array($transaction) ? new TransactionDetail($transaction) : $transaction;
             });
-
-            
+        
+            // Pastikan data dikelompokkan dengan benar
+            $this->transactions = $transactions->groupBy('order_id')->map(fn ($group) => $group->all());
         }
+        
+        
 
     
         public function loadMore()
