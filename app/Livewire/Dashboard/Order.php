@@ -6,6 +6,7 @@ use Livewire\Component;
 use App\Models\Product;
 use App\Models\Order as ModelsOrder;
 use App\Models\TransactionDetail;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -161,6 +162,7 @@ class Order extends Component
 
             // 3. Simpan data order (tanpa detail produk)
             $order = ModelsOrder::create([
+                'user_id' => Auth::user()->id,
                 'tax' => $this->tax,
                 'discount' => 0,
                 'customer_money' => $this->customerMoney,

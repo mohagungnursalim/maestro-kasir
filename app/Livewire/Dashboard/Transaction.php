@@ -4,6 +4,7 @@ namespace App\Livewire\Dashboard;
 
 use App\Models\TransactionDetail;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Livewire\Attributes\Url;
 use Livewire\Component;
@@ -41,6 +42,8 @@ class Transaction extends Component
         }
     
         
+
+
         public function loadInitialTransactions()
         {
             $ttl = 31536000; // TTL cache selama 1 tahun
@@ -58,10 +61,17 @@ class Transaction extends Component
         
             // Ambil transaksi dari cache atau query database jika tidak ada
             $transactions = Cache::remember($cacheKey, $ttl, function () {
-                return TransactionDetail::with(['product', 'order']) // Pastikan relasi di-load
-                    ->where(function ($query) {
-                        $query->where('order_id', 'like', '%' . $this->search . '%')
-                              ->orWhere('created_at', 'like', '%' . $this->search . '%');
+                return TransactionDetail::query()
+                    ->with([
+                        'product', // Pastikan product ikut dimuat
+                        'order.user' // Pastikan order dan user dalam order ikut dimuat
+                    ])
+                    ->whereHas('order', function ($query) {
+                        $query->where('id', 'like', '%' . $this->search . '%')
+                            ->orWhereDate('created_at', '=', $this->search) // Menggunakan '=' agar sesuai format tanggal
+                            ->orWhereHas('user', function ($userQuery) { // Cari berdasarkan nama user
+                                $userQuery->where('name', 'like', '%' . $this->search . '%');
+                            });
                     })
                     ->latest()
                     ->take($this->limit)
@@ -81,6 +91,11 @@ class Transaction extends Component
         
             // Pastikan data dikelompokkan dengan benar
             $this->transactions = $transactions->groupBy('order_id')->map(fn ($group) => $group->all());
+        
+            // Debugging Query untuk memastikan tidak ada N+1
+            DB::listen(function ($query) {
+                Log::info('SQL Query:', ['sql' => $query->sql, 'bindings' => $query->bindings]);
+            });
         }
         
         

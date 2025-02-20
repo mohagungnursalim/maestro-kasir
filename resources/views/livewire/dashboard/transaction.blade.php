@@ -92,7 +92,7 @@
                     <table class="w-full text-sm text-left rtl:text-right text-gray-500">
                         <thead class="text-xs text-white uppercase bg-gray-500">
                             <tr>
-                                <th scope="col" class="px-6 py-3">ID Order</th>
+                                <th scope="col" class="px-6 py-3">ID Order/Kasir</th>
                                 <th scope="col" class="px-6 py-3">Nama Produk</th>
                                 <th scope="col" class="px-6 py-3 text-center">Jumlah</th>
                                 <th scope="col" class="px-6 py-3 text-right">Harga</th>
@@ -107,6 +107,7 @@
                                 @for ($i = 0; $i < 8; $i++) 
                                     <tr class="bg-gray-200 font-bold">
                                         <td class="px-6 py-4" colspan="5">
+                                            <div class="h-4 w-20 bg-gray-500 rounded animate-pulse mb-1"></div>
                                             <div class="h-4 w-20 bg-gray-500 rounded animate-pulse"></div>
                                         </td>
                                         <td class="px-6 py-4"></td>
@@ -146,10 +147,14 @@
                 
                                     {{-- Tampilkan ID Order hanya sekali --}}
                                     <tr class="bg-gray-200 font-bold">
-                                        <td class="px-6 py-4" colspan="5">ID Order: {{ $orderId }}</td>
-                                        <td class="px-6 py-4"></td>
+                                        <td class="px-6 py-4" colspan="5">
+                                            ID Order: {{ $orderId }} <br>
+                                            Kasir: {{ $orderTransactions[0]->order->user->name ?? '-' }}
+                                        </td>
+                                        <td class="px-6 py-4 text-right font-bold"> </td>
                                         <td class="px-6 py-4 text-right font-bold">Rp{{ number_format($orderTotal, 0, ',', '.') }}</td>
                                     </tr>
+                                    
                 
                                     @foreach ($orderTransactions as $transaction)
                                         <tr class="bg-white border-b hover:bg-gray-300 text-gray-900">
@@ -176,7 +181,7 @@
                 
                 
             {{-- Tombol Load More --}}
-            {{-- @if($transactions->count() >= $limit && $totalTransactions > $limit) --}}
+            
             @if(count($transactions->flatten()) >= $limit && $totalTransactions > $limit)
 
             <div class="mt-4 mb-2 flex justify-center">
