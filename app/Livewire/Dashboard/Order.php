@@ -141,11 +141,11 @@ class Order extends Component
             $productUpdates = [];
             $insufficientProducts = [];
 
-            // 1. Ambil semua produk dalam satu query
+            //Ambil semua produk dalam satu query
             $productIds = collect($this->cart)->pluck('id');
             $products = Product::with('supplier')->whereIn('id', $productIds)->get()->keyBy('id');
 
-            // 2. Periksa stok sebelum memproses order
+            //Periksa stok sebelum memproses order
             foreach ($this->cart as $item) {
                 if (!isset($products[$item['id']]) || $products[$item['id']]->stock < $item['quantity']) {
                     $insufficientProducts[] = $products[$item['id']]->name ?? 'Produk Tidak Ditemukan';
@@ -160,7 +160,7 @@ class Order extends Component
 
             $this->calculateChange();
 
-            // 3. Simpan data order (tanpa detail produk)
+            //Simpan data order (tanpa detail produk)
             $order = ModelsOrder::create([
                 'user_id' => Auth::user()->id,
                 'tax' => $this->tax,
@@ -204,14 +204,14 @@ class Order extends Component
 
 
             DB::commit();
-            $this->refreshCacheStock();
-            $this->refreshCacheTransactionDetail();
+            $this->refreshCacheStock(); //Refresh Cache stok produk
+            $this->refreshCacheTransactionDetail(); // Refresh Cache transaksi
 
-            // 6. Dispatch event ke frontend
+            //Dispatch event ke frontend
             $this->dispatch('refreshProductStock');
             $this->dispatch('successPayment');
 
-            $this->dispatch('printReceipt', $order->id);
+            $this->dispatch('printReceipt', $order->id); // Print struk pembayaran
 
         } catch (\Exception $e) {
             DB::rollBack();
@@ -231,7 +231,7 @@ class Order extends Component
         $this->change = 0;
     }
 
-
+    // Refresh Cache transaksi
     public function refreshCacheTransactionDetail()
     {
         // Ambil daftar semua cache key transaksi
@@ -248,7 +248,7 @@ class Order extends Component
         // Untuk lebih memastikan cache total transaksi diperbarui, kamu bisa melakukan reset cache lainnya jika diperlukan
     }
     
-    // Refresh Cache saat update stok produk
+    // Refresh Cache stok produk
     protected function refreshCacheStock()
     {
           $ttl = 31536000; // TTL cache selama 1 tahun
