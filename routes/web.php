@@ -12,6 +12,7 @@ use App\Livewire\Dashboard\Transaction;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Storage;
 
 Route::view('/', 'welcome');
 
@@ -46,8 +47,6 @@ Route::get('/dashboard/store-settings', Settings::class)
 
 Route::get('/api/suppliers', [SupplierController::class, 'index'])->name('api.suppliers')
     ->middleware(['auth']);
-
-    
 
 Route::post('/logout', function () {
     Auth::logout();

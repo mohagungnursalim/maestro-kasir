@@ -214,7 +214,7 @@
 </div>
 
 <!-- Main modal -->
-<div id="default-modal" tabindex="-1" aria-hidden="true" class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full">
+<div wire:ignore id="default-modal" tabindex="-1" aria-hidden="true" class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full">
     <div class="relative p-4 w-full max-w-2xl max-h-full">
         <!-- Modal content -->
         <div class="relative bg-white rounded-lg shadow-sm dark:bg-gray-700">
@@ -236,8 +236,8 @@
                     Cetak laporan transaksi berdasarkan tanggal yang dipilih. Tersedia dua metode pencetakan laporan:
                 </p>
                 <ul class="text-base text-gray-500 list-decimal list-inside">
-                    <li>Menggunakan <a class="text-gray-700 underline ">request</a> biasa, yang cenderung lambat jika data transaksi banyak dan harus ditunggu hingga selesai.</li>
-                    <li>Menggunakan <a class="text-blue-500 underline">antrian (worker)</a>, yang lebih cepat karena berjalan di latar belakang.</li>
+                    <li>Menggunakan <a class="text-gray-700 underline ">Request (Sync)</a> biasa, yang cenderung lambat jika data transaksi banyak dan harus ditunggu hingga selesai.</li>
+                    <li>Menggunakan <a class="text-blue-500 underline">Antrian (Async)</a> yang lebih cepat karena berjalan di latar belakang.</li>
                 </ul>
             </div>
         
@@ -245,11 +245,11 @@
             <!-- Modal footer -->
             <div class="flex items-center justify-center p-4 md:p-5 border-t border-gray-200 rounded-b dark:border-gray-600">
                <!-- Modal toggle -->
-                <button data-modal-target="static-modal" data-modal-toggle="static-modal" class="mr-3 block text-white bg-gray-700 hover:bg-gray-800 focus:ring-4 focus:outline-none focus:ring-gray-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center" type="button">
-                    <i class="bi bi-alarm"></i> Request
+                <button data-modal-target="static-modal-request" data-modal-toggle="static-modal-request" class="mr-3 block text-white bg-gray-700 hover:bg-gray-800 focus:ring-4 focus:outline-none focus:ring-gray-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center" type="button">
+                    <i class="bi bi-alarm"></i> Request (Sync)
                 </button>
-                <button data-modal-target="static-modal" data-modal-toggle="static-modal" class="block text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center" type="button">
-                    <i class="bi bi-lightning-charge"></i> Antrian (worker) 
+                <button data-modal-target="static-modal-queue" data-modal-toggle="static-modal-queue" class="block text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center" type="button">
+                    <i class="bi bi-lightning-charge"></i> Antrian (Async) 
                 </button>
             </div>
         </div>
@@ -257,49 +257,103 @@
 </div>
 
 
-
-
-
-
-
-<!-- Main modal -->
-<div id="static-modal" data-modal-backdrop="static" tabindex="-1" aria-hidden="true" class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full">
+<!-- Modal Metode Request -->
+<div wire:ignore id="static-modal-request" data-modal-backdrop="static" tabindex="-1" aria-hidden="true" class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full">
     <div class="relative p-4 w-full max-w-2xl max-h-full">
-        <!-- Modal content -->
         <div class="relative bg-white rounded-lg shadow-sm dark:bg-gray-700">
-            <!-- Modal header -->
             <div class="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600 border-gray-200">
-                <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
-                    Static modal
-                </h3>
-                <button type="button" class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white" data-modal-hide="static-modal">
-                    <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
+                <h3 class="text-xl font-semibold text-gray-900 dark:text-white">Metode Request (Sync)</h3>
+                <button type="button" class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white" data-modal-hide="static-modal-request">
+                    <svg class="w-3 h-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
                         <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
                     </svg>
-                    <span class="sr-only">Close modal</span>
                 </button>
             </div>
-            <!-- Modal body -->
+
             <div class="p-4 md:p-5 space-y-4">
-                <p class="text-base leading-relaxed text-gray-500 dark:text-gray-400">
-                    With less than a month to go before the European Union enacts new consumer privacy laws for its citizens, companies around the world are updating their terms of service agreements to comply.
-                </p>
-                <p class="text-base leading-relaxed text-gray-500 dark:text-gray-400">
-                    The European Union’s General Data Protection Regulation (G.D.P.R.) goes into effect on May 25 and is meant to ensure a common set of data rights in the European Union. It requires organizations to notify users as soon as possible of high-risk data breaches that could personally affect them.
-                </p>
+                <label for="start_date_request" class="block text-sm font-medium text-gray-700 dark:text-white">Tanggal Mulai</label>
+                <input type="date" id="start_date_request" wire:model="startDate" class="w-full border border-gray-300 p-2 rounded-lg focus:ring focus:ring-blue-300 dark:bg-gray-800">
+
+                <label for="end_date_request" class="block text-sm font-medium text-gray-700">Tanggal Akhir</label>
+                <input type="date" id="end_date_request" wire:model="endDate" class="w-full border border-gray-300 p-2 rounded-lg focus:ring focus:ring-blue-300 dark:bg-gray-800">
             </div>
-            <!-- Modal footer -->
-            <div class="flex items-center p-4 md:p-5 border-t border-gray-200 rounded-b dark:border-gray-600">
-                <button data-modal-hide="static-modal" type="button" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">I accept</button>
-                <button data-modal-hide="static-modal" type="button" class="py-2.5 px-5 ms-3 text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-100 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700">Decline</button>
+
+            <div class="flex items-center justify-center p-4 md:p-5 border-t border-gray-200 rounded-b dark:border-gray-600">
+                <button type="button" wire:click="exportExcel" class="text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:outline-none focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center">
+                    Export Excel
+                </button>
+                <button type="button" wire:click="exportPdf" class="py-2.5 px-5 ms-3 text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-gray-200 hover:bg-gray-300 hover:text-blue-700">
+                    Export PDF
+                </button>
             </div>
         </div>
     </div>
 </div>
+
+
+<!-- Modal Metode Queue -->
+<div wire:ignore id="static-modal-queue" data-modal-backdrop="static" tabindex="-1" aria-hidden="true" class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full">
+    <div class="relative p-4 w-full max-w-2xl max-h-full">
+        <div class="relative bg-white rounded-lg shadow-sm dark:bg-gray-700">
+            <div class="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600 border-gray-200">
+                <h3 class="text-xl font-semibold text-gray-900">Metode Antrian (Async)</h3>
+                <button type="button" class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white" data-modal-hide="static-modal-queue">
+                    <svg class="w-3 h-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
+                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
+                    </svg>
+                </button>
+            </div>
+
+            <div class="p-4 md:p-5 space-y-4">
+                <label for="start_date_queue" class="block text-sm font-medium text-gray-700">Tanggal Mulai</label>
+                <input type="date" id="start_date_queue" wire:model="startDate" class="w-full border border-gray-300 p-2 rounded-lg focus:ring focus:ring-blue-300 dark:bg-gray-800">
+
+                <label for="end_date_queue" class="block text-sm font-medium text-gray-700">Tanggal Akhir</label>
+                <input type="date" id="end_date_queue" wire:model="endDate" class="w-full border border-gray-300 p-2 rounded-lg focus:ring focus:ring-blue-300 dark:bg-gray-800">
+            </div>
+
+            <div class="flex items-center justify-center p-4 md:p-5 border-t border-gray-200 rounded-b">
+                <button type="button" wire:click="queueReport('excel')" class="text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:outline-none focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center">
+                    Export Excel
+                </button>
+                <button type="button" wire:click="queueReport('pdf')" class="py-2.5 px-5 ms-3 text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-gray-200 hover:bg-gray-300 hover:text-blue-700">
+                    Export PDF
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
 {{-- Loading Progress Tombol Refresh --}}
 <script>
     function showLoading() {
         document.getElementById('loading-progress').classList.remove('hidden');
     }
 </script>
+
+{{-- Sweet alert queue --}}
+<script>
+    Livewire.on('notify', () => {
+        Swal.fire({
+            title: "Laporan Sedang Diproses!",
+            text: "Laporan transaksi sedang diproses di background. Anda dapat mengunduhnya setelah selesai.",
+            icon: "success",
+            showCancelButton: true,
+            confirmButtonText: "📥 Halaman Unduh",
+            cancelButtonText: "❌ Tutup",
+            confirmButtonColor: "#a78bfa", // Warna ungu soft (Tailwind: purple-400)
+            cancelButtonColor: "#878686",  // Warna abu-abu muda (Tailwind: gray-300)
+        }).then((result) => {
+            if (result.isConfirmed) {
+                window.location.href = "/dashboard/download-report";
+            }
+        });
+    });
+
+</script>
+
+
 </div>

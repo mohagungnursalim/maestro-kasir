@@ -3,6 +3,11 @@
 namespace App\Livewire\Dashboard;
 
 use App\Models\TransactionDetail;
+use Maatwebsite\Excel\Facades\Excel;
+use Barryvdh\DomPDF\Facade\Pdf;
+use App\Exports\TransactionExport;
+use App\Jobs\GenerateTransactionReport;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -99,6 +104,61 @@ class Transaction extends Component
             if ($this->transactions->flatten()->count() <= $oldCount) {
                 Log::info("No more data to load");
             }
+        }
+        // Date Export
+        public $startDate;
+        public $endDate;
+    
+        public function exportExcel()
+        {
+            $this->validate([
+                'startDate' => 'required|date',
+                'endDate' => 'required|date|after_or_equal:startDate',
+            ]);
+            
+            $startDate = Carbon::parse($this->startDate)->startOfDay(); // 00:00:00
+            $endDate = Carbon::parse($this->endDate)->endOfDay(); //23:59:59
+            $date = now()->format('d-m-Y'); 
+        
+            return Excel::download(new TransactionExport($startDate,$endDate), "transactions_{$date}.xlsx");
+        }
+        
+    
+        public function exportPdf()
+        {
+            $this->validate([
+                'startDate' => 'required|date',
+                'endDate' => 'required|date|after_or_equal:startDate',
+            ]);
+
+            $startDate = Carbon::parse($this->startDate)->startOfDay(); // 00:00:00
+            $endDate = Carbon::parse($this->endDate)->endOfDay(); //23:59:59
+            $date = now()->format('d-m-Y'); 
+
+            $transactions = TransactionDetail::with(['product', 'order.user'])
+                ->whereBetween('created_at', [$startDate, $endDate])
+                ->get()
+                ->groupBy('order_id'); // Kelompokkan berdasarkan order_id
+
+            $pdf = Pdf::loadView('exports.transactions', [
+                'transactions' => $transactions,
+                'startDate' => $this->startDate,
+                'endDate' => $this->endDate,
+            ]);
+            
+
+            return response()->streamDownload(fn() => print($pdf->output()), "transactions_{$date}.pdf");
+        }
+
+        public function queueReport($type)
+        {
+            $this->validate([
+                'startDate' => 'required|date',
+                'endDate' => 'required|date|after_or_equal:startDate',
+            ]);
+    
+            GenerateTransactionReport::dispatch($this->startDate, $this->endDate, $type);
+            $this->dispatch('notify');
         }
 
         public function render()
