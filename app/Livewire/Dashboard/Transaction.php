@@ -3,6 +3,11 @@
 namespace App\Livewire\Dashboard;
 
 use App\Models\TransactionDetail;
+use Maatwebsite\Excel\Facades\Excel;
+use Barryvdh\DomPDF\Facade\Pdf;
+use App\Exports\TransactionExport;
+use App\Jobs\GenerateTransactionReport;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -40,64 +45,53 @@ class Transaction extends Component
         {
             $this->loadInitialTransactions();
         }
-    
         
-
-
         public function loadInitialTransactions()
         {
             $ttl = 31536000; // TTL cache selama 1 tahun
             $this->loaded = true;
-        
+
             // Cache key unik berdasarkan search dan limit
             $cacheKey = "transactions_{$this->search}_{$this->limit}";
-        
+
             // Simpan daftar cache key untuk memudahkan refresh nanti
             $cacheKeys = Cache::get('transaction_cache_keys', []);
             if (!in_array($cacheKey, $cacheKeys)) {
                 $cacheKeys[] = $cacheKey;
                 Cache::put('transaction_cache_keys', $cacheKeys, $ttl);
             }
-        
+
             // Ambil transaksi dari cache atau query database jika tidak ada
             $transactions = Cache::remember($cacheKey, $ttl, function () {
-                return TransactionDetail::query()
-                    ->with([
-                        'product', // Pastikan product ikut dimuat
-                        'order.user' // Pastikan order dan user dalam order ikut dimuat
-                    ])
-                    ->whereHas('order', function ($query) {
-                        $query->where('id', 'like', '%' . $this->search . '%')
-                            ->orWhereDate('created_at', '=', $this->search) // Menggunakan '=' agar sesuai format tanggal
-                            ->orWhereHas('user', function ($userQuery) { // Cari berdasarkan nama user
-                                $userQuery->where('name', 'like', '%' . $this->search . '%');
-                            });
+                return DB::table('transaction_details')
+                    ->join('orders', 'transaction_details.order_id', '=', 'orders.id')
+                    ->join('users', 'orders.user_id', '=', 'users.id')
+                    ->join('products', 'transaction_details.product_id', '=', 'products.id')
+                    ->select(
+                        'transaction_details.*',
+                        'orders.id as order_id',
+                        'orders.created_at as order_date',
+                        'users.name as user_name',
+                        'products.name as product_name'
+                    )
+                    ->when($this->search, function ($query) {
+                        $query->where('orders.id', 'like', '%' . $this->search . '%')
+                            ->orWhereDate('orders.created_at', '=', $this->search)
+                            ->orWhere('users.name', 'like', '%' . $this->search . '%');
                     })
-                    ->latest()
-                    ->take($this->limit)
+                    ->orderBy('orders.created_at', 'desc')
+                    ->limit($this->limit)
                     ->get();
             });
-        
-            // Debug: Pastikan hasil dari cache adalah Collection dan bukan array
-            if (!($transactions instanceof \Illuminate\Support\Collection)) {
-                Log::error("Cache returned unexpected data type: ", ['data' => $transactions]);
-                $transactions = collect(); // Pastikan tetap Collection kosong jika terjadi kesalahan
-            }
-        
-            // Debug: Pastikan setiap item tetap instance dari TransactionDetail
-            $transactions = $transactions->map(function ($transaction) {
-                return is_array($transaction) ? new TransactionDetail($transaction) : $transaction;
-            });
-        
-            // Pastikan data dikelompokkan dengan benar
-            $this->transactions = $transactions->groupBy('order_id')->map(fn ($group) => $group->all());
-        
-            // Debugging Query untuk memastikan tidak ada N+1
+
+            // Debug: Log query yang dieksekusi
             DB::listen(function ($query) {
                 Log::info('SQL Query:', ['sql' => $query->sql, 'bindings' => $query->bindings]);
             });
+
+            // Pastikan data dikelompokkan berdasarkan order_id
+            $this->transactions = collect($transactions)->groupBy('order_id')->map(fn ($group) => $group->all());
         }
-        
         
 
     
@@ -110,6 +104,61 @@ class Transaction extends Component
             if ($this->transactions->flatten()->count() <= $oldCount) {
                 Log::info("No more data to load");
             }
+        }
+        // Date Export
+        public $startDate;
+        public $endDate;
+    
+        public function exportExcel()
+        {
+            $this->validate([
+                'startDate' => 'required|date',
+                'endDate' => 'required|date|after_or_equal:startDate',
+            ]);
+            
+            $startDate = Carbon::parse($this->startDate)->startOfDay(); // 00:00:00
+            $endDate = Carbon::parse($this->endDate)->endOfDay(); //23:59:59
+            $date = now()->format('d-m-Y'); 
+        
+            return Excel::download(new TransactionExport($startDate,$endDate), "transactions_{$date}.xlsx");
+        }
+        
+    
+        public function exportPdf()
+        {
+            $this->validate([
+                'startDate' => 'required|date',
+                'endDate' => 'required|date|after_or_equal:startDate',
+            ]);
+
+            $startDate = Carbon::parse($this->startDate)->startOfDay(); // 00:00:00
+            $endDate = Carbon::parse($this->endDate)->endOfDay(); //23:59:59
+            $date = now()->format('d-m-Y'); 
+
+            $transactions = TransactionDetail::with(['product', 'order.user'])
+                ->whereBetween('created_at', [$startDate, $endDate])
+                ->get()
+                ->groupBy('order_id'); // Kelompokkan berdasarkan order_id
+
+            $pdf = Pdf::loadView('exports.transactions', [
+                'transactions' => $transactions,
+                'startDate' => $this->startDate,
+                'endDate' => $this->endDate,
+            ]);
+            
+
+            return response()->streamDownload(fn() => print($pdf->output()), "transactions_{$date}.pdf");
+        }
+
+        public function queueReport($type)
+        {
+            $this->validate([
+                'startDate' => 'required|date',
+                'endDate' => 'required|date|after_or_equal:startDate',
+            ]);
+    
+            GenerateTransactionReport::dispatch($this->startDate, $this->endDate, $type);
+            $this->dispatch('notify');
         }
 
         public function render()
