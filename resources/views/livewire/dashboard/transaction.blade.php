@@ -230,26 +230,28 @@
                     <span class="sr-only">Close modal</span>
                 </button>
             </div>
+        
            <!-- Modal body -->
            <div class="p-4 md:p-5 space-y-4">
-                <p class="text-base leading-relaxed text-gray-500 dark:text-gray-400">
-                    Cetak laporan transaksi berdasarkan tanggal yang dipilih. Tersedia dua metode pencetakan laporan:
-                </p>
-                <ul class="text-base text-gray-500 list-decimal list-inside">
-                    <li>Menggunakan <a class="text-gray-700 underline ">Request (Sync)</a> biasa, yang cenderung lambat jika data transaksi banyak dan harus ditunggu hingga selesai.</li>
-                    <li>Menggunakan <a class="text-blue-500 underline">Antrian (Async)</a> yang lebih cepat karena berjalan di latar belakang.</li>
-                </ul>
-            </div>
+            <p class="text-base leading-relaxed text-gray-500 dark:text-gray-400">
+                Generate laporan transaksi berdasarkan rentang tanggal yang dipilih.
+            </p>
+            <ul class="text-base text-gray-500 list-inside">
+                <li>
+                    Proses pembuatan laporan dilakukan secara <a class="text-red-500 underline">Asinkron (Queued Processing)</a>, 
+                    memastikan kinerja server tetap optimal tanpa mengganggu aktivitas lainnya.  
+                    Laporan akan diproses di latar belakang dan dapat diakses melalui halaman  
+                    <a wire:navigate href="/dashboard/reports" class="text-blue-500 underline">Laporan</a> setelah selesai.
+                </li>
+            </ul>
+        </div>
         
 
             <!-- Modal footer -->
             <div class="flex items-center justify-center p-4 md:p-5 border-t border-gray-200 rounded-b dark:border-gray-600">
                <!-- Modal toggle -->
-                <button data-modal-target="static-modal-request" data-modal-toggle="static-modal-request" class="mr-3 block text-white bg-gray-700 hover:bg-gray-800 focus:ring-4 focus:outline-none focus:ring-gray-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center" type="button">
-                    <i class="bi bi-alarm"></i> Request (Sync)
-                </button>
                 <button data-modal-target="static-modal-queue" data-modal-toggle="static-modal-queue" class="block text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center" type="button">
-                    <i class="bi bi-lightning-charge"></i> Antrian (Async) 
+                    <i class="bi bi-lightning-charge"></i> Export 
                 </button>
             </div>
         </div>
@@ -257,46 +259,12 @@
 </div>
 
 
-<!-- Modal Metode Request -->
-<div wire:ignore id="static-modal-request" data-modal-backdrop="static" tabindex="-1" aria-hidden="true" class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full">
-    <div class="relative p-4 w-full max-w-2xl max-h-full">
-        <div class="relative bg-white rounded-lg shadow-sm dark:bg-gray-700">
-            <div class="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600 border-gray-200">
-                <h3 class="text-xl font-semibold text-gray-900 dark:text-white">Metode Request (Sync)</h3>
-                <button type="button" class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white" data-modal-hide="static-modal-request">
-                    <svg class="w-3 h-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
-                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
-                    </svg>
-                </button>
-            </div>
-
-            <div class="p-4 md:p-5 space-y-4">
-                <label for="start_date_request" class="block text-sm font-medium text-gray-700 dark:text-white">Tanggal Mulai</label>
-                <input type="date" id="start_date_request" wire:model="startDate" class="w-full border border-gray-300 p-2 rounded-lg focus:ring focus:ring-blue-300 dark:bg-gray-800">
-
-                <label for="end_date_request" class="block text-sm font-medium text-gray-700">Tanggal Akhir</label>
-                <input type="date" id="end_date_request" wire:model="endDate" class="w-full border border-gray-300 p-2 rounded-lg focus:ring focus:ring-blue-300 dark:bg-gray-800">
-            </div>
-
-            <div class="flex items-center justify-center p-4 md:p-5 border-t border-gray-200 rounded-b dark:border-gray-600">
-                <button type="button" wire:click="exportExcel" class="text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:outline-none focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center">
-                    Export Excel
-                </button>
-                <button type="button" wire:click="exportPdf" class="py-2.5 px-5 ms-3 text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-gray-200 hover:bg-gray-300 hover:text-blue-700">
-                    Export PDF
-                </button>
-            </div>
-        </div>
-    </div>
-</div>
-
-
-<!-- Modal Metode Queue -->
+<!-- Modal Queue -->
 <div wire:ignore id="static-modal-queue" data-modal-backdrop="static" tabindex="-1" aria-hidden="true" class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full">
     <div class="relative p-4 w-full max-w-2xl max-h-full">
         <div class="relative bg-white rounded-lg shadow-sm dark:bg-gray-700">
             <div class="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600 border-gray-200">
-                <h3 class="text-xl font-semibold text-gray-900">Metode Antrian (Async)</h3>
+                <h3 class="text-xl font-semibold text-gray-900">Cetak Laporan Transaksi</h3>
                 <button type="button" class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white" data-modal-hide="static-modal-queue">
                     <svg class="w-3 h-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
                         <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
@@ -304,22 +272,62 @@
                 </button>
             </div>
 
-            <div class="p-4 md:p-5 space-y-4">
+            <div class="p-4 md:p-5 space-y-4" x-data>
                 <label for="start_date_queue" class="block text-sm font-medium text-gray-700">Tanggal Mulai</label>
                 <input type="date" id="start_date_queue" wire:model="startDate" class="w-full border border-gray-300 p-2 rounded-lg focus:ring focus:ring-blue-300 dark:bg-gray-800">
-
+            
                 <label for="end_date_queue" class="block text-sm font-medium text-gray-700">Tanggal Akhir</label>
                 <input type="date" id="end_date_queue" wire:model="endDate" class="w-full border border-gray-300 p-2 rounded-lg focus:ring focus:ring-blue-300 dark:bg-gray-800">
             </div>
-
+            
             <div class="flex items-center justify-center p-4 md:p-5 border-t border-gray-200 rounded-b">
-                <button type="button" wire:click="queueReport('excel')" class="text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:outline-none focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center">
+                <!-- Tombol Excel -->
+                <button 
+                    type="button" 
+                    wire:loading.remove 
+                    wire:target="queueReport('excel')" 
+                    wire:click="queueReport('excel')" 
+                    class="text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:outline-none focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center disabled:opacity-50 disabled:cursor-not-allowed"
+                    x-bind:disabled="!$wire.startDate || !$wire.endDate">
                     Export Excel
                 </button>
-                <button type="button" wire:click="queueReport('pdf')" class="py-2.5 px-5 ms-3 text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-gray-200 hover:bg-gray-300 hover:text-blue-700">
+            
+                <button 
+                    type="button" 
+                    wire:loading 
+                    wire:target="queueReport('excel')" 
+                    class="text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:outline-none focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center">
+                    Export Excel
+                    <svg class="inline w-5 h-5 text-white animate-spin ml-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 100 8v4a8 8 0 01-8-8z"></path>
+                    </svg>
+                </button>
+            
+                <!-- Tombol PDF -->
+                <button 
+                    type="button" 
+                    wire:loading.remove 
+                    wire:target="queueReport('pdf')" 
+                    wire:click="queueReport('pdf')" 
+                    class="py-2.5 px-5 ms-3 text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-gray-200 hover:text-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                    x-bind:disabled="!$wire.startDate || !$wire.endDate">
                     Export PDF
                 </button>
+            
+                <button 
+                    type="button" 
+                    wire:loading 
+                    wire:target="queueReport('pdf')" 
+                    class="py-2.5 px-5 ms-3 text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-gray-200 hover:text-blue-700">
+                    Export PDF
+                    <svg class="inline w-5 h-5 text-white animate-spin ml-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 100 8v4a8 8 0 01-8-8z"></path>
+                    </svg>
+                </button>
             </div>
+            
         </div>
     </div>
 </div>
@@ -334,26 +342,36 @@
     }
 </script>
 
-{{-- Sweet alert queue --}}
 <script>
     Livewire.on('notify', () => {
+        let countdown = 3; // Mulai dari 3 detik
+
         Swal.fire({
             title: "Laporan Sedang Diproses!",
-            text: "Laporan transaksi sedang diproses di background. Anda dapat mengunduhnya setelah selesai.",
+            html: `Anda akan diarahkan ke halaman unduh laporan dalam <br><b>${countdown}</b> detik.`,
             icon: "success",
-            showCancelButton: true,
-            confirmButtonText: "📥 Halaman Unduh",
-            cancelButtonText: "❌ Tutup",
-            confirmButtonColor: "#a78bfa", // Warna ungu soft (Tailwind: purple-400)
-            cancelButtonColor: "#878686",  // Warna abu-abu muda (Tailwind: gray-300)
-        }).then((result) => {
-            if (result.isConfirmed) {
-                window.location.href = "/dashboard/download-report";
+            timer: 3000, // Total 3 detik
+            timerProgressBar: true,
+            allowOutsideClick: false,
+            showConfirmButton: false,
+            willOpen: () => {
+                let timerInterval = setInterval(() => {
+                    countdown--;
+                    Swal.getHtmlContainer().innerHTML = `Anda akan diarahkan ke halaman unduh laporan dalam <br><b>${countdown}</b> detik.`;
+
+                    if (countdown <= 0) {
+                        clearInterval(timerInterval);
+                    }
+                }, 1000);
             }
+        }).then(() => {
+            // Redirect setelah SweetAlert selesai
+            window.location.href = "/dashboard/reports";
         });
     });
-
 </script>
+
+
 
 
 </div>

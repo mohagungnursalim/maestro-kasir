@@ -64,6 +64,7 @@ class GenerateTransactionReport implements ShouldQueue
 
     }
 
+    
 
 
 }

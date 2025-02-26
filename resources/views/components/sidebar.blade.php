@@ -29,15 +29,47 @@ aria-label="Sidebar">
             </a>
         </li>
 
+
         <li>
-            <a 
-                class="flex items-center p-2 rounded-lg {{ Request::is('dashboard/transactions') ? 'bg-purple-300 text-dark' : 'hover:bg-gray-200' }}"
-                @if (!Request::is('dashboard/transactions'))
-                    wire:navigate href="/dashboard/transactions"
-                @endif>
+            <button 
+                type="button" 
+                class="flex items-center w-full p-2 text-base text-gray-900 transition duration-75 rounded-lg group {{ Request::is('dashboard/transactions') || Request::is('dashboard/reports') ? 'bg-gray-200' : 'hover:bg-gray-200' }}" 
+                aria-controls="dropdown-transactions"
+                data-collapse-toggle="dropdown-transactions"
+                aria-expanded="{{ Request::is('dashboard/transactions') || Request::is('dashboard/reports') ? 'true' : 'false' }}">
                 <i class="bi bi-wallet2"></i>
-                <span class="flex-1 ms-3 whitespace-nowrap">Rekap Transaksi</span>
-            </a>
+                <span class="flex-1 ms-3 text-left rtl:text-right whitespace-nowrap">Transaksi</span>
+                <i class="bi bi-caret-down-fill"></i>
+            </button>
+            <ul 
+                id="dropdown-transactions"
+                class="{{ Request::is('dashboard/transactions') || Request::is('dashboard/reports') ? '' : 'hidden' }} py-2 space-y-2">
+                
+                <a 
+                    @if (Request::is('dashboard/transactions'))
+                        class="flex items-center p-2 rounded-lg bg-purple-300 text-dark"
+                    @else
+                        wire:navigate href="/dashboard/transactions" 
+                        class="flex items-center p-2 rounded-lg hover:bg-gray-200"
+                    @endif
+                >
+                    <i class="bi bi-arrow-return-right"></i>
+                    <span class="flex-1 ms-3 whitespace-nowrap">Rekap Transaksi</span>
+                </a>
+        
+                <a 
+                    @if (Request::is('dashboard/reports'))
+                        class="flex items-center p-2 rounded-lg bg-purple-300 text-dark"
+                    @else
+                        wire:navigate href="/dashboard/reports" 
+                        class="flex items-center p-2 rounded-lg hover:bg-gray-200"
+                    @endif
+                >
+                    <i class="bi bi-arrow-return-right"></i>
+                    <span class="flex-1 ms-3 whitespace-nowrap">File Laporan</span>
+                </a>
+        
+            </ul>
         </li>
 
         <li>

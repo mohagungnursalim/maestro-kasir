@@ -8,6 +8,7 @@ use Barryvdh\DomPDF\Facade\Pdf;
 use App\Exports\TransactionExport;
 use App\Jobs\GenerateTransactionReport;
 use Carbon\Carbon;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -122,7 +123,6 @@ class Transaction extends Component
         
             return Excel::download(new TransactionExport($startDate,$endDate), "transactions_{$date}.xlsx");
         }
-        
     
         public function exportPdf()
         {
@@ -146,19 +146,24 @@ class Transaction extends Component
                 'endDate' => $this->endDate,
             ]);
             
-
             return response()->streamDownload(fn() => print($pdf->output()), "transactions_{$date}.pdf");
         }
 
+        
         public function queueReport($type)
         {
             $this->validate([
                 'startDate' => 'required|date',
                 'endDate' => 'required|date|after_or_equal:startDate',
             ]);
+
+            $startDate = Carbon::parse($this->startDate)->startOfDay(); // 00:00:00
+            $endDate = Carbon::parse($this->endDate)->endOfDay(); //23:59:59
     
-            GenerateTransactionReport::dispatch($this->startDate, $this->endDate, $type);
+            GenerateTransactionReport::dispatch($startDate, $endDate, $type);
+
             $this->dispatch('notify');
+
         }
 
         public function render()

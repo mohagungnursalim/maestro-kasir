@@ -52,7 +52,9 @@
                         <td class="text-center">{{ $transaction->quantity ?? '-' }}</td>
                         <td class="text-right">Rp{{ number_format($transaction->price, 0, ',', '.') }}</td>
                         <td class="text-right">Rp{{ number_format($transaction->quantity * $transaction->price, 0, ',', '.') }}</td>
-                        <td class="text-center">{{ $transaction->created_at->format('d-m-Y H:i') }}</td>
+                        <td class="text-center">
+                            {{ optional(\Carbon\Carbon::parse($transaction->created_at))->format('d-m-Y H:i') }}
+                        </td>
                         <td></td>
                     </tr>
                 @endforeach

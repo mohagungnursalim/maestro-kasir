@@ -257,7 +257,7 @@
             </div>
         </section>
     </div>
-    <script>
+    {{-- <script>
         Livewire.on('printReceipt', orderId => {
             let receiptUrl = `/dashboard/order-receipt/${orderId}`;
             let printWindow = window.open(receiptUrl, '_blank', 'width=640,height=600');
@@ -269,7 +269,7 @@
             }
         });
 
-    </script>
+    </script> --}}
 
 </div>
 </div>
