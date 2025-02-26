@@ -71,7 +71,6 @@ class Product extends Component
     
         // Cache key unik berdasarkan pencarian & limit
         $cacheKey = "products_{$this->search}_{$this->limit}";
-    
         $this->products = Cache::remember($cacheKey, $ttl, function () {
             return DB::table('products')
                 ->leftJoin('suppliers', 'products.supplier_id', '=', 'suppliers.id')

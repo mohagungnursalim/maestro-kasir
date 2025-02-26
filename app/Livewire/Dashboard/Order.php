@@ -251,19 +251,35 @@ class Order extends Component
     // Refresh Cache stok produk
     protected function refreshCacheStock()
     {
-          $ttl = 31536000; // TTL cache selama 1 tahun
-  
-          // Perbarui cache produk sesuai pencarian (opsional, jika perlu di-refresh seluruhnya)
-          $cacheKey = "products_{$this->search}_8";
-          Cache::put($cacheKey, Product::where(function ($query) {
-                  $query->where('name', 'like', '%' . $this->search . '%')
-                        ->orWhere('sku', 'like', '%' . $this->search . '%')
-                        ->orWhere('price', 'like', '%' . $this->search . '%')
-                        ->orWhere('description', 'like', '%' . $this->search . '%');
-              })
-              ->orderByDesc('sold_count')
-              ->take($this->limitProducts)
-              ->get(), $ttl);
+
+              $ttl = 31536000; // TTL cache selama 1 tahun
+          
+              // Cache key unik berdasarkan pencarian & limit
+              $cacheKey = "products_{$this->search}_8";
+              $this->products = Cache::remember($cacheKey, $ttl, function () {
+                  return DB::table('products')
+                      ->leftJoin('suppliers', 'products.supplier_id', '=', 'suppliers.id')
+                      ->select(
+                          'products.id',
+                          'products.name',
+                          'products.sku',
+                          'products.price',
+                          'products.description',
+                          'products.stock',
+                          'products.unit',
+                          'products.image',
+                          'suppliers.name as supplier_name'
+                      )
+                      ->where(function ($query) {
+                          $query->where('products.name', 'like', '%' . $this->search . '%')
+                              ->orWhere('products.sku', 'like', '%' . $this->search . '%')
+                              ->orWhere('products.price', 'like', '%' . $this->search . '%')
+                              ->orWhere('products.description', 'like', '%' . $this->search . '%');
+                      })
+                      ->orderByDesc('sold_count')
+                      ->take($this->limit)
+                      ->get();
+              });
     }
 
     public function render()
