@@ -17,6 +17,7 @@ class Order extends Component
     public $search = '';
     public $products = [];
     public $limitProducts = 5;
+    public $limitKey = 8; // Limit cache key
     public $cart = [];
     public $customerMoney = 0;
     public $subtotal = 0;
@@ -262,39 +263,48 @@ class Order extends Component
         // Untuk lebih memastikan cache total transaksi diperbarui, kamu bisa melakukan reset cache lainnya jika diperlukan
     }
     
+
     // Refresh Cache stok produk
     protected function refreshCacheStock()
     {
+        $ttl = 31536000; // TTL cache selama 1 tahun
 
-              $ttl = 31536000; // TTL cache selama 1 tahun
-          
-              // Cache key unik berdasarkan pencarian & limit
-              $cacheKey = "products_{$this->search}_8";
-              $this->products = Cache::remember($cacheKey, $ttl, function () {
-                  return DB::table('products')
-                      ->leftJoin('suppliers', 'products.supplier_id', '=', 'suppliers.id')
-                      ->select(
-                          'products.id',
-                          'products.name',
-                          'products.sku',
-                          'products.price',
-                          'products.description',
-                          'products.stock',
-                          'products.unit',
-                          'products.image',
-                          'suppliers.name as supplier_name'
-                      )
-                      ->where(function ($query) {
-                          $query->where('products.name', 'like', '%' . $this->search . '%')
-                              ->orWhere('products.sku', 'like', '%' . $this->search . '%')
-                              ->orWhere('products.price', 'like', '%' . $this->search . '%')
-                              ->orWhere('products.description', 'like', '%' . $this->search . '%');
-                      })
-                      ->orderByDesc('sold_count')
-                      ->take($this->limit)
-                      ->get();
-              });
+        // Cache key unik berdasarkan pencarian & limit
+        $cacheKey = "products_{$this->search}_{$this->limitKey}";
+
+        // Hapus cache lama sebelum memperbarui
+        Cache::forget($cacheKey);
+
+        // Simpan ulang data terbaru ke dalam cache
+        $this->products = Cache::remember($cacheKey, $ttl, function () {
+            return DB::table('products')
+                ->leftJoin('suppliers', 'products.supplier_id', '=', 'suppliers.id')
+                ->select(
+                    'products.id',
+                    'products.name',
+                    'products.sku',
+                    'products.price',
+                    'products.description',
+                    'products.stock',
+                    'products.unit',
+                    'products.image',
+                    'suppliers.name as supplier_name'
+                )
+                ->where(function ($query) {
+                    $query->where('products.name', 'like', '%' . $this->search . '%')
+                        ->orWhere('products.sku', 'like', '%' . $this->search . '%')
+                        ->orWhere('products.price', 'like', '%' . $this->search . '%')
+                        ->orWhere('products.description', 'like', '%' . $this->search . '%');
+                })
+                ->orderByDesc('products.sold_count')
+                ->take($this->limitKey)
+                ->get();
+        });
+
+        // Dispatch event ke frontend untuk memastikan UI juga terupdate
+        $this->dispatch('refreshProductStock');
     }
+
 
     public function render()
     {

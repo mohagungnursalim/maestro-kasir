@@ -91,7 +91,7 @@ class Product extends Component
                         ->orWhere('products.price', 'like', '%' . $this->search . '%')
                         ->orWhere('products.description', 'like', '%' . $this->search . '%');
                 })
-                ->orderByDesc('products.id')
+                ->orderByDesc('products.sold_count')
                 ->take($this->limit)
                 ->get();
         });
