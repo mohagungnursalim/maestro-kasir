@@ -285,7 +285,6 @@
                 <button 
                     type="button" 
                     wire:loading.remove 
-                    wire:target="queueReport('excel')" 
                     wire:click="queueReport('excel')" 
                     class="text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:outline-none focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center disabled:opacity-50 disabled:cursor-not-allowed"
                     x-bind:disabled="!$wire.startDate || !$wire.endDate">
@@ -342,6 +341,7 @@
     }
 </script>
 
+{{-- Redirect setelah 3 detik --}}
 <script>
     Livewire.on('notify', () => {
         let countdown = 3; // Mulai dari 3 detik
