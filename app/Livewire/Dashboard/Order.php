@@ -6,6 +6,7 @@ use Livewire\Component;
 use App\Models\Product;
 use App\Models\Order as ModelsOrder;
 use App\Models\TransactionDetail;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
@@ -122,6 +123,18 @@ class Order extends Component
     // Proses Order
     public function processOrder()
     {
+        $userKey = 'order-process:user-' . Auth::id(); // Key unik per user
+        $maxAttempts = 5; // Maksimal 5 request dalam 2 detik
+        $decaySeconds = 2; // Reset setelah 2 detik
+
+        if (RateLimiter::tooManyAttempts($userKey, $maxAttempts)) {
+            $this->dispatch('errorPayment', 'Terlalu banyak permintaan, coba lagi dalam 2 detik.');
+            return;
+        }
+
+        RateLimiter::hit($userKey, $decaySeconds);
+
+
         if (empty($this->cart)) {
             $this->dispatch('nullPaymentSelected');
             return;
@@ -216,6 +229,7 @@ class Order extends Component
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error($e->getMessage());
+
             $this->dispatch('errorPayment');
         }
     }
