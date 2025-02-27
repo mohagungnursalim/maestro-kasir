@@ -328,7 +328,10 @@ class Product extends Component
     
         // Perbarui cache produk sesuai pencarian
         $cacheKey = "products_{$this->search}_{$this->limit}";
-    
+        
+        // Hapus cache lama sebelum memperbarui
+        Cache::forget($cacheKey);
+        
         $products = DB::table('products')
             ->leftJoin('suppliers', 'products.supplier_id', '=', 'suppliers.id')
             ->select(
@@ -349,7 +352,7 @@ class Product extends Component
                       ->orWhere('products.price', 'like', '%' . $this->search . '%')
                       ->orWhere('products.description', 'like', '%' . $this->search . '%');
             })
-            ->orderBy('products.created_at', 'desc')
+            ->orderBy('products.sold_count')
             ->limit($this->limit)
             ->get();
     
