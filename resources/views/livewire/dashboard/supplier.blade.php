@@ -124,7 +124,7 @@
                                     <div>
                                         <button wire:click="deleteConfirmation({{ $supplier->id }})"
                                             class="mb-2 bg-red-100 hover:bg-red-200 text-red-800 text-xs font-semibold me-2 px-2.5 py-0.5 rounded border border-red-400 inline-flex items-center justify-center">
-                                            Delete
+                                            Hapus
                                         </button>
                                     </div>
                                 </td>
