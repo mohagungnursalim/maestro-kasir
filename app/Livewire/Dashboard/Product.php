@@ -68,9 +68,15 @@ class Product extends Component
     {
         $ttl = 31536000; // TTL cache selama 1 tahun
         $this->loaded = true;
-    
+
         // Cache key unik berdasarkan pencarian & limit
         $cacheKey = "products_{$this->search}_{$this->limit}";
+
+        // Hapus cache sebelum mengambil data jika produk diperbarui
+        if (!Cache::has($cacheKey)) {
+            $this->refreshCache();
+        }
+
         $this->products = Cache::remember($cacheKey, $ttl, function () {
             return DB::table('products')
                 ->leftJoin('suppliers', 'products.supplier_id', '=', 'suppliers.id')
@@ -83,6 +89,7 @@ class Product extends Component
                     'products.stock',
                     'products.unit',
                     'products.image',
+                    'products.supplier_id', // Tambahkan supaya konsisten
                     'suppliers.name as supplier_name'
                 )
                 ->where(function ($query) {
@@ -317,21 +324,21 @@ class Product extends Component
         $this->dispatch('productUpdated');
         $this->dispatch('deleteSuccess');
     }
-    
+
     protected function refreshCache()
     {
         $ttl = 31536000; 
-    
+
         // Perbarui total produk
         $totalProducts = DB::table('products')->count();
         Cache::put('totalProducts', $totalProducts, $ttl);
-    
+
         // Perbarui cache produk sesuai pencarian
         $cacheKey = "products_{$this->search}_{$this->limit}";
-        
+
         // Hapus cache lama sebelum memperbarui
         Cache::forget($cacheKey);
-        
+
         $products = DB::table('products')
             ->leftJoin('suppliers', 'products.supplier_id', '=', 'suppliers.id')
             ->select(
@@ -348,20 +355,20 @@ class Product extends Component
             )
             ->where(function ($query) {
                 $query->where('products.name', 'like', '%' . $this->search . '%')
-                      ->orWhere('products.sku', 'like', '%' . $this->search . '%')
-                      ->orWhere('products.price', 'like', '%' . $this->search . '%')
-                      ->orWhere('products.description', 'like', '%' . $this->search . '%');
+                    ->orWhere('products.sku', 'like', '%' . $this->search . '%')
+                    ->orWhere('products.price', 'like', '%' . $this->search . '%')
+                    ->orWhere('products.description', 'like', '%' . $this->search . '%');
             })
             ->orderBy('products.sold_count')
             ->limit($this->limit)
             ->get();
-    
+
         Cache::put($cacheKey, $products, $ttl);
+
+        // 🚀 Tambahkan ini supaya Livewire langsung refresh data
+        $this->loadInitialProducts();
     }
 
-    
-
-    
     protected function removeCache()
     {
         // Key cache produk yang relevan
