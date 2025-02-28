@@ -260,11 +260,15 @@ class Product extends Component
             $data['image'] = $newImagePath;
         }
     
-        // Update produk dengan Query Builder
+       // Update produk dengan Query Builder
         DB::table('products')->where('id', $this->productId)->update($data);
         
-    
-        $this->refreshCache();
+        $this->refreshCache(); // Perbarui cache produk
+
+        $this->loadInitialProducts(); // Perbarui data produk
+
+        $this->selectedProduct = collect($this->products)->firstWhere('id', $this->productId); // Perbarui data produk yang dipilih
+
         $this->dispatch('productUpdated');
         $this->dispatch('updatedSuccess');
     }
