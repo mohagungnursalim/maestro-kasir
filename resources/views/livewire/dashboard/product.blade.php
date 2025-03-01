@@ -140,7 +140,7 @@
                                         {{ $product->name }}
                                     </td>
                                     <td class="px-6 py-4 text-center">{{ $product->sku }}</td>
-                                    <td class="px-6 py-4 text-center">{{ $product->supplier_name }}</td> 
+                                    <td class="px-6 py-4 text-center">{{ $product->supplier_name ?? '-'}}</td> 
                                     <td class="px-6 py-4 text-center">Rp{{ number_format($product->price, 0, ',', '.') }}</td>
                                     <td class="px-6 py-4 text-center">{{ $product->stock }}</td>
                                     <td class="px-6 py-4 text-center">{{ $product->unit }}</td>
@@ -460,40 +460,34 @@
                     </div>
 
 
-                    
-                <div x-data="supplierSelectUpdate()" 
-                    x-init='updateSupplier(@json(["id" => $supplier_idUpdate, "name" => $supplierName]))'
-                    class="relative">
-                   <label for="supplier_idUpdate" class="block mb-2 text-sm font-medium text-gray-900">Supplier</label>
-               
-                   <!-- Input Pencarian -->
-                   <input id="supplier_idUpdate" type="text" x-model="search" @input.debounce="fetchSuppliers()" placeholder="Cari Supplier..."
-                       class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full">
-               
-                   <!-- Pesan Loading -->
-                   <div x-show="loading" class="text-sm text-gray-500 mt-1">
-                       Mencari..
-                   </div>
-               
-                   <!-- Dropdown Pilihan Supplier -->
-                   <ul x-show="suppliers.length > 0" @click.outside="suppliers = []"
-                       class="absolute z-10 bg-white border rounded-md w-full mt-1 max-h-48 overflow-auto shadow-lg">
-                       <template x-for="supplier in suppliers" :key="supplier.id">
-                           <li @click="selectSupplier(supplier)" 
-                               x-text="supplier.name" 
-                               class="cursor-pointer hover:bg-gray-200 px-4 py-2">  
-                           </li>
-                       </template>
-                   </ul>
-               
-                   <!-- Hidden Input untuk Livewire -->
-                   <input type="hidden" x-model="selectedSupplierId" name="supplier_idUpdate" wire:model="supplier_idUpdate">
-               
-                   @error('supplier_idUpdate') 
-                       <span class="text-red-500 text-xs">{{ $message }}</span>
-                   @enderror
-                </div>
                    
+                    <div x-data="supplierSelectUpdate()" 
+                        x-init='updateSupplier(@json(["id" => $supplier_idUpdate, "name" => $supplierName]))'
+                        class="relative">
+                        <label for="supplier_idUpdate" class="block mb-2 text-sm font-medium text-gray-900">Supplier</label>
+
+                        <input id="supplier_idUpdate" type="text" x-model="search" @input.debounce="fetchSuppliers()" placeholder="Cari Supplier..."
+                            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full">
+
+                        <div x-show="loading" class="text-sm text-gray-500 mt-1">Mencari..</div>
+
+                        <ul x-show="suppliers.length > 0" @click.outside="suppliers = []"
+                            class="absolute z-10 bg-white border rounded-md w-full mt-1 max-h-48 overflow-auto shadow-lg">
+                            <template x-for="supplier in suppliers" :key="supplier.id">
+                                <li @click="selectSupplier(supplier)" 
+                                    x-text="supplier.name" 
+                                    class="cursor-pointer hover:bg-gray-200 px-4 py-2">
+                                </li>
+                            </template>
+                        </ul>
+
+                        <input type="hidden" x-model="selectedSupplierId" name="supplier_idUpdate" wire:model="supplier_idUpdate">
+
+                        @error('supplier_idUpdate') 
+                            <span class="text-red-500 text-xs">{{ $message }}</span>
+                        @enderror
+                    </div>
+
 
                     <div class="sm:col-span-2" x-data="imageUploader()" x-init="init()">
                         <!-- Input Upload -->
@@ -958,7 +952,8 @@
     }
 </script>
 
-{{-- Script search supplier modal Edit --}}
+
+
 <script>
     function supplierSelectUpdate() {
         return {
@@ -969,24 +964,27 @@
             timeout: null,
 
             updateSupplier(supplier) {
-                this.selectedSupplierId = supplier.id ?? null;
-                this.search = supplier.name ?? '';
+                if (supplier && supplier.id) {
+                    this.selectedSupplierId = supplier.id;
+                    this.search = supplier.name;
+                }
             },
 
             fetchSuppliers() {
                 clearTimeout(this.timeout);
 
                 this.timeout = setTimeout(async () => {
-                    if (this.search.length < 1) {
-                        this.suppliers = [];
-                        return;
-                    }
+                    if (this.search.trim().length < 1) return; // Jangan kosongkan suppliers
 
                     this.loading = true;
 
                     try {
                         let response = await fetch(`/api/suppliers?search=${this.search}`);
-                        this.suppliers = await response.json();
+                        let data = await response.json();
+
+                        if (data.length > 0) {
+                            this.suppliers = data;
+                        }
                     } catch (error) {
                         console.error('Error fetching suppliers:', error);
                     }
@@ -996,13 +994,19 @@
             },
 
             selectSupplier(supplier) {
+                if (!supplier || !supplier.id) {
+                    return;
+                }
+
+             
                 this.selectedSupplierId = supplier.id;
                 this.search = supplier.name;
                 this.suppliers = [];
 
-                // Mengupdate data Livewire
-                @this.set('supplier_idUpdate', supplier.id); // Mengirim id baru ke Livewire
-                @this.set('supplierName', supplier.name);   // Mengirim nama baru ke Livewire (Jika perlu)
+                // Kirim update ke Livewire
+                @this.set('supplier_idUpdate', supplier.id);
+                @this.set('supplierName', supplier.name);
+                
             }
         };
     }

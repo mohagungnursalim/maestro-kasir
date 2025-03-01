@@ -178,6 +178,48 @@ class Product extends Component
     }
 
     
+    // public function editModal($id)
+    // {
+    //     $product = collect($this->products)->firstWhere('id', $id);
+
+    //     if (!$product) {
+    //         $product = DB::table('products')
+    //             ->leftJoin('suppliers', 'products.supplier_id', '=', 'suppliers.id')
+    //             ->select(
+    //                 'products.id',
+    //                 'products.name',
+    //                 'products.sku',
+    //                 'products.price',
+    //                 'products.description',
+    //                 'products.stock',
+    //                 'products.unit',
+    //                 'products.image',
+    //                 'products.supplier_id',
+    //                 'suppliers.name as supplier_name'
+    //             )
+    //             ->where('products.id', $id)
+    //             ->first();
+    //     }
+
+    //     if (!$product) {
+    //         abort(404, 'Produk tidak ditemukan');
+    //     }
+
+    //     $this->selectedProduct = $product;
+    //     $this->productId = $product->id;
+    //     $this->nameUpdate = $product->name;
+    //     $this->skuUpdate = $product->sku;
+    //     $this->priceUpdate = $product->price;
+    //     $this->descriptionUpdate = $product->description;
+    //     $this->stockUpdate = $product->stock;
+    //     $this->unitUpdate = $product->unit;
+    //     $this->currentImage = $product->image;
+    //     $this->supplier_idUpdate = $product->supplier_id ?? null; 
+    //     $this->supplierName = $product->supplier_name ?? '-';
+
+    //     $this->dispatch('showEditModal');
+    // }
+    
     public function editModal($id)
     {
         $product = collect($this->products)->firstWhere('id', $id);
@@ -205,6 +247,8 @@ class Product extends Component
             abort(404, 'Produk tidak ditemukan');
         }
 
+       
+
         $this->selectedProduct = $product;
         $this->productId = $product->id;
         $this->nameUpdate = $product->name;
@@ -219,7 +263,7 @@ class Product extends Component
 
         $this->dispatch('showEditModal');
     }
-    
+
     public function update()
     {
 
