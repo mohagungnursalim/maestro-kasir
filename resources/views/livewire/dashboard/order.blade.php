@@ -1,22 +1,22 @@
 <div class="py-12">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <section class="bg-white py-8 antialiased dark:bg-gray-900 md:py-16">
+        <section class="bg-white py-8 antialiased md:py-16">
             <div class="mx-auto max-w-screen-lg px-4">
                 <!-- Pencarian Produk -->
                 <div>
                     <form wire:submit.prevent="searchProduct" class="max-w-md mx-auto">
                         <label for="search"
-                            class="mb-2 text-sm font-medium text-gray-900 sr-only dark:text-white">Search</label>
+                            class="mb-2 text-sm font-medium text-gray-900 sr-only">Search</label>
                         <div class="relative">
                             <div class="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
-                                <svg class="w-4 h-4 text-gray-500 dark:text-gray-400" aria-hidden="true"
+                                <svg class="w-4 h-4 text-gray-500" aria-hidden="true"
                                     xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20">
                                     <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
                                         stroke-width="2" d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z" />
                                 </svg>
                             </div>
                             <input wire:model="search" type="search" id="search" name="search"
-                                class="block w-full p-4 ps-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                                class="block w-full p-4 ps-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500"
                                 placeholder="Cari produk.." />
                             <button wire:loading.remove wire:target='search' type="submit"
                                 class="text-white absolute end-2.5 bottom-2.5 bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-4 py-2">Cari</button>
@@ -79,25 +79,25 @@
 
 
                 <!-- Keranjang Belanja -->
-                <h2 class="text-xl font-semibold text-gray-900 dark:text-white sm:text-2xl mt-6">Pesanan</h2>
+                <h2 class="text-xl font-semibold text-gray-900 sm:text-2xl mt-6">Pesanan</h2>
                 <div class="mt-6 sm:mt-8 md:gap-6 lg:flex lg:items-start">
                     <div class="w-full lg:w-2/3">
                         <div class="space-y-6">
                             @foreach ($cart as $index => $item)
                             <div
-                                class="rounded-lg border border-gray-200 bg-white p-4 shadow-sm dark:border-gray-700 dark:bg-gray-800 md:p-6">
+                                class="rounded-lg border border-gray-200 bg-white p-4 shadow-sm md:p-6">
                                 <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
                                     <div class="flex-1">
                                         <span
-                                            class="text-base font-medium text-gray-900 dark:text-white">{{ $item['name'] }}</span>
+                                            class="text-base font-medium text-gray-900">{{ $item['name'] }}</span>
                                         <div class="flex items-center gap-4 mt-2">
                                             <button wire:loading.remove wire:target='removeFromCart({{ $index }})'
                                                 wire:click="removeFromCart({{ $index }})"
                                                 onclick="event.stopPropagation(); playSelectSound()" type="button"
-                                                class="text-sm text-red-600 hover:underline dark:text-red-500">Hapus</button>
+                                                class="text-sm text-red-600 hover:underline">Hapus</button>
                                             <button wire:loading wire:target='removeFromCart({{ $index }})'
                                                 type="button"
-                                                class="text-sm text-red-600 hover:underline dark:text-red-500">
+                                                class="text-sm text-red-600 hover:underline">
                                                 Hapus
                                                 <svg class="inline w-4 h-4 text-gray-900 animate-spin ml-2"
                                                     xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -122,7 +122,7 @@
                                                         }, 500);
                                                     }"
                                                 class="inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-md border border-gray-300 bg-gray-100 hover:bg-gray-200 focus:outline-none">
-                                                <svg class="h-2.5 w-2.5 text-gray-900 dark:text-white"
+                                                <svg class="h-2.5 w-2.5 text-gray-900"
                                                     aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none"
                                                     viewBox="0 0 18 18">
                                                     <path stroke="currentColor" stroke-linecap="round"
@@ -146,7 +146,7 @@
                                                             }, 500);
                                                         "
                                                 class="inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-md border border-gray-300 bg-gray-100 hover:bg-gray-200 focus:outline-none">
-                                                <svg class="h-2.5 w-2.5 text-gray-900 dark:text-white"
+                                                <svg class="h-2.5 w-2.5 text-gray-900"
                                                     aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none"
                                                     viewBox="0 0 18 18">
                                                     <path stroke="currentColor" stroke-linecap="round"
@@ -158,7 +158,7 @@
                                         </div>
 
                                         <div class="text-end md:order-4 md:w-32">
-                                            <p class="text-base font-bold text-gray-900 dark:text-white">
+                                            <p class="text-base font-bold text-gray-900">
                                                 Rp{{ number_format($item['price'] * $item['quantity'], 0, ',', '.') }}
                                             </p>
                                         </div>
@@ -173,40 +173,247 @@
                     <!-- Total dan Pembayaran -->
                     <div class="w-full lg:w-1/3 mt-6 lg:mt-0">
                         <div
-                            class="rounded-lg border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800">
-                            <p class="text-red-500 text-sm">*Harap terima dahulu uangnya baru proses pembayaran!</p>
+                            class="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
+                            <p class="text-red-500 text-sm">*Harap terima uangnya sebelum proses pembayaran dimulai!</p>
                             <div class="space-y-4 mt-4">
-                                <div>
-                                    <label for="customerMoney"
-                                        class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Uang
-                                        Pelanggan</label>
-                                    <input type="number" id="customerMoney" name="customerMoney"
-                                        wire:model="customerMoney"
-                                        class="block w-full p-2 text-gray-900 border border-gray-300 rounded-lg bg-gray-50 text-xs focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                                        placeholder="Masukkan uang pelanggan...">
+                                
+                                {{-- <div x-data="{ 
+                                        paymentMethod: @entangle('payment_method'), 
+                                        isCash() { return this.paymentMethod === 'cash'; }
+                                    }">
+                                    <!-- Metode Pembayaran -->
+                                    <div>
+                                        <select @if (empty($cart)) disabled @endif
+                                            x-model="paymentMethod"
+                                            wire:model="payment_method"
+                                            class="block py-2.5 px-0 w-full text-sm text-gray-500 bg-transparent border-0 border-b-2 
+                                                   border-gray-200 appearance-none focus:outline-none focus:ring-0 
+                                                   focus:border-gray-200 peer disabled:cursor-not-allowed">
+                                            
+                                            <option value="cash">Tunai</option>
+                                            <option value="credit_card">Kartu Kredit</option>
+                                            <option value="debit_card">Kartu Debit</option>
+                                
+                                            <optgroup label="E-Wallet">
+                                                <option value="ewallet">E-Wallet (Umum)</option>
+                                                <option value="gopay">GoPay</option>
+                                                <option value="ovo">OVO</option>
+                                                <option value="dana">DANA</option>
+                                                <option value="linkaja">LinkAja</option>
+                                                <option value="shopeepay">ShopeePay</option>
+                                                <option value="grabpay">GrabPay</option>
+                                            </optgroup>
+                                
+                                            <optgroup label="Transfer Bank">
+                                                <option value="bca">BCA</option>
+                                                <option value="bri">BRI</option>
+                                                <option value="mandiri">Mandiri</option>
+                                                <option value="bni">BNI</option>
+                                            </optgroup>
+                                
+                                        </select>
+                                    </div>
+                                
+                                    <!-- Input Uang Pelanggan -->
+                                    <div class="mt-3">
+                                        <label for="customerMoney" class="block mb-2 text-sm font-medium text-gray-900">Uang Pelanggan</label>
+                                        <input @if (empty($cart)) disabled @endif
+                                            type="number" 
+                                            id="customerMoney" 
+                                            name="customerMoney"
+                                            wire:model.live.debounce.300ms="customerMoney"
+                                            class="block w-full p-2 text-gray-900 border border-gray-300 rounded-lg bg-gray-50 text-xs 
+                                                   focus:ring-blue-500 focus:border-blue-500 disabled:cursor-not-allowed"
+                                            placeholder="Masukkan uang pelanggan...">
+                                    </div>
+                                </div> --}}
+                                
+                                <div x-data="{ 
+                                        paymentMethod: @entangle('payment_method'), 
+                                        isCash() { return this.paymentMethod === 'cash'; }
+                                    }">
+                                    <!-- Metode Pembayaran -->
+                                    <div>
+                                        <select 
+                                            x-model="paymentMethod"
+                                            wire:model="payment_method"
+                                            :disabled="@json(!$cartNotEmpty)"
+                                            class="block py-2.5 px-0 w-full text-sm text-gray-500 bg-transparent border-0 border-b-2 
+                                                   border-gray-200 appearance-none focus:outline-none focus:ring-0 
+                                                   focus:border-gray-200 peer disabled:cursor-not-allowed">
+                                            
+                                            <option value="cash">Tunai</option>
+                                            <option value="credit_card">Kartu Kredit</option>
+                                            <option value="debit_card">Kartu Debit</option>
+                                
+                                            <optgroup label="E-Wallet">
+                                                <option value="ewallet">E-Wallet (Umum)</option>
+                                                <option value="gopay">GoPay</option>
+                                                <option value="ovo">OVO</option>
+                                                <option value="dana">DANA</option>
+                                                <option value="linkaja">LinkAja</option>
+                                                <option value="shopeepay">ShopeePay</option>
+                                                <option value="grabpay">GrabPay</option>
+                                            </optgroup>
+                                
+                                            <optgroup label="Transfer Bank">
+                                                <option value="bca">BCA</option>
+                                                <option value="bri">BRI</option>
+                                                <option value="mandiri">Mandiri</option>
+                                                <option value="bni">BNI</option>
+                                            </optgroup>
+                                
+                                        </select>
+                                    </div>
+                                
+                                    <!-- Input Uang Pelanggan -->
+                                    <div class="mt-3">
+                                        <label for="customerMoney" class="block mb-2 text-sm font-medium text-gray-900">Uang Pelanggan</label>
+                                        <input 
+                                            type="number" 
+                                            id="customerMoney" 
+                                            name="customerMoney"
+                                            wire:model.live.debounce.300ms="customerMoney"
+                                            :disabled="@json(!$cartNotEmpty) || !isCash()"
+                                            class="block w-full p-2 text-gray-900 border border-gray-300 rounded-lg bg-gray-50 text-xs 
+                                                   focus:ring-blue-500 focus:border-blue-500 disabled:cursor-not-allowed"
+                                            placeholder="Masukkan uang pelanggan...">
+                                    </div>
                                 </div>
+                                
+                                
+
+                                
+                                {{-- Subtotal --}}
                                 <dl class="flex justify-between">
                                     <dt class="text-gray-500">Sub Total</dt>
-                                    <dd class="text-gray-900">Rp{{ number_format($subtotal, 0, ',', '.') }}</dd>
+                                    @if (!empty($cart)) <span class="font-bold p-2 text-gray-900 border border-gray-300 rounded-lg bg-gray-50 text-xs">Rp{{ number_format($subtotal, 0, ',', '.') }}</span> @endif
                                 </dl>
-                                <dl class="flex justify-between">
-                                    <dt class="text-gray-500">PPN (11%)</dt>
-                                    <dd class="text-red-500">Rp{{ number_format($tax, 0, ',', '.') }}</dd>
-                                </dl>
-                                <dl class="flex justify-between border-t pt-2">
-                                    <dt class="font-bold text-gray-900">Total</dt>
-                                    <dd class="font-bold text-gray-900">Rp{{ number_format($total, 0, ',', '.') }}</dd>
-                                </dl>
-                                <div>
-                                    <dt class="text-gray-500">Kembalian</dt>
-                                    <button disabled
-                                        class="relative inline-flex items-center justify-center p-0.5 mb-2 me-2 overflow-hidden text-sm font-medium text-gray-900 rounded-lg group bg-gradient-to-br from-cyan-500 to-blue-500 hover:text-gray-900 focus:ring-4 focus:outline-none focus:ring-cyan-200">
-                                        <span
-                                            class="relative px-5 py-2.5 transition-all ease-in duration-75 bg-white dark:bg-gray-900 rounded-md">
-                                            Rp{{ number_format($change, 0, ',', '.') }}
+
+                                {{-- Pajak --}}
+                                <div x-data="{ 
+                                            useTax: @entangle('use_tax'), 
+                                            taxPercentage: @entangle('tax_percentage'),
+                                            resetTax() {
+                                                if (!this.useTax) {
+                                                    $wire.tax_percentage = 0;
+                                                    $wire.call('calculateTotal'); // 🚀 Paksa Livewire update total setelah reset pajak
+                                                } 
+                                            }
+                                        }">
+                                
+                                    <!-- Toggle Pajak -->
+                                    <label class="inline-flex items-center me-5 peer-disabled:cursor-not-allowed cursor-pointer">
+                                        <input type="checkbox" class="sr-only peer disabled:cursor-not-allowed" 
+                                            x-model="useTax" 
+                                            x-on:change="resetTax()"
+                                            wire:model="use_tax">
+                                        <div class="relative w-11 h-6 bg-gray-200 rounded-full peer peer-focus:ring-4 
+                                                    peer-focus:ring-purple-300 peer-checked:after:translate-x-full 
+                                                    rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] 
+                                                    after:absolute after:top-0.5 after:start-[2px] after:bg-white after:border-gray-300 after:border 
+                                                    after:rounded-full after:h-5 after:w-5 after:transition-all 
+                                                    peer-checked:bg-purple-600 peer-disabled:bg-gray-400">
+                                        </div>
+                                        <span class="ms-3 text-sm font-medium text-gray-900 peer-disabled:text-gray-400">
+                                            Gunakan Pajak
                                         </span>
-                                    </button>
+                                    </label>
+                                
+                                    <!-- Input Pajak (Persentase) -->
+                                    <div class="mt-2 flex space-x-2" x-show="useTax" x-transition>
+                                        <input @if (empty($cart)) disabled @endif type="number" id="tax_percentage" name="tax_percentage"
+                                            wire:model.live.debounce.300ms="tax_percentage"
+                                            x-on:input="$wire.call('calculateTotal'); // 🚀 Update total saat pajak diubah"
+                                            class="w-full p-2 disabled:cursor-not-allowed text-gray-900 border border-gray-300 rounded-lg bg-gray-50 text-xs 
+                                                   focus:ring-blue-500 focus:border-blue-500"
+                                            placeholder="Masukkan pajak (contoh: 11 untuk 11%)">
+                                        <span class="p-2 text-gray-900 border border-gray-300 rounded-lg bg-gray-50 text-xs">%</span>
+                                    </div>
+                                
+                                    <!-- Pajak dalam Rupiah (Hanya Ditampilkan) -->
+                                    <dl class="flex justify-between mt-3" x-show="useTax" x-transition>
+                                        <dt class="text-gray-500">PPN (<span x-text="useTax ? taxPercentage : 0"></span>%)</dt>
+                                        @if (!empty($cart)) <span class="font-bold p-2 text-red-500 border border-gray-300 rounded-lg bg-gray-50 text-xs">Rp{{ number_format($tax, 0, ',', '.') }}</span> @endif
+                                    </dl>
+                                
                                 </div>
+                                
+                                {{-- Diskon --}}
+                                <div x-data="{ 
+                                            useDiscount: false, 
+                                            discountType: @entangle('discount_type'),
+                                            resetDiscount() {
+                                                if (!this.useDiscount) {
+                                                    $wire.discount_value = 0; 
+                                                    this.discountType = 'percentage';
+                                                    $wire.call('updateTotal'); // 🚀 Paksa Livewire update total setelah reset
+                                                }
+                                            }
+                                        }">
+                                    <!-- Toggle Diskon -->
+                                        <label class="inline-flex items-center me-5 peer-disabled:cursor-not-allowed cursor-pointer">
+                                            <input 
+                                                type="checkbox" 
+                                                class="sr-only peer disabled:cursor-not-allowed" 
+                                                x-model="useDiscount" 
+                                                x-on:change="resetDiscount()">
+                                            <div class="relative w-11 h-6 bg-gray-200 rounded-full peer peer-focus:ring-4 
+                                                        peer-focus:ring-purple-300 peer-checked:after:translate-x-full 
+                                                        rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] 
+                                                        after:absolute after:top-0.5 after:start-[2px] after:bg-white after:border-gray-300 after:border 
+                                                        after:rounded-full after:h-5 after:w-5 after:transition-all 
+                                                        peer-checked:bg-purple-600 peer-disabled:bg-gray-400">
+                                            </div>
+                                            <span class="ms-3 text-sm font-medium text-gray-900 peer-disabled:text-gray-400">
+                                                Gunakan Diskon
+                                            </span>
+                                        </label>
+
+
+                                    
+                                        <!-- Input Diskon (Disembunyikan jika tidak dicentang) -->
+                                        <div class="mt-2 flex space-x-2" x-show="useDiscount" x-transition>
+                                            <input @if (empty($cart)) disabled @endif type="number" id="discount_value" name="discount_value" 
+                                                wire:model.live.debounce.300ms="discount_value"
+                                                x-on:input="
+                                                    if ($event.target.value === '') $event.target.value = 0;
+                                                    discountType = ($event.target.value > 100) ? 'nominal' : 'percentage';
+                                                    $wire.call('updateTotal'); // 🚀 Setiap input langsung update total
+                                                "
+                                                class="w-full p-2 disabled:cursor-not-allowed text-gray-900 border border-gray-300 rounded-lg bg-gray-50 text-xs 
+                                                    focus:ring-blue-500 focus:border-blue-500"
+                                                placeholder="Masukkan diskon...">
+                                    
+                                            <select @if (empty($cart)) disabled @endif wire:model.live.debounce.300ms="discount_type" 
+                                                x-model="discountType"
+                                                class="disabled:cursor-not-allowed border rounded-lg text-gray-900 p-2 text-xs bg-gray-50">
+                                                <option value="percentage">%</option>
+                                                <option value="nominal">Rp</option>
+                                            </select>
+                                        </div>
+
+                                    <dl class="flex justify-between mt-3" x-show="useDiscount" x-transition>
+                                        <dt class="text-gray-500">Diskon</dt>
+                                        @if (!empty($cart)) <span class="font-bold p-2 text-gray-900 border border-gray-300 rounded-lg bg-gray-50 text-xs">
+                                            @if($discount_type == 'percentage') Diskon {{ $discount_value }}% 
+                                            @else Diskon Rp{{ number_format($discount_value, 0, ',', '.') }}
+                                            @endif</span> 
+                                        @endif
+                                    </dl>
+                                </div>
+
+                                {{-- Total Bayar --}}
+                                <dl class="flex justify-between border-t pt-2">
+                                    <dt class="font-bold text-gray-900">Total Bayar</dt>
+                                    @if (!empty($cart)) <span class="font-bold p-2 text-gray-900 border border-blue-300 rounded-lg bg-blue-50 text-xs">Rp{{ number_format($total, 0, ',', '.') }}</span> @endif
+                                </dl>
+                                
+                                {{-- Uang Kembali --}}
+                                <dl class="flex justify-between">
+                                    <dt class="font-bold text-gray-900">Uang Kembali</dt>
+                                    @if (!empty($cart)) <span class="font-bold p-2 text-gray-900 border border-green-300 rounded-lg bg-green-50 text-xs">Rp{{ number_format($change, 0, ',', '.') }}</span> @endif
+                                </dl>
                             </div>
                             <div class="flex justify-center mt-4">
                                 <!-- Tombol Proses -->

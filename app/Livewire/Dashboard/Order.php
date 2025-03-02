@@ -18,10 +18,20 @@ class Order extends Component
     public $products = [];
     public $limitProducts = 5;
     public $limitKey = 8; // Limit cache key
-    public $cart = [];
+
+    public $payment_method = 'cash'; // Metode pembayaran default
     public $customerMoney = 0;
-    public $subtotal = 0;
+    
+    public $discount_type = 'percentage';   // Tipe diskon (percentage/nominal)
+    public $discount_value = 0; // Nilai diskon
+    public $discount = 0; // Total diskon
+    
     public $tax = 0;
+    public $tax_percentage = 0; // Pajak default dalam persen
+    
+    public $cart = [];
+    public $cartNotEmpty = false;
+    public $subtotal = 0;
     public $total = 0;
     public $change = 0;
 
@@ -29,6 +39,7 @@ class Order extends Component
         'refreshProductStock' => 'searchProduct',
     ];
 
+    // Pencarian produk
     public function searchProduct()
     {
         $ttl = 31536000;
@@ -47,9 +58,7 @@ class Order extends Component
         });
     }
 
-
-
-    // Tambahkan produk ke keranjang (Cache)
+    // ✅ Saat tambah produk ke cart, langsung update cartNotEmpty
     public function addToCart($productId)
     {
         $product = Product::findOrFail($productId); 
@@ -61,10 +70,12 @@ class Order extends Component
                 'quantity' => 1,
                 'subtotal' => $product->price, // Tambahkan subtotal di awal
             ];
+            $this->cartNotEmpty = true; // ✅ Langsung set true
             $this->calculateTotal();
         }
     }
 
+    // ✅ Auto-update cartNotEmpty saat cart diubah
     public function updatedCart($value, $key)
     {
         list($index, $field) = explode('.', $key);
@@ -72,8 +83,39 @@ class Order extends Component
         if ($field === 'quantity' && isset($this->cart[$index])) {
             $this->updateQuantity($index, $value);
         }
+    
+        $this->cartNotEmpty = !empty($this->cart);
     }
     
+
+    
+    // Perbarui metode pembayaran
+    public function updatedPaymentMethod($value)
+    {
+        $this->payment_method = $value;
+    }
+
+    // Reset diskon saat checkbox diskon diubah
+    public function updateTotal()
+    {
+       $this->calculateTotal();
+    }
+
+    // Perbarui total saat uang pelanggan berubah
+    public function updatedCustomerMoney($value)
+    {
+        $this->calculateChange();
+    }
+
+    // Perbarui total saat diskon berubah
+    public function updatedDiscountValue($value)
+    {
+        // Pastikan nilai tetap 0 jika input kosong
+        $this->discount_value = $value === '' ? 0 : (float) $value;
+        $this->calculateTotal();
+    }
+
+    // Tambahkan jumlah produk
     public function updateQuantity($index, $quantity)
     {
         if (isset($this->cart[$index])) {
@@ -93,19 +135,45 @@ class Order extends Component
             $this->calculateTotal();
             $this->customerMoney = 0;
             $this->change = 0;
+
+            $this->cartNotEmpty = false;
         }
     }
 
-    // Hitung subtotal, PPN, dan total
+
+    // Perbarui pajak saat persentase pajak berubah
+    public function updatedTaxPercentage($value)
+    {
+        $this->tax_percentage = $value === '' ? 0 : (float) $value;
+        $this->calculateTotal();
+    }
+    
+    // Hitung total belanja
     public function calculateTotal()
     {
-        $this->subtotal = array_reduce($this->cart, function ($carry, $item) {
-            return $carry + ($item['price'] * $item['quantity']);
-        }, 0);
-
-        $this->tax = $this->subtotal * 0.11;
-        $this->total = $this->subtotal + $this->tax;
+        $subtotal = collect($this->cart)->sum(fn($item) => $item['price'] * $item['quantity']);
+    
+        // Hitung diskon
+        if ($this->discount_type === 'percentage') {
+            $discount = ($subtotal * $this->discount_value) / 100;
+        } else {
+            $discount = $this->discount_value;
+        }
+    
+        // Hitung pajak berdasarkan persentase yang bisa diedit user
+        $taxRate = $this->tax_percentage / 100;
+        $tax = ($subtotal - $discount) * $taxRate;
+    
+        // Hitung total akhir
+        $this->subtotal = $subtotal;
+        $this->discount = $discount;
+        $this->tax = $tax; // Pajak dalam Rupiah
+        $this->total = $subtotal - $discount + $tax;
+    
+        // Hitung kembalian jika pelanggan sudah memasukkan uang
+        $this->change = max($this->customerMoney - $this->total, 0);
     }
+    
 
     // Hitung kembalian
     public function calculateChange()
@@ -144,11 +212,16 @@ class Order extends Component
         $customerMoney = (float) $this->customerMoney;
         $total = (float) $this->total;
 
-        if ($customerMoney < $total) {
-            $shortage = $total - $customerMoney;
-            $this->dispatch('insufficientPayment', $shortage);
-            return;
+        if ($this->payment_method === 'cash') {
+            if ($customerMoney < $total) {
+                $shortage = $total - $customerMoney;
+                $this->dispatch('insufficientPayment', $shortage);
+                return;
+            }
+        } else {
+            $this->customerMoney = $total;
         }
+
 
         DB::beginTransaction();
         try {
@@ -177,8 +250,9 @@ class Order extends Component
             //Simpan data order (tanpa detail produk)
             $order = ModelsOrder::create([
                 'user_id' => Auth::user()->id,
+                'payment_method' => $this->payment_method,
                 'tax' => $this->tax,
-                'discount' => 0,
+                'discount' => $this->discount,
                 'customer_money' => $this->customerMoney,
                 'change' => $this->change,
                 'grandtotal' => $this->total,
@@ -244,6 +318,11 @@ class Order extends Component
         $this->total = 0;
         $this->customerMoney = 0;
         $this->change = 0;
+        $this->discount_value = 0;
+        $this->discount_type = 'percentage';
+        $this->tax_percentage = 0;
+
+        $this->cartNotEmpty = false;
     }
 
     // Refresh Cache transaksi
@@ -259,8 +338,6 @@ class Order extends Component
 
         // Hapus cache total transaksi jika diperlukan
         Cache::forget('totalTransactions');
-
-        // Untuk lebih memastikan cache total transaksi diperbarui, kamu bisa melakukan reset cache lainnya jika diperlukan
     }
     
 
