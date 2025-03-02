@@ -61,7 +61,12 @@ class Order extends Component
     // ✅ Saat tambah produk ke cart, langsung update cartNotEmpty
     public function addToCart($productId)
     {
-        $product = Product::findOrFail($productId); 
+        $product = collect($this->products)->firstWhere('id', $productId);
+
+        if (!$product){
+            $product = Product::findOrFail($productId);
+        }
+
         if ($product) {
             $this->cart[] = [
                 'id' => $product->id,
