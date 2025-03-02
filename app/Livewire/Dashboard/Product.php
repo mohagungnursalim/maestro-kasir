@@ -3,6 +3,7 @@
 namespace App\Livewire\Dashboard;
 
 use App\Models\Product as ModelsProduct;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -89,6 +90,8 @@ class Product extends Component
                     'products.stock',
                     'products.unit',
                     'products.image',
+                    'products.created_at',
+                    'products.updated_at',
                     'products.supplier_id', // Tambahkan supaya konsisten
                     'suppliers.name as supplier_name'
                 )
@@ -176,49 +179,6 @@ class Product extends Component
         $this->dispatch('productUpdated');
         $this->dispatch('addedSuccess');
     }
-
-    
-    // public function editModal($id)
-    // {
-    //     $product = collect($this->products)->firstWhere('id', $id);
-
-    //     if (!$product) {
-    //         $product = DB::table('products')
-    //             ->leftJoin('suppliers', 'products.supplier_id', '=', 'suppliers.id')
-    //             ->select(
-    //                 'products.id',
-    //                 'products.name',
-    //                 'products.sku',
-    //                 'products.price',
-    //                 'products.description',
-    //                 'products.stock',
-    //                 'products.unit',
-    //                 'products.image',
-    //                 'products.supplier_id',
-    //                 'suppliers.name as supplier_name'
-    //             )
-    //             ->where('products.id', $id)
-    //             ->first();
-    //     }
-
-    //     if (!$product) {
-    //         abort(404, 'Produk tidak ditemukan');
-    //     }
-
-    //     $this->selectedProduct = $product;
-    //     $this->productId = $product->id;
-    //     $this->nameUpdate = $product->name;
-    //     $this->skuUpdate = $product->sku;
-    //     $this->priceUpdate = $product->price;
-    //     $this->descriptionUpdate = $product->description;
-    //     $this->stockUpdate = $product->stock;
-    //     $this->unitUpdate = $product->unit;
-    //     $this->currentImage = $product->image;
-    //     $this->supplier_idUpdate = $product->supplier_id ?? null; 
-    //     $this->supplierName = $product->supplier_name ?? '-';
-
-    //     $this->dispatch('showEditModal');
-    // }
     
     public function editModal($id)
     {
@@ -246,8 +206,6 @@ class Product extends Component
         if (!$product) {
             abort(404, 'Produk tidak ditemukan');
         }
-
-       
 
         $this->selectedProduct = $product;
         $this->productId = $product->id;
@@ -320,11 +278,30 @@ class Product extends Component
     public function detailModal($id)
     {
         $product = collect($this->products)->firstWhere('id', $id);
-    
+
         if (!$product) {
             $product = DB::table('products')
-                ->where('id', $id)
+                ->leftJoin('suppliers', 'products.supplier_id', '=', 'suppliers.id')
+                ->select(
+                    'products.id',
+                    'products.name',
+                    'products.sku',
+                    'products.price',
+                    'products.description',
+                    'products.stock',
+                    'products.unit',
+                    'products.image',
+                    'products.created_at',
+                    'products.updated_at',
+                    'products.supplier_id',
+                    'suppliers.name as supplier_name'
+                )
+                ->where('products.id', $id)
                 ->first();
+        }
+
+        if (!$product) {
+            abort(404, 'Produk tidak ditemukan');
         }
     
         $this->nameDetail = $product->name;
@@ -336,7 +313,10 @@ class Product extends Component
         $this->unitDetail = $product->unit;
         $this->created_at = $product->created_at;
         $this->updated_at = $product->updated_at;
-    
+        
+        $this->supplier_idUpdate = $product->supplier_id ?? null; 
+        $this->supplierName = $product->supplier_name ?? '-';
+
         $this->dispatch('showDetailModal');
     }
     
@@ -398,6 +378,8 @@ class Product extends Component
                 'products.stock',
                 'products.unit',
                 'products.image',
+                'products.created_at',
+                'products.updated_at',
                 'products.supplier_id',
                 'suppliers.name as supplier_name'
             )

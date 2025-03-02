@@ -365,6 +365,8 @@ class Order extends Component
                     'products.stock',
                     'products.unit',
                     'products.image',
+                    'products.created_at',
+                    'products.updated_at',
                     'suppliers.name as supplier_name'
                 )
                 ->where(function ($query) {

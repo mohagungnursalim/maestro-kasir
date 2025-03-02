@@ -177,57 +177,6 @@
                             <p class="text-red-500 text-sm">*Harap terima uangnya sebelum proses pembayaran dimulai!</p>
                             <div class="space-y-4 mt-4">
                                 
-                                {{-- <div x-data="{ 
-                                        paymentMethod: @entangle('payment_method'), 
-                                        isCash() { return this.paymentMethod === 'cash'; }
-                                    }">
-                                    <!-- Metode Pembayaran -->
-                                    <div>
-                                        <select @if (empty($cart)) disabled @endif
-                                            x-model="paymentMethod"
-                                            wire:model="payment_method"
-                                            class="block py-2.5 px-0 w-full text-sm text-gray-500 bg-transparent border-0 border-b-2 
-                                                   border-gray-200 appearance-none focus:outline-none focus:ring-0 
-                                                   focus:border-gray-200 peer disabled:cursor-not-allowed">
-                                            
-                                            <option value="cash">Tunai</option>
-                                            <option value="credit_card">Kartu Kredit</option>
-                                            <option value="debit_card">Kartu Debit</option>
-                                
-                                            <optgroup label="E-Wallet">
-                                                <option value="ewallet">E-Wallet (Umum)</option>
-                                                <option value="gopay">GoPay</option>
-                                                <option value="ovo">OVO</option>
-                                                <option value="dana">DANA</option>
-                                                <option value="linkaja">LinkAja</option>
-                                                <option value="shopeepay">ShopeePay</option>
-                                                <option value="grabpay">GrabPay</option>
-                                            </optgroup>
-                                
-                                            <optgroup label="Transfer Bank">
-                                                <option value="bca">BCA</option>
-                                                <option value="bri">BRI</option>
-                                                <option value="mandiri">Mandiri</option>
-                                                <option value="bni">BNI</option>
-                                            </optgroup>
-                                
-                                        </select>
-                                    </div>
-                                
-                                    <!-- Input Uang Pelanggan -->
-                                    <div class="mt-3">
-                                        <label for="customerMoney" class="block mb-2 text-sm font-medium text-gray-900">Uang Pelanggan</label>
-                                        <input @if (empty($cart)) disabled @endif
-                                            type="number" 
-                                            id="customerMoney" 
-                                            name="customerMoney"
-                                            wire:model.live.debounce.300ms="customerMoney"
-                                            class="block w-full p-2 text-gray-900 border border-gray-300 rounded-lg bg-gray-50 text-xs 
-                                                   focus:ring-blue-500 focus:border-blue-500 disabled:cursor-not-allowed"
-                                            placeholder="Masukkan uang pelanggan...">
-                                    </div>
-                                </div> --}}
-                                
                                 <div x-data="{ 
                                         paymentMethod: @entangle('payment_method'), 
                                         isCash() { return this.paymentMethod === 'cash'; }

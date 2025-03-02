@@ -84,7 +84,6 @@
                                 <th scope="col" class="px-6 py-3 text-center">Gambar</th>
                                 <th scope="col" class="px-6 py-3 text-center">Nama Produk</th>
                                 <th scope="col" class="px-6 py-3 text-center">Sku</th>
-                                <th scope="col" class="px-6 py-3 text-center">Supplier</th>
                                 <th scope="col" class="px-6 py-3 text-center">Harga</th>
                                 <th scope="col" class="px-6 py-3 text-center">Stok</th>
                                 <th scope="col" class="px-6 py-3 text-center">Satuan</th>
@@ -140,7 +139,6 @@
                                         {{ $product->name }}
                                     </td>
                                     <td class="px-6 py-4 text-center">{{ $product->sku }}</td>
-                                    <td class="px-6 py-4 text-center">{{ $product->supplier_name ?? '-'}}</td> 
                                     <td class="px-6 py-4 text-center">Rp{{ number_format($product->price, 0, ',', '.') }}</td>
                                     <td class="px-6 py-4 text-center">{{ $product->stock }}</td>
                                     <td class="px-6 py-4 text-center">{{ $product->unit }}</td>
@@ -616,7 +614,7 @@
                             <div class="mt-4">
                                 <p class="text-xs text-gray-600">Produk: {{ $nameDetail }}</p>
                                 <p class="text-xs text-gray-600">SKU: {{ $stockDetail }}</p>
-                                <p class="text-xs text-gray-600">Supplier: {{ optional($product->supplier)->name ?? '-' }}</p>
+                                <p class="text-xs text-gray-600">Supplier: {{ $supplierName }}</p>
                                 <p class="text-xs text-gray-600">Harga: Rp {{ number_format($priceDetail, 0, ',', '.') }}</p>
                                 <p class="text-xs text-gray-600">Stok: {{ $stockDetail }}</p>
                                 <p class="text-xs text-gray-600">Satuan: {{ $unitDetail }}</p>
