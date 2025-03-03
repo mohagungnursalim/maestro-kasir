@@ -182,26 +182,22 @@ class Product extends Component
     
     public function editModal($id)
     {
-        $product = collect($this->products)->firstWhere('id', $id);
-
-        if (!$product) {
-            $product = DB::table('products')
-                ->leftJoin('suppliers', 'products.supplier_id', '=', 'suppliers.id')
-                ->select(
-                    'products.id',
-                    'products.name',
-                    'products.sku',
-                    'products.price',
-                    'products.description',
-                    'products.stock',
-                    'products.unit',
-                    'products.image',
-                    'products.supplier_id',
-                    'suppliers.name as supplier_name'
-                )
-                ->where('products.id', $id)
-                ->first();
-        }
+        $product = DB::table('products')
+            ->leftJoin('suppliers', 'products.supplier_id', '=', 'suppliers.id')
+            ->select(
+                'products.id',
+                'products.name',
+                'products.sku',
+                'products.price',
+                'products.description',
+                'products.stock',
+                'products.unit',
+                'products.image',
+                'products.supplier_id',
+                'suppliers.name as supplier_name'
+            )
+            ->where('products.id', $id)
+            ->first();
 
         if (!$product) {
             abort(404, 'Produk tidak ditemukan');
@@ -277,28 +273,24 @@ class Product extends Component
     
     public function detailModal($id)
     {
-        $product = collect($this->products)->firstWhere('id', $id);
-
-        if (!$product) {
-            $product = DB::table('products')
-                ->leftJoin('suppliers', 'products.supplier_id', '=', 'suppliers.id')
-                ->select(
-                    'products.id',
-                    'products.name',
-                    'products.sku',
-                    'products.price',
-                    'products.description',
-                    'products.stock',
-                    'products.unit',
-                    'products.image',
-                    'products.created_at',
-                    'products.updated_at',
-                    'products.supplier_id',
-                    'suppliers.name as supplier_name'
-                )
-                ->where('products.id', $id)
-                ->first();
-        }
+        $product = DB::table('products')
+            ->leftJoin('suppliers', 'products.supplier_id', '=', 'suppliers.id')
+            ->select(
+                'products.id',
+                'products.name',
+                'products.sku',
+                'products.price',
+                'products.description',
+                'products.stock',
+                'products.unit',
+                'products.image',
+                'products.created_at',
+                'products.updated_at',
+                'products.supplier_id',
+                'suppliers.name as supplier_name'
+            )
+            ->where('products.id', $id)
+            ->first();
 
         if (!$product) {
             abort(404, 'Produk tidak ditemukan');
