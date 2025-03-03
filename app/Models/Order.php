@@ -16,6 +16,7 @@ class Order extends Model
         return $this->hasMany(TransactionDetail::class, 'order_id');
     }
 
+    // Relasi ke User (1 order hanya dimiliki oleh 1 user)
     public function user()
     {
         return $this->belongsTo(User::class);

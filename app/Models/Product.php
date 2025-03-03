@@ -11,13 +11,13 @@ class Product extends Model
     protected $guarded = ['id'];
     protected $table = 'products';
 
-    // Relasi ke Supplier
+    // Relasi ke Supplier (1 produk hanya dimiliki oleh 1 supplier)
     public function supplier()
     {
         return $this->belongsTo(Supplier::class);
     }
 
-    // Relasi ke TransactionDetail (1 produk bisa muncul di banyak detail transaksi)
+    // Relasi ke TransactionDetail (1 produk bisa dimiliki oleh banyak detail transaksi)
     public function transactionDetails(): HasMany
     {
         return $this->hasMany(TransactionDetail::class, 'product_id');
