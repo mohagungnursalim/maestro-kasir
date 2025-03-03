@@ -43,7 +43,7 @@ class Order extends Component
     public function searchProduct()
     {
         $ttl = 31536000;
-        $cacheKey = "products_{$this->search}_8";
+        $cacheKey = "products_{$this->search}_{$this->limitKey}";
 
         $this->products = Cache::remember($cacheKey, $ttl, function () {
             return Product::where(function ($query) {
