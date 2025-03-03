@@ -479,8 +479,6 @@
                             </template>
                         </ul>
 
-                        <input type="hidden" x-model="selectedSupplierId" name="supplier_idUpdate" wire:model="supplier_idUpdate">
-
                         @error('supplier_idUpdate') 
                             <span class="text-red-500 text-xs">{{ $message }}</span>
                         @enderror
@@ -951,8 +949,8 @@
 </script>
 
 
-
-<script>
+{{-- Script search supplier modal Edit --}}
+{{-- <script>
     function supplierSelectUpdate() {
         return {
             suppliers: [],
@@ -1008,7 +1006,70 @@
             }
         };
     }
+</script> --}}
+
+<script>
+    function supplierSelectUpdate() {
+        return {
+            suppliers: [],
+            search: '',
+            selectedSupplierId: null,
+            loading: false,
+            timeout: null,
+            isSelecting: false,
+
+            updateSupplier(supplier) {
+                if (supplier?.id) {
+                    this.selectedSupplierId = supplier.id;
+                    this.search = supplier.name;
+                }
+            },
+
+            fetchSuppliers() {
+                if (this.isSelecting) return; // Hindari pencarian saat memilih supplier
+                if (this.search.trim().length < 1) {
+                    this.suppliers = [];
+                    return;
+                }
+
+                this.loading = true;
+
+                clearTimeout(this.timeout);
+                this.timeout = setTimeout(async () => {
+                    try {
+                        let response = await fetch(`/api/suppliers?search=${encodeURIComponent(this.search)}`);
+                        let data = await response.json();
+
+                        this.suppliers = data.length > 0 ? data : [];
+                    } catch (error) {
+                        console.error('Error fetching suppliers:', error);
+                    } finally {
+                        this.loading = false;
+                    }
+                }, 300);
+            },
+
+            selectSupplier(supplier) {
+                if (!supplier?.id) return;
+
+                this.isSelecting = true; // Set flag agar fetchSuppliers tidak berjalan
+
+                this.selectedSupplierId = supplier.id;
+                this.search = supplier.name;
+                this.suppliers = [];
+
+                // Update ke Livewire
+                @this.set('supplier_idUpdate', supplier.id);
+                @this.set('supplierName', supplier.name);
+
+                setTimeout(() => this.isSelecting = false, 500); // Reset flag setelah 500ms
+            }
+        };
+    }
 </script>
+
+
+
 
 {{-- Script modal detail --}}
 <script>
