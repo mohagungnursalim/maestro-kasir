@@ -43,7 +43,7 @@
                                                 clip-rule="evenodd" />
                                         </svg>
                                     </div>
-                                    <input type="text" wire:model.live.debounce.500ms='search' placeholder="Masukan ID Order"
+                                    <input type="text" wire:model.live.debounce.500ms='search' placeholder="Masukan kata kunci.."
                                         class="block w-full p-2 pl-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-primary-500 focus:border-primary-500">
                                 </div>
                             </div>
@@ -96,11 +96,16 @@
                             <tr>
                                 <th scope="col" class="px-6 py-3">ID Order/Kasir</th>
                                 <th scope="col" class="px-6 py-3">Nama Produk</th>
+                                <th scope="col" class="px-6 py-3 text-right">Pembayaran</th>
+                                <th scope="col" class="px-6 py-3 text-right">Pajak</th>
+                                <th scope="col" class="px-6 py-3 text-right">Diskon</th>
+                                <th scope="col" class="px-6 py-3 text-right">Uang Pelanggan</th>
+                                <th scope="col" class="px-6 py-3 text-right">Kembalian</th>            
                                 <th scope="col" class="px-6 py-3 text-center">Jumlah</th>
-                                <th scope="col" class="px-6 py-3 text-right">Harga</th>
-                                <th scope="col" class="px-6 py-3 text-right">Sub Total</th>
+                                <th scope="col" class="px-6 py-3 text-center">Harga</th>
+                                <th scope="col" class="px-6 py-3 text-center">Sub Total</th>
+                                <th scope="col" class="px-6 py-3 text-center">Total</th>
                                 <th scope="col" class="px-6 py-3 text-center">Tanggal/Jam</th>
-                                <th scope="col" class="px-6 py-3 text-right">Total</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -142,29 +147,44 @@
                                 @endfor
                             @else
                             @forelse ($transactions as $orderId => $orderTransactions)
-                                @php
+                                {{-- @php
                                     // Hitung total transaksi per Order ID
                                     $orderTotal = collect($orderTransactions)->sum(fn($transaction) => $transaction->quantity * $transaction->price);
-                                @endphp
+                                @endphp --}}
                             
                                 {{-- Tampilkan ID Order hanya sekali --}}
                                 <tr class="bg-gray-200 font-bold">
-                                    <td class="px-6 py-4" colspan="5">
-                                        ID Order: {{ $orderId }} <br>
+                                    <td class="px-6 py-4">
+                                        ID Order: {{ $orderId ?? '-' }} <br>
                                         Kasir: {{ $orderTransactions[0]->user_name ?? '-' }}
                                     </td>
-                                    <td class="px-6 py-4 text-right font-bold"></td>
-                                    <td class="px-6 py-4 text-right font-bold">Rp{{ number_format($orderTotal, 0, ',', '.') }}</td>
+                                    <td class="px-6 py-4 text-center font-bold"></td>
+                                    <td class="px-6 py-4 text-center font-bold">{{ $orderTransactions[0]->payment_method ?? '-' }}</td>
+                                    <td class="px-6 py-4 text-center font-bold">{{ number_format($orderTransactions[0]->tax, 0,',','.' ) ?? '-' }}</td>
+                                    <td class="px-6 py-4 text-center font-bold">{{ number_format($orderTransactions[0]->discount, 0,',','.' ) ?? '-' }}</td>
+                                    <td class="px-6 py-4 text-center font-bold">{{ number_format($orderTransactions[0]->customer_money, 0,',','.' ) ?? '-' }}</td>
+                                    <td class="px-6 py-4 text-center font-bold">{{ number_format($orderTransactions[0]->change, 0,',','.' ) ?? '-' }}</td>
+                                    <td class="px-6 py-4 text-center font-bold"></td>
+                                    <td class="px-6 py-4 text-center font-bold"></td>
+                                    <td class="px-6 py-4 text-center font-bold"></td>
+                                    <td class="px-6 py-4 text-start font-bold">Rp{{ number_format($orderTransactions[0]->grand_total, 0, ',', '.') ?? '-' }}</td>
+                                    <td class="px-6 py-4 text-start font-bold">{{ $orderTransactions[0]->order_date ?? '-' }}</td>
                                 </tr>
                             
                                 @foreach ($orderTransactions as $transaction)
                                     <tr class="bg-white border-b hover:bg-gray-300 text-gray-900">
                                         <td class="px-6 py-4"></td>
                                         <td class="px-6 py-4">{{ $transaction->product_name ?? '-' }}</td>
+                                        <td class="px-6 py-4"></td>
+                                        <td class="px-6 py-4"></td>
+                                        <td class="px-6 py-4"></td>
+                                        <td class="px-6 py-4"></td>
+                                        <td class="px-6 py-4"></td>
+
                                         <td class="px-6 py-4 text-center">{{ $transaction->quantity ?? '-' }}</td>
-                                        <td class="px-6 py-4 text-right">Rp{{ number_format($transaction->price, 0, ',', '.') }}</td>
-                                        <td class="px-6 py-4 text-right">Rp{{ number_format($transaction->quantity * $transaction->price, 0, ',', '.') }}</td>
-                                        <td class="px-6 py-4 text-center">{{ $transaction->order_date }}</td>
+                                        <td class="px-6 py-4 text-start">Rp{{ number_format($transaction->price, 0, ',', '.')  ?? '-' }}</td>
+                                        <td class="px-6 py-4 text-start">Rp{{ number_format($transaction->quantity * $transaction->price, 0, ',', '.') ?? '-' }}</td>
+                                        <td class="px-6 py-4"></td>
                                         <td class="px-6 py-4"></td>
                                     </tr>
                                 @endforeach

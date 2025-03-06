@@ -19,6 +19,11 @@ class Transaction extends Component
 {
         // List Transaction
         public $transactions, $totalTransactions;
+        
+        // Date Export
+        public $startDate;
+        public $endDate;
+
 
         // Search
         #[Url()]
@@ -49,7 +54,7 @@ class Transaction extends Component
         
         public function loadInitialTransactions()
         {
-            $ttl = 31536000; // TTL cache selama 1 tahun
+            $ttl = 31536000; // Cache selama 1 tahun
             $this->loaded = true;
 
             // Cache key unik berdasarkan search dan limit
@@ -71,6 +76,12 @@ class Transaction extends Component
                     ->select(
                         'transaction_details.*',
                         'orders.id as order_id',
+                        'orders.payment_method as payment_method',
+                        'orders.tax as tax',
+                        'orders.discount as discount',
+                        'orders.customer_money as customer_money',
+                        'orders.change as change',
+                        'orders.grandtotal as grand_total',
                         'orders.created_at as order_date',
                         'users.name as user_name',
                         'products.name as product_name'
@@ -78,16 +89,12 @@ class Transaction extends Component
                     ->when($this->search, function ($query) {
                         $query->where('orders.id', 'like', '%' . $this->search . '%')
                             ->orWhereDate('orders.created_at', '=', $this->search)
-                            ->orWhere('users.name', 'like', '%' . $this->search . '%');
+                            ->orWhere('users.name', 'like', '%' . $this->search . '%')
+                            ->orWhere('orders.payment_method', 'like', '%' . $this->search . '%');
                     })
                     ->orderBy('orders.created_at', 'desc')
                     ->limit($this->limit)
                     ->get();
-            });
-
-            // Debug: Log query yang dieksekusi
-            DB::listen(function ($query) {
-                Log::info('SQL Query:', ['sql' => $query->sql, 'bindings' => $query->bindings]);
             });
 
             // Pastikan data dikelompokkan berdasarkan order_id
@@ -106,9 +113,6 @@ class Transaction extends Component
                 Log::info("No more data to load");
             }
         }
-        // Date Export
-        public $startDate;
-        public $endDate;
     
         public function exportExcel()
         {
