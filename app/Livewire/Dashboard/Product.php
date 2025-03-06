@@ -78,7 +78,7 @@ class Product extends Component
             $this->refreshCache();
         }
 
-        $this->products = Cache::remember($cacheKey, $ttl, function () {
+        $this->products = Cache::remember($cacheKey . '_' . md5($this->search), $ttl, function () {
             return DB::table('products')
                 ->leftJoin('suppliers', 'products.supplier_id', '=', 'suppliers.id')
                 ->select(
@@ -92,19 +92,24 @@ class Product extends Component
                     'products.image',
                     'products.created_at',
                     'products.updated_at',
-                    'products.supplier_id', // Tambahkan supaya konsisten
+                    'suppliers.id as supplier_id',
                     'suppliers.name as supplier_name'
                 )
-                ->where(function ($query) {
-                    $query->where('products.name', 'like', '%' . $this->search . '%')
-                        ->orWhere('products.sku', 'like', '%' . $this->search . '%')
-                        ->orWhere('products.price', 'like', '%' . $this->search . '%')
-                        ->orWhere('products.description', 'like', '%' . $this->search . '%');
+                ->when($this->search, function ($query) {
+                    $query->where(function ($q) {
+                        $q->where('products.name', 'like', '%' . $this->search . '%')
+                          ->orWhere('products.sku', 'like', '%' . $this->search . '%')
+                          ->orWhere('products.price', 'like', '%' . $this->search . '%')
+                          ->orWhere('products.description', 'like', '%' . $this->search . '%')
+                          ->orWhere('suppliers.name', 'like', '%' . $this->search . '%'); // Pencarian nama supplier
+                    });
                 })
                 ->orderByDesc('products.sold_count')
                 ->take($this->limit)
                 ->get();
         });
+        
+        
     }
 
     public function loadMore()
@@ -218,6 +223,7 @@ class Product extends Component
         $this->dispatch('showEditModal');
     }
 
+
     public function update()
     {
 
@@ -270,6 +276,7 @@ class Product extends Component
         $this->dispatch('productUpdated');
         $this->dispatch('updatedSuccess');
     }
+
     
     public function detailModal($id)
     {

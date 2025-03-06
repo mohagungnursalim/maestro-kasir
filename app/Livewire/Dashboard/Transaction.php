@@ -54,7 +54,6 @@ class Transaction extends Component
         
         public function loadInitialTransactions()
         {
-            sleep(5);
             $ttl = 31536000; // Cache selama 1 tahun
             $this->loaded = true;
 

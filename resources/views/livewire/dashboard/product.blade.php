@@ -84,6 +84,7 @@
                                 <th scope="col" class="px-6 py-3 text-center">Gambar</th>
                                 <th scope="col" class="px-6 py-3 text-center">Nama Produk</th>
                                 <th scope="col" class="px-6 py-3 text-center">Sku</th>
+                                <th scope="col" class="px-6 py-3 text-center">Supplier</th>
                                 <th scope="col" class="px-6 py-3 text-center">Harga</th>
                                 <th scope="col" class="px-6 py-3 text-center">Stok</th>
                                 <th scope="col" class="px-6 py-3 text-center">Satuan</th>
@@ -139,6 +140,7 @@
                                         {{ $product->name }}
                                     </td>
                                     <td class="px-6 py-4 text-center">{{ $product->sku }}</td>
+                                    <td class="px-6 py-4 text-center">{{ $product->supplier_name }}</td>
                                     <td class="px-6 py-4 text-center">Rp{{ number_format($product->price, 0, ',', '.') }}</td>
                                     <td class="px-6 py-4 text-center">{{ $product->stock }}</td>
                                     <td class="px-6 py-4 text-center">{{ $product->unit }}</td>
