@@ -113,45 +113,34 @@
                                 {{-- Skeleton untuk data transaksi saat masih loading --}}
                                 @for ($i = 0; $i < 8; $i++) 
                                     <tr class="bg-gray-200 font-bold">
-                                        <td class="px-6 py-4" colspan="5">
-                                            <div class="h-4 w-20 bg-gray-500 rounded animate-pulse mb-1"></div>
+                                        <td class="px-6 py-4">
+                                            <div class="h-4 w-24 bg-gray-500 rounded animate-pulse mb-1"></div>
                                             <div class="h-4 w-20 bg-gray-500 rounded animate-pulse"></div>
                                         </td>
-                                        <td class="px-6 py-4"></td>
-                                        <td class="px-6 py-4 text-right">
-                                            <div class="h-4 w-20 bg-gray-500 rounded animate-pulse"></div>
-                                        </td>
+                                        @for ($j = 0; $j < 11; $j++) {{-- Sesuaikan jumlah kolom selain ID Order --}}
+                                            <td class="px-6 py-4 text-center">
+                                                <div class="h-4 w-16 bg-gray-300 rounded animate-pulse"></div>
+                                            </td>
+                                        @endfor
                                     </tr>
-                
+
                                     @for ($j = 0; $j < 3; $j++) {{-- 3 transaksi per Order ID --}}
                                         <tr class="bg-white border-b hover:bg-gray-300 text-gray-900">
-                                            <td class="px-6 py-4"></td>
+                                            <td class="px-6 py-4"></td> {{-- Kosongkan ID Order --}}
                                             <td class="px-6 py-4">
-                                                <div class="h-4 bg-gray-300 rounded animate-pulse"></div>
+                                                <div class="h-4 w-32 bg-gray-300 rounded animate-pulse"></div>
                                             </td>
-                                            <td class="px-6 py-4 text-center">
-                                                <div class="h-4 w-10 bg-gray-300 rounded animate-pulse"></div>
-                                            </td>
-                                            <td class="px-6 py-4 text-center">
-                                                <div class="h-4 bg-gray-300 rounded animate-pulse"></div>
-                                            </td>
-                                            <td class="px-6 py-4 text-center">
-                                                <div class="h-4 bg-gray-300 rounded animate-pulse"></div>
-                                            </td>
-                                            <td class="px-6 py-4 text-center">
-                                                <div class="h-4 bg-gray-300 rounded animate-pulse"></div>
-                                            </td>
-                                            <td class="px-6 py-4"></td>
+                                            @for ($k = 0; $k < 10; $k++) {{-- Untuk sisa kolom --}}
+                                                <td class="px-6 py-4 text-center">
+                                                    <div class="h-4 w-16 bg-gray-300 rounded animate-pulse"></div>
+                                                </td>
+                                            @endfor
                                         </tr>
                                     @endfor
                                 @endfor
                             @else
+
                             @forelse ($transactions as $orderId => $orderTransactions)
-                                {{-- @php
-                                    // Hitung total transaksi per Order ID
-                                    $orderTotal = collect($orderTransactions)->sum(fn($transaction) => $transaction->quantity * $transaction->price);
-                                @endphp --}}
-                            
                                 {{-- Tampilkan ID Order hanya sekali --}}
                                 <tr class="bg-gray-200 font-bold">
                                     <td class="px-6 py-4">
@@ -180,7 +169,6 @@
                                         <td class="px-6 py-4"></td>
                                         <td class="px-6 py-4"></td>
                                         <td class="px-6 py-4"></td>
-
                                         <td class="px-6 py-4 text-center">{{ $transaction->quantity ?? '-' }}</td>
                                         <td class="px-6 py-4 text-start">Rp{{ number_format($transaction->price, 0, ',', '.')  ?? '-' }}</td>
                                         <td class="px-6 py-4 text-start">Rp{{ number_format($transaction->quantity * $transaction->price, 0, ',', '.') ?? '-' }}</td>
