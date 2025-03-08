@@ -78,7 +78,7 @@ class Product extends Component
             $this->refreshCache();
         }
 
-        $this->products = Cache::remember($cacheKey . '_' . md5($this->search), $ttl, function () {
+        $this->products = Cache::remember($cacheKey,$ttl, function () {
             return DB::table('products')
                 ->leftJoin('suppliers', 'products.supplier_id', '=', 'suppliers.id')
                 ->select(
@@ -414,6 +414,7 @@ class Product extends Component
         }
 
     }
+
 
     public function render()
     {
