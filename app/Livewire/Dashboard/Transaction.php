@@ -134,24 +134,30 @@ class Transaction extends Component
                 'startDate' => 'required|date',
                 'endDate' => 'required|date|after_or_equal:startDate',
             ]);
-
+        
             $startDate = Carbon::parse($this->startDate)->startOfDay(); // 00:00:00
-            $endDate = Carbon::parse($this->endDate)->endOfDay(); //23:59:59
-            $date = now()->format('d-m-Y'); 
-
+            $endDate = Carbon::parse($this->endDate)->endOfDay(); // 23:59:59
+            $date = now()->format('d-m-Y');
+        
+            
             $transactions = TransactionDetail::with(['product', 'order.user'])
-                ->whereBetween('created_at', [$startDate, $endDate])
+                ->whereHas('order', function ($query) use ($startDate, $endDate) {
+                    $query->whereBetween('created_at', [$startDate, $endDate]);
+                })
+                ->orderBy('order_id', 'desc')
                 ->get()
-                ->groupBy('order_id'); // Kelompokkan berdasarkan order_id
-
+                ->groupBy('order_id'); 
+        
+           
             $pdf = Pdf::loadView('exports.transactions', [
                 'transactions' => $transactions,
                 'startDate' => $this->startDate,
                 'endDate' => $this->endDate,
             ]);
-            
-            return response()->streamDownload(fn() => print($pdf->output()), "transactions_{$date}.pdf");
+        
+            return response()->streamDownload(fn() => print($pdf->output()), "transactions_{$date}.pdf");            
         }
+         
 
         
         public function queueReport($type)

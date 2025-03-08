@@ -3,6 +3,7 @@
 namespace App\Exports;
 
 use App\Models\TransactionDetail;
+use Carbon\Carbon;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithMapping;
@@ -23,7 +24,9 @@ class TransactionExport implements FromCollection, WithHeadings, WithMapping
      */
     public function collection()
     {
-        return TransactionDetail::with(['product', 'order.user'])->whereBetween('created_at', [$this->startDate, $this->endDate])->get();
+        return TransactionDetail::with(['product', 'order.user'])
+            ->whereBetween('created_at', [$this->startDate, $this->endDate])
+            ->get();
     }
 
     /**
@@ -35,9 +38,14 @@ class TransactionExport implements FromCollection, WithHeadings, WithMapping
             'ID Order',
             'Kasir',
             'Nama Produk',
+            'Pembayaran',
+            'Pajak',
+            'Diskon',
+            'Uang Pelanggan',
+            'Kembalian',
             'Jumlah',
             'Harga',
-            'Sub Total',
+            'Subtotal',
             'Tanggal Transaksi'
         ];
     }
@@ -47,14 +55,24 @@ class TransactionExport implements FromCollection, WithHeadings, WithMapping
      */
     public function map($transaction): array
     {
+        // Format angka ke ribuan (8.470)
+        $formatRupiah = function ($number) {
+            return number_format($number, 0, ',', '.');
+        };
+
         return [
             $transaction->order->id,
             $transaction->order->user->name ?? '-',
             $transaction->product->name ?? '-',
+            $transaction->order->payment_method ?? '-',
+            $formatRupiah($transaction->order->tax ?? 0), // Pajak
+            $formatRupiah($transaction->order->discount ?? 0), // Diskon
+            $formatRupiah($transaction->order->customer_money ?? 0), // Uang Pelanggan
+            $formatRupiah($transaction->order->change ?? 0), // Kembalian
             $transaction->quantity,
-            number_format($transaction->price, 2, ',', '.'),
-            number_format($transaction->subtotal, 2, ',', '.'),
-            $transaction->created_at->format('Y-m-d H:i:s'),
+            $formatRupiah($transaction->product->price), // Harga
+            $formatRupiah($transaction->subtotal), // Subtotal
+            Carbon::parse($transaction->created_at)->translatedFormat('d/m/Y H:i:s'), // Bahasa Indonesia
         ];
     }
 }

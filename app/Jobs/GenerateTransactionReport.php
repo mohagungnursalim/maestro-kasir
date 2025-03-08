@@ -47,7 +47,7 @@ class GenerateTransactionReport implements ShouldQueue
             $startDate = Carbon::parse($this->startDate)->startOfDay(); // 00:00:00
             $endDate = Carbon::parse($this->endDate)->endOfDay(); //23:59:59
             
-            $transactions = TransactionDetail::with('product')
+            $transactions = TransactionDetail::with(['product', 'order.user'])
             ->whereBetween('created_at', [$startDate, $endDate])
             ->get()->groupBy('order_id');
             
