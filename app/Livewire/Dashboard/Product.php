@@ -6,6 +6,7 @@ use App\Models\Product as ModelsProduct;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 use Livewire\Attributes\On;
@@ -32,6 +33,8 @@ class Product extends Component
     // List Products
     public $products, $totalProducts;
 
+    
+
     // Search Product
     #[Url()]
     public $search = '';
@@ -41,6 +44,8 @@ class Product extends Component
     protected $listeners = [
         'productUpdated' => 'loadInitialProducts',
         'deleteConfirmed' => 'delete',
+        'unitSelected',
+        'setUnit' => 'setSelectedUnit'
     ];
 
     public function mount() 
@@ -53,6 +58,16 @@ class Product extends Component
         });
     
         $this->products = collect();
+    }
+   
+    public function unitSelected($unit)
+    {
+        $this->unit = $unit;
+    }
+
+    public function setSelectedUnit($unit)
+    {
+        $this->unitUpdate = $unit;
     }
     
     public function updatingSearch()
@@ -221,6 +236,7 @@ class Product extends Component
         $this->supplierName = $product->supplier_name ?? '-';
 
         $this->dispatch('showEditModal');
+        $this->dispatch('setUnit', $this->unitUpdate); // Kirim ke Unit.php
     }
 
 
