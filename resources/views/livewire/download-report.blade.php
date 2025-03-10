@@ -127,29 +127,30 @@
 </script>
 
 <script>
-    Livewire.on('showDeleteConfirmation', (filename) => {
-        Swal.fire({
-            title: 'Konfirmasi Hapus',
-            text: `Apakah Anda yakin ingin menghapus file "${filename}"?`,
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#d33',
-            cancelButtonColor: '#3085d6',
-            confirmButtonText: 'Ya, Hapus!',
-            cancelButtonText: 'Batal'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                Livewire.dispatch('deleteConfirmed');
-            }
+    document.addEventListener('livewire:navigated', () => {
+        Livewire.on('showDeleteConfirmation', (filename) => {
+            Swal.fire({
+                title: 'Konfirmasi Hapus',
+                text: `Apakah Anda yakin ingin menghapus file "${filename}"?`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Ya, Hapus!',
+                cancelButtonText: 'Batal'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    Livewire.dispatch('deleteConfirmed');
+                }
+            });
         });
     });
 </script>
 
 <script>
-    document.addEventListener('DOMContentLoaded', function () {
-        Livewire.on('fileDeleted', (eventData) => {
-            console.log("Event Data:", eventData); // Debugging
-            
+  
+    document.addEventListener('livewire:navigated', () => {
+        Livewire.on('fileDeleted', (eventData) => {  
             // Pastikan mengambil objek pertama dari array
             const data = Array.isArray(eventData) ? eventData[0] : eventData;
 
@@ -165,12 +166,5 @@
         });
     });
 </script>
-
-
-
-
-
-
-
 
 </div>

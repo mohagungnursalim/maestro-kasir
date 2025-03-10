@@ -67,22 +67,6 @@ class DownloadReport extends Component
     }
     
 
-    // public function deleteReport($filename)
-    // {
-    //     $filePath = 'reports/' . $filename;
-
-    //     if (Storage::exists($filePath)) {
-    //         Storage::delete($filePath);
-    //         session()->flash('message', "File $filename berhasil dihapus.");
-    //         $this->dispatch('fileDeleted', "File $filename berhasil dihapus.");
-    //     } else {
-    //         session()->flash('error', "File $filename tidak ditemukan.");
-    //         $this->dispatch('fileDeleted', "File $filename tidak ditemukan.", error: true);
-    //     }
-
-    //     $this->resetPage(); // Refresh tampilan
-    // }
-
     public $selectedFile = null;
 
     protected $listeners = [
