@@ -1,4 +1,21 @@
 <div x-data="{ showPopover: false }" class="relative">
+
+    <style>
+        /* Styling dropdown select agar ada scrollbar */
+        select {
+            appearance: none; /* Hilangkan default style */
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            padding-right: 2rem;
+        }
+    
+        /* Custom dropdown dengan scrollbar */
+        select option {
+            max-height: 10px; /* Atur tinggi maksimal */
+            overflow-y: auto; /* Tambahkan scrollbar */
+        }
+    </style>
+    
     <!-- Label dan Dropdown -->
     <label for="unit" class="block mb-2 text-sm font-medium text-gray-900">
         Satuan 
@@ -20,21 +37,6 @@
        </select>
    </div>
 
-   <style>
-    /* Styling dropdown select agar ada scrollbar */
-    select {
-        appearance: none; /* Hilangkan default style */
-        -webkit-appearance: none;
-        -moz-appearance: none;
-        padding-right: 2rem;
-    }
-
-    /* Custom dropdown dengan scrollbar */
-    select option {
-        max-height: 10px; /* Atur tinggi maksimal */
-        overflow-y: auto; /* Tambahkan scrollbar */
-    }
-</style>
 
     <!-- Modal Popover -->
     <div x-show="showPopover"
