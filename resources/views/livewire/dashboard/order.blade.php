@@ -241,7 +241,7 @@
 
                                 {{-- Pajak --}}
                                 <div x-data="{ 
-                                            useTax: @entangle('use_tax'), 
+                                            useTax: false, 
                                             taxPercentage: @entangle('tax_percentage'),
                                             resetTax() {
                                                 if (!this.useTax) {
@@ -255,8 +255,7 @@
                                     <label class="inline-flex items-center me-5 peer-disabled:cursor-not-allowed cursor-pointer">
                                         <input type="checkbox" class="sr-only peer disabled:cursor-not-allowed" 
                                             x-model="useTax" 
-                                            x-on:change="resetTax()"
-                                            wire:model="use_tax">
+                                            x-on:change="resetTax()">
                                         <div class="relative w-11 h-6 bg-gray-200 rounded-full peer peer-focus:ring-4 
                                                     peer-focus:ring-purple-300 peer-checked:after:translate-x-full 
                                                     rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] 
@@ -273,7 +272,7 @@
                                     <div class="mt-2 flex space-x-2" x-show="useTax" x-transition>
                                         <input @if (empty($cart)) disabled @endif type="number" id="tax_percentage" name="tax_percentage"
                                             wire:model.live.debounce.300ms="tax_percentage"
-                                            x-on:input="$wire.call('calculateTotal'); // 🚀 Update total saat pajak diubah"
+                                            x-on:input="() => $wire.call('calculateTotal')" 
                                             class="w-full p-2 disabled:cursor-not-allowed text-gray-900 border border-gray-300 rounded-lg bg-gray-50 text-xs 
                                                    focus:ring-blue-500 focus:border-blue-500"
                                             placeholder="Masukkan pajak (contoh: 11 untuk 11%)">
