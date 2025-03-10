@@ -241,6 +241,13 @@
                             placeholder="Masukan SKU">
                         @error('sku') <span class="text-red-500 text-xs">{{ $message }} @enderror
                     </div>
+
+                    <!-- Komponen Satuan Modal Add -->
+                    <div>
+                        @livewire('dashboard.unit', ['mode' => 'create'])
+                        @error('unit') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
+                    </div>
+
                     <div>
                         <label for="price"
                             class="block mb-2 text-sm font-medium text-gray-900">Harga</label>
@@ -249,6 +256,7 @@
                             placeholder="Masukan Harga">
                         @error('price') <span class="text-red-500 text-xs">{{ $message }} @enderror
                     </div>
+
                     <div>
                         <label for="stock"
                             class="block mb-2 text-sm font-medium text-gray-900">Stok</label>
@@ -257,36 +265,7 @@
                             placeholder="Masukan Stok">
                         @error('stock') <span class="text-red-500 text-xs">{{ $message }} @enderror
                     </div>
-
-                    <div>
-                        <label for="unit" class="block mb-2 text-sm font-medium text-gray-900">Satuan</label>
-                        <select wire:model="unit" id="unit"
-                            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full">
-                            <option selected="">-Pilih Satuan-</option>
-                            <option value="PCS">PCS</option>
-                            <option value="Pack">Pack</option>
-                            <option value="Box">Box</option>
-                            <option value="Lusin">Lusin</option>
-                            <option value="Rim">Rim</option>
-                            <option value="Ball">Ball</option>
-                            <option value="Botol">Botol</option>
-                            <option value="Kaleng">Kaleng</option>
-                            <option value="Sachet">Sachet</option>
-                            <option value="Dus">Dus</option>
-                            <option value="Slop">Slop</option>
-                            <option value="Karung">Karung</option>
-                            <option value="KG">KG</option>
-                            <option value="Gram">Gram</option>
-                            <option value="Ons">Ons</option>
-                            <option value="Liter">Liter</option>
-                            <option value="mL">mL</option>
-                            <option value="Meter">Meter</option>
-                            <option value="Yard">Yard</option>
-                            <option value="Roll">Roll</option>
-                        </select>
-                        @error('unit') <span class="text-red-500 text-xs">{{ $message }} @enderror
-                    </div>
-                    
+                       
                     
                     <div x-data="supplierSelect()" 
                         x-init="fetchSuppliers(); window.addEventListener('addedSuccess', () => resetSupplier())" 
@@ -447,6 +426,13 @@
                             placeholder="Masukan SKU">
                         @error('skuUpdate') <span class="text-red-500 text-xs">{{ $message }} @enderror
                     </div>
+
+                     <!-- Komponen Satuan Pada Modal Edit Produk -->
+                     <div>
+                        @livewire('dashboard.unit', ['defaultUnit' => $unitUpdate, 'mode' => 'edit'])
+                        @error('unitUpdate') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
+                    </div>
+                    
                     <div>
                         <label for="priceUpdate" class="block mb-2 text-sm font-medium text-gray-900">Harga</label>
                         <input wire:model='priceUpdate' type="number" name="priceUpdate" id="priceUpdate"
@@ -454,46 +440,15 @@
                             placeholder="Masukan Harga">
                         @error('priceUpdate') <span class="text-red-500 text-xs">{{ $message }} @enderror
                     </div>
+
                     <div>
                         <label for="stockUpdate" class="block mb-2 text-sm font-medium text-gray-900">Stok</label>
                         <input wire:model='stockUpdate' type="number" name="stockUpdate" id="stockUpdate"
                             class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full"
                             placeholder="Masukan Stok">
                         @error('stockUpdate') <span class="text-red-500 text-xs">{{ $message }} @enderror
-                    </div>
+                    </div>        
 
-                    <div>
-                        <label for="unitUpdate" class="block mb-2 text-sm font-medium text-gray-900">Satuan</label>
-                        <select wire:model="unitUpdate" id="unitUpdate"
-                            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full">
-                            <option selected="">-Pilih Satuan-</option>
-                            <option value="PCS">PCS</option>
-                            <option value="Pack">Pack</option>
-                            <option value="Box">Box</option>
-                            <option value="Lusin">Lusin</option>
-                            <option value="Rim">Rim</option>
-                            <option value="Ball">Ball</option>
-                            <option value="Botol">Botol</option>
-                            <option value="Kaleng">Kaleng</option>
-                            <option value="Sachet">Sachet</option>
-                            <option value="Dus">Dus</option>
-                            <option value="Slop">Slop</option>
-                            <option value="Karung">Karung</option>
-                            <option value="KG">KG</option>
-                            <option value="Gram">Gram</option>
-                            <option value="Ons">Ons</option>
-                            <option value="Liter">Liter</option>
-                            <option value="mL">mL</option>
-                            <option value="Meter">Meter</option>
-                            <option value="Yard">Yard</option>
-                            <option value="Roll">Roll</option>
-                        </select>
-                        @error('unitUpdate') <span class="text-red-500 text-xs">{{ $message }} @enderror
-                    </div>
-                    
-
-
-                   
                     <div x-data="supplierSelectUpdate()" 
                         x-init='updateSupplier(@json(["id" => $supplier_idUpdate, "name" => $supplierName]))'
                         class="relative">
