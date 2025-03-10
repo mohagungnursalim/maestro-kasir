@@ -351,32 +351,34 @@
 
 {{-- Redirect setelah 3 detik --}}
 <script>
-    Livewire.on('notify', () => {
-        let countdown = 3; // Mulai dari 3 detik
+    document.addEventListener('livewire:navigated', () => {
+        Livewire.on('notify', () => {
+            let countdown = 3; // Mulai dari 3 detik
+            Swal.fire({
+                title: "Laporan Sedang Diproses!",
+                html: `Anda akan diarahkan ke halaman unduh laporan dalam <br><b>${countdown}</b> detik.`,
+                icon: "success",
+                timer: 3000, // Total 3 detik
+                timerProgressBar: true,
+                allowOutsideClick: false,
+                showConfirmButton: false,
+                willOpen: () => {
+                    let timerInterval = setInterval(() => {
+                        countdown--;
+                        Swal.getHtmlContainer().innerHTML = `Anda akan diarahkan ke halaman unduh laporan dalam <br><b>${countdown}</b> detik.`;
 
-        Swal.fire({
-            title: "Laporan Sedang Diproses!",
-            html: `Anda akan diarahkan ke halaman unduh laporan dalam <br><b>${countdown}</b> detik.`,
-            icon: "success",
-            timer: 3000, // Total 3 detik
-            timerProgressBar: true,
-            allowOutsideClick: false,
-            showConfirmButton: false,
-            willOpen: () => {
-                let timerInterval = setInterval(() => {
-                    countdown--;
-                    Swal.getHtmlContainer().innerHTML = `Anda akan diarahkan ke halaman unduh laporan dalam <br><b>${countdown}</b> detik.`;
-
-                    if (countdown <= 0) {
-                        clearInterval(timerInterval);
-                    }
-                }, 1000);
-            }
-        }).then(() => {
-            // Redirect setelah SweetAlert selesai
-            window.location.href = "/dashboard/reports";
+                        if (countdown <= 0) {
+                            clearInterval(timerInterval);
+                        }
+                    }, 1000);
+                }
+            }).then(() => {
+                // Redirect setelah SweetAlert selesai
+                window.location.href = "/dashboard/reports";
+            });
         });
     });
+
 </script>
 
 
