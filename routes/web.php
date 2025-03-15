@@ -7,6 +7,7 @@ use App\Livewire\Dashboard\Product;
 use Illuminate\Support\Facades\Auth;
 use App\Livewire\Dashboard\Dashboard;
 use App\Livewire\Dashboard\Order;
+use App\Livewire\Dashboard\Profile;
 use App\Livewire\Dashboard\Supplier;
 use App\Livewire\Dashboard\Transaction;
 use App\Livewire\DownloadReport;
@@ -48,7 +49,7 @@ Route::get('/dashboard/store-settings', Settings::class)
 Route::get('/api/suppliers', [SupplierController::class, 'index'])->name('api.suppliers')
     ->middleware(['auth']);
 
-Route::get('/dashboard/reports', DownloadReport::class)->name('reports');
+Route::get('/dashboard/reports', DownloadReport::class)->name('reports')->middleware(['auth']);
 
 Route::middleware('auth')->get('/download-report/{filename}', function ($filename) {
     $filePath = "reports/{$filename}";
@@ -60,6 +61,7 @@ Route::middleware('auth')->get('/download-report/{filename}', function ($filenam
     return abort(404, 'File not found.');
 })->name('download.report');
 
+Route::get('/dashboard/profile', Profile::class)->name('profile')->middleware(['auth']);
 
 Route::post('/logout', function () {
     Auth::logout();
