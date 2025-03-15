@@ -31,16 +31,16 @@ class Unit extends Component
 
     public function loadUnits()
     {
-        $this->units = DB::table('satuans')->orderBy('name')->pluck('name')->toArray();
+        $this->units = DB::table('units')->orderBy('name')->pluck('name')->toArray();
     }
 
     public function addUnit()
     {
         $this->validate([
-            'newUnit' => 'required|string|max:20|unique:satuans,name'
+            'newUnit' => 'required|string|max:20|unique:units,name'
         ]);
 
-        DB::table('satuans')->insert([
+        DB::table('units')->insert([
             'name' => $this->newUnit,
             'created_at' => now(),
             'updated_at' => now(),

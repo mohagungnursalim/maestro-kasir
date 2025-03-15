@@ -7,5 +7,5 @@ use Illuminate\Database\Eloquent\Model;
 class Satuan extends Model
 {
     protected $guarded = ['id'];
-    protected $table = 'satuans';
+    protected $table = 'units';
 }
