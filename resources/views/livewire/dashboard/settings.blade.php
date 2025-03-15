@@ -97,10 +97,11 @@
                     </template>          
                 </div>
             
-                <!-- Footer Toko -->
+                <!-- Footer Struk -->
+                <hr>
                 <div>
-                    <label class="block text-sm font-medium">Footer Toko</label>
-                    <input type="text" wire:model="store_footer" class="w-full border-gray-300 border rounded-md p-2" required>
+                    <label class="block text-sm font-medium">Footer Struk Order</label>
+                    <input type="text" wire:model="store_footer" class="w-full   border-gray-300 border rounded-md p-2" required>
                     @error('store_footer') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
                 </div>
             
