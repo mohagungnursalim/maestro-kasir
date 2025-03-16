@@ -113,30 +113,53 @@
                                 {{-- Skeleton untuk data transaksi saat masih loading --}}
                                 @for ($i = 0; $i < 8; $i++) 
                                     <tr class="bg-gray-200 font-bold">
-                                        <td class="px-6 py-4">
+                                        <td class="px-6 py-4" colspan="2">
                                             <div class="h-4 w-24 bg-gray-500 rounded animate-pulse mb-1"></div>
                                             <div class="h-4 w-20 bg-gray-500 rounded animate-pulse"></div>
                                         </td>
-                                        @for ($j = 0; $j < 11; $j++) {{-- Sesuaikan jumlah kolom selain ID Order --}}
-                                            <td class="px-6 py-4 text-center">
-                                                <div class="h-4 w-16 bg-gray-300 rounded animate-pulse"></div>
-                                            </td>
-                                        @endfor
+                                        
+                                        <td class="px-6 py-4 text-center">
+                                            <div class="h-4 w-16 bg-gray-300 rounded animate-pulse"></div>
+                                        </td>
+                                        <td class="px-6 py-4 text-center">
+                                            <div class="h-4 w-16 bg-gray-300 rounded animate-pulse"></div>
+                                        </td>
+                                        <td class="px-6 py-4 text-center">
+                                            <div class="h-4 w-16 bg-gray-300 rounded animate-pulse"></div>
+                                        </td>
+                                        <td class="px-6 py-4 text-center">
+                                            <div class="h-4 w-16 bg-gray-300 rounded animate-pulse"></div>
+                                        </td>
+                                        <td class="px-6 py-4 text-center" colspan="4">
+                                            <div class="h-4 w-16 bg-gray-300 rounded animate-pulse"></div>
+                                        </td>
+                                        <td class="px-6 py-4 text-center">
+                                            <div class="h-4 w-16 bg-gray-300 rounded animate-pulse"></div>
+                                        </td>
+                                        <td class="px-6 py-4 text-center">
+                                            <div class="h-4 w-16 bg-gray-300 rounded animate-pulse"></div>
+                                        </td>
                                     </tr>
 
-                                    @for ($j = 0; $j < 3; $j++) {{-- 3 transaksi per Order ID --}}
+                                        @for($j = 0; $j < 2; $j++)
                                         <tr class="bg-white border-b hover:bg-gray-300 text-gray-900">
                                             <td class="px-6 py-4"></td> {{-- Kosongkan ID Order --}}
-                                            <td class="px-6 py-4">
-                                                <div class="h-4 w-32 bg-gray-300 rounded animate-pulse"></div>
+                                            <td class="px-6 py-4" colspan="6">
+                                                <div class="h-4 w-20 bg-gray-300 rounded animate-pulse"></div>
                                             </td>
-                                            @for ($k = 0; $k < 10; $k++) {{-- Untuk sisa kolom --}}
+                                    
                                                 <td class="px-6 py-4 text-center">
                                                     <div class="h-4 w-16 bg-gray-300 rounded animate-pulse"></div>
                                                 </td>
-                                            @endfor
+                                                <td class="px-6 py-4 text-center">
+                                                    <div class="h-4 w-16 bg-gray-300 rounded animate-pulse"></div>
+                                                </td>
+                                                <td class="px-6 py-4 text-center">
+                                                    <div class="h-4 w-16 bg-gray-300 rounded animate-pulse"></div>
+                                                </td>
                                         </tr>
-                                    @endfor
+                                        @endfor
+                                    
                                 @endfor
                             @else
 
