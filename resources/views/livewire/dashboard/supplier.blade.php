@@ -28,7 +28,7 @@
                                     </div>
                                     <input wire:model.live.debounce.500ms="search" type="text" id="simple-search"
                                         class="block w-full p-2 pl-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-primary-500 focus:border-primary-500"
-                                        placeholder="Search">
+                                        placeholder="Cari..">
                                 </div>
                             </form>
                             <a wire:loading wire:target='search' class="text-secondary text-sm mb-2">
