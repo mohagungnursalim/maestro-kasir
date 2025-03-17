@@ -19,9 +19,9 @@
                                 class="block w-full p-4 ps-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500"
                                 placeholder="Cari produk.." />
                             <button wire:loading.remove wire:target='search' type="submit"
-                                class="text-white absolute end-2.5 bottom-2.5 bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-4 py-2">Cari</button>
+                                class="text-white absolute end-2.5 bottom-2.5 bg-blue-600 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-4 py-2">Cari</button>
                             <button disabled wire:loading wire:target='search'
-                                class="text-white absolute end-2.5 bottom-2.5 bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-4 py-2">Mencari..</button>
+                                class="text-white absolute end-2.5 bottom-2.5 bg-blue-600 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-4 py-2">Mencari..</button>
                         </div>
                     </form>
                 </div>
@@ -79,7 +79,7 @@
 
 
                 <!-- Keranjang Belanja -->
-                <h2 class="text-xl font-semibold text-gray-900 sm:text-2xl mt-6">Pesanan</h2>
+                <h2 class="text-xl font-semibold text-gray-900 sm:text-2xl mt-6">Pesanan <i class="bi bi-receipt"></i></h2>
                 <div class="mt-6 sm:mt-8 md:gap-6 lg:flex lg:items-start">
                     <div class="w-full lg:w-2/3">
                         <div class="space-y-6">
