@@ -119,9 +119,15 @@
                                     <div class="h-4 w-10 bg-gray-300 rounded animate-pulse"></div>
                                 </td>
                                 <td class="px-6 py-4">
+                                    @can('Ubah')    
                                     <div class="h-4 mb-2 w-10 bg-gray-300 rounded animate-pulse"></div>
-                                    <div class="h-4 mb-2 w-10 bg-gray-300 rounded animate-pulse"></div>
-                                    <div class="h-4 w-10 bg-gray-300 rounded animate-pulse"></div>
+                                    @endcan
+                                    @can('Hapus')
+                                    <div class="h-4 mb-2 w-10 bg-gray-300 rounded animate-pulse"></div>    
+                                    @endcan
+                                    @can('Lihat')
+                                    <div class="h-4 w-10 bg-gray-300 rounded animate-pulse"></div>   
+                                    @endcan
                                 </td>
                                 </tr>
                                 @endfor
@@ -145,24 +151,33 @@
                                     <td class="px-6 py-4 text-center">{{ $product->stock }}</td>
                                     <td class="px-6 py-4 text-center">{{ $product->unit }}</td>
                                     <td class="px-6 py-4">
+                                        
+                                        @can('Ubah')
                                         <div>
                                             <button wire:click="editModal({{ $product->id }})"
                                                 class="mb-2 bg-green-100 hover:bg-green-200 text-green-800 text-xs font-semibold me-2 px-2.5 py-0.5 rounded border border-green-400 inline-flex items-center justify-center">
                                                 Ubah
                                             </button>                                        
-                                        </div>
+                                        </div>                                  
+                                        @endcan
+                                        
+                                        @can('Hapus')                                         
                                         <div>
                                             <button wire:click="deleteConfirmation({{ $product->id }})"
                                                 class="mb-2 bg-red-100 hover:bg-red-200 text-red-800 text-xs font-semibold me-2 px-2.5 py-0.5 rounded border border-red-400 inline-flex items-center justify-center">
                                                 Hapus
                                             </button>
                                         </div>
+                                        @endcan
+
+                                        @can('Lihat')    
                                         <div>
                                             <button wire:click="detailModal({{ $product->id }})"
                                                 class="bg-blue-100 hover:bg-blue-200 text-blue-800 text-xs font-semibold me-2 px-2.5 py-0.5 rounded border border-blue-400 inline-flex items-center justify-center">
                                                 Detail
                                             </button>
                                         </div>
+                                        @endcan
                                     </td>
                                 </tr>
                                 @empty

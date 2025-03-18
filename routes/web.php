@@ -32,7 +32,7 @@ Route::get('/dashboard/order-receipt/{orderId}', [OrderController::class, 'recei
     ->name('order.receipt');
 
 Route::get('/dashboard/transactions' , Transaction::class)
-    ->middleware(['auth'])
+    ->middleware(['auth','role:admin|owner'])
     ->name('transactions');
 
 Route::get('/dashboard/products', Product::class)
@@ -40,23 +40,23 @@ Route::get('/dashboard/products', Product::class)
     ->name('products');
 
 Route::get('/dashboard/suppliers', Supplier::class)
-    ->middleware(['auth'])
+    ->middleware(['auth','role:admin|owner'])
     ->name('suppliers');
 
 
 Route::get('/dashboard/store-settings', Settings::class)
-    ->middleware(['auth'])
+    ->middleware(['auth','role:admin|owner'])
     ->name('settings');
 
 Route::get('/api/suppliers', [SupplierController::class, 'index'])
-    ->middleware(['auth'])
+    ->middleware(['auth','role:admin|owner'])
     ->name('api.suppliers');
 
 Route::get('/dashboard/reports', DownloadReport::class)
-    ->middleware(['auth'])
+    ->middleware(['auth','role:admin|owner'])
     ->name('reports');
 
-Route::middleware('auth')->get('/download-report/{filename}', function ($filename) {
+Route::get('/download-report/{filename}', function ($filename) {
     $filePath = "reports/{$filename}";
 
     if (Storage::exists($filePath)) {
@@ -64,8 +64,7 @@ Route::middleware('auth')->get('/download-report/{filename}', function ($filenam
     }
 
     return abort(404, 'File not found.');
-})
-    ->middleware(['auth'])
+})->middleware(['auth','role:admin|owner'])
     ->name('download.report');
 
 Route::get('/dashboard/profile', Profile::class)
@@ -79,27 +78,12 @@ Route::post('/logout', function () {
     ->name('logout');
 
 Route::get('/dashboard/users-management', UserManagement::class)
-    ->middleware(['auth', 'role:admin'])
+    ->middleware(['auth', 'role:admin|owner'])
     ->name('users.management');
 
 Route::get('/dashboard/roles-permission', RolePermissionManagement::class)
-    ->middleware(['auth','role:admin'])
+    ->middleware(['auth','role:admin|owner'])
     ->name('role.permission');
-
-
-// Route::middleware(['auth', 'role:admin'])->get('/admin', function () {
-//     return 'Halo Admin!';
-// });
-
-// Route::middleware(['auth', 'role:kasir'])->get('/kasir', function () {
-//     return 'Halo Kasir!';
-// });
-
-// Route::middleware(['auth', 'role:owner'])->get('/owner', function () {
-//     return 'Halo Owner!';
-// });
-
-
 
 
 Route::view('profile', 'profile')

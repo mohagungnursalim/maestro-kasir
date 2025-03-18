@@ -16,13 +16,24 @@
         }
     </style>
     
-    <!-- Label dan Dropdown -->
+    <!-- Label dan Button -->
+   
     <label for="unit" class="block mb-2 text-sm font-medium text-gray-900">
         Satuan 
+
+        {{-- User harus punya izin Tambah & Ubah untuk bisa akses --}}
+        @can('Tambah')
+        @can('Ubah')
+        {{-- User harus memiliki peran admin --}}
+        @hasrole('admin')  
         <button type="button" class="bg-gray-500 rounded-full" @click.prevent="showPopover = true">
             <i class="bi bi-plus-lg text-white"></i>
         </button>
-    </label>          
+        @endrole        
+        @endcan
+        @endcan
+    </label>  
+    
 
 
    <!-- Dropdown Satuan -->
@@ -47,7 +58,8 @@
         <div class="flex justify-between mb-3">
             <h3 class="font-semibold text-gray-900">Tambah Satuan</h3>
             <button type="button" @click="showPopover = false" class="text-gray-500 hover:text-gray-900">✕</button>
-        </div>
+        </div>      
+
 
         <!-- Pesan Sukses/Error -->
         @if (session()->has('unit-message'))

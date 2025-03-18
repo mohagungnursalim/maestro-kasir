@@ -81,32 +81,6 @@ class RolePermissionManagement extends Component
         $this->dispatch('roleDeleted');
     }
 
-    // CRUD Permission
-    public function addPermission()
-    {
-        $this->validate([
-            'permissionName' => 'required|unique:permissions,name'
-        ]);
-
-        Permission::create(['name' => $this->permissionName]);
-        $this->permissionName = '';
-        $this->mount(); // Refresh data
-    }
-
-    // Modal Konfirmasi Delete Permission
-    public function deletePermissionConfirmation($id)
-    {
-        $this->permission_id = $id;
-        $this->dispatch('showDeletePermissionConfirmation');
-    }
-
-    public function deletePermission()
-    {
-        Permission::destroy($this->permission_id);
-        $this->mount();
-        $this->dispatch('permissionDeleted'); 
-    }
-
     public function resetInput()
     {
         $this->name = '';

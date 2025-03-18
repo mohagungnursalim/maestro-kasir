@@ -36,6 +36,11 @@ class Unit extends Component
 
     public function addUnit()
     {
+        // Cek apakah user memiliki izin Tambah dan harus peran admin & owner
+        if (!auth()->user()->can('Tambah') || !auth()->user()->hasAnyRole(['admin', 'owner'])) {
+            return redirect()->to(url()->previous());
+        }
+
         $this->validate([
             'newUnit' => 'required|string|max:20|unique:units,name'
         ]);

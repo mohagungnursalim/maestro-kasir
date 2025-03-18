@@ -337,6 +337,11 @@ class Product extends Component
     
     public function deleteConfirmation($id)
     {
+        // Cek apakah user ada izin Hapus
+        if (!auth()->user()->can('Hapus')) {
+            return redirect()->to(url()->previous());
+        }
+
         $product = collect($this->products)->firstWhere('id', $id);
     
         if (!$product) {
@@ -349,6 +354,11 @@ class Product extends Component
     
     public function delete()
     {
+        // Cek apakah user ada izin Hapus
+        if (!auth()->user()->can('Hapus')) {
+            return redirect()->to(url()->previous());
+        }
+        
         if (!$this->selectedProduct) {
             return;
         }
