@@ -1,5 +1,17 @@
 <div class="p-6">
-
+    <div class="flex items-center p-4 mb-4 text-sm text-blue-800 rounded-lg bg-blue-50 dark:bg-gray-800 dark:text-blue-400" role="alert">
+        <svg class="shrink-0 inline w-4 h-4 me-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
+          <path d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5ZM9.5 4a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3ZM12 15H8a1 1 0 0 1 0-2h1v-3H8a1 1 0 0 1 0-2h2a1 1 0 0 1 1 1v4h1a1 1 0 0 1 0 2Z"/>
+        </svg>
+        <span class="sr-only">Info</span>
+        <div class="p-4 mb-4 text-sm text-blue-800 rounded-lg bg-blue-50" role="alert">
+            <span class="font-medium">Info!</span> Dalam sistem ini, terdapat <b>3 peran utama</b>:  
+            <b>Admin</b> (akses penuh), <b>Owner</b> (kendali utama), dan <b>Kasir</b> (terbatas tanpa izin hapus).  
+            Setiap peran memiliki izin berikut: <b>Tambah</b>, <b>Lihat</b>, <b>Ubah</b>, <b>Hapus</b>, dan <b>Unduh</b>.  
+            Pastikan setiap pengguna memiliki peran dan izin yang sesuai agar sistem berjalan optimal! 🚀
+        </div>
+        
+      </div>
     <h1 class="text-2xl font-bold mb-6 text-gray-800">Peran & Izin User</h1>
 
     <!-- Input Role -->
@@ -11,27 +23,27 @@
     </div>
 
     <!-- Pilih Permission -->
-<h2 class="text-lg font-semibold mb-2 text-gray-700">Izin:</h2>
-<div class="grid grid-cols-5 gap-2 mb-4">
-    @foreach($allPermissions as $permission)
-    <label class="relative inline-flex items-center cursor-pointer">
-        <input type="checkbox" wire:model="permissions" value="{{ $permission->name }}" class="sr-only peer">
-        <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 
-                    peer-focus:ring-blue-300 rounded-full peer dark:bg-gray-700 
-                    peer-checked:after:translate-x-full peer-checked:after:border-white 
-                    after:content-[''] after:absolute after:top-0.5 after:left-[2px] 
-                    after:bg-white after:border-gray-300 after:border after:rounded-full 
-                    after:h-5 after:w-5 after:transition-all dark:border-gray-600 
-                    peer-checked:bg-blue-600">
-        </div>
-        <span class="ml-3 text-sm font-medium text-gray-700">{{ $permission->name }}</span>
-    </label>
-    @endforeach
-</div>
+    <h2 class="text-lg font-semibold mb-2 text-gray-700">Izin:</h2>
+    <div class="grid grid-cols-5 gap-2 mb-4">
+        @foreach($allPermissions as $permission)
+        <label class="relative inline-flex items-center cursor-pointer">
+            <input type="checkbox" wire:model="permissions" value="{{ $permission->name }}" class="sr-only peer">
+            <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 
+                        peer-focus:ring-blue-300 rounded-full peer dark:bg-gray-700 
+                        peer-checked:after:translate-x-full peer-checked:after:border-white 
+                        after:content-[''] after:absolute after:top-0.5 after:left-[2px] 
+                        after:bg-white after:border-gray-300 after:border after:rounded-full 
+                        after:h-5 after:w-5 after:transition-all dark:border-gray-600 
+                        peer-checked:bg-blue-600">
+            </div>
+            <span class="ml-3 text-sm font-medium text-gray-700">{{ $permission->name }}</span>
+        </label>
+        @endforeach
+    </div>
 
-@error('permissions') 
-    <span class="text-red-500 text-sm mt-1">{{ $message }}</span>
-@enderror
+    @error('permissions') 
+        <span class="text-red-500 text-sm mt-1">{{ $message }}</span>
+    @enderror
 
 
     <!-- Button Tambah / Update Role -->

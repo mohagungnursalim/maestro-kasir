@@ -23,8 +23,15 @@ class RolePermissionManagement extends Component
     // CRUD Role
     public function store()
     {
+        // Daftar role yang diperbolehkan
+        $allowedRoles = ['admin', 'owner', 'kasir'];
+
         $validatedData = $this->validate([
-            'name' => 'required|unique:roles,name',
+            'name' => ['required', 'unique:roles,name', function ($attribute, $value, $fail) use ($allowedRoles) {
+                if (!in_array($value, $allowedRoles)) {
+                    $fail('Role yang diperbolehkan hanya: admin, owner, dan kasir.');
+                }
+            }],
             'permissions' => 'array'
         ]);
 
