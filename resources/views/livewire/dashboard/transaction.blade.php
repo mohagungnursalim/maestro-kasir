@@ -382,12 +382,12 @@
 <script>
     document.addEventListener('livewire:navigated', () => {
         Livewire.on('notify', () => {
-            let countdown = 3; // Mulai dari 3 detik
+            let countdown = 3;
             Swal.fire({
                 title: "Laporan Sedang Diproses!",
                 html: `Anda akan diarahkan ke halaman unduh laporan dalam <br><b>${countdown}</b> detik.`,
                 icon: "success",
-                timer: 3000, // Total 3 detik
+                timer: 3000, // 3 detik
                 timerProgressBar: true,
                 allowOutsideClick: false,
                 showConfirmButton: false,
@@ -401,13 +401,15 @@
                         }
                     }, 1000);
                 }
-            }).then(() => {
-                // Redirect setelah SweetAlert selesai
-                window.location.href = "/dashboard/reports";
             });
-        });
-    });
 
+            // Tambahkan delay manual sebelum redirect
+            setTimeout(() => {
+                window.location.href = "/dashboard/reports";
+            }, 3000); // 3 detik
+        });
+
+    });
 </script>
 
 
