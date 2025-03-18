@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\SupplierController;
+use App\Livewire\Dashboard\RolePermissionManagement;
 use App\Livewire\Dashboard\Settings;
 use App\Livewire\Dashboard\Product;
 use Illuminate\Support\Facades\Auth;
@@ -10,6 +11,7 @@ use App\Livewire\Dashboard\Order;
 use App\Livewire\Dashboard\Profile;
 use App\Livewire\Dashboard\Supplier;
 use App\Livewire\Dashboard\Transaction;
+use App\Livewire\Dashboard\UserManagement;
 use App\Livewire\DownloadReport;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -46,10 +48,13 @@ Route::get('/dashboard/store-settings', Settings::class)
     ->middleware(['auth'])
     ->name('settings');
 
-Route::get('/api/suppliers', [SupplierController::class, 'index'])->name('api.suppliers')
-    ->middleware(['auth']);
+Route::get('/api/suppliers', [SupplierController::class, 'index'])
+    ->middleware(['auth'])
+    ->name('api.suppliers');
 
-Route::get('/dashboard/reports', DownloadReport::class)->name('reports')->middleware(['auth']);
+Route::get('/dashboard/reports', DownloadReport::class)
+    ->middleware(['auth'])
+    ->name('reports');
 
 Route::middleware('auth')->get('/download-report/{filename}', function ($filename) {
     $filePath = "reports/{$filename}";
@@ -59,17 +64,40 @@ Route::middleware('auth')->get('/download-report/{filename}', function ($filenam
     }
 
     return abort(404, 'File not found.');
-})->name('download.report');
+})
+    ->middleware(['auth'])
+    ->name('download.report');
 
-Route::get('/dashboard/profile', Profile::class)->name('profile')->middleware(['auth']);
+Route::get('/dashboard/profile', Profile::class)
+    ->middleware(['auth'])
+    ->name('profile');
 
 Route::post('/logout', function () {
     Auth::logout();
     return redirect('/'); // Atur redirect sesuai kebutuhan
-})->name('logout');
+})->middleware(['auth'])
+    ->name('logout');
+
+Route::get('/dashboard/users-management', UserManagement::class)
+    ->middleware(['auth', 'role:admin'])
+    ->name('users.management');
+
+Route::get('/dashboard/roles-permission', RolePermissionManagement::class)
+    ->middleware(['auth','role:admin'])
+    ->name('role.permission');
 
 
+// Route::middleware(['auth', 'role:admin'])->get('/admin', function () {
+//     return 'Halo Admin!';
+// });
 
+// Route::middleware(['auth', 'role:kasir'])->get('/kasir', function () {
+//     return 'Halo Kasir!';
+// });
+
+// Route::middleware(['auth', 'role:owner'])->get('/owner', function () {
+//     return 'Halo Owner!';
+// });
 
 
 

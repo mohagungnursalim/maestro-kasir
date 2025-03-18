@@ -6,7 +6,10 @@ aria-label="Sidebar">
 <div class="h-full px-3 pb-4 overflow-y-auto bg-white">
     <ul class="space-y-2 font-medium">
         
-
+        <div class="text-center">
+            <a class="text-center text-xs text-gray-500">Analitik</a>
+        </div>
+        
         <li>
             <a 
                 class="flex items-center p-2 rounded-lg {{ Request::is('dashboard') ? 'bg-purple-300 text-dark' : 'hover:bg-gray-200' }}"
@@ -18,6 +21,11 @@ aria-label="Sidebar">
             </a>
         </li>
         
+        <div class="text-center">
+            <hr>
+            <a class="text-center text-xs text-gray-500">Pembayaran</a>
+        </div>
+        @hasanyrole('admin|owner|kasir')
         <li>
             <a 
                 class="flex items-center p-2 rounded-lg {{ Request::is('dashboard/orders') ? 'bg-purple-300 text-dark' : 'hover:bg-gray-200' }}"
@@ -28,8 +36,9 @@ aria-label="Sidebar">
                 <span class="flex-1 ms-3 whitespace-nowrap">Kasir</span>
             </a>
         </li>
+        @endrole
 
-
+        @hasanyrole('admin|owner')
         <li>
             <button 
                 type="button" 
@@ -71,7 +80,12 @@ aria-label="Sidebar">
         
             </ul>
         </li>
+        @endrole
 
+        <div class="text-center">
+            <hr>
+            <a class="text-center text-xs text-gray-500">Menu</a>
+        </div>
         <li>
             <button 
                 type="button" 
@@ -113,18 +127,11 @@ aria-label="Sidebar">
         
             </ul>
         </li>
-        
-        <li>
-            <a 
-                class="flex items-center p-2 rounded-lg {{ Request::is('dashboard/store-settings') ? 'bg-purple-300 text-dark' : 'hover:bg-gray-200' }}"
-                @if (!Request::is('dashboard/store-settings'))
-                    wire:navigate href="/dashboard/store-settings"
-                @endif>
-                <i class="bi bi-shop"></i>
-                <span class="flex-1 ms-3 whitespace-nowrap">Pengaturan Toko</span>
-            </a>
-        </li>
 
+        <div class="text-center">
+            <hr>
+            <a class="text-center text-xs text-gray-500">Pengaturan</a>
+        </div>
         <li>
             <a 
                 class="flex items-center p-2 rounded-lg {{ Request::is('dashboard/profile') ? 'bg-purple-300 text-dark' : 'hover:bg-gray-200' }}"
@@ -135,6 +142,41 @@ aria-label="Sidebar">
                 <span class="flex-1 ms-3 whitespace-nowrap">Profil</span>
             </a>
         </li>
+
+        @hasanyrole('admin|owner')
+        <li>
+            <a 
+                class="flex items-center p-2 rounded-lg {{ Request::is('dashboard/store-settings') ? 'bg-purple-300 text-dark' : 'hover:bg-gray-200' }}"
+                @if (!Request::is('dashboard/store-settings'))
+                    wire:navigate href="/dashboard/store-settings"
+                @endif>
+                <i class="bi bi-shop"></i>
+                <span class="flex-1 ms-3 whitespace-nowrap">Pengaturan Toko</span>
+            </a>
+        </li>
+        
+        <li>
+            <a 
+                class="flex items-center p-2 rounded-lg {{ Request::is('dashboard/users-management') ? 'bg-purple-300 text-dark' : 'hover:bg-gray-200' }}"
+                @if (!Request::is('dashboard/users-management'))
+                    wire:navigate href="/dashboard/users-management"
+                @endif>
+                <i class="bi bi-people"></i>
+                <span class="flex-1 ms-3 whitespace-nowrap">Manajemen User</span>
+            </a>
+        </li>
+
+        <li>
+            <a 
+                class="flex items-center p-2 rounded-lg {{ Request::is('dashboard/roles-permission') ? 'bg-purple-300 text-dark' : 'hover:bg-gray-200' }}"
+                @if (!Request::is('dashboard/roles-permission'))
+                    wire:navigate href="/dashboard/roles-permission"
+                @endif>
+                <i class="bi bi-check2-square"></i>
+                <span class="flex-1 ms-3 whitespace-nowrap">Peran & Izin User</span>
+            </a>
+        </li>
+        @endrole
         
 
 
