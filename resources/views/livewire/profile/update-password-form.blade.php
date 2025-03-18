@@ -20,8 +20,19 @@ new class extends Component
         try {
             $validated = $this->validate([
                 'current_password' => ['required', 'string', 'current_password'],
-                'password' => ['required', 'string', Password::defaults(), 'confirmed'],
+                'password' => ['required', 'string', 'min:8', 'confirmed'],
+
+            ], [
+                'current_password.required' => 'Password saat ini wajib diisi.',
+                'current_password.string' => 'Password saat ini harus berupa teks.',
+                'current_password.current_password' => 'Password saat ini salah.',
+
+                'password.required' => 'Password baru wajib diisi.',
+                'password.string' => 'Password baru harus berupa teks.',
+                'password.min' => 'Password minimal 8 karakter.',
+                'password.confirmed' => 'Konfirmasi password tidak cocok.',
             ]);
+
         } catch (ValidationException $e) {
             $this->reset('current_password', 'password', 'password_confirmation');
 

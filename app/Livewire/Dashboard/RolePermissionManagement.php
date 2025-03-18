@@ -23,16 +23,24 @@ class RolePermissionManagement extends Component
     // CRUD Role
     public function store()
     {
-        // Daftar role yang diperbolehkan
+       // Daftar role yang diperbolehkan
         $allowedRoles = ['admin', 'owner', 'kasir'];
 
         $validatedData = $this->validate([
-            'name' => ['required', 'unique:roles,name', function ($attribute, $value, $fail) use ($allowedRoles) {
-                if (!in_array($value, $allowedRoles)) {
-                    $fail('Role yang diperbolehkan hanya: admin, owner, dan kasir.');
+            'name' => [
+                'required',
+                'unique:roles,name',
+                function ($attribute, $value, $fail) use ($allowedRoles) {
+                    if (!in_array($value, $allowedRoles)) {
+                        $fail('Role yang diperbolehkan hanya: admin, owner, dan kasir.');
+                    }
                 }
-            }],
+            ],
             'permissions' => 'array'
+        ], [
+            'name.required' => 'Nama peran wajib diisi.',
+            'name.unique' => 'Nama peran sudah ada!',
+            'permissions.array' => 'Format izin tidak valid.'
         ]);
 
         $role = Role::create(['name' => $this->name]);
@@ -58,6 +66,10 @@ class RolePermissionManagement extends Component
         $this->validate([
             'name' => 'required|unique:roles,name,' . $this->role_id,
             'permissions' => 'array'
+        ], [
+            'name.required' => 'Nama peran wajib diisi.',
+            'name.unique' => 'Nama peran sudah ada!',
+            'permissions.array' => 'Format izin tidak valid.'
         ]);
 
         $role = Role::find($this->role_id);

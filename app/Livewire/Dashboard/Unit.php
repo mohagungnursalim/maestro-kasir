@@ -43,6 +43,11 @@ class Unit extends Component
 
         $this->validate([
             'newUnit' => 'required|string|max:20|unique:units,name'
+        ],[
+            'newUnit.required' => 'Unit wajib diisi.',
+            'newUnit.string' => 'Unit harus bertipe string.',
+            'newUnit.max' => 'Unit maksimal 20 karakter',
+            'newUnit.unique' => 'Unit sudah ada!'
         ]);
 
         DB::table('units')->insert([

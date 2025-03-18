@@ -27,6 +27,13 @@ class UserManagement extends Component
             'email' => 'required|email|unique:users,email',
             'password' => 'nullable|min:6',
             'role' => 'required',
+        ],[
+            'name.required' => 'Nama wajib diisi.',
+            'email.required' => 'Email wajib diisi.',
+            'email.unique' => 'Email sudah terdaftar!',
+            'email.email' => 'Format email harus sesuai misal: nama@gmail.com',
+            'password.min' => 'Pendek minimal password 6 karakter',
+            'role.required' => 'Peran wajib diisi.'
         ]);
 
         $user = User::create([
@@ -59,6 +66,13 @@ class UserManagement extends Component
             'email' => 'required|email|unique:users,email,' . $this->user_id,
             'password' => 'nullable|min:6',
             'role' => 'required',
+        ],[
+            'name.required' => 'Nama wajib diisi.',
+            'email.required' => 'Email wajib diisi.',
+            'email.unique' => 'Email sudah terdaftar!',
+            'email.email' => 'Format email harus sesuai misal: nama@gmail.com',
+            'password.min' => 'Pendek minimal password 6 karakter',
+            'role.required' => 'Peran wajib diisi.'
         ]);
 
         $user = User::findOrFail($this->user_id);

@@ -37,7 +37,15 @@ class Settings extends Component
             'store_phone' => 'nullable|digits_between:10,14',
             'store_footer' => 'nullable|string|max:100',
             'new_logo' => 'nullable|image|max:2048',
+        ], [
+            'store_name.max' => 'Nama toko tidak boleh lebih dari 80 karakter.',
+            'store_address.max' => 'Alamat toko tidak boleh lebih dari 100 karakter.',
+            'store_phone.digits_between' => 'Nomor telepon harus terdiri dari 10 hingga 14 digit.',
+            'store_footer.max' => 'Footer struk tidak boleh lebih dari 100 karakter.',
+            'new_logo.image' => 'File yang diunggah harus berupa gambar.',
+            'new_logo.max' => 'Ukuran gambar tidak boleh lebih dari 2MB.'
         ]);
+        
     
         $settings = StoreSetting::firstOrNew([]);
     
