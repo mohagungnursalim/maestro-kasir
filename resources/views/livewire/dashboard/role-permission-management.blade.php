@@ -11,18 +11,28 @@
     </div>
 
     <!-- Pilih Permission -->
-    <h2 class="text-lg font-semibold mb-2 text-gray-700">Izin:</h2>
-    <div class="grid grid-cols-10 gap-2 mb-4">
-        @foreach($allPermissions as $permission)
-            <label class="flex items-center">
-                <input type="checkbox" wire:model="permissions" value="{{ $permission->name }}" class="mr-2 text-blue-500 border-gray-300 rounded focus:ring-blue-500">
-                <span class="text-gray-700">{{ $permission->name }}</span>
-            </label>
-        @endforeach
-        @error('permissions') 
-            <span class="text-red-500 text-sm mt-1 col-span-10">{{ $message }}</span>
-        @enderror
-    </div>
+<h2 class="text-lg font-semibold mb-2 text-gray-700">Izin:</h2>
+<div class="grid grid-cols-5 gap-2 mb-4">
+    @foreach($allPermissions as $permission)
+    <label class="relative inline-flex items-center cursor-pointer">
+        <input type="checkbox" wire:model="permissions" value="{{ $permission->name }}" class="sr-only peer">
+        <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 
+                    peer-focus:ring-blue-300 rounded-full peer dark:bg-gray-700 
+                    peer-checked:after:translate-x-full peer-checked:after:border-white 
+                    after:content-[''] after:absolute after:top-0.5 after:left-[2px] 
+                    after:bg-white after:border-gray-300 after:border after:rounded-full 
+                    after:h-5 after:w-5 after:transition-all dark:border-gray-600 
+                    peer-checked:bg-blue-600">
+        </div>
+        <span class="ml-3 text-sm font-medium text-gray-700">{{ $permission->name }}</span>
+    </label>
+    @endforeach
+</div>
+
+@error('permissions') 
+    <span class="text-red-500 text-sm mt-1">{{ $message }}</span>
+@enderror
+
 
     <!-- Button Tambah / Update Role -->
     <button class="text-white bg-gradient-to-r from-purple-500 to-pink-500 hover:bg-gradient-to-l focus:ring-4 focus:outline-none focus:ring-purple-200 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2" wire:click="{{ $isEditMode ? 'update' : 'store' }}">
