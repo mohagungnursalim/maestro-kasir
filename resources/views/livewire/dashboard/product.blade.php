@@ -290,7 +290,7 @@
                         <label for="supplier_id" class="block mb-2 text-sm font-medium text-gray-900">Supplier</label>
 
                         <!-- Input Pencarian -->
-                        <input id="supplier_id" type="text" x-model="search" @input.debounce="fetchSuppliers()" placeholder="Cari Supplier..."
+                        <input id="supplier_id" type="text" x-model="search" @input.debounce="fetchSuppliers()" placeholder="Tambahkan Supplier (Opsional)"
                             class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full">
 
                         <!-- Pesan Loading -->
@@ -465,11 +465,11 @@
                     </div>        
 
                     <div x-data="supplierSelectUpdate()" 
-                        x-init='updateSupplier(@json(["id" => $supplier_idUpdate, "name" => $supplierName]))'
+                         x-init='updateSupplier(@json(["id" => $supplier_idUpdate ?? null, "name" => $supplierName ?? ""]))'
                         class="relative">
                         <label for="supplier_idUpdate" class="block mb-2 text-sm font-medium text-gray-900">Supplier</label>
 
-                        <input id="supplier_idUpdate" type="text" x-model="search" @input.debounce="fetchSuppliers()" placeholder="Cari Supplier..."
+                        <input id="supplier_idUpdate" type="text" x-model="search" @input.debounce="fetchSuppliers()" placeholder="Tambahkan Supplier (Opsional)"
                             class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full">
 
                         <div x-show="loading" class="text-sm text-gray-500 mt-1">Mencari..</div>
@@ -805,7 +805,7 @@
                     }
 
                     this.loading = false;
-                }, 500); // Delay 500ms
+                }, 300); // Delay 300ms
             },
 
             selectSupplier(supplier) {
@@ -953,124 +953,70 @@
     }
 </script>
 
-
 {{-- Script search supplier modal Edit --}}
-{{-- <script>
-    function supplierSelectUpdate() {
-        return {
-            suppliers: [],
-            search: '',
-            selectedSupplierId: null,
-            loading: false,
-            timeout: null,
-
-            updateSupplier(supplier) {
-                if (supplier && supplier.id) {
-                    this.selectedSupplierId = supplier.id;
-                    this.search = supplier.name;
-                }
-            },
-
-            fetchSuppliers() {
-                clearTimeout(this.timeout);
-
-                this.timeout = setTimeout(async () => {
-                    if (this.search.trim().length < 1) return; // Jangan kosongkan suppliers
-
-                    this.loading = true;
-
-                    try {
-                        let response = await fetch(`/api/suppliers?search=${this.search}`);
-                        let data = await response.json();
-
-                        if (data.length > 0) {
-                            this.suppliers = data;
-                        }
-                    } catch (error) {
-                        console.error('Error fetching suppliers:', error);
-                    }
-
-                    this.loading = false;
-                }, 300);
-            },
-
-            selectSupplier(supplier) {
-                if (!supplier || !supplier.id) {
-                    return;
-                }
-
-             
-                this.selectedSupplierId = supplier.id;
-                this.search = supplier.name;
-                this.suppliers = [];
-
-                // Kirim update ke Livewire
-                @this.set('supplier_idUpdate', supplier.id);
-                @this.set('supplierName', supplier.name);
-                
-            }
-        };
-    }
-</script> --}}
-
 <script>
     function supplierSelectUpdate() {
-        return {
-            suppliers: [],
-            search: '',
-            selectedSupplierId: null,
-            loading: false,
-            timeout: null,
-            isSelecting: false,
+    return {
+        suppliers: [],
+        search: '',
+        selectedSupplierId: null,
+        loading: false,
+        timeout: null,
+        isSelecting: false,
 
-            updateSupplier(supplier) {
-                if (supplier?.id) {
-                    this.selectedSupplierId = supplier.id;
-                    this.search = supplier.name;
-                }
-            },
-
-            fetchSuppliers() {
-                if (this.isSelecting) return; // Hindari pencarian saat memilih supplier
-                if (this.search.trim().length < 1) {
-                    this.suppliers = [];
-                    return;
-                }
-
-                this.loading = true;
-
-                clearTimeout(this.timeout);
-                this.timeout = setTimeout(async () => {
-                    try {
-                        let response = await fetch(`/api/suppliers?search=${encodeURIComponent(this.search)}`);
-                        let data = await response.json();
-
-                        this.suppliers = data.length > 0 ? data : [];
-                    } catch (error) {
-                        console.error('Error fetching suppliers:', error);
-                    } finally {
-                        this.loading = false;
-                    }
-                }, 300);
-            },
-
-            selectSupplier(supplier) {
-                if (!supplier?.id) return;
-
-                this.isSelecting = true; // Set flag agar fetchSuppliers tidak berjalan
-
+        updateSupplier(supplier) {
+            if (supplier?.id) {
+                // Jika ada supplier, isi field sesuai data
                 this.selectedSupplierId = supplier.id;
                 this.search = supplier.name;
-                this.suppliers = [];
-
-                // Update ke Livewire
-                @this.set('supplier_idUpdate', supplier.id);
-                @this.set('supplierName', supplier.name);
-
-                setTimeout(() => this.isSelecting = false, 500); // Reset flag setelah 500ms
+            } else {
+                // Jika supplier kosong, reset field
+                this.selectedSupplierId = null;
+                this.search = '';
             }
-        };
-    }
+        },
+
+        fetchSuppliers() {
+            if (this.isSelecting) return; // Hindari pencarian saat memilih supplier
+            if (this.search.trim().length < 1) {
+                this.suppliers = [];
+                return;
+            }
+
+            this.loading = true;
+
+            clearTimeout(this.timeout);
+            this.timeout = setTimeout(async () => {
+                try {
+                    let response = await fetch(`/api/suppliers?search=${encodeURIComponent(this.search)}`);
+                    let data = await response.json();
+
+                    this.suppliers = data.length > 0 ? data : [];
+                } catch (error) {
+                    console.error('Error fetching suppliers:', error);
+                } finally {
+                    this.loading = false;
+                }
+            }, 300); // Delay 300ms
+        },
+
+        selectSupplier(supplier) {
+            if (!supplier?.id) return;
+
+            this.isSelecting = true; // Set flag agar fetchSuppliers tidak berjalan
+
+            this.selectedSupplierId = supplier.id;
+            this.search = supplier.name;
+            this.suppliers = [];
+
+            // Update ke Livewire
+            @this.set('supplier_idUpdate', supplier.id);
+            @this.set('supplierName', supplier.name);
+
+            setTimeout(() => this.isSelecting = false, 500); // Reset flag setelah 500ms
+        }
+    };
+}
 </script>
 
 
