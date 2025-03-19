@@ -3,6 +3,7 @@
 namespace App\Livewire\Dashboard;
 
 use App\Models\Order;
+use App\Models\Product;
 use App\Models\TransactionDetail;
 use Carbon\Carbon;
 use Livewire\Component;
@@ -12,6 +13,7 @@ class Dashboard extends Component
     public $totalOrders;
     public $totalSales;
     public $totalProductsSold;
+
     public $filterType = 'today'; // Default Hari Ini
 
     public function mount()

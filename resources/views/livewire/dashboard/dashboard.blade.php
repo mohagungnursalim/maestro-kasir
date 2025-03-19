@@ -29,8 +29,12 @@
                 <p class="text-2xl font-bold text-purple-600">{{ number_format($totalProductsSold, 0, ',', '.') }}</p>
             </div>
         </div>
-        
-        @livewire('dashboard.product-sales-chart')
 
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-6 mb-2">
+        
+            @livewire('dashboard.product-sales-chart')
+            @livewire('dashboard.stock-warning')
+
+        </div>
     </div>
 </div>
