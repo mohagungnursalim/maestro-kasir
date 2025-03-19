@@ -38,7 +38,7 @@ class Product extends Component
     // Search Product
     #[Url()]
     public $search = '';
-    public $limit = 8; 
+    public $limit = 5; 
     public $loaded = false;
 
     protected $listeners = [

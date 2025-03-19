@@ -17,7 +17,6 @@ class Order extends Component
     public $search = '';
     public $products = [];
     public $limitProducts = 5;
-    public $limitKey = 8; // Limit cache key
 
     public $payment_method = 'cash'; // Metode pembayaran default
     public $customerMoney = 0;
@@ -43,7 +42,7 @@ class Order extends Component
     public function searchProduct()
     {
         $ttl = 31536000;
-        $cacheKey = "products_{$this->search}_{$this->limitKey}";
+        $cacheKey = "products_{$this->search}_{$this->limitProducts}";
 
         $this->products = Cache::remember($cacheKey, $ttl, function () {
             return Product::where(function ($query) {
@@ -352,7 +351,7 @@ class Order extends Component
         $ttl = 31536000; // TTL cache selama 1 tahun
 
         // Cache key unik berdasarkan pencarian & limit
-        $cacheKey = "products_{$this->search}_{$this->limitKey}";
+        $cacheKey = "products_{$this->search}_{$this->limitProducts}";
 
         // Hapus cache lama sebelum memperbarui
         Cache::forget($cacheKey);
@@ -381,7 +380,7 @@ class Order extends Component
                         ->orWhere('products.description', 'like', '%' . $this->search . '%');
                 })
                 ->orderByDesc('products.sold_count')
-                ->take($this->limitKey)
+                ->take($this->limitProducts)
                 ->get();
         });
 
