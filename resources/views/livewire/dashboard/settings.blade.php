@@ -1,6 +1,8 @@
 <div> 
-   
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">     
+    
+        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">  
+            <p class="text-2xl font-bold">Pengaturan Toko</p>
+            <hr class="mb-3">   
             @if (session('success'))
                 <div 
                     x-data="{ show: true }" 
@@ -98,12 +100,16 @@
                 </div>
             
                 <!-- Footer Struk -->
-                <hr>
+                <p class="text-2xl font-bold">Pengaturan Struk</p>
+                <hr class="mb-3"> 
                 <div>
                     <label class="block text-sm font-medium">Footer Struk Order</label>
-                    <input type="text" wire:model="store_footer" class="w-full   border-gray-300 border rounded-md p-2" required>
-                    @error('store_footer') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+                    <textarea wire:model="store_footer" class="w-full border-gray-300 border rounded-md p-2 resize-none" rows="3" required></textarea>
+                    @error('store_footer') 
+                        <span class="text-red-500 text-sm">{{ $message }}</span> 
+                    @enderror
                 </div>
+                
             
                 <!-- Tombol Simpan -->
                 <div class="flex items-center justify-center">
