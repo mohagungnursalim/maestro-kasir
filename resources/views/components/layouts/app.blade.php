@@ -28,9 +28,9 @@
         <div class="flex items-center justify-between">
             {{-- Logo Section --}}
             <div class="flex items-center justify-start rtl:justify-end">
-                <button data-drawer-target="logo-sidebar" data-drawer-toggle="logo-sidebar" aria-controls="logo-sidebar"
+                <button  data-drawer-target="drawer-navigation" data-drawer-show="drawer-navigation" aria-controls="drawer-navigation"
                     type="button"
-                    class="inline-flex items-center p-2 text-sm text-gray-500 rounded-lg sm:hidden hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-200">
+                    class="inline-flex items-center p-2 text-sm text-gray-500 rounded-lg hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-200">
                     <span class="sr-only">Open sidebar</span>
                     <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20"
                         xmlns="http://www.w3.org/2000/svg">
@@ -39,13 +39,13 @@
                         </path>
                     </svg>
                 </button>
+                
                 <a href="/dashboard" class="flex ms-2 md:me-24">
                     <img src="{{ asset($settings->store_logo ?? '/logo/default.png') }}" class="h-8 me-3" alt="FlowBite Logo" />
                     <span class="self-center text-xl font-serif font-semibold sm:text-2xl whitespace-nowrap tracking-wide italic">
                         {{ $settings->store_name ?? 'Nama Toko' }}
                     </span>
-                </a>
-                
+                </a>                
             </div>
 
             {{-- Navbar Section --}}
@@ -57,7 +57,7 @@
 {{-- Sidebar Section --}}
 <x-sidebar />
 
-<div class="p-4 sm:ml-64">
+<div class="p-4 ">
     <div class="p-4 border-2 border-gray-200 border rounded-lg mt-14">
         <!-- Page Content -->
         <main>
