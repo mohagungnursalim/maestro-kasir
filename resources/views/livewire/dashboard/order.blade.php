@@ -192,7 +192,7 @@
                                         <select 
                                             x-model="paymentMethod"
                                             wire:model="payment_method"
-                                            :disabled="@json(!$cartNotEmpty)"
+                                            :disabled="@json(empty($cart))"
                                             class="block py-2.5 px-0 w-full text-sm text-gray-500 bg-transparent border-0 border-b-2 
                                                    border-gray-200 appearance-none focus:outline-none focus:ring-0 
                                                    focus:border-gray-200 peer disabled:cursor-not-allowed">
@@ -229,7 +229,7 @@
                                             id="customerMoney" 
                                             name="customerMoney"
                                             wire:model.live.debounce.300ms="customerMoney"
-                                            :disabled="@json(!$cartNotEmpty) || !isCash()"
+                                            :disabled="@json(empty($cart)) || !isCash()"
                                             class="block w-full p-2 text-gray-900 border border-gray-300 rounded-lg bg-gray-50 text-xs 
                                                    focus:ring-blue-500 focus:border-blue-500 disabled:cursor-not-allowed"
                                             placeholder="Masukkan uang pelanggan...">
