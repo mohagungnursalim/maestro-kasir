@@ -26,7 +26,7 @@
                     </form>
                 </div>
 
-                <!-- Daftar Produk Hasil Pencarian -->
+                {{-- <!-- Daftar Produk Hasil Pencarian -->
                 @if ($products)
                 <div class="mt-4">
                     @forelse ($products as $product)
@@ -74,9 +74,199 @@
                     <p class="text-center text-gray-400">Produk tidak ditemukan.</p>
                     @endforelse
                 </div>
+                @endif --}}
+
+
+                <!-- Daftar Produk Hasil Pencarian -->
+                {{-- @if ($products)
+                <div class="container mx-auto mt-4">
+                    <div class="grid grid-cols-5 md:grid-cols-5 lg:grid-cols-8 gap-5">
+                        @forelse ($products as $product)
+                        @php
+                            $isInCart = collect($cart)->contains('id', $product->id);
+                        @endphp
+                        <div class="bg-white rounded-lg shadow-sm overflow-hidden transition-all duration-200 hover:shadow-md 
+                            {{ $isInCart ? 'opacity-75' : '' }}" style="min-width: 160px;">
+                            
+                            <!-- Product Image -->
+                            <div class="relative h-32 overflow-hidden">
+                                <img class="w-full h-full object-cover" 
+                                    src="{{ asset('storage/' . $product->image ) }}" 
+                                    alt="{{ $product->name }}">
+                            </div>
+
+                            <!-- Product Details -->
+                            <div class="p-2">
+                                <h3 class="text-sm font-medium text-gray-800 truncate" title="{{ $product->name }}">
+                                    {{ $product->name }}
+                                </h3>
+                                
+                                <div class="flex flex-col mt-1 space-y-1">
+                                    <span class="text-sm font-bold text-gray-900">
+                                        Rp{{ number_format($product->price, 0, ',', '.') }}
+                                    </span>
+                                    
+                                    <!-- Stock Badge -->
+                                    <span class="@if($product->stock < 1) bg-red-100 text-red-800 
+                                                @elseif($product->stock < 10) bg-yellow-100 text-yellow-800 
+                                                @else bg-green-100 text-green-800 
+                                                @endif 
+                                                inline-flex items-center text-xs px-2 py-0.5 rounded-full">
+                                        Stok: {{ $product->stock }}
+                                    </span>
+                                </div>
+
+                                <!-- Add to Cart Button -->
+                                <div class="mt-2">
+                                    @if (!$isInCart)
+                                        <button 
+                                            wire:click="addToCart({{ $product->id }})" 
+                                            wire:loading.remove
+                                            wire:target="addToCart({{ $product->id }})"
+                                            onclick="playSelectSound()"
+                                            class="w-full bg-gray-900 text-white py-1.5 px-3 rounded text-sm hover:bg-gray-800 
+                                                transition duration-200 flex items-center justify-center">
+                                            <span>+ Keranjang</span>
+                                        </button>
+
+                                        <!-- Loading State -->
+                                        <button 
+                                            wire:loading
+                                            wire:target="addToCart({{ $product->id }})"
+                                            class="w-full bg-gray-900 text-white py-1.5 px-3 rounded text-sm opacity-75 
+                                                flex items-center justify-center cursor-wait">
+                                            <svg class="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                            </svg>
+                                        </button>
+                                    @else
+                                        <button 
+                                            disabled
+                                            class="w-full bg-gray-300 text-gray-600 py-1.5 px-3 rounded text-sm cursor-not-allowed">
+                                            ✓ Di Keranjang
+                                        </button>
+                                    @endif
+                                </div>
+                            </div>
+                        </div>
+                        @empty
+                        <div class="col-span-full">
+                            <div class="flex items-center justify-center py-6 bg-gray-50 rounded-lg">
+                                <p class="text-gray-500 text-sm">Produk tidak ditemukan</p>
+                            </div>
+                        </div>
+                        @endforelse
+                    </div>
+                </div>
+                @endif --}}
+
+
+                @if ($products)
+                <div class="container mx-auto mt-4 px-2 sm:px-4">
+                    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-5 gap-2 sm:gap-4">
+                        @forelse ($products as $product)
+                        @php
+                            $isInCart = collect($cart)->contains('id', $product->id);
+                        @endphp
+                        <div class="bg-white rounded-lg shadow-sm overflow-hidden transition-all duration-300 hover:shadow-lg 
+                            {{ $isInCart ? 'opacity-75' : '' }} {{ $product->stock < 1 ? 'opacity-75' : '' }} flex flex-col">
+                            
+                            <!-- Product Image Container -->
+                            <div class="relative pt-[100%]"> <!-- Square Aspect Ratio -->
+                                <img class="absolute inset-0 w-full h-full object-cover transition-all duration-300 hover:scale-105" 
+                                    src="{{ asset('storage/' . $product->image ) }}" 
+                                    alt="{{ $product->name }}"
+                                    loading="lazy"
+                                    onerror="this.src='{{ asset('images/placeholder.png') }}'">
+                            </div>
+
+                            <!-- Product Details -->
+                            <div class="p-2 sm:p-3 flex-1 flex flex-col">
+                                <!-- Product Name -->
+                                <h3 class="text-xs sm:text-sm font-medium text-gray-800 line-clamp-2 mb-1 min-h-[2.5rem]" 
+                                    title="{{ $product->name }}">
+                                    {{ $product->name }}
+                                </h3>
+                                
+                                <!-- Price and Stock -->
+                                <div class="mt-auto space-y-2">
+                                    <!-- Price -->
+                                    <div class="flex justify-between items-center">
+                                        <span class="text-sm sm:text-base font-bold text-gray-900">
+                                            Rp{{ number_format($product->price, 0, ',', '.') }}
+                                        </span>
+                                        
+                                        <!-- Stock Badge -->
+                                        <span class="@if($product->stock < 1) bg-red-100 text-red-800 
+                                                    @elseif($product->stock < 10) bg-yellow-100 text-yellow-800 
+                                                    @else bg-green-100 text-green-800 
+                                                    @endif 
+                                                    inline-flex items-center text-[10px] sm:text-xs px-1.5 py-0.5 rounded-full">
+                                            {{ $product->stock > 0 ? $product->stock : 'Habis' }}
+                                        </span>
+                                    </div>
+
+                                    <!-- Add to Cart Button -->
+                                    <div class="w-full">
+                                        @if (!$isInCart)
+                                            <button 
+                                                wire:click="addToCart({{ $product->id }})" 
+                                                wire:loading.remove
+                                                wire:target="addToCart({{ $product->id }})"
+                                                onclick="playSelectSound()"
+                                                @if($product->stock < 1) disabled @endif
+                                                class="w-full bg-gray-900 text-white py-1.5 sm:py-2 px-2 sm:px-3 rounded text-xs sm:text-sm
+                                                    hover:bg-gray-800 transition duration-200 flex items-center 
+                                                    justify-center gap-1 disabled:bg-gray-300 disabled:cursor-not-allowed">
+                                                <svg class="w-3 h-3 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+                                                </svg>
+                                                <span>Tambah</span>
+                                            </button>
+
+                                            <!-- Loading State -->
+                                            <button 
+                                                wire:loading
+                                                wire:target="addToCart({{ $product->id }})"
+                                                class="w-full bg-gray-900 text-white py-1.5 sm:py-2 px-2 sm:px-3 rounded text-xs sm:text-sm
+                                                    flex items-center justify-center gap-1 cursor-wait">
+                                                <svg class="animate-spin w-3 h-3 sm:w-4 sm:h-4" fill="none" viewBox="0 0 24 24">
+                                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+                                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/>
+                                                </svg>
+                                            </button>
+                                        @else
+                                            <button 
+                                                disabled
+                                                class="w-full bg-green-100 text-green-800 py-1.5 sm:py-2 px-2 sm:px-3 rounded text-xs sm:text-sm
+                                                    flex items-center justify-center gap-1 cursor-not-allowed">
+                                                <svg class="w-3 h-3 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                                                </svg>
+                                                <span>Di Keranjang</span>
+                                            </button>
+                                        @endif
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        @empty
+                        <div class="col-span-full">
+                            <div class="flex flex-col items-center justify-center py-6 bg-gray-50 rounded-lg">
+                                <svg class="w-10 h-10 text-gray-400 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                        d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                </svg>
+                                <p class="text-gray-500 text-sm">Produk tidak ditemukan</p>
+                            </div>
+                        </div>
+                        @endforelse
+                    </div>
+                </div>
                 @endif
 
-
+               
 
                 <!-- Keranjang Belanja -->
                 <h2 class="text-xl font-semibold text-gray-900 sm:text-2xl mt-6">Pesanan</h2>
