@@ -303,6 +303,10 @@ class Order extends Component
             $this->dispatch('refreshProductStock');
             $this->dispatch('successPayment');
 
+            // Reset keranjang & uang customer
+            $this->cart = null;
+            $this->customerMoney = 0;
+            
             $this->dispatch('printReceipt', $order->id); // Print struk pembayaran
 
         } catch (\Exception $e) {

@@ -200,7 +200,7 @@
                                         <!-- Stock Badge -->
                                         <span class="@if($product->stock < 1) bg-red-100 text-red-800 
                                                     @elseif($product->stock < 10) bg-yellow-100 text-yellow-800 
-                                                    @else bg-green-100 text-green-800 
+                                                    @else bg-blue-100 text-blue-800 
                                                     @endif 
                                                     inline-flex items-center text-[10px] sm:text-xs px-1.5 py-0.5 rounded-full">
                                             {{ $product->stock > 0 ? $product->stock : 'Habis' }}
