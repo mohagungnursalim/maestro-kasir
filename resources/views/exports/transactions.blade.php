@@ -50,7 +50,7 @@
     <table>
         <thead>
             <tr>
-                <th>ID Order/Kasir</th>
+                <th>Nomor Order/Kasir</th>
                 <th>Nama Produk</th>
                 <th>Pembayaran</th>
                 <th>Pajak</th>
@@ -74,7 +74,7 @@
                 @endphp
                 <tr>
                     <td class="bold">
-                        ID Order: {{ $order_id }}<br>
+                        Nomor Order: {{ $first->order->order_number ?? '-' }}<br>
                         Kasir: {{ $first->order->user->name ?? '-' }}<br>
                         Tanggal: {{ $first->order->created_at->format('d-m-Y') }}
                     </td>

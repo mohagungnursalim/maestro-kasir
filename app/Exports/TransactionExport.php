@@ -35,7 +35,7 @@ class TransactionExport implements FromCollection, WithHeadings, WithMapping
     public function headings(): array
     {
         return [
-            'ID Order',
+            'Nomor Order',
             'Kasir',
             'Nama Produk',
             'Pembayaran',
@@ -61,7 +61,7 @@ class TransactionExport implements FromCollection, WithHeadings, WithMapping
         };
 
         return [
-            $transaction->order->id,
+            $transaction->order->order_number ?? '-',
             $transaction->order->user->name ?? '-',
             $transaction->product->name ?? '-',
             $transaction->order->payment_method ?? '-',
