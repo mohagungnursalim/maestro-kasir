@@ -129,8 +129,42 @@ class Product extends Component
 
     public function loadMore()
     {
-        $this->limit += 8;
-        $this->loadInitialProducts();
+        // Ambil jumlah data yang sudah ada untuk dijadikan offset
+        $offset = count($this->products);
+    
+        // Ambil data baru dengan skip offset agar tidak mengulang data lama
+        $newProducts = DB::table('products')
+            ->leftJoin('suppliers', 'products.supplier_id', '=', 'suppliers.id')
+            ->select(
+                'products.id',
+                'products.name',
+                'products.sku',
+                'products.price',
+                'products.description',
+                'products.stock',
+                'products.unit',
+                'products.image',
+                'products.created_at',
+                'products.updated_at',
+                'suppliers.id as supplier_id',
+                'suppliers.name as supplier_name'
+            )
+            ->when($this->search, function ($query) {
+                $query->where(function ($q) {
+                    $q->where('products.name', 'like', '%' . $this->search . '%')
+                      ->orWhere('products.sku', 'like', '%' . $this->search . '%')
+                      ->orWhere('products.price', 'like', '%' . $this->search . '%')
+                      ->orWhere('products.description', 'like', '%' . $this->search . '%')
+                      ->orWhere('suppliers.name', 'like', '%' . $this->search . '%'); // Pencarian nama supplier
+                });
+            })
+            ->orderByDesc('products.sold_count')
+            ->skip($offset)
+            ->take(8) // Ambil 8 data lagi
+            ->get();
+    
+        // Gabungkan data baru dengan data lama
+        $this->products = $this->products->merge($newProducts);
     }
 
     #[On('resetForm')] 

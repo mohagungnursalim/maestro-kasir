@@ -194,31 +194,32 @@
 
 
             </div>
+            
             {{-- Tombol Load More --}}
-            @if($products->count() >= $limit && $totalProducts > $limit)
-            <div class="mt-4 mb-2 flex justify-center">
-                <!-- Tombol "Tampilkan Lebih" (akan hilang saat loading) -->
-                <button wire:click="loadMore"
-                    class="bg-gray-800 text-white px-6 py-2 rounded-full shadow-md hover:bg-gray-700 focus:outline-none focus:ring focus:ring-gray-400 focus:ring-opacity-50"
-                    wire:loading.remove wire:target="loadMore">
-                    Tampilkan Lebih
-                </button>
+@if($products->count() >= $limit && $products->count() < $totalProducts)
+<div class="mt-4 mb-2 flex justify-center">
+    <!-- Tombol "Tampilkan Lebih" (akan hilang saat loading) -->
+    <button wire:click="loadMore"
+        class="bg-gray-800 text-white px-6 py-2 rounded-full shadow-md hover:bg-gray-700 focus:outline-none focus:ring focus:ring-gray-400 focus:ring-opacity-50"
+        wire:loading.remove wire:target="loadMore">
+        Tampilkan Lebih
+    </button>
 
-                <!-- Tombol Loading (hanya muncul saat loading) -->
-                <button
-                    class="mb-5 bg-gray-800 text-white px-6 py-2 rounded-full shadow-md cursor-not-allowed focus:outline-none focus:ring focus:ring-gray-400 focus:ring-opacity-50"
-                    type="button" disabled wire:loading wire:target="loadMore">
-                    Memuat..
-                    <svg class="inline w-5 h-5 text-white animate-spin ml-2" xmlns="http://www.w3.org/2000/svg"
-                        fill="none" viewBox="0 0 24 24">
-                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4">
-                        </circle>
-                        <path class="opacity-75" fill="currentColor"
-                            d="M4 12a8 8 0 018-8v4a4 4 0 100 8v4a8 8 0 01-8-8z"></path>
-                    </svg>
-                </button>
-            </div>
-            @endif
+    <!-- Tombol Loading (hanya muncul saat loading) -->
+    <button
+        class="mb-5 bg-gray-800 text-white px-6 py-2 rounded-full shadow-md cursor-not-allowed focus:outline-none focus:ring focus:ring-gray-400 focus:ring-opacity-50"
+        type="button" disabled wire:loading wire:target="loadMore">
+        Memuat..
+        <svg class="inline w-5 h-5 text-white animate-spin ml-2" xmlns="http://www.w3.org/2000/svg"
+            fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor"
+                d="M4 12a8 8 0 018-8v4a4 4 0 100 8v4a8 8 0 01-8-8z"></path>
+        </svg>
+    </button>
+</div>
+@endif
+
         </div>
     </div>
 </div>
