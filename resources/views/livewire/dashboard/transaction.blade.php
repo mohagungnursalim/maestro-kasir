@@ -94,7 +94,7 @@
                     <table class="w-full text-sm text-left rtl:text-right text-gray-500">
                         <thead class="text-xs text-white uppercase bg-gray-500">
                             <tr>
-                                <th scope="col" class="px-6 py-3">ID Order/Kasir</th>
+                                <th scope="col" class="px-6 py-3">Nomor Order/Kasir</th>
                                 <th scope="col" class="px-6 py-3">Nama Produk</th>
                                 <th scope="col" class="px-6 py-3 text-right">Pembayaran</th>
                                 <th scope="col" class="px-6 py-3 text-right">Pajak</th>
@@ -170,11 +170,16 @@
                             @else
 
                             @forelse ($transactions as $orderId => $orderTransactions)
-                                {{-- Tampilkan ID Order hanya sekali --}}
                                 <tr class="bg-gray-200 font-bold">
                                     <td class="px-6 py-4">
-                                        ID Order: {{ $orderId ?? '-' }} <br>
-                                        Kasir: {{ $orderTransactions[0]->user_name ?? '-' }}
+                                        <div class="flex flex-wrap items-center gap-2">
+                                            <span class="bg-green-500 text-white text-xs font-semibold px-3 py-1 rounded-md shadow-sm">
+                                                {{ $orderTransactions[0]->order_number ?? '-' }}
+                                            </span>
+                                            <span class="bg-blue-500 text-white text-xs font-semibold px-3 py-1 rounded-md shadow-sm">
+                                                {{ $orderTransactions[0]->user_name ?? '-' }}
+                                            </span>
+                                        </div>
                                     </td>
                                     <td class="px-6 py-4 text-center font-bold"></td>
                                     <td class="px-6 py-4 text-center font-bold">{{ $orderTransactions[0]->payment_method ?? '-' }}</td>

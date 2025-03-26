@@ -75,7 +75,7 @@ class Transaction extends Component
                     ->join('products', 'transaction_details.product_id', '=', 'products.id')
                     ->select(
                         'transaction_details.*',
-                        'orders.id as order_id',
+                        'orders.order_number as order_number',
                         'orders.payment_method as payment_method',
                         'orders.tax as tax',
                         'orders.discount as discount',
@@ -87,7 +87,7 @@ class Transaction extends Component
                         'products.name as product_name'
                     )
                     ->when($this->search, function ($query) {
-                        $query->where('orders.id', 'like', '%' . $this->search . '%')
+                        $query->where('orders.order_number', 'like', '%' . $this->search . '%')
                             ->orWhereDate('orders.created_at', '=', $this->search)
                             ->orWhere('users.name', 'like', '%' . $this->search . '%')
                             ->orWhere('orders.payment_method', 'like', '%' . $this->search . '%');

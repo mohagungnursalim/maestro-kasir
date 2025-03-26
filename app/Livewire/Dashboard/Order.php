@@ -9,6 +9,7 @@ use App\Models\TransactionDetail;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
@@ -254,6 +255,7 @@ class Order extends Component
             //Simpan data order (tanpa detail produk)
             $order = ModelsOrder::create([
                 'user_id' => Auth::user()->id,
+                'order_number' => 'ORD/' . now()->format('Y-m-d') . '/' . Str::random(6),
                 'payment_method' => $this->payment_method,
                 'tax' => $this->tax,
                 'discount' => $this->discount,
