@@ -207,7 +207,7 @@
                                 @endforeach
                             @empty
                                 <tr>
-                                    <td colspan="10" class="text-center align-middle h-20">
+                                    <td colspan="12" class="text-center align-middle h-20">
                                         Tidak ada data ditemukan!
                                     </td>
                                 </tr>
