@@ -4,6 +4,7 @@ namespace App\Livewire\Dashboard;
 
 use App\Models\TransactionDetail;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Livewire\Component;
 
@@ -38,19 +39,27 @@ class ProductSalesChart extends Component
 
     private function getSalesData($startDate, $endDate)
     {
-        return TransactionDetail::selectRaw('products.name, SUM(transaction_details.quantity) as total_sold')
-            ->join('products', 'transaction_details.product_id', '=', 'products.id') // Gabungkan langsung dengan tabel produk
-            ->whereBetween('transaction_details.created_at', [$startDate, $endDate])
-            ->groupBy('products.name')
+        $query = TransactionDetail::selectRaw('products.name, SUM(transaction_details.quantity) as total_sold')
+            ->join('products', 'transaction_details.product_id', '=', 'products.id')
+            ->whereBetween('transaction_details.created_at', [$startDate, $endDate]);
+
+        // Jika bukan admin, filter berdasarkan kasir yang login
+        if (!Auth::user()->hasRole('admin')) {
+            $query->whereHas('order', function ($q) {
+                $q->where('user_id', Auth::id());
+            });
+        }
+
+        return $query->groupBy('products.name')
             ->orderByDesc('total_sold')
             ->limit(5)
             ->get()
             ->map(fn($sale) => [
-                'name' => $sale->name, // Langsung dari join
+                'name' => $sale->name,
                 'total' => $sale->total_sold
             ])
             ->toArray();
-        }    
+    }
 
     public function render()
     {

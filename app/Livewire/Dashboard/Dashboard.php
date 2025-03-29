@@ -6,6 +6,7 @@ use App\Models\Order;
 use App\Models\Product;
 use App\Models\TransactionDetail;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 
 class Dashboard extends Component
@@ -24,10 +25,20 @@ class Dashboard extends Component
     public function updateStats()
     {
         $dates = $this->getDateRange($this->filterType);
+        $queryOrders = Order::whereBetween('created_at', [$dates['start'], $dates['end']]);
+        $queryTransactions = TransactionDetail::whereBetween('created_at', [$dates['start'], $dates['end']]);
 
-        $this->totalOrders = Order::whereBetween('created_at', [$dates['start'], $dates['end']])->count();
-        $this->totalSales = Order::whereBetween('created_at', [$dates['start'], $dates['end']])->sum('grandtotal');
-        $this->totalProductsSold = TransactionDetail::whereBetween('created_at', [$dates['start'], $dates['end']])->sum('quantity');
+        // Jika bukan admin, hanya ambil transaksi kasir yang login
+        if (!Auth::user()->hasRole('admin')) {
+            $queryOrders->where('user_id', Auth::id());
+            $queryTransactions->whereHas('order', function ($query) {
+                $query->where('user_id', Auth::id());
+            });
+        }
+
+        $this->totalOrders = $queryOrders->count();
+        $this->totalSales = $queryOrders->sum('grandtotal');
+        $this->totalProductsSold = $queryTransactions->sum('quantity');
     }
 
     public function getDateRange($type)
