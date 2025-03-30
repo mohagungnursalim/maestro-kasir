@@ -957,67 +957,75 @@
 {{-- Script search supplier modal Edit --}}
 <script>
         function supplierSelectUpdate() {
-        return {
-            suppliers: [],
-            search: '',
-            selectedSupplierId: null,
-            loading: false,
-            timeout: null,
-            isSelecting: false,
+    return {
+        suppliers: [],
+        search: '',
+        selectedSupplierId: null,
+        loading: false,
+        timeout: null,
+        isSelecting: false,
 
-            updateSupplier(supplier) {
-                if (supplier?.id) {
-                    // Jika ada supplier, isi field sesuai data
-                    this.selectedSupplierId = supplier.id;
-                    this.search = supplier.name;
-                } else {
-                    // Jika supplier kosong, reset field
-                    this.selectedSupplierId = null;
-                    this.search = '';
-                }
-            },
-
-            fetchSuppliers() {
-                if (this.isSelecting) return; // Hindari pencarian saat memilih supplier
-                if (this.search.trim().length < 1) {
-                    this.suppliers = [];
-                    return;
-                }
-
-                this.loading = true;
-
-                clearTimeout(this.timeout);
-                this.timeout = setTimeout(async () => {
-                    try {
-                        let response = await fetch(`/api/suppliers?search=${encodeURIComponent(this.search)}`);
-                        let data = await response.json();
-
-                        this.suppliers = data.length > 0 ? data : [];
-                    } catch (error) {
-                        console.error('Error fetching suppliers:', error);
-                    } finally {
-                        this.loading = false;
-                    }
-                }, 300); // Delay 300ms
-            },
-
-            selectSupplier(supplier) {
-                if (!supplier?.id) return;
-
-                this.isSelecting = true; // Set flag agar fetchSuppliers tidak berjalan
-
+        updateSupplier(supplier) {
+            if (supplier?.id) {
+                // Jika ada supplier, isi field sesuai data
                 this.selectedSupplierId = supplier.id;
                 this.search = supplier.name;
-                this.suppliers = [];
-
-                // Update ke Livewire
-                @this.set('supplier_idUpdate', supplier.id);
-                @this.set('supplierName', supplier.name);
-
-                setTimeout(() => this.isSelecting = false, 500); // Reset flag setelah 500ms
+            } else {
+                // Jika supplier kosong, reset field
+                this.selectedSupplierId = null;
+                this.search = '';
             }
-        };
-    }
+        },
+
+        fetchSuppliers() {
+            if (this.isSelecting) return; // Hindari pencarian saat memilih supplier
+
+            if (this.search.trim().length < 1) {
+                this.suppliers = [];
+                
+                // Jika input kosong, reset data supplier
+                this.selectedSupplierId = null;
+                @this.set('supplier_idUpdate', null);
+                @this.set('supplierName', '');
+
+                return;
+            }
+
+            this.loading = true;
+
+            clearTimeout(this.timeout);
+            this.timeout = setTimeout(async () => {
+                try {
+                    let response = await fetch(`/api/suppliers?search=${encodeURIComponent(this.search)}`);
+                    let data = await response.json();
+
+                    this.suppliers = data.length > 0 ? data : [];
+                } catch (error) {
+                    console.error('Error fetching suppliers:', error);
+                } finally {
+                    this.loading = false;
+                }
+            }, 300); // Delay 300ms
+        },
+
+        selectSupplier(supplier) {
+            if (!supplier?.id) return;
+
+            this.isSelecting = true; // Set flag agar fetchSuppliers tidak berjalan
+
+            this.selectedSupplierId = supplier.id;
+            this.search = supplier.name;
+            this.suppliers = [];
+
+            // Update ke Livewire
+            @this.set('supplier_idUpdate', supplier.id);
+            @this.set('supplierName', supplier.name);
+
+            setTimeout(() => this.isSelecting = false, 500); // Reset flag setelah 500ms
+        }
+    };
+}
+
 </script>
 
 
