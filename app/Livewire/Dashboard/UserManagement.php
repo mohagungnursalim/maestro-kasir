@@ -66,7 +66,7 @@ class UserManagement extends Component
             'email' => 'required|email|unique:users,email,' . $this->user_id,
             'password' => 'nullable|min:6',
             'role' => 'required',
-        ],[
+        ], [
             'name.required' => 'Nama wajib diisi.',
             'email.required' => 'Email wajib diisi.',
             'email.unique' => 'Email sudah terdaftar!',
@@ -74,21 +74,25 @@ class UserManagement extends Component
             'password.min' => 'Pendek minimal password 6 karakter',
             'role.required' => 'Peran wajib diisi.'
         ]);
-
+    
         $user = User::findOrFail($this->user_id);
-
+    
+        // Jika password diisi, hash password baru, kalau kosong gunakan email sebagai password default
+        $newPassword = $this->password ? Hash::make($this->password) : Hash::make($this->email);
+    
         $user->update([
             'name' => $this->name,
             'email' => $this->email,
-            'password' => $this->password ? Hash::make($this->email) : $user->password,
+            'password' => $newPassword,
         ]);
-
+    
         $user->syncRoles($this->role);
-
+    
         $this->resetInput();
         $this->mount();
         $this->isEditMode = false;
     }
+    
 
     protected $listeners = [
         'deleteConfirmed' => 'delete'
