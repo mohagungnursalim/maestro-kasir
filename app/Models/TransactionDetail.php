@@ -10,6 +10,11 @@ class TransactionDetail extends Model
     protected $guarded = ['id'];
     protected $table = 'transaction_details';
 
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
+    
     // Relasi ke Order (1 transaksi detail hanya dimiliki oleh 1 order)
     public function order(): BelongsTo
     {
