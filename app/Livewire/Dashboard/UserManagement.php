@@ -46,6 +46,8 @@ class UserManagement extends Component
 
         $this->resetInput();
         $this->mount();
+
+        $this->dispatch('userStored');
     }
 
     public function edit($id)
@@ -91,6 +93,8 @@ class UserManagement extends Component
         $this->resetInput();
         $this->mount();
         $this->isEditMode = false;
+
+        $this->dispatch('userUpdated');
     }
     
 
