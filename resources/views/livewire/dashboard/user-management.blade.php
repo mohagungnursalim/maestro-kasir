@@ -43,22 +43,49 @@
             @error('role')
             <span class="text-red-500 text-sm mt-1">{{ $message }}</span>
             @enderror
-        </div>
+        </div> 
 
-        <!-- Tombol Action -->
-        <div class="col-span-2 text-center mt-4">
-            @if($isEditMode)
-            <button wire:click="update"
-                class="text-white bg-gradient-to-r from-purple-500 to-pink-500 hover:bg-gradient-to-l focus:ring-4 focus:outline-none focus:ring-purple-200 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2">
-                Simpan
-            </button>
-            @else
-            <button wire:click="store"
-                class="text-white bg-gradient-to-r from-purple-500 to-pink-500 hover:bg-gradient-to-l focus:ring-4 focus:outline-none focus:ring-purple-200 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2">
-                Tambah
-            </button>
-            @endif
-        </div>
+      <!-- Tombol Action -->
+    <div class="col-span-2 text-center mt-4">
+        @if($isEditMode)
+        <button wire:click="update" wire:loading.attr="disabled" wire:target="update"
+            class="text-white bg-gradient-to-r from-purple-500 to-pink-500 hover:bg-gradient-to-l focus:ring-4 focus:outline-none focus:ring-purple-200 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 relative">
+            
+            <!-- Teks tombol normal -->
+            <span wire:target="update">Simpan</span>
+
+            <!-- Loading Spinner -->
+            <span wire:loading wire:target="update" class="flex items-center justify-center">
+                Menyimpan..
+                <svg class="inline w-5 h-5 text-white animate-spin ml-2" xmlns="http://www.w3.org/2000/svg" fill="none"
+                    viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor"
+                        d="M4 12a8 8 0 018-8v4a4 4 0 100 8v4a8 8 0 01-8-8z"></path>
+                </svg>
+            </span>
+        </button>
+        @else
+        <button wire:click="store" wire:loading.attr="disabled" wire:target="store"
+            class="text-white bg-gradient-to-r from-purple-500 to-pink-500 hover:bg-gradient-to-l focus:ring-4 focus:outline-none focus:ring-purple-200 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 relative">
+            
+            <!-- Teks tombol normal -->
+            <span wire:loading.remove wire:target="store">Tambah</span>
+
+            <!-- Loading Spinner -->
+            <span wire:loading wire:target="store" class="flex items-center justify-center">
+                Menyimpan..
+                <svg class="inline w-5 h-5 text-white animate-spin ml-2" xmlns="http://www.w3.org/2000/svg" fill="none"
+                    viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor"
+                        d="M4 12a8 8 0 018-8v4a4 4 0 100 8v4a8 8 0 01-8-8z"></path>
+                </svg>
+            </span>
+        </button>
+        @endif
+    </div>
+
 
     </div>
 
@@ -116,26 +143,27 @@
     {{-- Toast--}}
     <script>
         const showToast = (title) => {
-        const Toast = Swal.mixin({
-            toast: true,
-            position: "top-end",
-            showConfirmButton: false,
-            timer: 3000,
-            timerProgressBar: true,
-            didOpen: (toast) => {
-                toast.onmouseenter = Swal.stopTimer;
-                toast.onmouseleave = Swal.resumeTimer;
-            }
-        });
-        Toast.fire({
-            icon: "success",
-            title: title
-        });
-    };
+            const Toast = Swal.mixin({
+                toast: true,
+                position: "top-end",
+                showConfirmButton: false,
+                timer: 3000,
+                timerProgressBar: true,
+                didOpen: (toast) => {
+                    toast.onmouseenter = Swal.stopTimer;
+                    toast.onmouseleave = Swal.resumeTimer;
+                }
+            });
+            Toast.fire({
+                icon: "success",
+                title: title
+            });
+        };
 
-    Livewire.on('userStored', () => showToast("User berhasil ditambahkan!"));
-    Livewire.on('userUpdated', () => showToast("User berhasil diperbarui!"));
-    Livewire.on('userDeleted', () => showToast("User berhasil dihapus!"));
+        Livewire.on('userStored', () => showToast("User berhasil ditambahkan!"));
+        Livewire.on('userUpdated', () => showToast("User berhasil diperbarui!"));
+        Livewire.on('userDeleted', () => showToast("User berhasil dihapus!"));
+
     </script>
 
 </div>
