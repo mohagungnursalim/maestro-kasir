@@ -160,7 +160,7 @@ class Product extends Component
             })
             ->orderByDesc('products.sold_count')
             ->skip($offset)
-            ->take(8) // Ambil 8 data lagi
+            ->take($this->limit) // Ambil 4 data lagi
             ->get();
     
         // Gabungkan data baru dengan data lama
