@@ -22,7 +22,7 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         // Matikan saat migrasi database
-        // $settings = StoreSetting::first(); 
-        // View::share('settings', $settings);
+        $settings = StoreSetting::first(); 
+        View::share('settings', $settings);
     }
 }
