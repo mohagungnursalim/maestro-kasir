@@ -20,34 +20,34 @@
 
     <script>
         document.getElementById("chartFilter").addEventListener("change", function () {
-            updateChart(this.value);
+            if (typeof updateChart === "function") {
+                updateChart(this.value);
+            }
         });
-
     </script>
-
+    
     <script>
         function initChart() {
             setTimeout(() => {
-                const ctx = document.getElementById("salesChart") ? .getContext("2d");
+                const ctx = document.getElementById("salesChart")?.getContext("2d");
                 if (!ctx) return; // Cegah error jika elemen tidak ditemukan
-
-                // Hapus chart lama jika ada
+    
                 if (window.salesChart instanceof Chart) {
                     window.salesChart.destroy();
                 }
-
+    
                 let salesData = {
                     daily: @json($dailySales),
                     weekly: @json($weeklySales),
                     monthly: @json($monthlySales),
                     yearly: @json($yearlySales),
                 };
-
+    
                 function getChartData(type) {
                     return {
-                        labels: salesData[type].map(item => item.name),
+                        labels: (salesData[type] || []).map(item => item.name),
                         datasets: [{
-                            data: salesData[type].map(item => item.total),
+                            data: (salesData[type] || []).map(item => item.total),
                             backgroundColor: [
                                 'rgba(54, 162, 235, 0.6)',
                                 'rgba(75, 192, 192, 0.6)',
@@ -64,10 +64,9 @@
                             ],
                             borderWidth: 1,
                         }]
-
                     };
                 }
-
+    
                 window.salesChart = new Chart(ctx, {
                     type: 'bar',
                     data: getChartData('daily'),
@@ -81,23 +80,24 @@
                         plugins: {
                             legend: {
                                 display: false
-                            } // Ini menghilangkan legend
+                            }
                         }
                     }
                 });
-
+    
                 window.updateChart = function (type) {
-                    window.salesChart.data = getChartData(type);
-                    window.salesChart.update();
+                    if (window.salesChart) {
+                        window.salesChart.data = getChartData(type);
+                        window.salesChart.update();
+                    }
                 };
-
-            }, 300); // Tunggu 300ms agar Livewire selesai render
+            }, 300);
         }
-
-        // Inisialisasi ulang saat navigasi dengan Livewire selesai
+    
         document.addEventListener("livewire:navigated", initChart);
-
+        document.addEventListener("DOMContentLoaded", initChart);
     </script>
+    
 
 
 </div>

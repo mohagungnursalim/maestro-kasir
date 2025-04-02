@@ -105,4 +105,6 @@ document.addEventListener('livewire:navigated', () => {
             });
         });
     }
+
+    
 });
