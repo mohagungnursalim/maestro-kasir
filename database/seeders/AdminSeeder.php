@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\StoreSetting;
 use Illuminate\Database\Seeder;
 use App\Models\User;
 use Spatie\Permission\Models\Role;
@@ -37,5 +38,19 @@ class AdminSeeder extends Seeder
         }
 
         $this->command->info('✅ Akun admin berhasil dibuat! Email: admin@pos.com | Password: admin123');
+
+        // **Tambahkan data toko jika belum ada**
+        StoreSetting::firstOrCreate(
+            ['id' => 1], // Pastikan hanya satu data toko yang ada
+            [
+                'store_name' => 'POS Kafe',
+                'store_address' => 'Jl. Kopi No. 1, Jakarta',
+                'store_phone' => '081234567890',
+                'store_footer' => 'Terima kasih telah berbelanja di POS Kafe',
+                'store_logo' => 'default-logo.png',
+            ]
+        );
+
+        $this->command->info('✅ Data toko berhasil dibuat atau sudah ada!');
     }
 }
