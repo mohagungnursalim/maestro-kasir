@@ -16,7 +16,7 @@ class CreateAdminCommand extends Command
         Artisan::call('db:seed', ['--class' => 'Database\\Seeders\\RolePermissionSeeder']);
         $this->info('✅ Role & Permission berhasil di-seed.');
 
-        $this->info('🚀 Membuat akun admin...');
+        $this->info('🚀 Membuat akun admin & data toko');
         Artisan::call('db:seed', ['--class' => 'Database\\Seeders\\AdminSeeder']);
         $this->info('✅ Akun admin berhasil dibuat & otomatis di-assign ke role "admin".');
         $this->info('✅ Data toko berhasil dibuat atau sudah ada!');
