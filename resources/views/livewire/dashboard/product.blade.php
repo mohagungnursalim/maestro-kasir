@@ -18,11 +18,11 @@
                 /* Sesuai dengan height gambar (h-10) */
                 border-radius: 50%;
                 /* Membuat bentuk lingkaran */
-              
+
             }
 
         </style>
-    
+
     </head>
 
     <div class="py-12">
@@ -45,8 +45,8 @@
                                 <label for="simple-search" class="sr-only">Search</label>
                                 <div class="relative w-full">
                                     <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                                        <svg class="w-5 h-5 text-gray-500" fill="currentColor"
-                                            viewbox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                                        <svg class="w-5 h-5 text-gray-500" fill="currentColor" viewbox="0 0 20 20"
+                                            xmlns="http://www.w3.org/2000/svg">
                                             <path fill-rule="evenodd"
                                                 d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z"
                                                 clip-rule="evenodd" />
@@ -59,9 +59,8 @@
                             </form>
                             <a wire:loading wire:target='search' class="text-secondary text-sm mb-2">
                                 Mencari...
-                                <svg role="status"
-                                    class="inline w-4 h-4 me-3 text-gray-800 animate-spin" viewBox="0 0 100 101"
-                                    fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <svg role="status" class="inline w-4 h-4 me-3 text-gray-800 animate-spin"
+                                    viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg">
                                     <path
                                         d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z"
                                         fill="#E5E7EB" />
@@ -94,8 +93,7 @@
                         <tbody>
                             @if (!$loaded)
                             {{-- Tampilkan skeleton saat data belum dimuat --}}
-                            @for ($i = 0; $i < 8; $i++) <tr
-                                class="bg-white border-b">
+                            @for ($i = 0; $i < 8; $i++) <tr class="bg-white border-b">
                                 <td class="px-6 py-4 text-center">
                                     <div class="w-10 h-10 bg-gray-300 rounded-full animate-pulse">
                                     </div>
@@ -119,14 +117,14 @@
                                     <div class="h-4 w-10 bg-gray-300 rounded animate-pulse"></div>
                                 </td>
                                 <td class="px-6 py-4">
-                                    @can('Ubah')    
+                                    @can('Ubah')
                                     <div class="h-4 mb-2 w-10 bg-gray-300 rounded animate-pulse"></div>
                                     @endcan
                                     @can('Hapus')
-                                    <div class="h-4 mb-2 w-10 bg-gray-300 rounded animate-pulse"></div>    
+                                    <div class="h-4 mb-2 w-10 bg-gray-300 rounded animate-pulse"></div>
                                     @endcan
                                     @can('Lihat')
-                                    <div class="h-4 w-10 bg-gray-300 rounded animate-pulse"></div>   
+                                    <div class="h-4 w-10 bg-gray-300 rounded animate-pulse"></div>
                                     @endcan
                                 </td>
                                 </tr>
@@ -138,7 +136,8 @@
                                     <th scope="row" class="flex items-center px-6 py-4 whitespace-nowrap">
                                         <div class="image flex items-center px-6 py-4">
                                             @if ($product->image)
-                                                <img src="{{ asset('storage/' . $product->image) }}" class="lazy-img w-10 h-10 rounded-full">
+                                            <img src="{{ asset('storage/' . $product->image) }}"
+                                                class="lazy-img w-10 h-10 rounded-full">
                                             @endif
                                         </div>
                                     </th>
@@ -147,21 +146,22 @@
                                     </td>
                                     <td class="px-6 py-4 text-center">{{ $product->sku }}</td>
                                     <td class="px-6 py-4 text-center">{{ $product->supplier_name }}</td>
-                                    <td class="px-6 py-4 text-center">Rp{{ number_format($product->price, 0, ',', '.') }}</td>
+                                    <td class="px-6 py-4 text-center">
+                                        Rp{{ number_format($product->price, 0, ',', '.') }}</td>
                                     <td class="px-6 py-4 text-center">{{ $product->stock }}</td>
                                     <td class="px-6 py-4 text-center">{{ $product->unit }}</td>
                                     <td class="px-6 py-4">
-                                        
+
                                         @can('Ubah')
                                         <div>
                                             <button wire:click="editModal({{ $product->id }})"
                                                 class="mb-2 bg-green-100 hover:bg-green-200 text-green-800 text-xs font-semibold me-2 px-2.5 py-0.5 rounded border border-green-400 inline-flex items-center justify-center">
                                                 Ubah
-                                            </button>                                        
-                                        </div>                                  
+                                            </button>
+                                        </div>
                                         @endcan
-                                        
-                                        @can('Hapus')                                         
+
+                                        @can('Hapus')
                                         <div>
                                             <button wire:click="deleteConfirmation({{ $product->id }})"
                                                 class="mb-2 bg-red-100 hover:bg-red-200 text-red-800 text-xs font-semibold me-2 px-2.5 py-0.5 rounded border border-red-400 inline-flex items-center justify-center">
@@ -170,7 +170,7 @@
                                         </div>
                                         @endcan
 
-                                        @can('Lihat')    
+                                        @can('Lihat')
                                         <div>
                                             <button wire:click="detailModal({{ $product->id }})"
                                                 class="bg-blue-100 hover:bg-blue-200 text-blue-800 text-xs font-semibold me-2 px-2.5 py-0.5 rounded border border-blue-400 inline-flex items-center justify-center">
@@ -188,35 +188,36 @@
                                 </tr>
                                 @endforelse
 
-                            @endif
-                            </tbody>
-                            </table>
+                                @endif
+                        </tbody>
+                    </table>
 
 
-            </div>
-            
-            {{-- Tombol Load More --}}
-            @if($products->count() >= $limit && $products->count() < $totalProducts)
-            <div class="mt-4 mb-2 flex justify-center">
-                <!-- Tombol "Tampilkan Lebih" (akan hilang saat loading) -->
-                <button wire:click="loadMore"
-                    class="bg-gray-800 text-white px-6 py-2 rounded-full shadow-md hover:bg-gray-700 focus:outline-none focus:ring focus:ring-gray-400 focus:ring-opacity-50"
-                    wire:loading.remove wire:target="loadMore">
-                    Tampilkan Lebih
-                </button>
+                </div>
 
-                <!-- Tombol Loading (hanya muncul saat loading) -->
-                <button
-                    class="mb-5 bg-gray-800 text-white px-6 py-2 rounded-full shadow-md cursor-not-allowed focus:outline-none focus:ring focus:ring-gray-400 focus:ring-opacity-50"
-                    type="button" disabled wire:loading wire:target="loadMore">
-                    Memuat..
-                    <svg class="inline w-5 h-5 text-white animate-spin ml-2" xmlns="http://www.w3.org/2000/svg"
-                        fill="none" viewBox="0 0 24 24">
-                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                        <path class="opacity-75" fill="currentColor"
-                            d="M4 12a8 8 0 018-8v4a4 4 0 100 8v4a8 8 0 01-8-8z"></path>
-                    </svg>
-                </button>
+                {{-- Tombol Load More --}}
+                @if($products->count() >= $limit && $products->count() < $totalProducts) <div
+                    class="mt-4 mb-2 flex justify-center">
+                    <!-- Tombol "Tampilkan Lebih" (akan hilang saat loading) -->
+                    <button wire:click="loadMore"
+                        class="bg-gray-800 text-white px-6 py-2 rounded-full shadow-md hover:bg-gray-700 focus:outline-none focus:ring focus:ring-gray-400 focus:ring-opacity-50"
+                        wire:loading.remove wire:target="loadMore">
+                        Tampilkan Lebih
+                    </button>
+
+                    <!-- Tombol Loading (hanya muncul saat loading) -->
+                    <button
+                        class="mb-5 bg-gray-800 text-white px-6 py-2 rounded-full shadow-md cursor-not-allowed focus:outline-none focus:ring focus:ring-gray-400 focus:ring-opacity-50"
+                        type="button" disabled wire:loading wire:target="loadMore">
+                        Memuat..
+                        <svg class="inline w-5 h-5 text-white animate-spin ml-2" xmlns="http://www.w3.org/2000/svg"
+                            fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4">
+                            </circle>
+                            <path class="opacity-75" fill="currentColor"
+                                d="M4 12a8 8 0 018-8v4a4 4 0 100 8v4a8 8 0 01-8-8z"></path>
+                        </svg>
+                    </button>
             </div>
             @endif
 
@@ -226,7 +227,7 @@
 
 
 {{-- Modal Create --}}
-<div id="addModal" tabindex="-1"  data-modal-backdrop="addModal"
+<div id="addModal" tabindex="-1" data-modal-backdrop="addModal"
     class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-modal md:h-full"
     wire:ignore.self>
     <div class="relative p-4 w-full max-w-2xl h-full md:h-auto">
@@ -250,8 +251,7 @@
                         @error('name') <span class="text-red-500 text-xs">{{ $message }} @enderror
                     </div>
                     <div>
-                        <label for="sku"
-                            class="block mb-2 Updatetext-sm font-medium text-gray-900">SKU</label>
+                        <label for="sku" class="block mb-2 Updatetext-sm font-medium text-gray-900">SKU</label>
                         <input wire:model='sku' type="text" name="sku" id="sku"
                             class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full"
                             placeholder="Masukan SKU">
@@ -265,8 +265,7 @@
                     </div>
 
                     <div>
-                        <label for="price"
-                            class="block mb-2 text-sm font-medium text-gray-900">Harga</label>
+                        <label for="price" class="block mb-2 text-sm font-medium text-gray-900">Harga</label>
                         <input wire:model='price' type="number" name="price" id="price"
                             class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full"
                             placeholder="Masukan Harga">
@@ -274,24 +273,24 @@
                     </div>
 
                     <div>
-                        <label for="stock"
-                            class="block mb-2 text-sm font-medium text-gray-900">Stok</label>
+                        <label for="stock" class="block mb-2 text-sm font-medium text-gray-900">Stok</label>
                         <input wire:model='stock' type="number" name="stock" id="stock"
                             class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full"
                             placeholder="Masukan Stok">
                         @error('stock') <span class="text-red-500 text-xs">{{ $message }} @enderror
                     </div>
-                       
-                    
-                    <div x-data="supplierSelect()" 
-                        x-init="fetchSuppliers(); window.addEventListener('addedSuccess', () => resetSupplier())" 
+
+
+                    <div x-data="supplierSelect()"
+                        x-init="fetchSuppliers(); window.addEventListener('addedSuccess', () => resetSupplier())"
                         class="relative">
-                        
-                        
+
+
                         <label for="supplier_id" class="block mb-2 text-sm font-medium text-gray-900">Supplier</label>
 
                         <!-- Input Pencarian -->
-                        <input id="supplier_id" type="text" x-model="search" @input.debounce="fetchSuppliers()" placeholder="Tambahkan Supplier (Opsional)"
+                        <input id="supplier_id" type="text" x-model="search" @input.debounce="fetchSuppliers()"
+                            placeholder="Tambahkan Supplier (Opsional)"
                             class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full">
 
                         <!-- Pesan Loading -->
@@ -303,8 +302,7 @@
                         <ul x-show="suppliers.length > 0" @click.outside="suppliers = []"
                             class="absolute z-10 bg-white border rounded-md w-full mt-1 max-h-48 overflow-auto shadow-lg">
                             <template x-for="supplier in suppliers" :key="supplier.id">
-                                <li @click="selectSupplier(supplier)" 
-                                    x-text="supplier.name" 
+                                <li @click="selectSupplier(supplier)" x-text="supplier.name"
                                     class="cursor-pointer hover:bg-gray-200 px-4 py-2">
                                 </li>
                             </template>
@@ -313,24 +311,20 @@
                         <!-- Hidden Input untuk Livewire -->
                         <input type="hidden" x-model="selectedSupplierId" name="supplier_id" wire:model="supplier_id">
 
-                        @error('supplier_id') 
-                            <span class="text-red-500 text-xs">{{ $message }}</span>
+                        @error('supplier_id')
+                        <span class="text-red-500 text-xs">{{ $message }}</span>
                         @enderror
                     </div>
-                    
+
 
                     <div class="sm:col-span-2" x-data="imageUploader()">
                         <!-- Input Upload -->
                         <label class="block mb-2 text-sm font-medium text-gray-900" for="image">Upload Gambar</label>
-                        <input wire:model='image'
-                            type="file"
-                            id="image"
+                        <input wire:model='image' type="file" id="image"
                             class="block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 focus:outline-none"
-                            accept=".png,.jpg,.jpeg,.gif,.svg"
-                            x-on:change="previewImage($event)"
-                        >
+                            accept=".png,.jpg,.jpeg,.gif,.svg" x-on:change="previewImage($event)">
                         <p class="mt-1 text-sm text-gray-500" id="image">SVG, PNG, JPG or GIF (Max: 5MB)</p>
-                    
+
                         <!-- Progress Container -->
                         <div x-show="uploading" x-transition:enter="transition ease-out duration-300" class="w-full">
                             <div class="flex justify-between mb-1">
@@ -338,40 +332,38 @@
                                 <span class="text-sm font-medium text-gray-700" x-text="`${progress}%`"></span>
                             </div>
                             <div class="w-full bg-gray-200 rounded-full h-2.5">
-                                <div
-                                    class="h-2.5 rounded-full transition-all duration-150 ease-out"
-                                    :style="`width: ${progress}%`"
-                                    :class="{
+                                <div class="h-2.5 rounded-full transition-all duration-150 ease-out"
+                                    :style="`width: ${progress}%`" :class="{
                                         'bg-blue-600': progress < 60,
                                         'bg-yellow-400': progress >= 60 && progress < 80,
                                         'bg-green-500': progress >= 80
-                                    }"
-                                ></div>
+                                    }"></div>
                             </div>
                         </div>
-                    
+
                         <!-- Error Message -->
                         @error('image') <span class="text-red-500 text-xs">{{ $message }} @enderror
-                        <template x-if="error">
-                            <span class="text-red-500 text-xs" x-text="error"></span>
-                        </template>
-                    
-                        <!-- Image Preview -->
-                        <template x-if="imagePreview">
-                            <div class="flex justify-center items-center mt-2">
-                                <div class="flex flex-col items-center">
-                                    <!-- Preview Image -->
-                                    <img :src="imagePreview" alt="Preview" class="max-w-full h-64 rounded-lg object-cover border-2 border-gray-300 border-dashed">
-                                    <!-- File Name -->
-                                    <p class="mt-4 text-sm text-gray-500">
-                                        <span class="font-semibold" x-text="fileName"></span>
-                                        <span x-text="fileSize"></span>
-                                    </p>
+                            <template x-if="error">
+                                <span class="text-red-500 text-xs" x-text="error"></span>
+                            </template>
+
+                            <!-- Image Preview -->
+                            <template x-if="imagePreview">
+                                <div class="flex justify-center items-center mt-2">
+                                    <div class="flex flex-col items-center">
+                                        <!-- Preview Image -->
+                                        <img :src="imagePreview" alt="Preview"
+                                            class="max-w-full h-64 rounded-lg object-cover border-2 border-gray-300 border-dashed">
+                                        <!-- File Name -->
+                                        <p class="mt-4 text-sm text-gray-500">
+                                            <span class="font-semibold" x-text="fileName"></span>
+                                            <span x-text="fileSize"></span>
+                                        </p>
+                                    </div>
                                 </div>
-                            </div>
-                        </template>
+                            </template>
                     </div>
-                    
+
 
                     <div class="sm:col-span-2">
                         <label for="description"
@@ -387,7 +379,7 @@
                         class="text-white bg-gradient-to-r from-purple-500 to-pink-500 hover:bg-gradient-to-l focus:ring-4 focus:outline-none focus:ring-purple-200 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2">
                         Simpan
                     </button>
-                    <button disabled wire:loading wire:target='store' 
+                    <button disabled wire:loading wire:target='store'
                         class="text-white bg-gradient-to-r from-purple-500 to-pink-500 hover:bg-gradient-to-l focus:ring-4 focus:outline-none focus:ring-purple-200 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2">
                         Menyimpan..
                         <svg class="inline w-5 h-5 text-white animate-spin ml-2" xmlns="http://www.w3.org/2000/svg"
@@ -399,8 +391,8 @@
                         </svg>
                     </button>
 
-                    <button wire:loading.remove wire:target='store' id="closeButtonAddModal"
-                    type="button" class="py-2.5 px-5 ms-3 text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-100">
+                    <button wire:loading.remove wire:target='store' id="closeButtonAddModal" type="button"
+                        class="py-2.5 px-5 ms-3 text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-100">
                         Tutup
                     </button>
                 </div>
@@ -412,7 +404,7 @@
 
 
 {{-- Modal Edit --}}
-<div id="editModal" tabindex="-1"  data-modal-backdrop="editModal"
+<div id="editModal" tabindex="-1" data-modal-backdrop="editModal"
     class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-modal md:h-full"
     wire:ignore.self>
     <div class="relative p-4 w-full max-w-2xl h-full md:h-auto">
@@ -443,12 +435,12 @@
                         @error('skuUpdate') <span class="text-red-500 text-xs">{{ $message }} @enderror
                     </div>
 
-                     <!-- Komponen Satuan Pada Modal Edit Produk -->
-                     <div>
+                    <!-- Komponen Satuan Pada Modal Edit Produk -->
+                    <div>
                         @livewire('dashboard.unit', ['defaultUnit' => $unitUpdate, 'mode' => 'edit'])
                         @error('unitUpdate') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
                     </div>
-                    
+
                     <div>
                         <label for="priceUpdate" class="block mb-2 text-sm font-medium text-gray-900">Harga</label>
                         <input wire:model='priceUpdate' type="number" name="priceUpdate" id="priceUpdate"
@@ -463,14 +455,16 @@
                             class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full"
                             placeholder="Masukan Stok">
                         @error('stockUpdate') <span class="text-red-500 text-xs">{{ $message }} @enderror
-                    </div>        
+                    </div>
 
-                    <div x-data="supplierSelectUpdate()" 
-                         x-init='updateSupplier(@json(["id" => $supplier_idUpdate ?? null, "name" => $supplierName ?? ""]))'
+                    <div x-data="supplierSelectUpdate()"
+                        x-init='updateSupplier(@json(["id" => $supplier_idUpdate ?? null, "name" => $supplierName ?? ""]))'
                         class="relative">
-                        <label for="supplier_idUpdate" class="block mb-2 text-sm font-medium text-gray-900">Supplier</label>
+                        <label for="supplier_idUpdate"
+                            class="block mb-2 text-sm font-medium text-gray-900">Supplier</label>
 
-                        <input id="supplier_idUpdate" type="text" x-model="search" @input.debounce="fetchSuppliers()" placeholder="Tambahkan Supplier (Opsional)"
+                        <input id="supplier_idUpdate" type="text" x-model="search" @input.debounce="fetchSuppliers()"
+                            placeholder="Tambahkan Supplier (Opsional)"
                             class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full">
 
                         <div x-show="loading" class="text-sm text-gray-500 mt-1">Mencari..</div>
@@ -478,15 +472,14 @@
                         <ul x-show="suppliers.length > 0" @click.outside="suppliers = []"
                             class="absolute z-10 bg-white border rounded-md w-full mt-1 max-h-48 overflow-auto shadow-lg">
                             <template x-for="supplier in suppliers" :key="supplier.id">
-                                <li @click="selectSupplier(supplier)" 
-                                    x-text="supplier.name" 
+                                <li @click="selectSupplier(supplier)" x-text="supplier.name"
                                     class="cursor-pointer hover:bg-gray-200 px-4 py-2">
                                 </li>
                             </template>
                         </ul>
 
-                        @error('supplier_idUpdate') 
-                            <span class="text-red-500 text-xs">{{ $message }}</span>
+                        @error('supplier_idUpdate')
+                        <span class="text-red-500 text-xs">{{ $message }}</span>
                         @enderror
                     </div>
 
@@ -494,62 +487,54 @@
                     <div class="sm:col-span-2" x-data="imageUploader()" x-init="init()">
                         <!-- Input Upload -->
                         <label class="block mb-2 text-sm font-medium text-gray-900" for="image">Upload Gambar</label>
-                        <input wire:model='imageUpdate'
-                            type="file"
-                            id="image"
+                        <input wire:model='imageUpdate' type="file" id="image"
                             class="block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 focus:outline-none"
-                            accept=".png,.jpg,.jpeg,.gif,.svg"
-                            x-on:change="previewImage($event)"
-                            x-ref="fileInput"
-                        >
+                            accept=".png,.jpg,.jpeg,.gif,.svg" x-on:change="previewImage($event)" x-ref="fileInput">
                         <p class="mt-1 text-sm text-gray-500">SVG, PNG, JPG or GIF (Max: 5MB)</p>
-                    
-                         <!-- Progress Container -->
+
+                        <!-- Progress Container -->
                         <div x-show="uploading" x-transition:enter="transition ease-out duration-300" class="w-full">
                             <div class="flex justify-between mb-1">
                                 <span class="text-sm font-medium text-gray-700">Upload Progress</span>
                                 <span class="text-sm font-medium text-gray-700" x-text="`${progress}%`"></span>
                             </div>
                             <div class="w-full bg-gray-200 rounded-full h-2.5">
-                                <div
-                                    class="h-2.5 rounded-full transition-all duration-150 ease-out"
-                                    :style="`width: ${progress}%`"
-                                    :class="{
+                                <div class="h-2.5 rounded-full transition-all duration-150 ease-out"
+                                    :style="`width: ${progress}%`" :class="{
                                         'bg-blue-600': progress < 60,
                                         'bg-yellow-400': progress >= 60 && progress < 80,
                                         'bg-green-500': progress >= 80
-                                    }"
-                                ></div>
+                                    }"></div>
                             </div>
                         </div>
 
                         <!-- Error Message -->
                         @error('imageUpdate') <span class="text-red-500 text-xs">{{ $message }} @enderror
-                        <template x-if="error">
-                            <span class="text-red-500 text-xs" x-text="error"></span>
-                        </template>
-                    
-                        <!-- Tampilkan gambar preview atau gambar lama -->
-                        <template x-if="imagePreview || existingImage">
-                            <div class="flex justify-center items-center mt-2">
-                                <div class="flex flex-col items-center">
-                                    <!-- Preview Image -->
-                                    <img 
-                                        :src="imagePreview || '{{ asset('storage') }}/' + existingImage" 
-                                        alt="Preview" 
-                                        class="max-w-full h-64 rounded-lg object-cover border-2 border-gray-300 border-dashed">
-                                    
-                                    <!-- File Name -->
-                                    <p class="mt-4 text-sm text-gray-500">
-                                        <span class="font-semibold" x-text="fileName || (existingImage ? existingImage.split('/').pop() : '')"></span>
-                                        <span x-text="fileSize"></span>
-                                    </p>
+                            <template x-if="error">
+                                <span class="text-red-500 text-xs" x-text="error"></span>
+                            </template>
+
+                            <!-- Tampilkan gambar preview atau gambar lama -->
+                            <template x-if="imagePreview || existingImage">
+                                <div class="flex justify-center items-center mt-2">
+                                    <div class="flex flex-col items-center">
+                                        <!-- Preview Image -->
+                                        <img :src="imagePreview || '{{ asset('storage') }}/' + existingImage"
+                                            alt="Preview"
+                                            class="max-w-full h-64 rounded-lg object-cover border-2 border-gray-300 border-dashed">
+
+                                        <!-- File Name -->
+                                        <p class="mt-4 text-sm text-gray-500">
+                                            <span class="font-semibold"
+                                                x-text="fileName || (existingImage ? existingImage.split('/').pop() : '')"></span>
+                                            <span x-text="fileSize"></span>
+                                        </p>
+                                    </div>
                                 </div>
-                            </div>
-                        </template>         
+                            </template>
 
                     </div>
-                    
+
 
                     <div class="sm:col-span-2">
                         <label for="descriptionUpdate"
@@ -565,7 +550,7 @@
                         class="text-white bg-gradient-to-r from-purple-500 to-pink-500 hover:bg-gradient-to-l focus:ring-4 focus:outline-none focus:ring-purple-200 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2">
                         Simpan
                     </button>
-                    <button disabled wire:loading wire:target='update' 
+                    <button disabled wire:loading wire:target='update'
                         class="text-white bg-gradient-to-r from-purple-500 to-pink-500 hover:bg-gradient-to-l focus:ring-4 focus:outline-none focus:ring-purple-200 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2">
                         Menyimpan..
                         <svg class="inline w-5 h-5 text-white animate-spin ml-2" xmlns="http://www.w3.org/2000/svg"
@@ -577,8 +562,8 @@
                         </svg>
                     </button>
 
-                    <button wire:loading.remove wire:target='update' id="closeButtonEditModal"
-                    type="button" class="py-2.5 px-5 ms-3 text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-100">
+                    <button wire:loading.remove wire:target='update' id="closeButtonEditModal" type="button"
+                        class="py-2.5 px-5 ms-3 text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-100">
                         Tutup
                     </button>
                 </div>
@@ -600,37 +585,39 @@
             <!-- Modal header -->
             <div class="flex justify-between items-center pb-4 mb-4 rounded-t border-b sm:mb-5">
                 <h3 class="text-lg font-semibold text-gray-900">
-                   {{ $nameDetail }}
+                    {{ $nameDetail }}
                 </h3>
             </div>
-            
+
             <div class="container mx-auto p-4">
                 <div class="flex flex-col md:flex-row gap-4">
-                    @if ($imageDetail)    
+                    @if ($imageDetail)
                     <!-- Container untuk gambar dan stock (fixed di sebelah kiri) -->
                     <div class="md:sticky md:top-4 md:w-1/3">
                         <div class="bg-white rounded-lg p-4">
                             <!-- Image container -->
                             <div class="flex justify-center">
-                                <img class="h-36 w-36 rounded-lg object-cover" src="{{ asset('storage/' . $imageDetail) }}">
+                                <img class="h-36 w-36 rounded-lg object-cover"
+                                    src="{{ asset('storage/' . $imageDetail) }}">
                             </div>
-                           
+
                             <div class="mt-4">
                                 <p class="text-xs text-gray-600">Produk: {{ $nameDetail }}</p>
                                 <p class="text-xs text-gray-600">SKU: {{ $stockDetail }}</p>
                                 <p class="text-xs text-gray-600">Supplier: {{ $supplierName }}</p>
-                                <p class="text-xs text-gray-600">Harga: Rp {{ number_format($priceDetail, 0, ',', '.') }}</p>
+                                <p class="text-xs text-gray-600">Harga: Rp
+                                    {{ number_format($priceDetail, 0, ',', '.') }}</p>
                                 <p class="text-xs text-gray-600">Stok: {{ $stockDetail }}</p>
                                 <p class="text-xs text-gray-600">Satuan: {{ $unitDetail }}</p>
                             </div>
                             <div class="mt-4">
                                 <p class="text-xs text-gray-600">Ditambahkan: <br>{{ $created_at }}</p>
                                 <p class="text-xs text-gray-600">Diperbarui: <br>{{ $updated_at }}</p>
-                               
+
                             </div>
                         </div>
                     </div>
-                    
+
                     <!-- Container untuk description (di sebelah kanan) -->
                     <div class="md:w-2/3 max-h-[60vh] overflow-y-auto">
                         <div class="bg-white rounded-lg p-4">
@@ -642,14 +629,14 @@
                     @endif
                 </div>
             </div>
-            
-            
-                <div class="flex items-center justify-center">
-                    <button id="closeButtonDetailModal"
-                    type="button" class="py-2.5 px-5 ms-3 text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-100">
-                        Tutup
-                    </button>
-                </div>
+
+
+            <div class="flex items-center justify-center">
+                <button id="closeButtonDetailModal" type="button"
+                    class="py-2.5 px-5 ms-3 text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-100">
+                    Tutup
+                </button>
+            </div>
         </div>
     </div>
 </div>
@@ -682,8 +669,8 @@
             });
         }
 
-       const closeButtonAddModal = document.getElementById('closeButtonAddModal');
-        
+        const closeButtonAddModal = document.getElementById('closeButtonAddModal');
+
         if (closeButtonAddModal) {
             closeButtonAddModal.addEventListener('click', () => {
                 const modalElement = document.getElementById('addModal');
@@ -696,6 +683,7 @@
             });
         }
     });
+
 </script>
 
 
@@ -772,6 +760,7 @@
             },
         };
     }
+
 </script>
 
 
@@ -820,18 +809,19 @@
                 this.search = '';
             }
         };
-    
+
     }
+
 </script>
 
 
 {{-- Script modal Edit --}}
 <script>
-    document.addEventListener('livewire:navigated', () => { 
+    document.addEventListener('livewire:navigated', () => {
         Livewire.on('updatedSuccess', (event) => {
             const modal = new Modal(document.getElementById('editModal'));
             modal.hide(); // Menutup modal setelah data berhasil ditambahkan
-        
+
         });
 
         Livewire.on('showEditModal', (event) => {
@@ -840,9 +830,9 @@
         });
 
 
-       // Event listener untuk tombol close
-       const closeButtonEditModal = document.getElementById('closeButtonEditModal');
-        
+        // Event listener untuk tombol close
+        const closeButtonEditModal = document.getElementById('closeButtonEditModal');
+
         if (closeButtonEditModal) {
             closeButtonEditModal.addEventListener('click', () => {
                 const modalElement = document.getElementById('editModal');
@@ -853,22 +843,23 @@
             });
         }
     });
+
 </script>
 
 {{-- Alpine FileUpload Form Update --}}
 <script>
     function imageUploader() {
         return {
-            imagePreview:  null, 
+            imagePreview: null,
             fileName: '',
             fileSize: '',
             error: null,
             uploading: false,
             progress: 0,
-            existingImage: @entangle('currentImage') ?? null,  // Bind gambar yang sudah ada
+            existingImage: @entangle('currentImage') ? ? null, // Bind gambar yang sudah ada
             hasImage: false,
 
-            
+
 
             previewImage(event) {
                 const file = event.target.files[0];
@@ -925,7 +916,7 @@
                 this.error = null;
                 this.uploading = false;
                 this.progress = 0;
-                
+
                 // Also reset the file input
                 const fileInput = document.getElementById('image');
                 if (fileInput) {
@@ -940,10 +931,10 @@
                     this.hasImage = true;
                 }
 
-                 // Listener untuk event addedSuccess dari Livewire
-                 Livewire.on('addedSuccess', () => {
+                // Listener untuk event addedSuccess dari Livewire
+                Livewire.on('addedSuccess', () => {
                     this.resetPreview(); // Panggil untuk clear preview
-                   
+
                 });
                 // Listener untuk event updatedSuccess dari Livewire
                 Livewire.on('updatedSuccess', () => {
@@ -952,79 +943,81 @@
             },
         };
     }
+
 </script>
 
 {{-- Script search supplier modal Edit --}}
 <script>
-        function supplierSelectUpdate() {
-    return {
-        suppliers: [],
-        search: '',
-        selectedSupplierId: null,
-        loading: false,
-        timeout: null,
-        isSelecting: false,
+    function supplierSelectUpdate() {
+        return {
+            suppliers: [],
+            search: '',
+            selectedSupplierId: null,
+            loading: false,
+            timeout: null,
+            isSelecting: false,
 
-        updateSupplier(supplier) {
-            if (supplier?.id) {
-                // Jika ada supplier, isi field sesuai data
+            updateSupplier(supplier) {
+                if (supplier ? .id) {
+                    // Jika ada supplier, isi field sesuai data
+                    this.selectedSupplierId = supplier.id;
+                    this.search = supplier.name;
+                } else {
+                    // Jika supplier kosong, reset field
+                    this.selectedSupplierId = null;
+                    this.search = '';
+                }
+            },
+
+            fetchSuppliers() {
+                if (this.isSelecting) return; // Hindari pencarian saat memilih supplier
+
+                if (this.search.trim().length < 1) {
+                    this.suppliers = [];
+
+                    // Jika input kosong, reset data supplier
+                    this.selectedSupplierId = null;
+                    @this.set('supplier_idUpdate', null);
+                    @this.set('supplierName', '');
+
+                    return;
+                }
+
+                this.loading = true;
+
+                clearTimeout(this.timeout);
+                this.timeout = setTimeout(async () => {
+                    try {
+                        let response = await fetch(
+                            `/api/suppliers?search=${encodeURIComponent(this.search)}`);
+                        let data = await response.json();
+
+                        this.suppliers = data.length > 0 ? data : [];
+                    } catch (error) {
+                        console.error('Error fetching suppliers:', error);
+                    } finally {
+                        this.loading = false;
+                    }
+                }, 300); // Delay 300ms
+            },
+
+            selectSupplier(supplier) {
+                if (!supplier ? .id) return;
+
+                this.isSelecting = true; // Set flag agar fetchSuppliers tidak berjalan
+
                 this.selectedSupplierId = supplier.id;
                 this.search = supplier.name;
-            } else {
-                // Jika supplier kosong, reset field
-                this.selectedSupplierId = null;
-                this.search = '';
-            }
-        },
-
-        fetchSuppliers() {
-            if (this.isSelecting) return; // Hindari pencarian saat memilih supplier
-
-            if (this.search.trim().length < 1) {
                 this.suppliers = [];
-                
-                // Jika input kosong, reset data supplier
-                this.selectedSupplierId = null;
-                @this.set('supplier_idUpdate', null);
-                @this.set('supplierName', '');
 
-                return;
+                // Update ke Livewire
+                @this.set('supplier_idUpdate', supplier.id);
+                @this.set('supplierName', supplier.name);
+
+                setTimeout(() => this.isSelecting = false, 500); // Reset flag setelah 500ms
             }
-
-            this.loading = true;
-
-            clearTimeout(this.timeout);
-            this.timeout = setTimeout(async () => {
-                try {
-                    let response = await fetch(`/api/suppliers?search=${encodeURIComponent(this.search)}`);
-                    let data = await response.json();
-
-                    this.suppliers = data.length > 0 ? data : [];
-                } catch (error) {
-                    console.error('Error fetching suppliers:', error);
-                } finally {
-                    this.loading = false;
-                }
-            }, 300); // Delay 300ms
-        },
-
-        selectSupplier(supplier) {
-            if (!supplier?.id) return;
-
-            this.isSelecting = true; // Set flag agar fetchSuppliers tidak berjalan
-
-            this.selectedSupplierId = supplier.id;
-            this.search = supplier.name;
-            this.suppliers = [];
-
-            // Update ke Livewire
-            @this.set('supplier_idUpdate', supplier.id);
-            @this.set('supplierName', supplier.name);
-
-            setTimeout(() => this.isSelecting = false, 500); // Reset flag setelah 500ms
-        }
-    };
-}
+        };
+    }
 
 </script>
 
@@ -1033,15 +1026,15 @@
 
 {{-- Script modal detail --}}
 <script>
-    document.addEventListener('livewire:navigated', () => { 
+    document.addEventListener('livewire:navigated', () => {
         Livewire.on('showDetailModal', (event) => {
             const modal = new Modal(document.getElementById('detailModal'));
             modal.show(); // Menampilkan modal saat tombol ditekan
         });
 
         // Event listener untuk tombol close
-       const closeButtonDetailModal = document.getElementById('closeButtonDetailModal');
-        
+        const closeButtonDetailModal = document.getElementById('closeButtonDetailModal');
+
         if (closeButtonDetailModal) {
             closeButtonDetailModal.addEventListener('click', () => {
                 const modalElement = document.getElementById('detailModal');
@@ -1052,48 +1045,50 @@
             });
         }
     });
+
 </script>
 
 {{-- Sweet alert,added success --}}
 <script>
-        Livewire.on('addedSuccess', (event) => {
-            const Toast = Swal.mixin({
-                toast: true,
-                position: "top-end",
-                showConfirmButton: false,
-                timer: 3000,
-                timerProgressBar: true,
-                didOpen: (toast) => {
-                    toast.onmouseenter = Swal.stopTimer;
-                    toast.onmouseleave = Swal.resumeTimer;
-                }
-            });
-            Toast.fire({
-                icon: "success",
-                title: "Produk berhasil ditambahkan!"
-            });
-
+    Livewire.on('addedSuccess', (event) => {
+        const Toast = Swal.mixin({
+            toast: true,
+            position: "top-end",
+            showConfirmButton: false,
+            timer: 3000,
+            timerProgressBar: true,
+            didOpen: (toast) => {
+                toast.onmouseenter = Swal.stopTimer;
+                toast.onmouseleave = Swal.resumeTimer;
+            }
         });
+        Toast.fire({
+            icon: "success",
+            title: "Produk berhasil ditambahkan!"
+        });
+
+    });
+
 </script>
 
 {{-- Sweet alert,updated success --}}
 <script>
-   Livewire.on('updatedSuccess', (event) => {
-            const Toast = Swal.mixin({
-                toast: true,
-                position: "top-end",
-                showConfirmButton: false,
-                timer: 3000,
-                timerProgressBar: true,
-                didOpen: (toast) => {
-                    toast.onmouseenter = Swal.stopTimer;
-                    toast.onmouseleave = Swal.resumeTimer;
-                }
-            });
-            Toast.fire({
-                icon: "success",
-                title: "Produk berhasil diperbarui!"
-            });
+    Livewire.on('updatedSuccess', (event) => {
+        const Toast = Swal.mixin({
+            toast: true,
+            position: "top-end",
+            showConfirmButton: false,
+            timer: 3000,
+            timerProgressBar: true,
+            didOpen: (toast) => {
+                toast.onmouseenter = Swal.stopTimer;
+                toast.onmouseleave = Swal.resumeTimer;
+            }
+        });
+        Toast.fire({
+            icon: "success",
+            title: "Produk berhasil diperbarui!"
+        });
 
     });
 
@@ -1117,25 +1112,26 @@
             }
         });
     });
-    
+
     Livewire.on('deleteSuccess', (event) => {
         const Toast = Swal.mixin({
-                toast: true,
-                position: "top-end",
-                showConfirmButton: false,
-                timer: 3000,
-                timerProgressBar: true,
-                didOpen: (toast) => {
-                    toast.onmouseenter = Swal.stopTimer;
-                    toast.onmouseleave = Swal.resumeTimer;
-                }
-            });
-            Toast.fire({
-                icon: "success",
-                title: "Produk berhasil dihapus!"
-            });
+            toast: true,
+            position: "top-end",
+            showConfirmButton: false,
+            timer: 3000,
+            timerProgressBar: true,
+            didOpen: (toast) => {
+                toast.onmouseenter = Swal.stopTimer;
+                toast.onmouseleave = Swal.resumeTimer;
+            }
+        });
+        Toast.fire({
+            icon: "success",
+            title: "Produk berhasil dihapus!"
+        });
 
     });
+
 </script>
 
 </div>
