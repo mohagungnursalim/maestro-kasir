@@ -21,9 +21,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        $settings = StoreSetting::first(); // Ambil pengaturan aplikasi pertama
-
-        // Share pengaturan ke seluruh tampilan
+        // Matikan saat migrasi database
+        $settings = StoreSetting::first(); 
         View::share('settings', $settings);
     }
 }
