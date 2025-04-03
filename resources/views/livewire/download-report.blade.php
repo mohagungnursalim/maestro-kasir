@@ -24,10 +24,10 @@
 
   <!-- Filter -->
 <div class="flex justify-end mb-4">
-    <input type="date" wire:model.live.debounce.300ms="searchDate"
+    <input type="date" wire:model.live.debounce.300ms="searchDate" id="searchDate" name="searchDate"
            class="block p-2 pl-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-primary-500 focus:border-primary-500">
 
-    <select wire:model.live.debounce.300ms="perPage" class="block p-2 pl-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-primary-500 focus:border-primary-500">
+    <select wire:model.live.debounce.300ms="perPage" id="perPage" name="perPage" class="block p-2 pl-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-primary-500 focus:border-primary-500">
         <option value="5">5 per halaman</option>
         <option value="10">10 per halaman</option>
         <option value="20">20 per halaman</option>

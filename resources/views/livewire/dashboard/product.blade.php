@@ -42,7 +42,7 @@
                                 Tambah Produk
                             </button>
                             <form class="flex items-center">
-                                <label for="simple-search" class="sr-only">Search</label>
+                                <label for="search" class="sr-only">Search</label>
                                 <div class="relative w-full">
                                     <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
                                         <svg class="w-5 h-5 text-gray-500" fill="currentColor" viewbox="0 0 20 20"
@@ -52,7 +52,7 @@
                                                 clip-rule="evenodd" />
                                         </svg>
                                     </div>
-                                    <input wire:model.live.debounce.500ms="search" type="text" id="simple-search"
+                                    <input wire:model.live.debounce.500ms="search" type="text" id="search" name="search" autocomplete="search"
                                         class="block w-full p-2 pl-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-primary-500 focus:border-primary-500"
                                         placeholder="Cari..">
                                 </div>
@@ -245,14 +245,14 @@
                     <div>
                         <label for="name" class="block mb-2 text-sm font-medium text-gray-900">Nama
                             Produk</label>
-                        <input wire:model='name' type="text" name="name" id="name"
+                        <input wire:model='name' type="text" id="name" name="name" autocomplete="name" 
                             class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full"
                             placeholder="Masukan Nama Produk">
                         @error('name') <span class="text-red-500 text-xs">{{ $message }} @enderror
                     </div>
                     <div>
                         <label for="sku" class="block mb-2 Updatetext-sm font-medium text-gray-900">SKU</label>
-                        <input wire:model='sku' type="text" name="sku" id="sku"
+                        <input wire:model='sku' type="text" id="sku" name="sku" autocomplete="sku"
                             class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full"
                             placeholder="Masukan SKU">
                         @error('sku') <span class="text-red-500 text-xs">{{ $message }} @enderror
@@ -266,7 +266,7 @@
 
                     <div>
                         <label for="price" class="block mb-2 text-sm font-medium text-gray-900">Harga</label>
-                        <input wire:model='price' type="number" name="price" id="price"
+                        <input wire:model='price' type="number" id="price" name="price" autocomplete="price"
                             class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full"
                             placeholder="Masukan Harga">
                         @error('price') <span class="text-red-500 text-xs">{{ $message }} @enderror
@@ -274,7 +274,7 @@
 
                     <div>
                         <label for="stock" class="block mb-2 text-sm font-medium text-gray-900">Stok</label>
-                        <input wire:model='stock' type="number" name="stock" id="stock"
+                        <input wire:model='stock' type="number" id="stock" name="stock" autocomplete="stock"
                             class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full"
                             placeholder="Masukan Stok">
                         @error('stock') <span class="text-red-500 text-xs">{{ $message }} @enderror
@@ -289,7 +289,7 @@
                         <label for="supplier_id" class="block mb-2 text-sm font-medium text-gray-900">Supplier</label>
 
                         <!-- Input Pencarian -->
-                        <input id="supplier_id" type="text" x-model="search" @input.debounce="fetchSuppliers()"
+                        <input id="supplier_id" name="supplier_id" type="text" x-model="search" @input.debounce="fetchSuppliers()"
                             placeholder="Tambahkan Supplier (Opsional)"
                             class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full">
 
@@ -309,7 +309,7 @@
                         </ul>
 
                         <!-- Hidden Input untuk Livewire -->
-                        <input type="hidden" x-model="selectedSupplierId" name="supplier_id" wire:model="supplier_id">
+                        <input type="hidden" x-model="selectedSupplierId" id="hidden_supplier_id" name="hidden_supplier_id" wire:model="supplier_id">
 
                         @error('supplier_id')
                         <span class="text-red-500 text-xs">{{ $message }}</span>
@@ -320,10 +320,10 @@
                     <div class="sm:col-span-2" x-data="imageUploader()">
                         <!-- Input Upload -->
                         <label class="block mb-2 text-sm font-medium text-gray-900" for="image">Upload Gambar</label>
-                        <input wire:model='image' type="file" id="image"
+                        <input wire:model='image' type="file" id="image" name="image" autocomplete="image"
                             class="block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 focus:outline-none"
                             accept=".png,.jpg,.jpeg,.gif,.svg" x-on:change="previewImage($event)">
-                        <p class="mt-1 text-sm text-gray-500" id="image">SVG, PNG, JPG or GIF (Max: 5MB)</p>
+                        <p class="mt-1 text-sm text-gray-500">SVG, PNG, JPG or GIF (Max: 5MB)</p>
 
                         <!-- Progress Container -->
                         <div x-show="uploading" x-transition:enter="transition ease-out duration-300" class="w-full">
@@ -368,7 +368,7 @@
                     <div class="sm:col-span-2">
                         <label for="description"
                             class="block mb-2 text-sm font-medium text-gray-900">Description</label>
-                        <textarea wire:model='description' id="description" rows="4"
+                        <textarea wire:model='description' id="description" name="description" rows="4" autocomplete="description"
                             class="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-primary-500 focus:border-primary-500"
                             placeholder="Masukan deskripsi disini"></textarea>
                         @error('description') <span class="text-red-500 text-xs">{{ $message }} @enderror
@@ -422,14 +422,14 @@
                 <div class="grid gap-4 mb-4 sm:grid-cols-2" style="max-height: 60vh; overflow-y: auto;">
                     <div>
                         <label for="nameUpdate" class="block mb-2 text-sm font-medium text-gray-900">Nama Produk</label>
-                        <input wire:model='nameUpdate' type="text" name="nameUpdate" id="nameUpdate"
+                        <input wire:model='nameUpdate' type="text" id="nameUpdate" name="nameUpdate" autocomplete="off"
                             class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full"
                             placeholder="Masukan Nama Produk">
                         @error('nameUpdate') <span class="text-red-500 text-xs">{{ $message }} @enderror
                     </div>
                     <div>
                         <label for="skuUpdate" class="block mb-2 text-sm font-medium text-gray-900">SKU</label>
-                        <input wire:model='skuUpdate' type="text" name="skuUpdate" id="skuUpdate"
+                        <input wire:model='skuUpdate' type="text" id="skuUpdate" name="skuUpdate" autocomplete="skuUpdate"
                             class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full"
                             placeholder="Masukan SKU">
                         @error('skuUpdate') <span class="text-red-500 text-xs">{{ $message }} @enderror
@@ -443,7 +443,7 @@
 
                     <div>
                         <label for="priceUpdate" class="block mb-2 text-sm font-medium text-gray-900">Harga</label>
-                        <input wire:model='priceUpdate' type="number" name="priceUpdate" id="priceUpdate"
+                        <input wire:model='priceUpdate' type="number" id="priceUpdate" name="priceUpdate" autocomplete="priceUpdate"
                             class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full"
                             placeholder="Masukan Harga">
                         @error('priceUpdate') <span class="text-red-500 text-xs">{{ $message }} @enderror
@@ -451,7 +451,7 @@
 
                     <div>
                         <label for="stockUpdate" class="block mb-2 text-sm font-medium text-gray-900">Stok</label>
-                        <input wire:model='stockUpdate' type="number" name="stockUpdate" id="stockUpdate"
+                        <input wire:model='stockUpdate' type="number" id="stockUpdate" name="stockUpdate" autocomplete="stockUpdate"
                             class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full"
                             placeholder="Masukan Stok">
                         @error('stockUpdate') <span class="text-red-500 text-xs">{{ $message }} @enderror
@@ -463,7 +463,7 @@
                         <label for="supplier_idUpdate"
                             class="block mb-2 text-sm font-medium text-gray-900">Supplier</label>
 
-                        <input id="supplier_idUpdate" type="text" x-model="search" @input.debounce="fetchSuppliers()"
+                        <input id="supplier_idUpdate" name="supplier_idUpdate" type="text" x-model="search" @input.debounce="fetchSuppliers()" autocomplete="supplier_idUpdate"
                             placeholder="Tambahkan Supplier (Opsional)"
                             class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full">
 
@@ -487,7 +487,7 @@
                     <div class="sm:col-span-2" x-data="imageUploader()" x-init="init()">
                         <!-- Input Upload -->
                         <label class="block mb-2 text-sm font-medium text-gray-900" for="image">Upload Gambar</label>
-                        <input wire:model='imageUpdate' type="file" id="image"
+                        <input wire:model='imageUpdate' type="file" id="imageUpdate" name="imageUpdate" autocomplete="imageUpdate"
                             class="block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 focus:outline-none"
                             accept=".png,.jpg,.jpeg,.gif,.svg" x-on:change="previewImage($event)" x-ref="fileInput">
                         <p class="mt-1 text-sm text-gray-500">SVG, PNG, JPG or GIF (Max: 5MB)</p>
@@ -539,7 +539,7 @@
                     <div class="sm:col-span-2">
                         <label for="descriptionUpdate"
                             class="block mb-2 text-sm font-medium text-gray-900">Description</label>
-                        <textarea wire:model='descriptionUpdate' id="descriptionUpdate" rows="4"
+                        <textarea wire:model='descriptionUpdate' id="descriptionUpdate" name="descriptionUpdate" rows="4" autocomplete="descriptionUpdate"
                             class="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-primary-500 focus:border-primary-500"
                             placeholder="Masukan deskripsi disini"></textarea>
                         @error('descriptionUpdate') <span class="text-red-500 text-xs">{{ $message }} @enderror
@@ -856,7 +856,7 @@
             error: null,
             uploading: false,
             progress: 0,
-            existingImage: @entangle('currentImage') ? ? null, // Bind gambar yang sudah ada
+            existingImage: @entangle('currentImage') ?? null, // Bind gambar yang sudah ada
             hasImage: false,
 
 
@@ -958,7 +958,7 @@
             isSelecting: false,
 
             updateSupplier(supplier) {
-                if (supplier ? .id) {
+                if (supplier?.id) { // ✅ Fix optional chaining
                     // Jika ada supplier, isi field sesuai data
                     this.selectedSupplierId = supplier.id;
                     this.search = supplier.name;
@@ -1002,7 +1002,7 @@
             },
 
             selectSupplier(supplier) {
-                if (!supplier ? .id) return;
+                if (!supplier?.id) return; // ✅ Fix optional chaining
 
                 this.isSelecting = true; // Set flag agar fetchSuppliers tidak berjalan
 
@@ -1018,11 +1018,7 @@
             }
         };
     }
-
 </script>
-
-
-
 
 {{-- Script modal detail --}}
 <script>

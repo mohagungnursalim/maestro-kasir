@@ -25,24 +25,24 @@
         <form wire:submit.prevent="updateSettings" class="space-y-4">
             <!-- Nama Toko -->
             <div>
-                <label class="block text-sm font-medium">Nama Toko</label>
-                <input type="text" wire:model="store_name" class="w-full border-gray-300 border rounded-md p-2"
+                <label for="store_name" class="block text-sm font-medium">Nama Toko</label>
+                <input type="text" id="store_name" name="store_name" wire:model="store_name" class="w-full border-gray-300 border rounded-md p-2"
                     required>
                 @error('store_name') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
             </div>
 
             <!-- Alamat Toko -->
             <div>
-                <label class="block text-sm font-medium">Alamat Toko</label>
-                <input type="text" wire:model="store_address" class="w-full border-gray-300 border rounded-md p-2"
+                <label for="store_address" class="block text-sm font-medium">Alamat Toko</label>
+                <input type="text" id="store_address" name="store_address" wire:model="store_address" class="w-full border-gray-300 border rounded-md p-2"
                     required>
                 @error('store_address') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
             </div>
 
             <!-- Nomor Telepon Toko -->
             <div>
-                <label class="block text-sm font-medium">Nomor Telepon</label>
-                <input type="text" wire:model="store_phone" class="w-full border-gray-300 border rounded-md p-2"
+                <label for="store_phone" class="block text-sm font-medium">Nomor Telepon</label>
+                <input type="text" id="store_phone"  name="store_phone" wire:model="store_phone" class="w-full border-gray-300 border rounded-md p-2"
                     required>
                 @error('store_phone') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
             </div>
@@ -55,8 +55,8 @@
 
             <!-- Upload Logo -->
             <div class="sm:col-span-2" x-data="imageUploader()">
-                <label class="block mb-2 text-sm font-medium text-gray-900" for="new_logo">Unggah Logo</label>
-                <input wire:model="new_logo" type="file" id="new_logo"
+                <label for="new_logo" class="block mb-2 text-sm font-medium text-gray-900">Unggah Logo</label>
+                <input wire:model="new_logo" type="file" id="new_logo" name="new_logo"
                     class="block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 focus:outline-none"
                     accept=".png,.jpg,.jpeg,.svg" x-on:change="previewImage($event)" x-ref="fileInput">
                 <p class="mt-1 text-sm text-gray-500">SVG, PNG, JPG or GIF (Max: 5MB)</p>
@@ -98,8 +98,8 @@
             <p class="text-2xl font-bold">Pengaturan Struk</p>
             <hr class="mb-3">
             <div>
-                <label class="block text-sm font-medium">Footer Struk Order</label>
-                <textarea wire:model="store_footer" class="w-full border-gray-300 border rounded-md p-2 resize-none"
+                <label for="store_footer" class="block text-sm font-medium">Footer Struk Order</label>
+                <textarea id="store_footer" name="store_footer" wire:model="store_footer" class="w-full border-gray-300 border rounded-md p-2 resize-none"
                     rows="3" required></textarea>
                 @error('store_footer')
                 <span class="text-red-500 text-sm">{{ $message }}</span>

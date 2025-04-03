@@ -6,7 +6,7 @@
 
         <!-- Input Nama -->
         <div class="flex flex-col">
-            <input wire:model="name" type="text" placeholder="Nama User"
+            <input id="name" name="name" wire:model="name" type="text" placeholder="Nama User" autocomplete="off"
                 class="block w-full px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-md focus:border-blue-500 focus:ring-blue-500 focus:outline-none focus:ring focus:ring-opacity-40">
             @error('name')
             <span class="text-red-500 text-sm mt-1">{{ $message }}</span>
@@ -15,7 +15,7 @@
 
         <!-- Input Email -->
         <div class="flex flex-col">
-            <input wire:model="email" type="email" placeholder="Email User"
+            <input  id="email" name="email" wire:model="email" type="email" placeholder="Email User" autocomplete="off"
                 class="block w-full px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-md focus:border-blue-500 focus:ring-blue-500 focus:outline-none focus:ring focus:ring-opacity-40">
             @error('email')
             <span class="text-red-500 text-sm mt-1">{{ $message }}</span>
@@ -24,7 +24,7 @@
 
         <!-- Input Password -->
         <div class="flex flex-col">
-            <input wire:model="password" type="password" placeholder="Password (Opsional)"
+            <input id="password" name="password" wire:model="password" type="password" placeholder="Password (Opsional)"
                 class="block w-full px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-md focus:border-blue-500 focus:ring-blue-500 focus:outline-none focus:ring focus:ring-opacity-40">
             @error('password')
             <span class="text-red-500 text-sm mt-1">{{ $message }}</span>
@@ -33,7 +33,7 @@
 
         <!-- Select Role -->
         <div class="flex flex-col">
-            <select wire:model="role"
+            <select id="role" name="role" wire:model="role"
                 class="block w-full px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-md focus:border-blue-500 focus:ring-blue-500 focus:outline-none focus:ring focus:ring-opacity-40">
                 <option value="">- Pilih Role -</option>
                 @foreach($roles as $role)

@@ -19,7 +19,7 @@
                                                 clip-rule="evenodd" />
                                         </svg>
                                     </div>
-                                    <input type="datetime-local" id="search-date" x-model="date"
+                                    <input type="datetime-local" id="date" name="date" x-model="date"
                                         x-on:input.debounce.500ms="
                                             let date = new Date($event.target.value);
                                             
@@ -45,7 +45,7 @@
                                                 clip-rule="evenodd" />
                                         </svg>
                                     </div>
-                                    <input type="text" wire:model.live.debounce.500ms='search'
+                                    <input type="text" wire:model.live.debounce.500ms='search' id="search" name="search"
                                         placeholder="Masukan kata kunci.."
                                         class="block w-full p-2 pl-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-primary-500 focus:border-primary-500">
                                 </div>
@@ -350,11 +350,11 @@
 
                 <div class="p-4 md:p-5 space-y-4" x-data>
                     <label for="start_date_queue" class="block text-sm font-medium text-gray-700">Tanggal Mulai</label>
-                    <input type="date" id="start_date_queue" wire:model="startDate"
+                    <input type="date" id="start_date_queue" name="start_date_queue" wire:model="startDate"
                         class="w-full border border-gray-300 p-2 rounded-lg focus:ring focus:ring-blue-300 dark:bg-gray-800">
 
                     <label for="end_date_queue" class="block text-sm font-medium text-gray-700">Tanggal Akhir</label>
-                    <input type="date" id="end_date_queue" wire:model="endDate"
+                    <input type="date" id="end_date_queue" name="end_date_queue" wire:model="endDate"
                         class="w-full border border-gray-300 p-2 rounded-lg focus:ring focus:ring-blue-300 dark:bg-gray-800">
                 </div>
 

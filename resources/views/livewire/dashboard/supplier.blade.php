@@ -16,7 +16,7 @@
                                 Tambah Supplier
                             </button>
                             <form class="flex items-center">
-                                <label for="simple-search" class="sr-only">Search</label>
+                                <label for="search" class="sr-only">Search</label>
                                 <div class="relative w-full">
                                     <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
                                         <svg class="w-5 h-5 text-gray-500" fill="currentColor" viewbox="0 0 20 20"
@@ -26,7 +26,7 @@
                                                 clip-rule="evenodd" />
                                         </svg>
                                     </div>
-                                    <input wire:model.live.debounce.500ms="search" type="text" id="simple-search"
+                                    <input wire:model.live.debounce.500ms="search" type="text" id="search" name="search"
                                         class="block w-full p-2 pl-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-primary-500 focus:border-primary-500"
                                         placeholder="Cari..">
                                 </div>
@@ -188,56 +188,56 @@
                     <div class="grid gap-4 mb-4 sm:grid-cols-2" style="max-height: 60vh; overflow-y: auto;">
                         <div>
                             <label for="name" class="block mb-2 text-sm font-medium text-gray-900">Nama Supplier</label>
-                            <input autocomplete="name" wire:model="name" type="text" name="name" id="name"
+                            <input autocomplete="off" wire:model="name" type="text" id="name" name="name" 
                                 class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full"
                                 placeholder="Masukkan Nama Supplier">
                             @error('name') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
                         </div>
                         <div>
                             <label for="email" class="block mb-2 text-sm font-medium text-gray-900">Email</label>
-                            <input autocomplete="email" wire:model="email" type="email" name="email" id="email"
+                            <input autocomplete="off" wire:model="email" type="email" id="email" name="email" 
                                 class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full"
                                 placeholder="Masukkan Email (Opsional)">
                             @error('email') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
                         </div>
                         <div>
                             <label for="phone" class="block mb-2 text-sm font-medium text-gray-900">No. HP</label>
-                            <input autocomplete="phone" wire:model="phone" type="text" name="phone" id="phone"
+                            <input autocomplete="off" wire:model="phone" type="text" id="phone" name="phone" 
                                 class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full"
                                 placeholder="Masukkan No. HP (Opsional)">
                             @error('phone') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
                         </div>
                         <div>
                             <label for="address" class="block mb-2 text-sm font-medium text-gray-900">Alamat</label>
-                            <input autocomplete="address" wire:model="address" type="text" name="address" id="address"
+                            <input autocomplete="off" wire:model="address" type="text" id="address" name="address"
                                 class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full"
                                 placeholder="Masukkan Alamat (Opsional)">
                             @error('address') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
                         </div>
                         <div>
                             <label for="city" class="block mb-2 text-sm font-medium text-gray-900">Kota</label>
-                            <input autocomplete="city" wire:model="city" type="text" name="city" id="city"
+                            <input autocomplete="off" wire:model="city" type="text" id="city" name="city" 
                                 class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full"
                                 placeholder="Masukkan Kota (Opsional)">
                             @error('city') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
                         </div>
                         <div>
                             <label for="state" class="block mb-2 text-sm font-medium text-gray-900">Provinsi</label>
-                            <input autocomplete="state" wire:model="state" type="text" name="state" id="state"
+                            <input autocomplete="off" wire:model="state" type="text" id="state"  name="state" 
                                 class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full"
                                 placeholder="Masukkan Provinsi (Opsional)">
                             @error('state') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
                         </div>
                         <div>
                             <label for="country" class="block mb-2 text-sm font-medium text-gray-900">Negara</label>
-                            <input autocomplete="country" wire:model="country" type="text" name="country" id="country"
+                            <input autocomplete="off" wire:model="country" type="text" id="country" name="country"
                                 class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full"
                                 placeholder="Masukkan Negara (Opsional)">
                             @error('country') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
                         </div>
                         <div>
                             <label for="zip" class="block mb-2 text-sm font-medium text-gray-900">Kode Pos</label>
-                            <input autocomplete="zip" wire:model="zip" type="text" name="zip" id="zip"
+                            <input autocomplete="off" wire:model="zip" type="text" id="zip" name="zip"
                                 class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full"
                                 placeholder="Masukkan Kode Pos (Opsional)">
                             @error('zip') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
@@ -294,21 +294,21 @@
                         <div>
                             <label for="nameUpdate" class="block mb-2 text-sm font-medium text-gray-900">Nama
                                 Supplier</label>
-                            <input wire:model='nameUpdate' type="text" name="nameUpdate" id="nameUpdate"
+                            <input autocomplete="off" wire:model='nameUpdate' type="text" id="nameUpdate" name="nameUpdate" 
                                 class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full"
                                 placeholder="Masukan Nama Supplier">
                             @error('nameUpdate') <span class="text-red-500 text-xs">{{ $message }} @enderror
                         </div>
                         <div>
                             <label for="emailUpdate" class="block mb-2 text-sm font-medium text-gray-900">Email</label>
-                            <input wire:model='emailUpdate' type="email" name="emailUpdate" id="emailUpdate"
+                            <input autocomplete="off" wire:model='emailUpdate' type="email" id="emailUpdate" name="emailUpdate"
                                 class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full"
                                 placeholder="Masukan Email (Opsional)">
                             @error('emailUpdate') <span class="text-red-500 text-xs">{{ $message }} @enderror
                         </div>
                         <div>
                             <label for="phoneUpdate" class="block mb-2 text-sm font-medium text-gray-900">No. HP</label>
-                            <input wire:model='phoneUpdate' type="text" name="phoneUpdate" id="phoneUpdate"
+                            <input autocomplete="off" wire:model='phoneUpdate' type="text" id="phoneUpdate" name="phoneUpdate" 
                                 class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full"
                                 placeholder="Masukan No. HP (Opsional)">
                             @error('phoneUpdate') <span class="text-red-500 text-xs">{{ $message }} @enderror
@@ -316,14 +316,14 @@
                         <div>
                             <label for="addressUpdate"
                                 class="block mb-2 text-sm font-medium text-gray-900">Alamat</label>
-                            <input wire:model='addressUpdate' type="text" name="addressUpdate" id="addressUpdate"
+                            <input autocomplete="off" wire:model='addressUpdate' type="text" id="addressUpdate" name="addressUpdate" 
                                 class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full"
                                 placeholder="Masukan Alamat (Opsional)">
                             @error('addressUpdate') <span class="text-red-500 text-xs">{{ $message }} @enderror
                         </div>
                         <div>
                             <label for="cityUpdate" class="block mb-2 text-sm font-medium text-gray-900">Kota</label>
-                            <input wire:model='cityUpdate' type="text" name="cityUpdate" id="cityUpdate"
+                            <input autocomplete="off" wire:model='cityUpdate' type="text" id="cityUpdate" name="cityUpdate" 
                                 class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full"
                                 placeholder="Masukan Kota (Opsional)">
                             @error('cityUpdate') <span class="text-red-500 text-xs">{{ $message }} @enderror
@@ -331,7 +331,7 @@
                         <div>
                             <label for="stateUpdate"
                                 class="block mb-2 text-sm font-medium text-gray-900">Provinsi</label>
-                            <input wire:model='stateUpdate' type="text" name="stateUpdate" id="stateUpdate"
+                            <input autocomplete="off" wire:model='stateUpdate' type="text" id="stateUpdate" name="stateUpdate" 
                                 class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full"
                                 placeholder="Masukan Provinsi (Opsional)">
                             @error('stateUpdate') <span class="text-red-500 text-xs">{{ $message }} @enderror
@@ -339,14 +339,14 @@
                         <div>
                             <label for="countryUpdate"
                                 class="block mb-2 text-sm font-medium text-gray-900">Negara</label>
-                            <input wire:model='countryUpdate' type="text" name="countryUpdate" id="countryUpdate"
+                            <input autocomplete="off" wire:model='countryUpdate' type="text" id="countryUpdate" name="countryUpdate" 
                                 class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full"
                                 placeholder="Masukan Negara (Opsional)">
                             @error('countryUpdate') <span class="text-red-500 text-xs">{{ $message }} @enderror
                         </div>
                         <div>
                             <label for="zipUpdate" class="block mb-2 text-sm font-medium text-gray-900">Kode Pos</label>
-                            <input wire:model='zipUpdate' type="text" name="zipUpdate" id="zipUpdate"
+                            <input autocomplete="off" wire:model='zipUpdate' type="text" id="zipUpdate" name="zipUpdate" 
                                 class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full"
                                 placeholder="Masukan Kode Pos (Opsional)">
                             @error('zipUpdate') <span class="text-red-500 text-xs">{{ $message }} @enderror

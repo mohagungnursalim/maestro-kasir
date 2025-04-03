@@ -3,7 +3,7 @@
 
     <!-- Tab Filter (Select List) -->
     <div class="mb-4">
-        <select id="chartFilter" class="px-4 py-2 border rounded bg-white text-gray-700">
+        <select id="chartFilter" name="chartFilter" class="px-4 py-2 border rounded bg-white text-gray-700">
             <option value="daily">Hari Ini</option>
             <option value="weekly">Minggu Ini</option>
             <option value="monthly">Bulan Ini</option>

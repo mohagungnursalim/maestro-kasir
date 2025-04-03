@@ -20,7 +20,7 @@
 
     <!-- Input Role -->
     <div class="mb-4">
-        <input wire:model="name" type="text" placeholder="Masukan nama peran.."
+        <input id="name" name="name" wire:model="name" type="text" placeholder="Masukan nama peran.." autocomplete="name"
             class="block w-full px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-md focus:border-blue-500 focus:ring-blue-500 focus:outline-none focus:ring focus:ring-opacity-40">
         @error('name')
         <span class="text-red-500 text-sm mt-1 block">{{ $message }}</span>
@@ -32,7 +32,7 @@
     <div class="grid grid-cols-5 gap-2 mb-4">
         @foreach($allPermissions as $permission)
         <label class="relative inline-flex items-center cursor-pointer">
-            <input type="checkbox" wire:model="permissions" value="{{ $permission->name }}" class="sr-only peer">
+            <input id="permissions{{ $loop->iteration }}" name="permissions{{ $loop->iteration }}" type="checkbox" wire:model="permissions" value="{{ $permission->name }}" class="sr-only peer">
             <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 
                         peer-focus:ring-blue-300 rounded-full peer dark:bg-gray-700 
                         peer-checked:after:translate-x-full peer-checked:after:border-white 

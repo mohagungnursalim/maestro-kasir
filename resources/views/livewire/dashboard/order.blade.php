@@ -247,7 +247,7 @@
                                     <!-- Toggle Pajak -->
                                     <label
                                         class="inline-flex items-center me-5 peer-disabled:cursor-not-allowed cursor-pointer">
-                                        <input type="checkbox" class="sr-only peer disabled:cursor-not-allowed"
+                                        <input type="checkbox" id="tax" name="tax" class="sr-only peer disabled:cursor-not-allowed"
                                             x-model="useTax" x-on:change="resetTax()">
                                         <div class="relative w-11 h-6 bg-gray-200 rounded-full peer peer-focus:ring-4 
                                                 peer-focus:ring-purple-300 peer-checked:after:translate-x-full 
@@ -299,7 +299,7 @@
                                     <!-- Toggle Diskon -->
                                     <label
                                         class="inline-flex items-center me-5 peer-disabled:cursor-not-allowed cursor-pointer">
-                                        <input type="checkbox" class="sr-only peer disabled:cursor-not-allowed"
+                                        <input type="checkbox" id="discount" name="discount" class="sr-only peer disabled:cursor-not-allowed"
                                             x-model="useDiscount" x-on:change="resetDiscount()">
                                         <div class="relative w-11 h-6 bg-gray-200 rounded-full peer peer-focus:ring-4 
                                                 peer-focus:ring-purple-300 peer-checked:after:translate-x-full 
@@ -323,12 +323,12 @@
                                             x-on:input="
                                             if ($event.target.value === '') $event.target.value = 0;
                                             discountType = ($event.target.value > 100) ? 'nominal' : 'percentage';
-                                            $wire.call('updateTotal'); // 🚀 Setiap input langsung update total
+                                            $wire.call('updateTotal'); 
                                         " class="w-full p-2 disabled:cursor-not-allowed text-gray-900 border border-gray-300 rounded-lg bg-gray-50 text-xs 
                                             focus:ring-blue-500 focus:border-blue-500"
                                             placeholder="Masukkan diskon...">
 
-                                        <select @if (empty($cart)) disabled @endif
+                                        <select @if (empty($cart)) disabled @endif id="discount_type" name="discount_type"
                                             wire:model.live.debounce.300ms="discount_type" x-model="discountType"
                                             class="disabled:cursor-not-allowed border rounded-lg text-gray-900 p-2 text-xs bg-gray-50">
                                             <option value="percentage">%</option>
@@ -353,7 +353,7 @@
                                     }">
                                     <!-- Metode Pembayaran -->
                                     <div>
-                                        <select x-model="paymentMethod" wire:model="payment_method"
+                                        <select x-model="paymentMethod" wire:model="payment_method" id="paymentMethod" name="paymentMethod"
                                             :disabled="@json(empty($cart))" class="block py-2.5 px-0 w-full text-sm text-gray-500 bg-transparent border-0 border-b-2 
                                                    border-gray-200 appearance-none focus:outline-none focus:ring-0 
                                                    focus:border-gray-200 peer disabled:cursor-not-allowed">
