@@ -1,4 +1,4 @@
-<div class="max-w-4xl mx-auto p-6 bg-white shadow-md rounded-lg">
+<div>
     <h1 class="text-2xl font-semibold mb-4 text-gray-700">Manajemen User</h1>
 
     <!-- Form Input User -->
