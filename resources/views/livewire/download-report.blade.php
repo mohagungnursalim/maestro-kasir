@@ -127,7 +127,6 @@
 </script>
 
 <script>
-    document.addEventListener('livewire:navigated', () => {
         Livewire.on('showDeleteConfirmation', (filename) => {
             Swal.fire({
                 title: 'Konfirmasi Hapus',
@@ -144,12 +143,9 @@
                 }
             });
         });
-    });
 </script>
 
 <script>
-  
-    document.addEventListener('livewire:navigated', () => {
         Livewire.on('fileDeleted', (eventData) => {  
             // Pastikan mengambil objek pertama dari array
             const data = Array.isArray(eventData) ? eventData[0] : eventData;
@@ -164,7 +160,6 @@
                 confirmButtonText: "OK"
             });
         });
-    });
 </script>
 
 </div>
