@@ -15,25 +15,27 @@ use Illuminate\Support\Facades\Log;
 
 class Order extends Component
 {
-    public $search = '';
-    public $products = [];
-    public $limitProducts = 4;
+    public $search = ''; // Pencarian produk
+    public $products = []; // Daftar produk
+    public $limitProducts = 4; // Batas produk yang ditampilkan
 
     public $payment_method = 'cash'; // Metode pembayaran default
-    public $customerMoney = 0;
+    public $customerMoney = 0; // Uang pelanggan
     
     public $discount_type = 'percentage';   // Tipe diskon (percentage/nominal)
     public $discount_value = 0; // Nilai diskon
     public $discount = 0; // Total diskon
     
-    public $tax = 0;
+    public $tax = 0; // Pajak dalam Rupiah
     public $tax_percentage = 0; // Pajak default dalam persen
     
-    public $cart = [];
-    public $cartNotEmpty = false;
-    public $subtotal = 0;
-    public $total = 0;
-    public $change = 0;
+    public $cart = []; // Keranjang belanja
+    public $cartNotEmpty = false; // Status keranjang belanja
+    public $subtotal = 0; // Subtotal belanja
+    public $total = 0; // Total belanja
+    public $change = 0; // Kembalian
+
+    public $ttl = 31536000; // Cache selama 1 tahun
 
     protected $listeners = [
         'refreshProductStock' => 'searchProduct',
@@ -42,10 +44,10 @@ class Order extends Component
     // Pencarian produk
     public function searchProduct()
     {
-        $ttl = 31536000;
+        
         $cacheKey = "products_{$this->search}_{$this->limitProducts}";
 
-        $this->products = Cache::remember($cacheKey, $ttl, function () {
+        $this->products = Cache::remember($cacheKey, $this->ttl, function () {
             return Product::where(function ($query) {
                     $query->where('name', 'like', '%' . $this->search . '%')
                         ->orWhere('sku', 'like', '%' . $this->search . '%')
@@ -58,7 +60,7 @@ class Order extends Component
         });
     }
 
-    // ✅ Saat tambah produk ke cart, langsung update cartNotEmpty
+    // Saat tambah produk ke cart, langsung update cartNotEmpty
     public function addToCart($productId)
     {
         $product = collect($this->products)->firstWhere('id', $productId);
@@ -80,7 +82,7 @@ class Order extends Component
         }
     }
 
-    // ✅ Auto-update cartNotEmpty saat cart diubah
+    // Auto-update cartNotEmpty saat cart diubah
     public function updatedCart($value, $key)
     {
         list($index, $field) = explode('.', $key);
@@ -354,8 +356,6 @@ class Order extends Component
     // Refresh Cache stok produk
     protected function refreshCacheStock()
     {
-        $ttl = 31536000; // TTL cache selama 1 tahun
-
         // Cache key unik berdasarkan pencarian & limit
         $cacheKey = "products_{$this->search}_{$this->limitProducts}";
 
@@ -363,7 +363,7 @@ class Order extends Component
         Cache::forget($cacheKey);
 
         // Simpan ulang data terbaru ke dalam cache
-        $this->products = Cache::remember($cacheKey, $ttl, function () {
+        $this->products = Cache::remember($cacheKey, $this->ttl, function () {
             return DB::table('products')
                 ->leftJoin('suppliers', 'products.supplier_id', '=', 'suppliers.id')
                 ->select(

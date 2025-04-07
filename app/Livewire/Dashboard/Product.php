@@ -33,6 +33,8 @@ class Product extends Component
     // List Products
     public $products, $totalProducts;
 
+    public $ttl = 31536000; // Cache selama 1 tahun
+    
     
 
     // Search Product
@@ -50,14 +52,12 @@ class Product extends Component
 
     public function mount() 
     {  
-        $ttl = 31536000; // TTL cache selama 1 tahun
-    
         // Ambil total produk dari cache atau database
-        $this->totalProducts = Cache::remember('totalProducts', $ttl, function () {
+        $this->totalProducts = Cache::remember('totalProducts', $this->ttl, function () {
             return DB::table('products')->count();
         });
     
-        $this->products = collect();
+        $this->products = collect(); // Inisialisasi produk sebagai koleksi kosong
     }
    
     public function unitSelected($unit)
@@ -82,7 +82,7 @@ class Product extends Component
     
     public function loadInitialProducts()
     {
-        $ttl = 31536000; // TTL cache selama 1 tahun
+    
         $this->loaded = true;
 
         // Cache key unik berdasarkan pencarian & limit
@@ -93,7 +93,7 @@ class Product extends Component
             $this->refreshCache();
         }
 
-        $this->products = Cache::remember($cacheKey,$ttl, function () {
+        $this->products = Cache::remember($cacheKey,$this->ttl, function () {
             return DB::table('products')
                 ->leftJoin('suppliers', 'products.supplier_id', '=', 'suppliers.id')
                 ->select(
@@ -414,11 +414,9 @@ class Product extends Component
 
     protected function refreshCache()
     {
-        $ttl = 31536000; 
-
         // Perbarui total produk
         $totalProducts = DB::table('products')->count();
-        Cache::put('totalProducts', $totalProducts, $ttl);
+        Cache::put('totalProducts', $totalProducts, $this->ttl);
 
         // Perbarui cache produk sesuai pencarian
         $cacheKey = "products_{$this->search}_{$this->limit}";
@@ -452,7 +450,7 @@ class Product extends Component
             ->limit($this->limit)
             ->get();
 
-        Cache::put($cacheKey, $products, $ttl);
+        Cache::put($cacheKey, $products, $this->ttl);
 
         // 🚀 Tambahkan ini supaya Livewire langsung refresh data
         $this->loadInitialProducts();

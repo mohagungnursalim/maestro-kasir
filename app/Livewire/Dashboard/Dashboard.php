@@ -22,6 +22,7 @@ class Dashboard extends Component
         $this->updateStats();
     }
 
+    // Mengambil data statistik berdasarkan filter yang dipilih
     public function updateStats()
     {
         $dates = $this->getDateRange($this->filterType);
@@ -41,6 +42,7 @@ class Dashboard extends Component
         $this->totalProductsSold = $queryTransactions->sum('quantity');
     }
 
+    // Mengambil rentang tanggal berdasarkan filter yang dipilih
     public function getDateRange($type)
     {
         switch ($type) {
@@ -55,6 +57,7 @@ class Dashboard extends Component
         }
     }
 
+    // Mengupdate statistik ketika filter diubah
     public function updatedFilterType()
     {
         $this->updateStats();

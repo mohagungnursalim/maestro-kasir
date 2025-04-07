@@ -17,7 +17,11 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Storage;
 
-Route::view('/', 'welcome');
+Route::get('/', function () {
+    if (!auth()->check()) {
+        return redirect('/login');
+    }
+});
 
 Route::get('/dashboard', Dashboard::class)
     ->middleware(['auth'])

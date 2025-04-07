@@ -7,9 +7,9 @@ use Spatie\Permission\Models\Permission;
 
 class RolePermissionManagement extends Component
 {
-    public $name, $role_id, $permissions = [];
-    public $allPermissions, $permission_id,$roles;
-    public $isEditMode = false;
+    public $name, $role_id, $permissions = []; // Untuk menyimpan izin yang dipilih
+    public $allPermissions, $permission_id,$roles; // Untuk menyimpan semua izin
+    public $isEditMode = false; // Untuk menandakan mode edit
 
     public $permissionName; // Untuk tambah permission
 

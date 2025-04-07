@@ -20,24 +20,28 @@ class DownloadReport extends Component
 
     #[Url()]
     public $perPage = 5; // Jumlah file per halaman
-    public $currentPage = 1; 
+    public $currentPage = 1; //
 
 
+    // Update Search
     public function updatingSearch()
     {
         $this->resetPage();
     }
 
+    // Update Per Page
     public function updatingPerPage()
     {
         $this->resetPage();
     }
 
+    // Pagination
     public function goToPage($page)
     {
         $this->currentPage = max(1, min($page, $this->getReports()->count() / $this->perPage + 1));
     }
 
+    // Mengambil semua laporan dari storage
     private function getReports()
     {
         $files = Storage::allFiles('reports');
@@ -80,38 +84,34 @@ class DownloadReport extends Component
     }
 
     public function deleteReport()
-{
-    if (!$this->selectedFile) {
-        return;
+    {
+        if (!$this->selectedFile) {
+            return;
+        }
+
+        $filePath = 'reports/' . $this->selectedFile;
+        $filename = $this->selectedFile; // Simpan nama file sebelum direset
+
+        if (Storage::exists($filePath)) {
+            Storage::delete($filePath);
+            $this->dispatch('fileDeleted', [
+                'message' => "File \"$filename\" telah berhasil dihapus dari sistem.",
+                'filename' => $filename,
+                'error' => false
+            ]);
+        } else {
+            $this->dispatch('fileDeleted', [
+                'message' => "File \"$filename\" tidak ditemukan. Mungkin telah dihapus sebelumnya atau tidak tersedia.",
+                'filename' => $filename,
+                'error' => true
+            ]);
+        }
+
+        $this->selectedFile = null; // Reset setelah dikirim
+        $this->resetPage();
     }
 
-    $filePath = 'reports/' . $this->selectedFile;
-    $filename = $this->selectedFile; // Simpan nama file sebelum direset
-
-    if (Storage::exists($filePath)) {
-        Storage::delete($filePath);
-        $this->dispatch('fileDeleted', [
-            'message' => "File \"$filename\" telah berhasil dihapus dari sistem.",
-            'filename' => $filename,
-            'error' => false
-        ]);
-    } else {
-        $this->dispatch('fileDeleted', [
-            'message' => "File \"$filename\" tidak ditemukan. Mungkin telah dihapus sebelumnya atau tidak tersedia.",
-            'filename' => $filename,
-            'error' => true
-        ]);
-    }
-
-    $this->selectedFile = null; // Reset setelah dikirim
-    $this->resetPage();
-}
-
-    
-    
-    
-    
-
+    // Format ukuran file
     private function formatSize($bytes)
     {
         if ($bytes <= 0) return "0 B";
@@ -126,7 +126,7 @@ class DownloadReport extends Component
     {
         $reports = $this->getReports();
 
-        // 🛠️ Buat paginasi manual dengan `LengthAwarePaginator`
+        // Buat paginasi manual dengan `LengthAwarePaginator`
         $currentPage = $this->currentPage; // Livewire butuh variabel currentPage
         $paginatedReports = new LengthAwarePaginator(
             $reports->forPage($currentPage, $this->perPage),

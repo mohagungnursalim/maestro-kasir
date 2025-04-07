@@ -9,10 +9,9 @@ use Illuminate\Support\Facades\Hash;
 
 class UserManagement extends Component
 {
-    public $name, $email, $password, $user_id, $role;
-
-    public $roles, $users;
-    public $isEditMode = false;
+    public $name, $email, $password, $user_id, $role; // Untuk menyimpan data user
+    public $roles, $users; // Untuk menyimpan semua role
+    public $isEditMode = false; // Untuk menandakan mode edit
 
     public function mount()
     {
@@ -20,6 +19,7 @@ class UserManagement extends Component
         $this->users = User::with('roles')->get();
     }
 
+    // CRUD User
     public function store()
     {
         $validatedData = $this->validate([
@@ -97,7 +97,6 @@ class UserManagement extends Component
         $this->dispatch('userUpdated');
     }
     
-
     protected $listeners = [
         'deleteConfirmed' => 'delete'
     ];
@@ -108,6 +107,7 @@ class UserManagement extends Component
         $this->dispatch('showDeleteConfirmation');
     }
     
+    
     public function delete()
     {
         if ($this->user_id) {
@@ -117,8 +117,7 @@ class UserManagement extends Component
         }
     }
     
-    
-
+    // Reset input form
     public function resetInput()
     {
         $this->name = '';

@@ -30,7 +30,7 @@
         <div class="flex items-center justify-between">
             {{-- Logo Section --}}
             <div class="flex items-center justify-start rtl:justify-end">
-            <!-- Tombol Toggle & Close Sidebar (Satu Tombol Saja) -->
+            {{-- Tombol Toggle & Close Sidebar (Satu Tombol Saja)  --}}
             <button data-drawer-target="drawer-navigation" data-drawer-toggle="drawer-navigation" aria-controls="drawer-navigation"
                 type="button"
                 class="inline-flex items-center p-2 text-sm text-gray-500 rounded-lg hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-200">

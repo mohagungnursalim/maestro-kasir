@@ -10,10 +10,10 @@ use Livewire\Component;
 
 class ProductSalesChart extends Component
 {
-    public $dailySales = [];
-    public $weeklySales = [];
-    public $monthlySales = [];
-    public $yearlySales = [];
+    public $dailySales = []; // Data penjualan hari ini
+    public $weeklySales = []; // Data penjualan minggu ini
+    public $monthlySales = []; // Data penjualan bulan ini
+    public $yearlySales = []; // Data penjualan tahun ini
 
     public function mount()
     {
@@ -36,9 +36,10 @@ class ProductSalesChart extends Component
    
     }
     
-
+    // Mengambil data penjualan produk berdasarkan rentang tanggal
     private function getSalesData($startDate, $endDate)
     {
+        // Mengambil data penjualan produk dari TransactionDetail
         $query = TransactionDetail::selectRaw('products.name, SUM(transaction_details.quantity) as total_sold')
             ->join('products', 'transaction_details.product_id', '=', 'products.id')
             ->whereBetween('transaction_details.created_at', [$startDate, $endDate]);
@@ -50,6 +51,7 @@ class ProductSalesChart extends Component
             });
         }
 
+        // Mengelompokkan data berdasarkan nama produk dan menghitung total penjualan
         return $query->groupBy('products.name')
             ->orderByDesc('total_sold')
             ->limit(5)

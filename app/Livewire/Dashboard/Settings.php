@@ -22,11 +22,11 @@ class Settings extends Component
     {
         $settings = StoreSetting::first();
 
-        $this->store_name = $settings->store_name ?? 'Default Name';
-        $this->store_address = $settings->store_address ?? 'Default Address';
-        $this->store_phone = $settings->store_phone ?? '085756000000';
-        $this->store_logo = $settings->store_logo ?? 'Default Logo';
-        $this->store_footer = $settings->store_footer ?? 'Default Footer';
+        $this->store_name = $settings->store_name;
+        $this->store_address = $settings->store_address;
+        $this->store_phone = $settings->store_phone;
+        $this->store_logo = $settings->store_logo;
+        $this->store_footer = $settings->store_footer;
     }
 
     public function updateSettings()

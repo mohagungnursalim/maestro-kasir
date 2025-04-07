@@ -42,16 +42,19 @@ class Transaction extends Component
             $this->transactions = collect();
         }
     
+        // Update Search
         public function updatingSearch()
         {
             $this->limit = 8;
         }
     
+        // Update Search
         public function updatedSearch()
         {
             $this->loadInitialTransactions();
         }
         
+        // Load Initial Transactions
         public function loadInitialTransactions()
         {
             $ttl = 31536000; // Cache selama 1 tahun
@@ -102,7 +105,7 @@ class Transaction extends Component
         }
         
 
-    
+        // Load More
         public function loadMore()
         {
             $oldCount = $this->transactions->flatten()->count();
@@ -114,6 +117,8 @@ class Transaction extends Component
             }
         }
     
+
+        // Export Excel
         public function exportExcel()
         {
             $this->validate([
@@ -128,6 +133,7 @@ class Transaction extends Component
             return Excel::download(new TransactionExport($startDate,$endDate), "transactions_{$date}.xlsx");
         }
     
+        // Export PDF
         public function exportPdf()
         {
             $this->validate([
@@ -158,8 +164,7 @@ class Transaction extends Component
             return response()->streamDownload(fn() => print($pdf->output()), "transactions_{$date}.pdf");            
         }
          
-
-        
+        // Queue Report
         public function queueReport($type)
         {
             $this->validate([

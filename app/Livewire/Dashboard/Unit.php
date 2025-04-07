@@ -7,9 +7,9 @@ use Illuminate\Support\Facades\Log;
 
 class Unit extends Component
 {
-    public $units = [];
-    public $newUnit = '';
-    public $selectedUnit = '';
+    public $units = []; // Menyimpan daftar unit
+    public $newUnit = ''; // Untuk menyimpan unit baru yang akan ditambahkan
+    public $selectedUnit = ''; // Untuk menyimpan unit yang dipilih
     public $defaultUnit = ''; // Untuk menyimpan unit default saat edit
     public $mode = 'create'; // Bisa 'create' atau 'edit'
 
@@ -29,11 +29,13 @@ class Unit extends Component
         }
     }
 
+    // Mengambil data unit dari database
     public function loadUnits()
     {
         $this->units = DB::table('units')->orderBy('name')->pluck('name')->toArray();
     }
 
+    // Menghapus unit yang dipilih
     public function addUnit()
     {
         // Cek apakah user memiliki izin Tambah dan harus peran admin & owner
@@ -63,6 +65,7 @@ class Unit extends Component
         session()->flash('unit-message', 'Satuan berhasil ditambahkan!');
     }
 
+    // Menghapus unit yang dipilih
     public function setSelectedUnit($unit)
     {
         if ($this->mode === 'edit') {
@@ -70,6 +73,7 @@ class Unit extends Component
         }
     }
 
+    // Menghapus unit yang dipilih
     public function updatedSelectedUnit($value)
     {
         if ($this->mode === 'edit') {

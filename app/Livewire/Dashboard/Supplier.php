@@ -26,6 +26,8 @@ class Supplier extends Component
     public $limit = 8; 
     public $loaded = false;
 
+    public $ttl = 31536000;
+
     protected $listeners = [
         'supplierUpdated' => 'loadInitialSuppliers',
         'deleteConfirmed' => 'delete',
@@ -33,9 +35,7 @@ class Supplier extends Component
 
     public function mount()
     {
-        $ttl = 31536000;
-
-        $this->totalSuppliers = Cache::remember('totalSuppliers', $ttl, function () {
+        $this->totalSuppliers = Cache::remember('totalSuppliers', $this->ttl, function () {
             return ModelsSupplier::count();
         });
          
@@ -54,13 +54,12 @@ class Supplier extends Component
 
     public function loadInitialSuppliers()
     {
-        $ttl = 31536000; // TTL cache selama 1 tahun
         $this->loaded = true;
     
         // Cache key untuk menyimpan data supplier
         $cacheKey = "suppliers_{$this->search}_{$this->limit}";
     
-        $this->suppliers = Cache::remember($cacheKey, $ttl, function () {
+        $this->suppliers = Cache::remember($cacheKey, $this->ttl, function () {
             return ModelsSupplier::where(function ($query) {
                     $query->where('name', 'like', '%' . $this->search . '%')
                           ->orWhere('email', 'like', '%' . $this->search . '%')
@@ -97,6 +96,7 @@ class Supplier extends Component
         $this->reset(['nameUpdate', 'emailUpdate', 'phoneUpdate', 'addressUpdate', 'cityUpdate', 'stateUpdate', 'zipUpdate', 'countryUpdate']);
     }
 
+    // CRUD Supplier
     public function store()
     {
         $this->validate([
@@ -219,12 +219,11 @@ class Supplier extends Component
         $this->dispatch('deletedSuccess');
     }
 
+    // Fungsi untuk memperbarui cache supplier
     protected function refreshCache()
     {
-        $ttl = 31536000; // TTL cache selama 1 tahun
-    
         // Refresh total suppliers 
-        Cache::put('totalSuppliers', ModelsSupplier::count(), $ttl);
+        Cache::put('totalSuppliers', ModelsSupplier::count(), $this->ttl);
     
         // Refresh cache supplier sesuai pencarian
         $cacheKey = "suppliers_{$this->search}_{$this->limit}";
@@ -240,10 +239,10 @@ class Supplier extends Component
         })
         ->latest()
         ->take($this->limit)
-        ->get(), $ttl);
+        ->get(), $this->ttl);
     }
     
-
+    // Fungsi untuk menghapus cache supplier yang dihapus
     protected function removeCache()
     {
         $cacheKey = "suppliers_{$this->search}_{$this->limit}";
