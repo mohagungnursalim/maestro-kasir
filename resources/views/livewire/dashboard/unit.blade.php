@@ -30,9 +30,13 @@
         @can('Ubah')
         {{-- User harus memiliki peran admin --}}
         @hasrole('admin')
-        <button type="button" class="bg-gray-500 rounded-full" @click.prevent="showPopover = true">
-            <i class="bi bi-plus-lg text-white"></i>
+        <button 
+            type="button" 
+            class="bg-gray-500 hover:bg-gray-600 text-white rounded-full transition duration-150 ease-in-out shadow-md"
+            @click.prevent="showPopover = true">
+            <i class="bi bi-plus-lg"></i>
         </button>
+
         @endrole
         @endcan
         @endcan
