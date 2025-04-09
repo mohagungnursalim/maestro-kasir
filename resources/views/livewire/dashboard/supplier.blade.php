@@ -129,7 +129,7 @@
                                 </tr>
                                 @empty
                                 <tr>
-                                    <td colspan="8" class="text-center align-middle h-20">
+                                    <td colspan="9" class="text-center align-middle h-20">
                                         Tidak ada data ditemukan!
                                     </td>
                                 </tr>
