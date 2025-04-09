@@ -99,14 +99,14 @@
                 class="flex items-center w-full p-2 text-base text-gray-900 transition duration-75 rounded-lg group {{ Request::is('dashboard/products') || Request::is('dashboard/suppliers') ? 'bg-gray-200' : 'hover:bg-gray-200' }}" 
                 aria-controls="dropdown" 
                 data-collapse-toggle="dropdown"
-                aria-expanded="{{ Request::is('dashboard/products') || Request::is('dashboard/suppliers') ? 'true' : 'false' }}">
+                aria-expanded="{{ Request::is('dashboard/{products,suppliers,units}') ? 'true' : 'false' }}"
                 <i class="bi bi-list-ul"></i>
                 <span class="flex-1 ms-3 text-left rtl:text-right whitespace-nowrap">Produk</span>
                 <i class="bi bi-caret-down-fill"></i>
             </button>
             <ul 
                 id="dropdown" 
-                class="{{ Request::is('dashboard/products') || Request::is('dashboard/suppliers') ? '' : 'hidden' }} py-2 space-y-2">
+                class="{{ Request::is('dashboard/products') || Request::is('dashboard/suppliers') || Request::is('dashboard/units') ? '' : 'hidden' }} py-2 space-y-2">
                 
                 <a 
                     @if (Request::is('dashboard/products'))
@@ -131,6 +131,20 @@
                 >
                     <i class="bi bi-arrow-return-right"></i>
                     <span class="flex-1 ms-3 whitespace-nowrap">Master Supplier</span>
+                </a>
+                @endrole
+
+                @hasrole('admin|owner')
+                <a 
+                    @if (Request::is('dashboard/units'))
+                        class="flex items-center p-2 rounded-lg bg-purple-300 text-dark"
+                    @else
+                        wire:navigate href="/dashboard/units" 
+                        class="flex items-center p-2 rounded-lg hover:bg-gray-200"
+                    @endif
+                >
+                    <i class="bi bi-arrow-return-right"></i>
+                    <span class="flex-1 ms-3 whitespace-nowrap">Master Satuan</span>
                 </a>
                 @endrole
         

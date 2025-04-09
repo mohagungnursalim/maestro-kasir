@@ -11,6 +11,7 @@ use App\Livewire\Dashboard\Order;
 use App\Livewire\Dashboard\Profile;
 use App\Livewire\Dashboard\Supplier;
 use App\Livewire\Dashboard\Transaction;
+use App\Livewire\Dashboard\UnitManagement;
 use App\Livewire\Dashboard\UserManagement;
 use App\Livewire\DownloadReport;
 use Illuminate\Http\Request;
@@ -47,11 +48,16 @@ Route::get('/dashboard/suppliers', Supplier::class)
     ->middleware(['auth','role:admin|owner'])
     ->name('suppliers');
 
+Route::get('/dashboard/units', UnitManagement::class)
+    ->middleware(['auth','role:admin|owner'])
+    ->name('units');
+
 
 Route::get('/dashboard/store-settings', Settings::class)
     ->middleware(['auth','role:admin|owner'])
     ->name('settings');
 
+// Api Pencarian Suppliers
 Route::get('/api/suppliers', [SupplierController::class, 'index'])
     ->middleware(['auth','role:admin|owner'])
     ->name('api.suppliers');
