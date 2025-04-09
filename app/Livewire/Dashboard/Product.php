@@ -188,7 +188,7 @@ class Product extends Component
             'price' => 'required|numeric|min:0',
             'description' => 'required|string',
             'stock' => 'required|numeric|min:0',
-            'unit' => 'required|string|max:10',
+            'unit' => 'required|string|max:80',
             'supplier_id' => 'nullable|exists:suppliers,id',
             ], [
             'name.required' => 'Nama produk wajib diisi.',
@@ -284,7 +284,7 @@ class Product extends Component
             'priceUpdate' => 'required|numeric|min:0',
             'descriptionUpdate' => 'required|string',
             'stockUpdate' => 'required|numeric|min:0',
-            'unitUpdate' => 'required|string|max:10',
+            'unitUpdate' => 'required|string|max:80',
             'supplier_idUpdate' => 'nullable|exists:suppliers,id',
         ]);
 
