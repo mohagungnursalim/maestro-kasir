@@ -99,7 +99,7 @@
                 class="flex items-center w-full p-2 text-base text-gray-900 transition duration-75 rounded-lg group {{ Request::is('dashboard/products') || Request::is('dashboard/suppliers') ? 'bg-gray-200' : 'hover:bg-gray-200' }}" 
                 aria-controls="dropdown" 
                 data-collapse-toggle="dropdown"
-                aria-expanded="{{ Request::is('dashboard/{products,suppliers,units}') ? 'true' : 'false' }}"
+                aria-expanded="{{ Request::is('dashboard/{products,suppliers,units}') ? 'true' : 'false' }}">
                 <i class="bi bi-list-ul"></i>
                 <span class="flex-1 ms-3 text-left rtl:text-right whitespace-nowrap">Produk</span>
                 <i class="bi bi-caret-down-fill"></i>
