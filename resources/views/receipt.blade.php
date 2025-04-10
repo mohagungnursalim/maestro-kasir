@@ -71,6 +71,7 @@
         <p>Telp: {{ $settings->store_phone }}</p>
         <p>Tanggal: {{ now()->format('d-m-Y H:i') }}</p>
         <p>Kasir: {{ $order->user->name ?? 'Tidak Diketahui' }}</p>
+        <p>Struk: {{ $order->order_number }}</p>
         
         <div class="line"></div>
 
@@ -93,17 +94,19 @@
                 <td>Subtotal</td>
                 <td class="right">{{ number_format($order->grandtotal - $order->tax, 0, ',', '.') }}</td>
             </tr>
-            @php
-                $subtotal = $order->grandtotal - $order->tax;
-                $taxPercentage = $subtotal > 0 ? ($order->tax / $subtotal) * 100 : 0;
 
-                $discount = $order->grandtotal - $order->discount;
-                $discountPercentage = $subtotal > 0 ? ($order->discount / $subtotal) * 100 : 0;
+            @php
+                $hargaAwal = $order->grandtotal + $order->discount - $order->tax;
+                $hargaSetelahDiskon = $hargaAwal - $order->discount;
+            
+                $taxPercentage = $hargaSetelahDiskon > 0 ? ($order->tax / $hargaSetelahDiskon) * 100 : 0;
+                $discountPercentage = $hargaAwal > 0 ? ($order->discount / $hargaAwal) * 100 : 0;
             @endphp
+
 
             @if ($taxPercentage)
             <tr>
-                <td>Pajak ({{ number_format($taxPercentage, 0) }}%)</td>
+                <td>PPN ({{ number_format($taxPercentage, 0) }}%)</td>
                 <td class="right">{{ number_format($order->tax, 0, ',', '.') }}</td>
             </tr>
             @endif
@@ -116,7 +119,7 @@
             @endif
 
             <tr class="total">
-                <td>Total</td>
+                <td>Total Bayar</td>
                 <td class="right">{{ number_format($order->grandtotal, 0, ',', '.') }}</td>
             </tr>
             <tr>

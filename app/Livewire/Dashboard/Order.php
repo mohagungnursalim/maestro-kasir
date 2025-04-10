@@ -257,7 +257,7 @@ class Order extends Component
             //Simpan data order (tanpa detail produk)
             $order = ModelsOrder::create([
                 'user_id' => Auth::user()->id,
-                'order_number' => 'ORD/' . now()->format('Y-m-d') . '/' . Str::random(6),
+                'order_number' => 'ORD/' . now()->format('dmY') . '/' . Str::random(6),
                 'payment_method' => $this->payment_method,
                 'tax' => $this->tax,
                 'discount' => $this->discount,
