@@ -137,7 +137,7 @@
                 <!-- Keranjang Belanja -->
                 <h2 class="text-xl font-semibold text-gray-900 sm:text-2xl mt-6">Pesanan</h2>
                 <div class="mt-6 sm:mt-8 md:gap-6 lg:flex lg:items-start">
-                    <div class="w-full lg:w-2/3">
+                    <div class="w-full lg:w-2/3 max-h-[60vh] overflow-y-auto custom-scrollbar">
                         <div class="space-y-6">
                             @if (empty($cart))
                             <div class="text-center mt-9">
