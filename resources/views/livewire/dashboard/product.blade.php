@@ -26,6 +26,7 @@
     </head>
 
     <div class="py-12">
+        @can('Lihat')
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
 
@@ -34,13 +35,15 @@
                     <div
                         class="flex flex-col items-center justify-between p-4 space-y-3 md:flex-row md:space-y-0 md:space-x-4">
                         <div class="w-full md:w-1/2">
-
-                            <!-- Tombol Buka Modal -->
-                            <button type="button" id="addProductButton" data-modal-target="addModal"
-                                data-modal-toggle="addModal"
-                                class="text-white bg-purple-500 to-blue-500 hover:bg-gradient-to-bl focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2">
-                                Tambah Produk
-                            </button>
+                            @can('Tambah')
+                                <!-- Tombol Buka Modal -->
+                                <button type="button" id="addProductButton" data-modal-target="addModal"
+                                    data-modal-toggle="addModal"
+                                    class="text-white bg-purple-500 to-blue-500 hover:bg-gradient-to-bl focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2">
+                                    Tambah Produk
+                                </button>
+                            @endcan
+                            
                             <form class="flex items-center">
                                 <label for="search" class="sr-only">Search</label>
                                 <div class="relative w-full">
@@ -221,15 +224,16 @@
             </div>
             @endif
 
-        </div>
+        </div>       
+        @endcan
     </div>
-</div>
 
 
-{{-- Modal Create --}}
-<div id="addModal" tabindex="-1" data-modal-backdrop="addModal"
-    class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-modal md:h-full"
-    wire:ignore.self>
+@can('Tambah')
+    {{-- Modal Create --}}
+    <div id="addModal" tabindex="-1" data-modal-backdrop="addModal"
+        class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-modal md:h-full"
+        wire:ignore.self>
     <div class="relative p-4 w-full max-w-2xl h-full md:h-auto">
         <!-- Modal content -->
         <div class="relative p-4 bg-white rounded-lg shadow sm:p-5">
@@ -399,10 +403,12 @@
             </form>
         </div>
     </div>
-</div>
+    </div>
+@endcan
 
 
 
+@can('Ubah')
 {{-- Modal Edit --}}
 <div id="editModal" tabindex="-1" data-modal-backdrop="editModal"
     class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-modal md:h-full"
@@ -572,9 +578,9 @@
         </div>
     </div>
 </div>
+@endcan
 
-
-
+@can('Lihat')
 {{-- Modal Detail --}}
 <div id="detailModal" tabindex="-1" data-modal-backdrop="detailModal"
     class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-modal md:h-full"
@@ -640,9 +646,9 @@
         </div>
     </div>
 </div>
+@endcan
 
-
-
+</div>
 
 {{-- Script modal Add --}}
 <script>

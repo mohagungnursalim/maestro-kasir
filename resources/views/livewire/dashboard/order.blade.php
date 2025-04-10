@@ -1,4 +1,5 @@
 <div class="py-12">
+    @can('Lihat')
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <section class="bg-white py-8 antialiased md:py-16">
             <div class="mx-auto max-w-screen-lg px-4">
@@ -475,7 +476,8 @@
                 </div>
             </div>
         </section>
-    </div>
+    </div>  
+    @endcan
     <script>
         Livewire.on('printReceipt', orderId => {
             let receiptUrl = `/dashboard/order-receipt/${orderId}`;

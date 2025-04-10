@@ -1,4 +1,5 @@
 <div class="py-12">
+    @can('Lihat')
     <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
         <div class="mb-4">
             <label for="filterType" class="block text-gray-700 font-semibold mb-2">Filter Waktu:</label>
@@ -37,4 +38,5 @@
 
         </div>
     </div>
+    @endcan
 </div>
