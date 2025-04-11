@@ -129,9 +129,9 @@
                                     <td class="px-6 py-4 text-center">
                                         <div class="h-4 w-16 bg-gray-300 rounded animate-pulse mb-1"></div>
                                         <div class="h-4 w-16 bg-gray-300 rounded animate-pulse"></div>
-
                                     </td>
                                     <td class="px-6 py-4 text-right">
+                                        <div class="h-4 w-16 bg-gray-300 rounded animate-pulse mb-1"></div>
                                         <div class="h-4 w-16 bg-gray-300 rounded animate-pulse"></div>
                                     </td>
                                     <td class="px-6 py-4 text-right">
