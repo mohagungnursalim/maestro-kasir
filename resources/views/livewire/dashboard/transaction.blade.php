@@ -195,7 +195,7 @@
                                                 $taxPercentage = $base > 0 ? ($order->tax / $base) * 100 : 0;
                                             @endphp
                                         <span class="text-xs text-gray-600">({{ number_format($taxPercentage, 2) }}%)</span>
-                                            {{ number_format($order->tax, 0, ',', '.') }} 
+                                            Rp{{ number_format($order->tax, 0, ',', '.') }} 
                                         </td>
                                         
                                         <td class="px-6 py-4 text-right font-bold">
@@ -206,14 +206,14 @@
                                                 $discountPercentage = $originalPrice > 0 ? ($order->discount / $originalPrice) * 100 : 0;
                                             @endphp
                                             <span class="text-xs text-gray-600">({{ number_format($discountPercentage, 2) }}%)</span>
-                                            {{ number_format($order->discount, 0, ',', '.') }} 
+                                            Rp{{ number_format($order->discount, 0, ',', '.') }} 
                                         </td>
                                         
                                         <td class="px-6 py-4 text-right font-bold">
-                                            {{ number_format($orderTransactions[0]->customer_money, 0,',','.') ?? '-' }}
+                                            Rp{{ number_format($orderTransactions[0]->customer_money, 0,',','.') ?? '-' }}
                                         </td>
                                         <td class="px-6 py-4 text-right font-bold">
-                                            {{ number_format($orderTransactions[0]->change, 0,',','.') ?? '-' }}
+                                            Rp{{ number_format($orderTransactions[0]->change, 0,',','.') ?? '-' }}
                                         </td>
                                         <td class="px-6 py-4 text-right font-bold">
                                             Rp{{ number_format($orderTransactions[0]->grand_total, 0, ',', '.') ?? '-' }}
