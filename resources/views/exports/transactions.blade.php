@@ -25,7 +25,7 @@
             font-size: 10px;
         }
         .bold { font-weight: bold; }
-        .right { text-align: right; } /* Biar angka rata kanan */
+        .center { text-align: center; } /* Biar angka rata kanan */
 
         /* Atur lebar kolom */
         th:nth-child(1) { width: 15%; } /* ID Order/Kasir */
@@ -37,6 +37,11 @@
         th:nth-child(7) { width: 10%; } /* Kembalian */
         th:nth-child(8) { width: 7%; }  /* Jumlah */
         th:nth-child(9) { width: 10%; } /* Harga */
+
+        .text-small-gray {
+        font-size: 8px;
+        color: #6b7280; /* abu-abu ke arah Tailwind gray-500 */
+        }
     </style>
 </head>
 <body>
@@ -44,74 +49,104 @@
         @php
             \Carbon\Carbon::setLocale('id');
         @endphp
+    <h2>{{ $settings->store_name }}</h2>
+    <p>{{ $settings->store_address }}</p>
+
     <p>Periode: {{ \Carbon\Carbon::parse($startDate)->translatedFormat('l, d F Y') }} - {{ \Carbon\Carbon::parse($endDate)->translatedFormat('l, d F Y') }}</p>
     <p>Total Transaksi: {{ $transactions->count() }}</p>
 
     <table>
         <thead>
             <tr>
-                <th>Nomor Order/Kasir</th>
-                <th>Nama Produk</th>
-                <th>Pembayaran</th>
-                <th>Pajak</th>
-                <th>Diskon</th>
-                <th>Uang Pelanggan</th>
-                <th>Kembalian</th>
+                <th>Order/Kasir</th>
+                <th>Produk</th>
                 <th>Jumlah</th>
                 <th>Harga</th>
+                <th>Metode</th>
+                <th>Pajak</th>
+                <th>Diskon</th>
             </tr>
         </thead>
         <tbody>
             @php
-                $grandTotal = 0; // Simpan total keseluruhan
+                $grandTotal = 0;
             @endphp
-
+    
             @foreach ($transactions as $order_id => $details)
                 @php
-                    $first = $details->first(); // Ambil transaksi pertama untuk order
-                    $subtotal = $details->sum(fn($item) => $item->quantity * $item->product->price); // Hitung subtotal
-                    $grandTotal += $subtotal; // Tambahkan ke total keseluruhan
+                    $first = $details->first();
+                    $subtotal = $details->sum(fn($item) => $item->quantity * $item->product->price);
+                    $totalPay = $first->order->grandtotal ?? 0;
+                    $grandTotal += $totalPay;
                 @endphp
                 <tr>
                     <td class="bold">
-                        Nomor Order: {{ $first->order->order_number ?? '-' }}<br>
+                        Order: {{ $first->order->order_number ?? '-' }}<br>
                         Kasir: {{ $first->order->user->name ?? '-' }}<br>
                         Tanggal: {{ $first->order->created_at->format('d-m-Y') }}
                     </td>
                     <td></td>
-                    <td>{{ $first->order->payment_method ?? '-' }}</td>
-                    <td class="right">Rp{{ number_format($first->order->tax ?? 0, 0, ',', '.') }}</td>
-                    <td class="right">{{ number_format($first->order->discount ?? 0, 0, ',', '.') }}</td>
-                    <td class="right">Rp{{ number_format($first->order->customer_money ?? 0, 0, ',', '.') }}</td>
-                    <td class="right">Rp{{ number_format($first->order->change ?? 0, 0, ',', '.') }}</td>
                     <td></td>
                     <td></td>
+                    <td class="center">{{ $first->order->payment_method ?? '-' }}</td>
+                    @php
+                        
+                        $base = $first->order->grandtotal - $first->order->tax;
+                        $taxPercentage = $base > 0 ? round(($first->order->tax / $base) * 100) : 0;
+
+                        $originalPrice = $base + $first->order->discount;
+                        $discountPercentage = $originalPrice > 0 ? round(($first->order->discount / $originalPrice) * 100) : 0;
+                    @endphp
+                   
+                   <td class="center">
+                        @if ($taxPercentage)
+                            <div class="text-small-gray">({{ number_format($taxPercentage) }}%)</div>
+                        @endif
+                        Rp{{ number_format($first->order->tax ?? 0, 0, ',', '.') }}
+                    </td>
+                    <td class="center">
+                        @if ($discountPercentage)
+                            <div class="text-small-gray">({{ number_format($discountPercentage) }}%)</div>
+                        @endif
+                        Rp{{ number_format($first->order->discount ?? 0, 0, ',', '.') }}
+                    </td>
+                
                 </tr>
+    
                 @foreach ($details as $transaction)
                     <tr>
                         <td></td>
                         <td>{{ $transaction->product->name ?? '-' }}</td>
+                        <td class="center">{{ $transaction->quantity }}</td>
+                        <td class="center">Rp{{ number_format($transaction->product->price, 0, ',', '.') }}</td>
                         <td></td>
                         <td></td>
                         <td></td>
-                        <td></td>
-                        <td></td>
-                        <td class="right">{{ $transaction->quantity }}</td>
-                        <td class="right">Rp{{ number_format($transaction->product->price, 0, ',', '.') }}</td>
                     </tr>
                 @endforeach
+    
                 <tr>
-                    <td colspan="7" class="bold right">Subtotal:</td>
-                    <td colspan="2" class="bold right">Rp{{ number_format($subtotal, 0, ',', '.') }}</td>
+                    <td colspan="7" class="bold center">Subtotal: Rp{{ number_format($subtotal, 0, ',', '.') }}</td>
+                </tr>
+                <tr>
+                    <td colspan="7" class="bold center">Total Bayar: Rp{{ number_format($totalPay, 0, ',', '.') }}</td>
+                </tr>
+                <tr>
+                    <td colspan="7" class="bold center">Uang Pelanggan: Rp{{ number_format($first->order->customer_money ?? 0, 0, ',', '.') }}</td>
+                </tr>
+                <tr>
+                    <td colspan="7" class="bold center">Kembalian: Rp{{ number_format($first->order->change ?? 0, 0, ',', '.') }}</td>
                 </tr>
             @endforeach
         </tbody>
-        <tfoot>
-            <tr>
-                <td colspan="7" class="bold right">Total Keseluruhan:</td>
-                <td colspan="2" class="bold right">Rp{{ number_format($grandTotal, 0, ',', '.') }}</td>
-            </tr>
-        </tfoot>
     </table>
+    
+    
+    
+    <div style="margin-top: 20px; text-align: right; font-weight: bold; font-size: 18px;">
+        <p style="margin: 0;">Total Pendapatan:</p>
+        <p style="margin: 0; font-size: 18px;">Rp{{ number_format($grandTotal, 0, ',', '.') }}</p>
+    </div>
+    
 </body>
 </html>

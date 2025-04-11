@@ -101,7 +101,7 @@
                             <tr>
                                 <th class="px-6 py-3">Order/Kasir</th>
                                 <th class="px-6 py-3">Produk</th>
-                                <th class="px-6 py-3 text-center">Qty</th>
+                                <th class="px-6 py-3 text-center">Jumlah</th>
                                 <th class="px-6 py-3 text-center">Harga</th>
                                 <th class="px-6 py-3 text-center">Subtotal</th>
                                 <th class="px-6 py-3 text-center">Metode</th>
@@ -188,27 +188,29 @@
                                         <td class="px-6 py-4 text-center font-bold">
                                             {{ $orderTransactions[0]->payment_method ?? '-' }}
                                         </td>
+                                        @php
+                                            $order = $orderTransactions[0];
+                                            $base = $order->grand_total - $order->tax;
+                                            $taxPercentage = $base > 0 ? round(($order->tax / $base) * 100) : 0;
+
+                                            $originalPrice = $base + $order->discount;
+                                            $discountPercentage = $originalPrice > 0 ? round(($order->discount / $originalPrice) * 100) : 0;
+                                        @endphp
+
                                         <td class="px-6 py-4 text-right font-bold">
-                                            @php
-                                                $order = $orderTransactions[0];
-                                                $base = $order->grand_total - $order->tax;
-                                                $taxPercentage = $base > 0 ? ($order->tax / $base) * 100 : 0;
-                                            @endphp
-                                        <span class="text-xs text-gray-600">({{ number_format($taxPercentage, 2) }}%)</span>
+                                            @if ($taxPercentage)
+                                                <span class="text-xs text-gray-600">({{ number_format($taxPercentage) }}%)</span>
+                                            @endif
                                             Rp{{ number_format($order->tax, 0, ',', '.') }} 
                                         </td>
-                                        
+
                                         <td class="px-6 py-4 text-right font-bold">
-                                            @php
-                                                $order = $orderTransactions[0];
-                                                $base = $order->grand_total - $order->tax;
-                                                $originalPrice = $base + $order->discount;
-                                                $discountPercentage = $originalPrice > 0 ? ($order->discount / $originalPrice) * 100 : 0;
-                                            @endphp
-                                            <span class="text-xs text-gray-600">({{ number_format($discountPercentage, 2) }}%)</span>
+                                            @if ($discountPercentage)
+                                                <span class="text-xs text-gray-600">({{ number_format($discountPercentage) }}%)</span>
+                                            @endif
                                             Rp{{ number_format($order->discount, 0, ',', '.') }} 
                                         </td>
-                                        
+              
                                         <td class="px-6 py-4 text-right font-bold">
                                             Rp{{ number_format($orderTransactions[0]->customer_money, 0,',','.') ?? '-' }}
                                         </td>

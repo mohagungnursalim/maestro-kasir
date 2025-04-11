@@ -144,7 +144,7 @@ class Transaction extends Component
             $startDate = Carbon::parse($this->startDate)->startOfDay(); // 00:00:00
             $endDate = Carbon::parse($this->endDate)->endOfDay(); // 23:59:59
             $date = now()->format('d-m-Y');
-        
+            $userName = auth()->user()->name;
             
             $transactions = TransactionDetail::with(['product', 'order.user'])
                 ->whereHas('order', function ($query) use ($startDate, $endDate) {
@@ -159,6 +159,7 @@ class Transaction extends Component
                 'transactions' => $transactions,
                 'startDate' => $this->startDate,
                 'endDate' => $this->endDate,
+                'userName' => $userName,
             ]);
         
             return response()->streamDownload(fn() => print($pdf->output()), "transactions_{$date}.pdf");            
