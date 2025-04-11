@@ -99,146 +99,134 @@
                     <table class="w-full text-sm text-left rtl:text-right text-gray-500">
                         <thead class="text-xs text-white uppercase bg-gray-500">
                             <tr>
-                                <th scope="col" class="px-6 py-3">Nomor Order/Kasir</th>
-                                <th scope="col" class="px-6 py-3">Nama Produk</th>
-                                <th scope="col" class="px-6 py-3 text-right">Pembayaran</th>
-                                <th scope="col" class="px-6 py-3 text-right">Pajak</th>
-                                <th scope="col" class="px-6 py-3 text-right">Diskon</th>
-                                <th scope="col" class="px-6 py-3 text-right">Uang Pelanggan</th>
-                                <th scope="col" class="px-6 py-3 text-right">Kembalian</th>
-                                <th scope="col" class="px-6 py-3 text-center">Jumlah</th>
-                                <th scope="col" class="px-6 py-3 text-center">Harga</th>
-                                <th scope="col" class="px-6 py-3 text-center">Sub Total</th>
-                                <th scope="col" class="px-6 py-3 text-center">Total</th>
-                                <th scope="col" class="px-6 py-3 text-center">Tanggal/Jam</th>
+                                <th class="px-6 py-3">Order/Kasir</th>
+                                <th class="px-6 py-3">Produk</th>
+                                <th class="px-6 py-3 text-center">Qty</th>
+                                <th class="px-6 py-3 text-center">Harga</th>
+                                <th class="px-6 py-3 text-center">Subtotal</th>
+                                <th class="px-6 py-3 text-center">Metode</th>
+                                <th class="px-6 py-3 text-right">Pajak</th>
+                                <th class="px-6 py-3 text-right">Diskon</th>
+                                <th class="px-6 py-3 text-right">Uang Pelanggan</th>
+                                <th class="px-6 py-3 text-right">Kembalian</th>
+                                <th class="px-6 py-3 text-right">Total Bayar</th>
+                                <th class="px-6 py-3 text-center">Tanggal</th>
                             </tr>
                         </thead>
                         <tbody>
                             @if (!$loaded)
-                            {{-- Skeleton untuk data transaksi saat masih loading --}}
-                            @for ($i = 0; $i < 8; $i++) <tr class="bg-gray-200 font-bold">
-                                <td class="px-6 py-4" colspan="2">
-                                    <div class="h-4 w-24 bg-gray-500 rounded animate-pulse mb-1"></div>
-                                    <div class="h-4 w-20 bg-gray-500 rounded animate-pulse"></div>
-                                </td>
-
-                                <td class="px-6 py-4 text-center">
-                                    <div class="h-4 w-16 bg-gray-300 rounded animate-pulse"></div>
-                                </td>
-                                <td class="px-6 py-4 text-center">
-                                    <div class="h-4 w-16 bg-gray-300 rounded animate-pulse"></div>
-                                </td>
-                                <td class="px-6 py-4 text-center">
-                                    <div class="h-4 w-16 bg-gray-300 rounded animate-pulse"></div>
-                                </td>
-                                <td class="px-6 py-4 text-center">
-                                    <div class="h-4 w-16 bg-gray-300 rounded animate-pulse"></div>
-                                </td>
-                                <td class="px-6 py-4 text-center" colspan="4">
-                                    <div class="h-4 w-16 bg-gray-300 rounded animate-pulse"></div>
-                                </td>
-                                <td class="px-6 py-4 text-center">
-                                    <div class="h-4 w-16 bg-gray-300 rounded animate-pulse"></div>
-                                </td>
-                                <td class="px-6 py-4 text-center">
-                                    <div class="h-4 w-16 bg-gray-300 rounded animate-pulse"></div>
-                                </td>
-                                </tr>
-
-                                @for($j = 0; $j < 2; $j++) <tr
-                                    class="bg-white border-b hover:bg-gray-300 text-gray-900">
-                                    <td class="px-6 py-4"></td> {{-- Kosongkan ID Order --}}
-                                    <td class="px-6 py-4" colspan="6">
+                            @for ($i = 0; $i < 3; $i++) {{-- 3 order dummy --}}
+                                {{-- Baris utama order --}}
+                                <tr class="bg-gray-200 font-bold">
+                                    <td class="px-6 py-4" colspan="1">
+                                        <div class="h-4 w-24 bg-gray-500 rounded animate-pulse mb-1"></div>
+                                        <div class="h-4 w-20 bg-gray-500 rounded animate-pulse"></div>
+                                    </td>
+                                    <td class="px-6 py-4 text-center font-bold" colspan="4"></td>
+                                    <td class="px-6 py-4 text-center">
                                         <div class="h-4 w-20 bg-gray-300 rounded animate-pulse"></div>
                                     </td>
-
-                                    <td class="px-6 py-4 text-center">
+                                    <td class="px-6 py-4 text-right">
                                         <div class="h-4 w-16 bg-gray-300 rounded animate-pulse"></div>
                                     </td>
-                                    <td class="px-6 py-4 text-center">
+                                    <td class="px-6 py-4 text-right">
                                         <div class="h-4 w-16 bg-gray-300 rounded animate-pulse"></div>
                                     </td>
-                                    <td class="px-6 py-4 text-center">
-                                        <div class="h-4 w-16 bg-gray-300 rounded animate-pulse"></div>
+                                    <td class="px-6 py-4 text-right">
+                                        <div class="h-4 w-20 bg-gray-300 rounded animate-pulse"></div>
+                                    </td>
+                                    <td class="px-6 py-4 text-right">
+                                        <div class="h-4 w-20 bg-gray-300 rounded animate-pulse"></div>
+                                    </td>
+                                    <td class="px-6 py-4 text-right">
+                                        <div class="h-4 w-20 bg-gray-300 rounded animate-pulse"></div>
                                     </td>
                                     <td class="px-6 py-4 text-center">
-
+                                        <div class="h-4 w-28 bg-gray-300 rounded animate-pulse"></div>
                                     </td>
-                                    <td class="px-6 py-4 text-center">
-
-                                    </td>
+                                </tr>
+                        
+                                {{-- Baris produk di bawah order --}}
+                                @for ($j = 0; $j < 3; $j++) {{-- 2 produk dummy per order --}}
+                                    <tr class="bg-white border-b hover:bg-gray-300 text-gray-900">
+                                        <td class="px-6 py-4"></td>
+                                        <td class="px-6 py-4">
+                                            <div class="h-4 w-32 bg-gray-300 rounded animate-pulse"></div>
+                                        </td>
+                                        <td class="px-6 py-4 text-center">
+                                            <div class="h-4 w-12 bg-gray-300 rounded animate-pulse"></div>
+                                        </td>
+                                        <td class="px-6 py-4 text-right">
+                                            <div class="h-4 w-14 bg-gray-300 rounded animate-pulse"></div>
+                                        </td>
+                                        <td class="px-6 py-4 text-right">
+                                            <div class="h-4 w-16 bg-gray-300 rounded animate-pulse"></div>
+                                        </td>
+                                        {{-- Kosongkan kolom selanjutnya --}}
+                                        @for ($k = 0; $k < 7; $k++)
+                                            <td class="px-6 py-4"></td>
+                                        @endfor
                                     </tr>
-                                    @endfor
-
-                                    @endfor
-                                    @else
-
-                                    @forelse ($transactions as $orderId => $orderTransactions)
+                                @endfor
+                            @endfor
+                            @else
+                                @forelse ($transactions as $orderId => $orderTransactions)
                                     <tr class="bg-gray-200 font-bold">
                                         <td class="px-6 py-4">
                                             <div class="flex flex-wrap items-center gap-2">
-                                                <span
-                                                    class="bg-green-500 text-white text-xs font-semibold px-3 py-1 rounded-md shadow-sm">
+                                                <span class="bg-green-500 text-white text-xs font-semibold px-3 py-1 rounded-md shadow-sm">
                                                     {{ $orderTransactions[0]->order_number ?? '-' }}
                                                 </span>
-                                                <span
-                                                    class="bg-blue-500 text-white text-xs font-semibold px-3 py-1 rounded-md shadow-sm">
+                                                <span class="bg-blue-500 text-white text-xs font-semibold px-3 py-1 rounded-md shadow-sm">
                                                     {{ $orderTransactions[0]->user_name ?? '-' }}
                                                 </span>
                                             </div>
                                         </td>
-                                        <td class="px-6 py-4 text-center font-bold"></td>
+                                        <td class="px-6 py-4 text-center font-bold" colspan="4"></td>
                                         <td class="px-6 py-4 text-center font-bold">
-                                            {{ $orderTransactions[0]->payment_method ?? '-' }}</td>
-                                        <td class="px-6 py-4 text-center font-bold">
-                                            {{ number_format($orderTransactions[0]->tax, 0,',','.' ) ?? '-' }}</td>
-                                        <td class="px-6 py-4 text-center font-bold">
-                                            {{ number_format($orderTransactions[0]->discount, 0,',','.' ) ?? '-' }}</td>
-                                        <td class="px-6 py-4 text-center font-bold">
-                                            {{ number_format($orderTransactions[0]->customer_money, 0,',','.' ) ?? '-' }}
+                                            {{ $orderTransactions[0]->payment_method ?? '-' }}
                                         </td>
-                                        <td class="px-6 py-4 text-center font-bold">
-                                            {{ number_format($orderTransactions[0]->change, 0,',','.' ) ?? '-' }}</td>
-                                        <td class="px-6 py-4 text-center font-bold"></td>
-                                        <td class="px-6 py-4 text-center font-bold"></td>
-                                        <td class="px-6 py-4 text-center font-bold"></td>
-                                        <td class="px-6 py-4 text-start font-bold">
+                                        <td class="px-6 py-4 text-right font-bold">
+                                            {{ number_format($orderTransactions[0]->tax, 0,',','.') ?? '-' }}
+                                        </td>
+                                        <td class="px-6 py-4 text-right font-bold">
+                                            {{ number_format($orderTransactions[0]->discount, 0,',','.') ?? '-' }}
+                                        </td>
+                                        <td class="px-6 py-4 text-right font-bold">
+                                            {{ number_format($orderTransactions[0]->customer_money, 0,',','.') ?? '-' }}
+                                        </td>
+                                        <td class="px-6 py-4 text-right font-bold">
+                                            {{ number_format($orderTransactions[0]->change, 0,',','.') ?? '-' }}
+                                        </td>
+                                        <td class="px-6 py-4 text-right font-bold">
                                             Rp{{ number_format($orderTransactions[0]->grand_total, 0, ',', '.') ?? '-' }}
                                         </td>
-                                        <td class="px-6 py-4 text-start font-bold">
-                                            {{ $orderTransactions[0]->order_date ?? '-' }}</td>
+                                        <td class="px-6 py-4 text-center font-bold">
+                                            {{ $orderTransactions[0]->order_date ?? '-' }}
+                                        </td>
                                     </tr>
-
+                    
                                     @foreach ($orderTransactions as $transaction)
-                                    <tr class="bg-white border-b hover:bg-gray-300 text-gray-900">
-                                        <td class="px-6 py-4"></td>
-                                        <td class="px-6 py-4">{{ $transaction->product_name ?? '-' }}</td>
-                                        <td class="px-6 py-4"></td>
-                                        <td class="px-6 py-4"></td>
-                                        <td class="px-6 py-4"></td>
-                                        <td class="px-6 py-4"></td>
-                                        <td class="px-6 py-4"></td>
-                                        <td class="px-6 py-4 text-center">{{ $transaction->quantity ?? '-' }}</td>
-                                        <td class="px-6 py-4 text-start">
-                                            Rp{{ number_format($transaction->price, 0, ',', '.')  ?? '-' }}</td>
-                                        <td class="px-6 py-4 text-start">
-                                            Rp{{ number_format($transaction->quantity * $transaction->price, 0, ',', '.') ?? '-' }}
-                                        </td>
-                                        <td class="px-6 py-4"></td>
-                                        <td class="px-6 py-4"></td>
-                                    </tr>
+                                        <tr class="bg-white border-b hover:bg-gray-300 text-gray-900">
+                                            <td class="px-6 py-4"></td>
+                                            <td class="px-6 py-4">{{ $transaction->product_name ?? '-' }}</td>
+                                            <td class="px-6 py-4 text-center">{{ $transaction->quantity ?? '-' }}</td>
+                                            <td class="px-6 py-4 text-right">Rp{{ number_format($transaction->price, 0, ',', '.') ?? '-' }}</td>
+                                            <td class="px-6 py-4 text-right">
+                                                Rp{{ number_format($transaction->quantity * $transaction->price, 0, ',', '.') ?? '-' }}
+                                            </td>
+                                            <td colspan="7"></td>
+                                        </tr>
                                     @endforeach
-                                    @empty
+                                @empty
                                     <tr>
-                                        <td colspan="12" class="text-center align-middle h-20">
-                                            Tidak ada data ditemukan!
-                                        </td>
+                                        <td colspan="12" class="text-center align-middle h-20">Tidak ada data ditemukan!</td>
                                     </tr>
-                                    @endforelse
-
-                                    @endif
+                                @endforelse
+                            @endif
                         </tbody>
                     </table>
+                    
                 </div>
 
 
