@@ -105,7 +105,7 @@
                                 <th class="px-6 py-3 text-center">Harga</th>
                                 <th class="px-6 py-3 text-center">Subtotal</th>
                                 <th class="px-6 py-3 text-center">Metode</th>
-                                <th class="px-6 py-3 text-right">Pajak</th>
+                                <th class="px-6 py-3 text-right">Pajak (PPN)</th>
                                 <th class="px-6 py-3 text-right">Diskon</th>
                                 <th class="px-6 py-3 text-right">Uang Pelanggan</th>
                                 <th class="px-6 py-3 text-right">Kembalian</th>
@@ -126,8 +126,10 @@
                                     <td class="px-6 py-4 text-center">
                                         <div class="h-4 w-20 bg-gray-300 rounded animate-pulse"></div>
                                     </td>
-                                    <td class="px-6 py-4 text-right">
+                                    <td class="px-6 py-4 text-center">
+                                        <div class="h-4 w-16 bg-gray-300 rounded animate-pulse mb-1"></div>
                                         <div class="h-4 w-16 bg-gray-300 rounded animate-pulse"></div>
+
                                     </td>
                                     <td class="px-6 py-4 text-right">
                                         <div class="h-4 w-16 bg-gray-300 rounded animate-pulse"></div>
@@ -187,11 +189,26 @@
                                             {{ $orderTransactions[0]->payment_method ?? '-' }}
                                         </td>
                                         <td class="px-6 py-4 text-right font-bold">
-                                            {{ number_format($orderTransactions[0]->tax, 0,',','.') ?? '-' }}
+                                            @php
+                                                $order = $orderTransactions[0];
+                                                $base = $order->grand_total - $order->tax;
+                                                $taxPercentage = $base > 0 ? ($order->tax / $base) * 100 : 0;
+                                            @endphp
+                                        <span class="text-xs text-gray-600">({{ number_format($taxPercentage, 2) }}%)</span>
+                                            {{ number_format($order->tax, 0, ',', '.') }} 
                                         </td>
+                                        
                                         <td class="px-6 py-4 text-right font-bold">
-                                            {{ number_format($orderTransactions[0]->discount, 0,',','.') ?? '-' }}
+                                            @php
+                                                $order = $orderTransactions[0];
+                                                $base = $order->grand_total - $order->tax;
+                                                $originalPrice = $base + $order->discount;
+                                                $discountPercentage = $originalPrice > 0 ? ($order->discount / $originalPrice) * 100 : 0;
+                                            @endphp
+                                            <span class="text-xs text-gray-600">({{ number_format($discountPercentage, 2) }}%)</span>
+                                            {{ number_format($order->discount, 0, ',', '.') }} 
                                         </td>
+                                        
                                         <td class="px-6 py-4 text-right font-bold">
                                             {{ number_format($orderTransactions[0]->customer_money, 0,',','.') ?? '-' }}
                                         </td>
