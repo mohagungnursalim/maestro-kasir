@@ -19,9 +19,7 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Storage;
 
 Route::get('/', function () {
-    if (!auth()->check()) {
-        return redirect('/login');
-    }
+    return redirect()->route('dashboard');
 });
 
 Route::get('/dashboard', Dashboard::class)
