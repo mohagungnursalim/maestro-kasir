@@ -41,11 +41,16 @@ class Order extends Component
         'refreshProductStock' => 'searchProduct',
     ];
 
-    // Pencarian produk
     public function searchProduct()
     {
-        
         $cacheKey = "products_{$this->search}_{$this->limitProducts}";
+
+        // Simpan semua cache key yang pernah digunakan
+        $usedKeys = Cache::get('product_cache_keys', []);
+        if (!in_array($cacheKey, $usedKeys)) {
+            $usedKeys[] = $cacheKey;
+            Cache::put('product_cache_keys', $usedKeys, $this->ttl);
+        }
 
         $this->products = Cache::remember($cacheKey, $this->ttl, function () {
             return Product::where(function ($query) {
@@ -54,11 +59,12 @@ class Order extends Component
                         ->orWhere('price', 'like', '%' . $this->search . '%')
                         ->orWhere('description', 'like', '%' . $this->search . '%');
                 })
-                ->orderByDesc('sold_count') // 🔥 Urutkan berdasarkan produk terlaris
-                ->take($this->limitProducts) // Batas produk yang akan ditampilkan
+                ->orderByDesc('sold_count')
+                ->take($this->limitProducts)
                 ->get();
         });
     }
+
 
     // Saat tambah produk ke cart, langsung update cartNotEmpty
     public function addToCart($productId)
@@ -368,41 +374,19 @@ class Order extends Component
     // Refresh Cache stok produk
     protected function refreshCacheStock()
     {
-        // Cache key unik berdasarkan pencarian & limit
-        $cacheKey = "products_{$this->search}_{$this->limitProducts}";
+        $cacheKeys = Cache::get('product_cache_keys', []);
 
-        // Hapus cache lama sebelum memperbarui
-        Cache::forget($cacheKey);
+        foreach ($cacheKeys as $key) {
+            Cache::forget($key);
+        }
 
-        // Simpan ulang data terbaru ke dalam cache
-        $this->products = Cache::remember($cacheKey, $this->ttl, function () {
-            return DB::table('products')
-                ->leftJoin('suppliers', 'products.supplier_id', '=', 'suppliers.id')
-                ->select(
-                    'products.id',
-                    'products.name',
-                    'products.sku',
-                    'products.price',
-                    'products.description',
-                    'products.stock',
-                    'products.unit',
-                    'products.image',
-                    'products.created_at',
-                    'products.updated_at',
-                    'suppliers.name as supplier_name'
-                )
-                ->where(function ($query) {
-                    $query->where('products.name', 'like', '%' . $this->search . '%')
-                        ->orWhere('products.sku', 'like', '%' . $this->search . '%')
-                        ->orWhere('products.price', 'like', '%' . $this->search . '%')
-                        ->orWhere('products.description', 'like', '%' . $this->search . '%');
-                })
-                ->orderByDesc('products.sold_count')
-                ->take($this->limitProducts)
-                ->get();
-        });
+        // Kosongkan arraynya supaya tidak numpuk
+        Cache::forget('product_cache_keys');
 
-        // Dispatch event ke frontend untuk memastikan UI juga terupdate
+        // Muat ulang cache untuk current state pencarian
+        $this->searchProduct();
+
+        // Pastikan UI terupdate
         $this->dispatch('refreshProductStock');
     }
 
