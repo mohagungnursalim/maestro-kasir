@@ -35,7 +35,7 @@ Route::get('/dashboard/order-receipt/{orderId}', [OrderController::class, 'recei
     ->name('order.receipt');
 
 Route::get('/dashboard/transactions' , Transaction::class)
-    ->middleware(['auth','role:admin|owner'])
+    ->middleware(['auth'])
     ->name('transactions');
 
 Route::get('/dashboard/products', Product::class)

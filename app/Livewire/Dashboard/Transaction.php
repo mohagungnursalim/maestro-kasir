@@ -9,6 +9,7 @@ use App\Exports\TransactionExport;
 use App\Jobs\GenerateTransactionReport;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -59,19 +60,24 @@ class Transaction extends Component
         {
             $ttl = 31536000; // Cache selama 1 tahun
             $this->loaded = true;
-
-            // Cache key unik berdasarkan search dan limit
-            $cacheKey = "transactions_{$this->search}_{$this->limit}";
-
-            // Simpan daftar cache key untuk memudahkan refresh nanti
+        
+            $user = Auth::user();
+            $userId = $user->id;
+            $isAdminOrOwner = $user->hasRole('admin|owner');
+        
+            // Cache key unik berdasarkan search, limit, dan user ID (kalau bukan admin/owner)
+            $cacheKey = $isAdminOrOwner 
+                ? "transactions_{$this->search}_{$this->limit}" 
+                : "transactions_user_{$userId}_{$this->search}_{$this->limit}";
+        
+            // Simpan daftar cache key untuk refresh nanti
             $cacheKeys = Cache::get('transaction_cache_keys', []);
             if (!in_array($cacheKey, $cacheKeys)) {
                 $cacheKeys[] = $cacheKey;
                 Cache::put('transaction_cache_keys', $cacheKeys, $ttl);
             }
-
-            // Ambil transaksi dari cache atau query database jika tidak ada
-            $transactions = Cache::remember($cacheKey, $ttl, function () {
+        
+            $transactions = Cache::remember($cacheKey, $ttl, function () use ($userId, $isAdminOrOwner) {
                 return DB::table('transaction_details')
                     ->join('orders', 'transaction_details.order_id', '=', 'orders.id')
                     ->join('users', 'orders.user_id', '=', 'users.id')
@@ -89,20 +95,27 @@ class Transaction extends Component
                         'users.name as user_name',
                         'products.name as product_name'
                     )
+                    ->when(!$isAdminOrOwner, function ($query) use ($userId) {
+                        $query->where('orders.user_id', $userId);
+                    })
                     ->when($this->search, function ($query) {
-                        $query->where('orders.order_number', 'like', '%' . $this->search . '%')
-                            ->orWhereDate('orders.created_at', '=', $this->search)
-                            ->orWhere('users.name', 'like', '%' . $this->search . '%')
-                            ->orWhere('orders.payment_method', 'like', '%' . $this->search . '%');
+                        $query->where(function ($q) {
+                            $q->where('orders.order_number', 'like', '%' . $this->search . '%')
+                              ->orWhereDate('orders.created_at', '=', $this->search)
+                              ->orWhere('users.name', 'like', '%' . $this->search . '%')
+                              ->orWhere('orders.payment_method', 'like', '%' . $this->search . '%');
+                        });
                     })
                     ->orderBy('orders.created_at', 'desc')
                     ->limit($this->limit)
                     ->get();
             });
-
-            // Pastikan data dikelompokkan berdasarkan order_id
-            $this->transactions = collect($transactions)->groupBy('order_id')->map(fn ($group) => $group->all());
+        
+            $this->transactions = collect($transactions)
+                ->groupBy('order_id')
+                ->map(fn ($group) => $group->all());
         }
+        
         
 
         // Load More

@@ -45,7 +45,7 @@ class ProductSalesChart extends Component
             ->whereBetween('transaction_details.created_at', [$startDate, $endDate]);
 
         // Jika bukan admin, filter berdasarkan kasir yang login
-        if (!Auth::user()->hasRole('admin')) {
+        if (!Auth::user()->hasRole('admin|owner')) {
             $query->whereHas('order', function ($q) {
                 $q->where('user_id', Auth::id());
             });

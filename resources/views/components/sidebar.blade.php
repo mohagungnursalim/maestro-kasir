@@ -45,7 +45,7 @@
         </li>
         @endrole
 
-        @hasrole('admin|owner')
+        
         <li>
             <button 
                 type="button" 
@@ -73,6 +73,7 @@
                     <span class="flex-1 ms-3 whitespace-nowrap">Rekap Transaksi</span>
                 </a>
         
+                @hasrole('admin|owner')
                 <a 
                     @if (Request::is('dashboard/reports'))
                         class="flex items-center p-2 rounded-lg bg-purple-300 text-dark"
@@ -84,10 +85,11 @@
                     <i class="bi bi-arrow-return-right"></i>
                     <span class="flex-1 ms-3 whitespace-nowrap">File Laporan</span>
                 </a>
-        
+                @endrole
+
             </ul>
         </li>
-        @endrole
+        
 
         <div class="text-center">
             <hr>

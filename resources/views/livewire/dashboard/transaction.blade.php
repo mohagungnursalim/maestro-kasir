@@ -68,12 +68,16 @@
                         </div>
                         <div
                             class="flex flex-col items-stretch justify-end flex-shrink-0 w-full space-y-2 md:w-auto md:flex-row md:space-y-0 md:items-center md:space-x-3">
+                            
+                            @hasrole('admin|owner')
                             <!-- Modal Cetak Laporan-->
                             <button data-modal-target="default-modal" data-modal-toggle="default-modal"
                                 class="block text-white bg-gray-700 hover:bg-gray-800 focus:ring-4 focus:outline-none focus:ring-gray-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center"
                                 type="button">
                                 Cetak Laporan
                             </button>
+                            @endrole
+
                             <!-- Tombol Refresh Page -->
                             <a href="{{ route('transactions') }}" onclick="showLoading()"
                                 class="px-4 py-2 text-white bg-blue-600 rounded-lg hover:bg-blue-700 focus:ring-2 focus:ring-blue-500">

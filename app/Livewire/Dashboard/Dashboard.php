@@ -29,8 +29,8 @@ class Dashboard extends Component
         $queryOrders = Order::whereBetween('created_at', [$dates['start'], $dates['end']]);
         $queryTransactions = TransactionDetail::whereBetween('created_at', [$dates['start'], $dates['end']]);
 
-        // Jika bukan admin, hanya ambil transaksi kasir yang login
-        if (!Auth::user()->hasRole('admin')) {
+        // Jika bukan admin & Owner, hanya ambil transaksi kasir yang login
+        if (!Auth::user()->hasRole('admin|owner')) {
             $queryOrders->where('user_id', Auth::id());
             $queryTransactions->whereHas('order', function ($query) {
                 $query->where('user_id', Auth::id());
