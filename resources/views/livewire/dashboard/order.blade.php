@@ -348,10 +348,17 @@
                                     </dl>
                                 </div>
 
-                                <div x-data="{ 
+                                <div 
+                                    x-data="{ 
                                         paymentMethod: @entangle('payment_method'), 
                                         isCash() { return this.paymentMethod === 'cash'; }
-                                    }">
+                                    }"
+                                    x-init="$watch('paymentMethod', value => {
+                                        if (value !== 'cash') {
+                                            @this.set('customerMoney', 0);
+                                        }
+                                    })">
+
                                     <!-- Metode Pembayaran -->
                                     <div>
                                         <select x-model="paymentMethod" wire:model="payment_method" id="paymentMethod" name="paymentMethod"
