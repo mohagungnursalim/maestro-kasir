@@ -82,49 +82,29 @@ class Product extends Component
     
     public function loadInitialProducts()
     {
-    
         $this->loaded = true;
 
-        // Cache key unik berdasarkan pencarian & limit
-        $cacheKey = "products_{$this->search}_{$this->limit}";
+        $key = $this->getProductsCacheKey();
 
-        // Hapus cache sebelum mengambil data jika produk diperbarui
-        if (!Cache::has($cacheKey)) {
-            $this->refreshCache();
-        }
-
-        $this->products = Cache::remember($cacheKey,$this->ttl, function () {
-            return DB::table('products')
-                ->leftJoin('suppliers', 'products.supplier_id', '=', 'suppliers.id')
-                ->select(
-                    'products.id',
-                    'products.name',
-                    'products.sku',
-                    'products.price',
-                    'products.description',
-                    'products.stock',
-                    'products.unit',
-                    'products.image',
-                    'products.created_at',
-                    'products.updated_at',
-                    'suppliers.id as supplier_id',
-                    'suppliers.name as supplier_name'
-                )
+        if (!Cache::has($key)) {
+            $products = $this->getProductsQuery()
                 ->when($this->search, function ($query) {
                     $query->where(function ($q) {
                         $q->where('products.name', 'like', '%' . $this->search . '%')
-                          ->orWhere('products.sku', 'like', '%' . $this->search . '%')
-                          ->orWhere('products.price', 'like', '%' . $this->search . '%')
-                          ->orWhere('products.description', 'like', '%' . $this->search . '%')
-                          ->orWhere('suppliers.name', 'like', '%' . $this->search . '%'); // Pencarian nama supplier
+                            ->orWhere('products.sku', 'like', '%' . $this->search . '%')
+                            ->orWhere('products.price', 'like', '%' . $this->search . '%')
+                            ->orWhere('products.description', 'like', '%' . $this->search . '%')
+                            ->orWhere('suppliers.name', 'like', '%' . $this->search . '%');
                     });
                 })
                 ->orderByDesc('products.sold_count')
                 ->take($this->limit)
                 ->get();
-        });
-        
-        
+
+            $this->cacheProducts($products);
+        }
+
+        $this->products = Cache::get($key);
     }
 
     public function loadMore()
@@ -414,17 +394,51 @@ class Product extends Component
 
     protected function refreshCache()
     {
-        // Perbarui total produk
-        $totalProducts = DB::table('products')->count();
-        Cache::put('totalProducts', $totalProducts, $this->ttl);
+        Cache::put('totalProducts', DB::table('products')->count(), $this->ttl);
 
-        // Perbarui cache produk sesuai pencarian
-        $cacheKey = "products_{$this->search}_{$this->limit}";
+        $allKeys = Cache::get('product_cache_keys', []);
 
-        // Hapus cache lama sebelum memperbarui
-        Cache::forget($cacheKey);
+        foreach ($allKeys as $key) {
+            Cache::forget($key);
+        }
 
-        $products = DB::table('products')
+        Cache::forget('product_cache_keys');
+    }
+
+    protected function getProductsCacheKey()
+    {
+        return "products:{$this->search}:{$this->limit}";
+    }
+
+    protected function cacheProducts($products)
+    {
+        $key = $this->getProductsCacheKey();
+        Cache::put($key, $products, $this->ttl);
+
+        // Simpan key-nya supaya bisa dihapus semuanya kalau perlu
+        $allKeys = Cache::get('product_cache_keys', []);
+        if (!in_array($key, $allKeys)) {
+            $allKeys[] = $key;
+            Cache::put('product_cache_keys', $allKeys, $this->ttl);
+        }
+    }
+
+    protected function removeCache()
+    {
+        // Hapus total produk
+        Cache::forget('totalProducts');
+
+        // Hapus semua cache produk
+        $allKeys = Cache::get('product_cache_keys', []);
+        foreach ($allKeys as $key) {
+            Cache::forget($key);
+        }
+        Cache::forget('product_cache_keys');
+    }
+
+    protected function getProductsQuery()
+    {
+        return DB::table('products')
             ->leftJoin('suppliers', 'products.supplier_id', '=', 'suppliers.id')
             ->select(
                 'products.id',
@@ -439,39 +453,9 @@ class Product extends Component
                 'products.updated_at',
                 'products.supplier_id',
                 'suppliers.name as supplier_name'
-            )
-            ->where(function ($query) {
-                $query->where('products.name', 'like', '%' . $this->search . '%')
-                    ->orWhere('products.sku', 'like', '%' . $this->search . '%')
-                    ->orWhere('products.price', 'like', '%' . $this->search . '%')
-                    ->orWhere('products.description', 'like', '%' . $this->search . '%');
-            })
-            ->orderBy('products.sold_count')
-            ->limit($this->limit)
-            ->get();
-
-        Cache::put($cacheKey, $products, $this->ttl);
-
-        // 🚀 Tambahkan ini supaya Livewire langsung refresh data
-        $this->loadInitialProducts();
+            );
     }
 
-    protected function removeCache()
-    {
-        // Key cache produk yang relevan
-        $cacheKey = "products_{$this->search}_{$this->limit}";
-
-        // Hapus cache produk
-        if (Cache::has($cacheKey)) {
-            Cache::forget($cacheKey);
-        }
-
-        // Hapus cache total produk
-        if (Cache::has('totalProducts')) {
-            Cache::forget('totalProducts');
-        }
-
-    }
 
 
     public function render()

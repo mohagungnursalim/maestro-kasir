@@ -33,6 +33,8 @@ class Supplier extends Component
         'deleteConfirmed' => 'delete',
     ];
 
+    public $cacheKeysKey = 'supplier_cache_keys';
+
     public function mount()
     {
         $this->totalSuppliers = Cache::remember('totalSuppliers', $this->ttl, function () {
@@ -56,24 +58,31 @@ class Supplier extends Component
     {
         $this->loaded = true;
     
-        // Cache key untuk menyimpan data supplier
         $cacheKey = "suppliers_{$this->search}_{$this->limit}";
-    
+
         $this->suppliers = Cache::remember($cacheKey, $this->ttl, function () {
             return ModelsSupplier::where(function ($query) {
                     $query->where('name', 'like', '%' . $this->search . '%')
-                          ->orWhere('email', 'like', '%' . $this->search . '%')
-                          ->orWhere('phone', 'like', '%' . $this->search . '%')
-                          ->orWhere('address', 'like', '%' . $this->search . '%')
-                          ->orWhere('city', 'like', '%' . $this->search . '%')
-                          ->orWhere('state', 'like', '%' . $this->search . '%')
-                          ->orWhere('zip', 'like', '%' . $this->search . '%')
-                          ->orWhere('country', 'like', '%' . $this->search . '%');
+                        ->orWhere('email', 'like', '%' . $this->search . '%')
+                        ->orWhere('phone', 'like', '%' . $this->search . '%')
+                        ->orWhere('address', 'like', '%' . $this->search . '%')
+                        ->orWhere('city', 'like', '%' . $this->search . '%')
+                        ->orWhere('state', 'like', '%' . $this->search . '%')
+                        ->orWhere('zip', 'like', '%' . $this->search . '%')
+                        ->orWhere('country', 'like', '%' . $this->search . '%');
                 })
                 ->latest()
                 ->take($this->limit)
                 ->get();
         });
+
+        // Tambahkan cache key ke list tracking
+        $existingKeys = Cache::get($this->cacheKeysKey, []);
+        if (!in_array($cacheKey, $existingKeys)) {
+            $existingKeys[] = $cacheKey;
+            Cache::put($this->cacheKeysKey, $existingKeys, $this->ttl);
+        }
+
     }
     
 
@@ -222,41 +231,30 @@ class Supplier extends Component
     // Fungsi untuk memperbarui cache supplier
     protected function refreshCache()
     {
-        // Refresh total suppliers 
         Cache::put('totalSuppliers', ModelsSupplier::count(), $this->ttl);
-    
-        // Refresh cache supplier sesuai pencarian
-        $cacheKey = "suppliers_{$this->search}_{$this->limit}";
-        Cache::put($cacheKey, ModelsSupplier::where(function ($query) {
-            $query->where('name', 'like', '%' . $this->search . '%')
-                  ->orWhere('email', 'like', '%' . $this->search . '%')
-                  ->orWhere('phone', 'like', '%' . $this->search . '%')
-                  ->orWhere('address', 'like', '%' . $this->search . '%')
-                  ->orWhere('city', 'like', '%' . $this->search . '%')
-                  ->orWhere('state', 'like', '%' . $this->search . '%')
-                  ->orWhere('zip', 'like', '%' . $this->search . '%')
-                  ->orWhere('country', 'like', '%' . $this->search . '%');
-        })
-        ->latest()
-        ->take($this->limit)
-        ->get(), $this->ttl);
+
+        $keys = Cache::get($this->cacheKeysKey, []);
+        foreach ($keys as $key) {
+            Cache::forget($key);
+        }
+
+        Cache::forget($this->cacheKeysKey);
     }
+
     
     // Fungsi untuk menghapus cache supplier yang dihapus
     protected function removeCache()
     {
-        $cacheKey = "suppliers_{$this->search}_{$this->limit}";
-
-        // Hapus cache supplier yang dihapus
-        if (Cache::has($cacheKey)) {
-            Cache::forget($cacheKey);
+        // Hapus semua key cache supplier
+        $keys = Cache::get($this->cacheKeysKey, []);
+        foreach ($keys as $key) {
+            Cache::forget($key);
         }
 
-        // Hapus cache total supplier
-        if (Cache::has('totalSuppliers')) {
-            Cache::forget('totalSuppliers');
-        }
+        Cache::forget('totalSuppliers');
+        Cache::forget($this->cacheKeysKey);
     }
+
     public function render()
     {
         return view('livewire.dashboard.supplier');
