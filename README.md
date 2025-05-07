@@ -6,6 +6,7 @@ Sistem kasir modern berbasis Laravel, Livewire, AlpineJs dan TailwindCSS.
 
 - Dashboard Interaktif
 - Manajemen Produk
+- Manajemen Supplier
 - Manajemen User
 - Manajemen Role
 - Order & Transaksi
