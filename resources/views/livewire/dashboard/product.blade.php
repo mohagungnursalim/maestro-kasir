@@ -136,14 +136,15 @@
                                 {{-- Tampilkan data asli setelah dimuat --}}
                                 @forelse ($products as $product)
                                 <tr class="bg-white border-b hover:bg-gray-300 text-gray-900">
-                                    <th scope="row" class="flex items-center px-6 py-4 whitespace-nowrap">
-                                        <div class="image flex items-center px-6 py-4">
+                                    <th scope="row" class="px-6 py-4 whitespace-nowrap">
+                                        <div class="flex justify-center items-center h-full w-full">
                                             @if ($product->image)
-                                            <img src="{{ asset('storage/' . $product->image) }}"
-                                                class="lazy-img w-10 h-10 rounded-full">
+                                                <img src="{{ asset('storage/' . $product->image) }}"
+                                                     class="lazy-img w-10 h-10 rounded-full object-cover">
                                             @endif
                                         </div>
                                     </th>
+                                    
                                     <td scope="row" class="px-6 py-4 font-medium text-gray-900">
                                         {{ $product->name }}
                                     </td>
