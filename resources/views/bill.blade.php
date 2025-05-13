@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Struk Pembayaran</title>
+    <title>Bill Pembayaran</title>
     <style>
         body {
             font-family: 'Courier New', monospace;
@@ -15,17 +15,17 @@
             padding: 0;
         }
 
-        .receipt {
+        .bill {
             padding: 5px;
             text-align: center;
         }
 
-        .receipt h2 {
+        .bill h2 {
             margin: 0;
             font-size: 13px;
         }
 
-        .receipt p {
+        .bill p {
             margin: 2px 0;
         }
 
@@ -101,7 +101,7 @@
 
     </script>
 
-    <div class="receipt">
+    <div class="bill">
         @if ($settings->store_logo)
         <img src="{{ asset($settings->store_logo) }}" alt="{{ $settings->store_name }}" class="logo">
         @endif
@@ -109,25 +109,19 @@
         <h2>{{ $settings->store_name }}</h2>
         <p>{{ $settings->store_address }}</p>
         <p>Telp: {{ $settings->store_phone }}</p>
-        <p>Tanggal: {{ now()->format('d-m-Y H:i') }}</p>
-        <p>Kasir: {{ $order->user->name ?? 'Tidak Diketahui' }}</p>
-        <p>Kode Order: {{ $order->order_number }}</p>
+        <p>Tanggal: {{ $billData['tanggal'] }}</p>
+        <p>Kasir: {{ $billData['kasir'] }}</p>
+        <p>Kode Order: {{ $billData['order_number'] }}</p>
 
         <div class="line"></div>
 
-        @php
-            $subtotal = $order->transactionDetails->sum(function ($detail) {
-            return $detail->price * $detail->quantity;
-            });
-        @endphp
-
         <table>
             <tbody>
-                @foreach ($order->transactionDetails as $detail)
+                @foreach ($billData['items'] as $item)
                 <tr>
-                    <td>{{ $detail->product->name }}</td>
-                    <td class="right">{{ $detail->quantity }}x</td>
-                    <td class="right">{{ number_format($detail->price, 0, ',', '.') }}</td>
+                    <td>{{ $item['name'] }}</td>
+                    <td class="right">{{ $item['qty'] }}x</td>
+                    <td class="right">{{ number_format($item['price'], 0, ',', '.') }}</td>
                 </tr>
                 @endforeach
             </tbody>
@@ -138,48 +132,39 @@
         <table>
             <tr>
                 <td>Subtotal</td>
-                <td class="right">{{ number_format($subtotal, 0, ',', '.') }}</td>
+                <td class="right">{{ number_format($billData['subtotal'], 0, ',', '.') }}</td>
             </tr>
 
             @php
-            $hargaAwal = $order->grandtotal + $order->discount - $order->tax;
-            $hargaSetelahDiskon = $hargaAwal - $order->discount;
+            $hargaAwal = $billData['total'] + $billData['discount'] - $billData['tax'];
+            $hargaSetelahDiskon = $hargaAwal - $billData['discount'];
 
-            $taxPercentage = $hargaSetelahDiskon > 0 ? ($order->tax / $hargaSetelahDiskon) * 100 : 0;
-            $discountPercentage = $hargaAwal > 0 ? ($order->discount / $hargaAwal) * 100 : 0;
+            $taxPercentage = $hargaSetelahDiskon > 0 ? ($billData['tax'] / $hargaSetelahDiskon) * 100 : 0;
+            $discountPercentage = $hargaAwal > 0 ? ($billData['discount'] / $hargaAwal) * 100 : 0;
             @endphp
-
 
             @if ($taxPercentage)
             <tr>
                 <td>PPN ({{ number_format($taxPercentage, 0) }}%)</td>
-                <td class="right">{{ number_format($order->tax, 0, ',', '.') }}</td>
+                <td class="right">{{ number_format($billData['tax'], 0, ',', '.') }}</td>
             </tr>
             @endif
 
             @if ($discountPercentage)
             <tr>
                 <td>Diskon ({{ number_format($discountPercentage, 0) }}%)</td>
-                <td class="right">{{ number_format($order->discount, 0, ',', '.') }}</td>
+                <td class="right">{{ number_format($billData['discount'], 0, ',', '.') }}</td>
             </tr>
             @endif
 
             <tr class="total">
                 <td>Total Bayar</td>
-                <td class="right">{{ number_format($order->grandtotal, 0, ',', '.') }}</td>
-            </tr>
-            <tr>
-                <td>Uang Pelanggan</td>
-                <td class="right">{{ number_format($order->customer_money, 0, ',', '.') }}</td>
-            </tr>
-            <tr>
-                <td>Kembalian</td>
-                <td class="right">{{ number_format($order->change, 0, ',', '.') }}</td>
+                <td class="right">{{ number_format($billData['total'], 0, ',', '.') }}</td>
             </tr>
         </table>
 
         <div class="line"></div>
-        <p>{{ $settings->store_footer }}</p>
+
     </div>
     <div class="powered-by">
         <p>Powered by <a href="" target="_blank">Maestro-POS</a></p>

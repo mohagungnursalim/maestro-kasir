@@ -202,6 +202,48 @@ class Order extends Component
         }
     }
 
+    // Proses Bill
+    public function billPayment()
+    {
+        if (empty($this->cart)) {
+            $this->dispatch('nullPaymentSelected');
+            return;
+        }
+
+        $billData = [
+            'tanggal' => now()->format('d-m-Y H:i'),
+            'kasir' => Auth::user()->name ?? 'Owner',
+            'order_number' => 'ORD/' . now()->format('dmY') . '/' . Str::random(6),
+            'items' => [],
+            'subtotal' => 0,
+            'discount' => $this->discount,
+            'tax' => $this->tax,
+            'total' => $this->total,
+        ];
+
+        $subtotal = 0;
+        foreach ($this->cart as $item) {
+            $total = $item['price'] * $item['quantity'];
+            $subtotal += $total;
+
+            $billData['items'][] = [
+                'name' => $item['name'],
+                'qty' => $item['quantity'],
+                'price' => $item['price'],
+                'total' => $total,
+            ];
+        }
+
+        $billData['subtotal'] = $subtotal;
+
+        // Simpan sementara di cache (5 menit cukup)
+        cache()->put('bill-preview:' . Auth::id(), $billData, now()->addMinutes(5));
+
+        // Dispatch JS untuk buka tab baru
+        $this->dispatch('showBillPrintPopup', route('order.bill'));
+        
+    }
+
     // Proses Order
     public function processOrder()
     {

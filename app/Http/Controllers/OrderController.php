@@ -13,4 +13,17 @@ class OrderController extends Controller
         
         return view('receipt', compact('order'));
     }
+
+    public function bill()
+    {
+        // Ambil dari cache/session
+        $billData = cache()->get('bill-preview:' . auth()->id());
+
+        if (!$billData) {
+            abort(404, 'Data bill tidak ditemukan');
+        }
+
+        return view('bill', compact('billData'));
+    }
+
 }

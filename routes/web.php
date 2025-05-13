@@ -26,14 +26,18 @@ Route::get('/dashboard', Dashboard::class)
     ->middleware(['auth'])
     ->name('dashboard');
 
-Route::get('/dashboard/orders', Order::class)
+Route::get('/dashboard/order-bill', [OrderController::class, 'bill'])
     ->middleware(['auth'])
-    ->name('orders');
+    ->name('order.bill');
 
 Route::get('/dashboard/order-receipt/{orderId}', [OrderController::class, 'receipt'])
     ->middleware(['auth'])
     ->name('order.receipt');
 
+Route::get('/dashboard/orders', Order::class)
+    ->middleware(['auth'])
+    ->name('orders');   
+    
 Route::get('/dashboard/transactions' , Transaction::class)
     ->middleware(['auth'])
     ->name('transactions');

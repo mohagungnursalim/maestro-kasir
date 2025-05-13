@@ -224,6 +224,51 @@
                             @endforeach
                             @endif
                         </div>
+                        <!-- Tombol Konfirmasi -->
+                        @if (!empty($cart))
+                        <div class="flex justify-center mt-6">
+                            <button 
+                                x-data 
+                                @click="$dispatch('open-print-preview')" 
+                                class="px-4 py-2 bg-blue-600 text-white font-semibold rounded-md block text-white bg-gray-700 hover:bg-gray-800  transition">
+                                Cetak Tagihan/Tiket
+                            </button>
+                        </div>
+                        @endif
+
+                        <!-- Modal Konfirmasi -->
+                        <div 
+                        x-data="{ show: false }" 
+                        x-on:open-print-preview.window="show = true" 
+                        x-show="show" 
+                        class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50"
+                        x-cloak>
+                        <div class="bg-white p-6 rounded-md w-96 shadow-lg">
+                            <h2 class="text-lg font-bold mb-4 text-gray-800">Konfirmasi</h2>
+                            <p class="text-gray-600 mb-4">Ingin cetak tagihan di tab baru?</p>
+
+                            <div class="flex justify-center space-x-2">
+
+                                {{-- Batal Cetak --}}
+                                <button 
+                                    @click="show = false" 
+                                    class="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400">
+                                    Batal
+                                </button>
+                            
+                                {{-- Tombol Cetak --}}
+                                <button 
+                                    wire:click="billPayment"
+                                    wire:loading.attr="disabled"
+                                    @click="show = false"
+                                    class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700">
+                                    Cetak
+                                </button>
+                            </div>                            
+                            
+                        </div>
+                        </div>
+
                     </div>
 
 
@@ -496,7 +541,13 @@
                 alert("Popup blocked! Please allow popups for this site.");
             }
         });
+    </script>
 
+    <script>
+        window.addEventListener('showBillPrintPopup', event => {
+            const url = event.detail;
+            window.open(url, '_blank', 'width=640,height=600');
+        });
     </script>
 
 </div>
