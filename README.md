@@ -13,7 +13,7 @@ Sistem kasir modern berbasis Laravel, Livewire, AlpineJs dan TailwindCSS.
 - Filter berdasarkan kasir/admin/owner
 - Export laporan PDF & Excel
 
-## 🛠️ Instalasi
+## 🛠️ Instalasi Local
 
 ```bash
 
