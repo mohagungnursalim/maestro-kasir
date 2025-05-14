@@ -212,6 +212,7 @@ class Product extends Component
 
         $this->dispatch('productUpdated');
         $this->dispatch('addedSuccess');
+        $this->dispatch('resetUnitSelection');
     }
     
     public function editModal($id)

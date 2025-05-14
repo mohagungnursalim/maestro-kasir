@@ -15,8 +15,15 @@ class Unit extends Component
 
     protected $listeners = [
         'refreshUnits' => 'loadUnits',
-        'setUnit' => 'setSelectedUnit'
+        'setUnit' => 'setSelectedUnit',
+        'resetUnitSelection' => 'resetSelection'
     ];
+    
+
+    public function resetSelection()
+    {
+        $this->selectedUnit = null;
+    }
     
 
     public function mount($defaultUnit = null, $mode = 'create')
