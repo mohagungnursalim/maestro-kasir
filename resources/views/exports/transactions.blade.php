@@ -144,7 +144,7 @@
     
     
     <div style="margin-top: 20px; text-align: right; font-weight: bold; font-size: 18px;">
-        <p style="margin: 0;">Total Pendapatan:</p>
+        <p style="margin: 0;">Total Omset:</p>
         <p style="margin: 0; font-size: 18px;">Rp{{ number_format($grandTotal, 0, ',', '.') }}</p>
     </div>
     
