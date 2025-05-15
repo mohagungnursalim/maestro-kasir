@@ -12,32 +12,31 @@ class AdminSeeder extends Seeder
 {
     public function run()
     {
-        // Pastikan role "admin" ada
-        $adminRole = Role::where('name', 'admin')->first();
+        // Pastikan role "owner" ada
+        $ownerRole = Role::where('name', 'owner')->first();
 
-        if (!$adminRole) {
-            $this->command->error('❌ Role "admin" belum ada! Jalankan RolePermissionSeeder dulu.');
+        if (!$ownerRole) {
+            $this->command->error('❌ Role "owner" belum ada! Jalankan RolePermissionSeeder dulu.');
             return;
         }
 
-        // Buat akun admin jika belum ada
-        $admin = User::firstOrCreate(
-            ['email' => 'admin@pos.com'],
+        // Buat akun owner jika belum ada
+        $owner = User::firstOrCreate(
+            ['email' => 'owner@gmail.com'],
             [
-                'name' => 'Administrator',
-                'password' => Hash::make('admin123'), // Ganti dengan password yang aman!
+                'name' => 'Owner',
+                'password' => Hash::make('owner123'), // Ganti dengan password yang aman!
             ]
         );
 
-        // Auto-assign role admin jika belum ada
-        if (!$admin->hasRole('admin')) {
-            $admin->assignRole('admin');
-            $this->command->info('✅ Admin berhasil di-assign ke role "admin"!');
+        // Auto-assign role owner jika belum ada
+        if (!$owner->hasRole('owner')) {
+            $owner->assignRole('owner');
+            $this->command->info('✅ Owner berhasil di-assign ke role "owner"!');
         } else {
-            $this->command->info('🔹 Admin sudah memiliki role "admin".');
+            $this->command->info('🔹 Owner sudah memiliki role "owner".');
         }
 
-        $this->command->info('✅ Akun admin berhasil dibuat! Email: admin@pos.com | Password: admin123');
 
         // **Tambahkan data toko jika belum ada**
         StoreSetting::firstOrCreate(
