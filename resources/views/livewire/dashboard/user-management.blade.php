@@ -22,6 +22,8 @@
             @enderror
         </div>
 
+        {{-- Tampilkan field password jika dalam mode edit saja --}}
+        @if($isEditMode == true) 
         <!-- Input Password -->
         <div class="flex flex-col">
             <input id="password" name="password" wire:model="password" type="password" placeholder="Password (Opsional)"
@@ -30,6 +32,7 @@
             <span class="text-red-500 text-sm mt-1">{{ $message }}</span>
             @enderror
         </div>
+        @endif
 
         <!-- Select Role -->
         <div class="flex flex-col">
@@ -119,7 +122,7 @@
         </tbody>
     </table>
 
-    {{-- Konfirmasi Hapus --}}
+    {{-- Konfirmasi Hapus Akun --}}
     <script>
         document.addEventListener('livewire:navigated', () => {
             Livewire.on('showDeleteConfirmation', () => {
@@ -139,7 +142,74 @@
                 });
             });
         });
+    </script>
 
+    {{-- Alert tidak bisa Edit Diri Sendiri --}}
+    <script>
+        document.addEventListener('livewire:navigated', () => {
+            Livewire.on('showErrorCannotEditSelf', () => {
+                Swal.fire({
+                    title: 'Error',
+                    text: 'Tidak dapat mengedit akun sendiri, silahkan ke halaman profil.',
+                    icon: 'error',
+                    showCancelButton: true,
+                    showConfirmButton: false,
+                    cancelButtonColor: '#3085d6',
+                    cancelButtonText: 'Tutup'
+                });
+            });
+        });
+    </script>
+
+    {{-- Alert tidak bisa Edit Sesama Admin --}}
+    <script>
+        document.addEventListener('livewire:navigated', () => {
+            Livewire.on('showErrorCannotEditAdmin', () => {
+                Swal.fire({
+                    title: 'Error',
+                    text: 'Tidak dapat mengedit sesama akun admin.',
+                    icon: 'error',
+                    showCancelButton: true,
+                    showConfirmButton: false,
+                    cancelButtonColor: '#3085d6',
+                    cancelButtonText: 'Tutup'
+                });
+            });
+        });
+    </script>
+
+    {{-- Alert tidak bisa Hapus Diri Sendiri --}}
+    <script>
+        document.addEventListener('livewire:navigated', () => {
+            Livewire.on('showErrorCannotDeleteSelf', () => {
+                Swal.fire({
+                    title: 'Error',
+                    text: 'Tidak dapat menghapus akun sendiri.',
+                    icon: 'error',
+                    showCancelButton: true,
+                    showConfirmButton: false,
+                    cancelButtonColor: '#3085d6',
+                    cancelButtonText: 'Tutup'
+                });
+            });
+        });
+    </script>
+
+    {{-- Alert tidak bisa Hapus Sesama Admin --}}
+    <script>
+        document.addEventListener('livewire:navigated', () => {
+            Livewire.on('showErrorCannotDeleteAdmin', () => {
+                Swal.fire({
+                    title: 'Error',
+                    text: 'Tidak dapat menghapus sesama akun admin.',
+                    icon: 'error',
+                    showCancelButton: true,
+                    showConfirmButton: false,
+                    cancelButtonColor: '#3085d6',
+                    cancelButtonText: 'Tutup'
+                });
+            });
+        });
     </script>
 
     {{-- Toast--}}
