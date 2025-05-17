@@ -151,7 +151,7 @@
                                     <td class="px-6 py-4 text-center">{{ $product->sku }}</td>
                                     <td class="px-6 py-4 text-center">{{ $product->supplier_name }}</td>
                                     <td class="px-6 py-4 text-center">
-                                        Rp{{ number_format($product->price, 0, ',', '.') }}</td>
+                                        Rp{{ number_format($product->price, 2, ',', '.') }}</td>
                                     <td class="px-6 py-4 text-center">{{ $product->stock }}</td>
                                     <td class="px-6 py-4 text-center">{{ $product->unit }}</td>
                                     <td class="px-6 py-4">

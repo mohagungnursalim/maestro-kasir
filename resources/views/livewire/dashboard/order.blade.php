@@ -59,7 +59,7 @@
                                     <!-- Price -->
                                     <div class="flex justify-between items-center">
                                         <span class="text-sm sm:text-base font-bold text-gray-900">
-                                            Rp{{ number_format($product->price, 0, ',', '.') }}
+                                            Rp{{ number_format($product->price, 2, ',', '.') }}
                                         </span>
 
                                         <!-- Stock Badge -->
@@ -215,8 +215,8 @@
 
                                         <div class="text-end md:order-4 md:w-32">
                                             <p class="text-base font-bold text-gray-900">
-                                                Rp{{ number_format($item['price'] * $item['quantity'], 0, ',', '.') }}
-                                            </p>
+                                                Rp{{ number_format($item['price'] * $item['quantity'], 2, ',', '.') }}
+                                            </p>                                            
                                         </div>
                                     </div>
                                 </div>
@@ -324,7 +324,7 @@
                                         <dt class="text-gray-500">PPN (<span
                                                 x-text="useTax ? taxPercentage : 0"></span>%)</dt>
                                         @if (!empty($cart)) <span
-                                            class="font-bold p-2 text-red-500 border border-gray-300 rounded-lg bg-gray-50 text-xs">Rp{{ number_format($tax, 0, ',', '.') }}</span>
+                                            class="font-bold p-2 text-red-500 border border-gray-300 rounded-lg bg-gray-50 text-xs">Rp{{ number_format($tax, 2, ',', '.') }}</span>
                                         @endif
                                     </dl>
 
@@ -387,7 +387,7 @@
                                         @if (!empty($cart)) <span
                                             class="font-bold p-2 text-gray-900 border border-gray-300 rounded-lg bg-gray-50 text-xs">
                                             @if($discount_type == 'percentage') Diskon {{ $discount_value }}%
-                                            @else Diskon Rp{{ number_format($discount_value, 0, ',', '.') }}
+                                            @else Diskon Rp{{ number_format($discount_value, 2, ',', '.') }}
                                             @endif</span>
                                         @endif
                                     </dl>
@@ -451,7 +451,7 @@
                                 <dl class="flex justify-between">
                                     <dt class="text-gray-500">Sub Total</dt>
                                     @if (!empty($cart)) <span
-                                        class="font-bold p-2 text-gray-900 border border-gray-300 rounded-lg bg-gray-50 text-xs">Rp{{ number_format($subtotal, 0, ',', '.') }}</span>
+                                        class="font-bold p-2 text-gray-900 border border-gray-300 rounded-lg bg-gray-50 text-xs">Rp{{ number_format($subtotal, 2, ',', '.') }}</span>
                                     @endif
                                 </dl>
 
@@ -459,7 +459,7 @@
                                 <dl class="flex justify-between border-t pt-2">
                                     <dt class="font-bold text-gray-900">Total Bayar</dt>
                                     @if (!empty($cart)) <span
-                                        class="font-bold p-2 text-gray-900 border border-blue-300 rounded-lg bg-blue-50 text-xs">Rp{{ number_format($total, 0, ',', '.') }}</span>
+                                        class="font-bold p-2 text-gray-900 border border-blue-300 rounded-lg bg-blue-50 text-xs">Rp{{ number_format($total, 2, ',', '.') }}</span>
                                     @endif
                                 </dl>
 
@@ -467,7 +467,7 @@
                                 <dl class="flex justify-between">
                                     <dt class="font-bold text-gray-900">Uang Kembali</dt>
                                     @if (!empty($cart)) <span
-                                        class="font-bold p-2 text-gray-900 border border-green-300 rounded-lg bg-green-50 text-xs">Rp{{ number_format($change, 0, ',', '.') }}</span>
+                                        class="font-bold p-2 text-gray-900 border border-green-300 rounded-lg bg-green-50 text-xs">Rp{{ number_format($change, 2, ',', '.') }}</span>
                                     @endif
                                 </dl>
                             </div>

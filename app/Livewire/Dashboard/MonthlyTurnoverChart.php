@@ -34,8 +34,9 @@ class MonthlyTurnoverChart extends Component
         $this->monthlyTurnover = array_fill(0, 12, 0);
 
         foreach ($results as $result) {
-            $this->monthlyTurnover[$result->month - 1] = (float) $result->total;
-        }
+            $this->monthlyTurnover[$result->month - 1] = (float) decimal($result->total);
+        } 
+        
     }
 
     public function render()

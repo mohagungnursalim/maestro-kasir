@@ -216,13 +216,13 @@
                                         </td>
               
                                         <td class="px-6 py-4 text-right font-bold">
-                                            Rp{{ number_format($orderTransactions[0]->customer_money, 0,',','.') ?? '-' }}
+                                            Rp{{ number_format($orderTransactions[0]->customer_money, 2,',','.') ?? '-' }}
                                         </td>
                                         <td class="px-6 py-4 text-right font-bold">
-                                            Rp{{ number_format($orderTransactions[0]->change, 0,',','.') ?? '-' }}
+                                            Rp{{ number_format($orderTransactions[0]->change, 2,',','.') ?? '-' }}
                                         </td>
                                         <td class="px-6 py-4 text-right font-bold">
-                                            Rp{{ number_format($orderTransactions[0]->grand_total, 0, ',', '.') ?? '-' }}
+                                            Rp{{ number_format($orderTransactions[0]->grand_total, 2, ',', '.') ?? '-' }}
                                         </td>
                                         <td class="px-6 py-4 text-center font-bold">
                                             {{ $orderTransactions[0]->order_date ?? '-' }}
@@ -234,9 +234,9 @@
                                             <td class="px-6 py-4"></td>
                                             <td class="px-6 py-4">{{ $transaction->product_name ?? '-' }}</td>
                                             <td class="px-6 py-4 text-center">{{ $transaction->quantity ?? '-' }}</td>
-                                            <td class="px-6 py-4 text-right">Rp{{ number_format($transaction->price, 0, ',', '.') ?? '-' }}</td>
+                                            <td class="px-6 py-4 text-right">Rp{{ number_format($transaction->price, 2, ',', '.') ?? '-' }}</td>
                                             <td class="px-6 py-4 text-right">
-                                                Rp{{ number_format($transaction->quantity * $transaction->price, 0, ',', '.') ?? '-' }}
+                                                Rp{{ number_format($transaction->quantity * $transaction->price, 2, ',', '.') ?? '-' }}
                                             </td>
                                             <td colspan="7"></td>
                                         </tr>

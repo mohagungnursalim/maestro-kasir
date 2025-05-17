@@ -118,7 +118,7 @@
                         <td></td>
                         <td>{{ $transaction->product->name ?? '-' }}</td>
                         <td class="center">{{ $transaction->quantity }}</td>
-                        <td class="center">Rp{{ number_format($transaction->product->price, 0, ',', '.') }}</td>
+                        <td class="center">Rp{{ number_format($transaction->product->price, 2, ',', '.') }}</td>
                         <td></td>
                         <td></td>
                         <td></td>
@@ -126,16 +126,16 @@
                 @endforeach
     
                 <tr>
-                    <td colspan="7" class="bold center">Subtotal: Rp{{ number_format($subtotal, 0, ',', '.') }}</td>
+                    <td colspan="7" class="bold center">Subtotal: Rp{{ number_format($subtotal, 2, ',', '.') }}</td>
                 </tr>
                 <tr>
-                    <td colspan="7" class="bold center">Total Bayar: Rp{{ number_format($totalPay, 0, ',', '.') }}</td>
+                    <td colspan="7" class="bold center">Total Bayar: Rp{{ number_format($totalPay, 2, ',', '.') }}</td>
                 </tr>
                 <tr>
                     <td colspan="7" class="bold center">Uang Pelanggan: Rp{{ number_format($first->order->customer_money ?? 0, 0, ',', '.') }}</td>
                 </tr>
                 <tr>
-                    <td colspan="7" class="bold center">Kembalian: Rp{{ number_format($first->order->change ?? 0, 0, ',', '.') }}</td>
+                    <td colspan="7" class="bold center">Kembalian: Rp{{ number_format($first->order->change ?? 2, 0, ',', '.') }}</td>
                 </tr>
             @endforeach
         </tbody>
@@ -145,7 +145,7 @@
     
     <div style="margin-top: 20px; text-align: right; font-weight: bold; font-size: 18px;">
         <p style="margin: 0;">Total Omset:</p>
-        <p style="margin: 0; font-size: 18px;">Rp{{ number_format($grandTotal, 0, ',', '.') }}</p>
+        <p style="margin: 0; font-size: 18px;">Rp{{ number_format($grandTotal, 2, ',', '.') }}</p>
     </div>
     
 </body>

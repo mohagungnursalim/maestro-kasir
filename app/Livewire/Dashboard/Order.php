@@ -124,7 +124,7 @@ class Order extends Component
     public function updatedDiscountValue($value)
     {
         // Pastikan nilai tetap 0 jika input kosong
-        $this->discount_value = $value === '' ? 0 : (float) $value;
+        $this->discount_value = $value === '' ? 0 : decimal($value);
         $this->calculateTotal();
     }
 
@@ -264,8 +264,8 @@ class Order extends Component
             return;
         }
 
-        $customerMoney = (float) $this->customerMoney;
-        $total = (float) $this->total;
+        $customerMoney = decimal($this->customerMoney);
+        $total = decimal($this->total);
 
         if ($this->payment_method === 'cash') {
             if ($customerMoney < $total) {
