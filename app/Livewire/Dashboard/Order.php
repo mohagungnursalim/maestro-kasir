@@ -101,7 +101,6 @@ class Order extends Component
     }
     
 
-    
     // Perbarui metode pembayaran
     public function updatedPaymentMethod($value)
     {
@@ -244,32 +243,31 @@ class Order extends Component
         
     }
 
-    // Proses Order
+    // Proses Order 
     public function processOrder()
     {
-        $userKey = 'order-process:user-' . Auth::id(); // Key unik per user
-        $maxAttempts = 5; // Maksimal 5 request dalam 2 detik
-        $decaySeconds = 2; // Reset setelah 2 detik
+        $userKey = 'order-process:user-' . Auth::id(); 
+        $maxAttempts = 5; 
+        $decaySeconds = 2; 
 
         if (RateLimiter::tooManyAttempts($userKey, $maxAttempts)) {
             $this->dispatch('errorPayment', 'Terlalu banyak permintaan, coba lagi dalam 2 detik.');
             return;
         }
-
         RateLimiter::hit($userKey, $decaySeconds);
-
 
         if (empty($this->cart)) {
             $this->dispatch('nullPaymentSelected');
             return;
         }
 
+        // Pastikan input customerMoney & total decimal string
         $customerMoney = decimal($this->customerMoney);
         $total = decimal($this->total);
 
         if ($this->payment_method === 'cash') {
-            if ($customerMoney < $total) {
-                $shortage = $total - $customerMoney;
+            if (bccomp($customerMoney, $total, 2) === -1) {
+                $shortage = bcsub($total, $customerMoney, 2);
                 $this->dispatch('insufficientPayment', $shortage);
                 return;
             }
@@ -277,17 +275,14 @@ class Order extends Component
             $this->customerMoney = $total;
         }
 
-
         DB::beginTransaction();
         try {
             $productUpdates = [];
             $insufficientProducts = [];
 
-            //Ambil semua produk dalam satu query
             $productIds = collect($this->cart)->pluck('id');
             $products = Product::with('supplier')->whereIn('id', $productIds)->get()->keyBy('id');
 
-            //Periksa stok sebelum memproses order
             foreach ($this->cart as $item) {
                 if (!isset($products[$item['id']]) || $products[$item['id']]->stock < $item['quantity']) {
                     $insufficientProducts[] = $products[$item['id']]->name ?? 'Produk Tidak Ditemukan';
@@ -302,84 +297,96 @@ class Order extends Component
 
             $this->calculateChange();
 
-            //Simpan data order (tanpa detail produk)
+            // Hitung total sebelum diskon dengan bc math
+            $totalBeforeDiscount = '0';
+            foreach ($this->cart as $item) {
+                $itemPrice = decimal($item['price']);
+                $itemQuantity = (string) $item['quantity'];
+                $itemTotal = bcmul($itemPrice, $itemQuantity, 2);
+                $totalBeforeDiscount = bcadd($totalBeforeDiscount, $itemTotal, 2);
+            }
+
+            $discount = decimal($this->discount);
+
+            // Simpan order
             $order = ModelsOrder::create([
                 'user_id' => Auth::user()->id,
                 'order_number' => 'ORD/' . now()->format('dmY') . '/' . Str::random(6),
                 'payment_method' => $this->payment_method,
                 'tax' => $this->tax,
-                'discount' => $this->discount,
-                'customer_money' => $this->customerMoney,
-                'change' => $this->change,
-                'grandtotal' => $this->total,
+                'discount' => $discount,
+                'customer_money' => $customerMoney,
+                'change' => '0', // sementara, update nanti
+                'grandtotal' => $total,
             ]);
 
-            $totalBeforeDiscount = collect($this->cart)->sum(fn($item) => $item['price'] * $item['quantity']);
-            $discount = $this->discount;
-
             $transactionDetails = [];
+            $sumSubtotal = '0';
+
             foreach ($this->cart as $item) {
-                $itemTotal = $item['price'] * $item['quantity'];
-            
-                // Bagi diskon secara proporsional (biar adil sesuai harga masing-masing item)
-                $itemDiscount = ($totalBeforeDiscount > 0)
-                    ? ($itemTotal / $totalBeforeDiscount) * $discount
-                    : 0;
-            
-                $itemSubtotal = $itemTotal - $itemDiscount;
-            
+                $itemPrice = decimal($item['price']);
+                $itemQuantity = (string) $item['quantity'];
+                $itemTotal = bcmul($itemPrice, $itemQuantity, 2);
+
+                // Diskon proporsional
+                $itemDiscount = '0';
+                if (bccomp($totalBeforeDiscount, '0', 2) === 1) {
+                    $ratio = bcdiv($itemTotal, $totalBeforeDiscount, 10);
+                    $itemDiscount = bcmul($ratio, $discount, 2);
+                }
+
+                $itemSubtotal = bcsub($itemTotal, $itemDiscount, 2);
+                $sumSubtotal = bcadd($sumSubtotal, $itemSubtotal, 2);
+
                 $transactionDetails[] = [
                     'order_id' => $order->id,
                     'product_id' => $item['id'],
-                    'quantity' => $item['quantity'],
-                    'price' => $item['price'],
-                    'subtotal' => round($itemSubtotal), // Setelah diskon, dibulatkan
+                    'quantity' => $itemQuantity,
+                    'price' => $itemPrice,
+                    'subtotal' => $itemSubtotal,
                     'created_at' => now(),
                     'updated_at' => now(),
                 ];
-            
+
                 $productUpdates[$item['id']] = $item['quantity'];
             }
-            
 
-                // Gunakan batch insert
-                TransactionDetail::insert($transactionDetails);
+            TransactionDetail::insert($transactionDetails);
 
-
-
+            // Update stock & sold_count
             $updateQuery = "UPDATE products SET stock = CASE";
-            $updateSoldCount = ", sold_count = CASE"; // Gabungkan update stock & sold_count
-            
+            $updateSoldCount = ", sold_count = CASE";
             foreach ($productUpdates as $productId => $quantity) {
                 $updateQuery .= " WHEN id = $productId THEN stock - $quantity";
-                $updateSoldCount .= " WHEN id = $productId THEN sold_count + $quantity"; 
+                $updateSoldCount .= " WHEN id = $productId THEN sold_count + $quantity";
             }
             $updateQuery .= " END" . $updateSoldCount . " END WHERE id IN (" . implode(',', array_keys($productUpdates)) . ")";
-            
             DB::statement($updateQuery);
-            
 
+            // Hitung kembalian dengan bc math
+            $change = bcsub($customerMoney, $total, 2);
+            $order->change = $change;
+            $order->save();
 
             DB::commit();
-            $this->refreshCacheStock(); //Refresh Cache stok produk
-            $this->refreshCacheTransactionDetail(); // Refresh Cache transaksi
 
-            //Dispatch event ke frontend
+            $this->refreshCacheStock();
+            $this->refreshCacheTransactionDetail();
+
             $this->dispatch('refreshProductStock');
             $this->dispatch('successPayment');
 
-            // Reset keranjang setelah pembayaran berhasil
             $this->resetCart();
-            
-            $this->dispatch('printReceipt', $order->id); // Print struk pembayaran
+
+            $this->dispatch('printReceipt', $order->id);
 
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error($e->getMessage());
-
             $this->dispatch('errorPayment');
         }
     }
+
 
     // Reset keranjang
     public function resetCart()

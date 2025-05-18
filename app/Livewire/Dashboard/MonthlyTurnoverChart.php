@@ -28,16 +28,17 @@ class MonthlyTurnoverChart extends Component
         }
 
         $results = $query->groupByRaw('MONTH(created_at)')
-                         ->orderBy('month')
-                         ->get();
+                        ->orderBy('month')
+                        ->get();
 
-        $this->monthlyTurnover = array_fill(0, 12, 0);
+        // Array string desimal agar konsisten
+        $this->monthlyTurnover = array_fill(0, 12, '0.00');
 
         foreach ($results as $result) {
             $this->monthlyTurnover[$result->month - 1] = (float) decimal($result->total);
         } 
-        
     }
+
 
     public function render()
     {

@@ -205,7 +205,7 @@
                                             @if ($taxPercentage)
                                                 <span class="text-xs text-gray-600">({{ number_format($taxPercentage) }}%)</span>
                                             @endif
-                                            Rp{{ number_format($order->tax, 0, ',', '.') }} 
+                                            Rp{{ number_format($order->tax, 2, ',', '.') }} 
                                         </td>
 
                                         <td class="px-6 py-4 text-right font-bold">
