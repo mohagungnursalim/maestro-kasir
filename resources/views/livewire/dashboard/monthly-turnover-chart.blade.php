@@ -41,14 +41,20 @@
                             y: {
                                 beginAtZero: true,
                                 ticks: {
-                                    callback: value => 'Rp ' + value.toLocaleString('id-ID')
+                                    callback: value => 'Rp ' + value.toLocaleString('id-ID', {
+                                        minimumFractionDigits: 2,
+                                        maximumFractionDigits: 2
+                                    })
                                 }
                             }
                         },
                         plugins: {
                             tooltip: {
                                 callbacks: {
-                                    label: ctx => 'Rp ' + ctx.raw.toLocaleString('id-ID')
+                                    label: ctx => 'Rp ' + ctx.raw.toLocaleString('id-ID', {
+                                        minimumFractionDigits: 2,
+                                        maximumFractionDigits: 2
+                                    })
                                 }
                             },
                             legend: {

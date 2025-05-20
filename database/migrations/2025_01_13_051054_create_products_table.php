@@ -17,7 +17,7 @@ return new class extends Migration
             $table->string('sku');
             $table->foreignId('supplier_id')->nullable();
             $table->string('image');
-            $table->decimal('price');
+            $table->decimal('price', 10, 2);
             $table->longText('description');
             $table->integer('stock')->default(0);
             $table->string('unit');

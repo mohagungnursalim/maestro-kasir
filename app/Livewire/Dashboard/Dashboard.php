@@ -26,21 +26,28 @@ class Dashboard extends Component
     public function updateStats()
     {
         $dates = $this->getDateRange($this->filterType);
+    
+        // Query orders (untuk total count)
         $queryOrders = Order::whereBetween('created_at', [$dates['start'], $dates['end']]);
-        $queryTransactions = TransactionDetail::whereBetween('created_at', [$dates['start'], $dates['end']]);
-
-        // Jika bukan admin & Owner, hanya ambil transaksi kasir yang login
+    
+        // Query transactions (untuk sales & quantity)
+        $queryTransactions = TransactionDetail::join('orders', 'transaction_details.order_id', '=', 'orders.id')
+            ->whereBetween('transaction_details.created_at', [$dates['start'], $dates['end']]);
+    
         if (!Auth::user()->hasRole('admin|owner')) {
             $queryOrders->where('user_id', Auth::id());
-            $queryTransactions->whereHas('order', function ($query) {
-                $query->where('user_id', Auth::id());
-            });
+            $queryTransactions->where('orders.user_id', Auth::id());
         }
-
+    
         $this->totalOrders = $queryOrders->count();
-        $this->totalSales = $queryOrders->sum('grandtotal');
-        $this->totalProductsSold = $queryTransactions->sum('quantity');
+    
+        // Gunakan sum(subtotal) untuk total penjualan bersih (tanpa diskon & pajak)
+        $this->totalSales = $queryTransactions->sum('transaction_details.subtotal');
+    
+        $this->totalProductsSold = $queryTransactions->sum('transaction_details.quantity');
     }
+    
+    
 
     // Mengambil rentang tanggal berdasarkan filter yang dipilih
     public function getDateRange($type)
