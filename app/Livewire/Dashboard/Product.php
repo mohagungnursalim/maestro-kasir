@@ -40,7 +40,7 @@ class Product extends Component
     // Search Product
     #[Url()]
     public $search = '';
-    public $limit = 4; 
+    public $limit = 8; 
     public $loaded = false;
 
     protected $listeners = [
@@ -140,7 +140,7 @@ class Product extends Component
             })
             ->orderByDesc('products.sold_count')
             ->skip($offset)
-            ->take($this->limit) // Ambil 4 data lagi
+            ->take($this->limit) // Ambil data lagi
             ->get();
     
         // Gabungkan data baru dengan data lama

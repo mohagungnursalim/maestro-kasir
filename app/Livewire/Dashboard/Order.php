@@ -17,7 +17,7 @@ class Order extends Component
 {
     public $search = ''; // Pencarian produk
     public $products = []; // Daftar produk
-    public $limitProducts = 4; // Batas produk yang ditampilkan
+    public $limitProducts = 8; // Batas produk yang ditampilkan
 
     public $payment_method = 'cash'; // Metode pembayaran default
     public $customerMoney = 0; // Uang pelanggan
