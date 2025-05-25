@@ -42,12 +42,14 @@
                                     {{ $isInCart ? 'opacity-75' : '' }} {{ $product->stock < 1 ? 'opacity-75' : '' }} flex flex-col">
 
                                     <!-- Product Image -->
-                                    <div class="relative pt-[100%]">
-                                        <img class="absolute inset-0 w-full h-full object-cover transition-all duration-300 hover:scale-105"
+                                    <div class="relative aspect-square overflow-hidden bg-gray-100">
+                                        <img
+                                            class="absolute inset-0 w-full h-full object-cover object-center transition-all duration-300 hover:scale-105"
                                             src="{{ asset('storage/' . $product->image) }}"
-                                            alt="{{ $product->name }}" loading="lazy"
+                                            alt="{{ $product->name }}"
+                                            loading="lazy"
                                             onerror="this.src='{{ asset('images/placeholder.png') }}'">
-                                    </div>
+                                    </div>                                    
 
                                     <!-- Product Details -->
                                     <div class="p-2 sm:p-3 flex-1 flex flex-col">
