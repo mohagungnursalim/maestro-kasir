@@ -125,10 +125,15 @@
             <tbody>
                 @foreach ($order->transactionDetails as $detail)
                 <tr>
-                    <td>{{ $detail->product->name }}</td>
-                    <td class="right">{{ $detail->quantity }}x</td>
-                    <td class="right">{{ number_format($detail->price, 0, ',', '.') }}</td>
+                    <td colspan="2">
+                        {{ $detail->product->name }}<br>
+                        <small class="text-gray-500">{{ $detail->quantity }}x Rp{{ number_format($detail->price, 2, ',', '.') }}</small>
+                    </td>
+                    <td class="text-right">
+                        Rp{{ number_format($detail->price * $detail->quantity, 2, ',', '.') }}
+                    </td>
                 </tr>
+                
                 @endforeach
             </tbody>
         </table>
@@ -138,7 +143,7 @@
         <table>
             <tr>
                 <td>Subtotal</td>
-                <td class="right">{{ number_format($subtotal, 0, ',', '.') }}</td>
+                <td class="right">{{ number_format($subtotal, 2, ',', '.') }}</td>
             </tr>
 
             @php
@@ -153,28 +158,28 @@
             @if ($taxPercentage)
             <tr>
                 <td>PPN ({{ number_format($taxPercentage, 0) }}%)</td>
-                <td class="right">{{ number_format($order->tax, 0, ',', '.') }}</td>
+                <td class="right">{{ number_format($order->tax, 2, ',', '.') }}</td>
             </tr>
             @endif
 
             @if ($discountPercentage)
             <tr>
                 <td>Diskon ({{ number_format($discountPercentage, 0) }}%)</td>
-                <td class="right">{{ number_format($order->discount, 0, ',', '.') }}</td>
+                <td class="right">{{ number_format($order->discount, 2, ',', '.') }}</td>
             </tr>
             @endif
 
             <tr class="total">
                 <td>Total Bayar</td>
-                <td class="right">{{ number_format($order->grandtotal, 0, ',', '.') }}</td>
+                <td class="right">{{ number_format($order->grandtotal, 2, ',', '.') }}</td>
             </tr>
             <tr>
                 <td>Uang Pelanggan</td>
-                <td class="right">{{ number_format($order->customer_money, 0, ',', '.') }}</td>
+                <td class="right">{{ number_format($order->customer_money, 2, ',', '.') }}</td>
             </tr>
             <tr>
                 <td>Kembalian</td>
-                <td class="right">{{ number_format($order->change, 0, ',', '.') }}</td>
+                <td class="right">{{ number_format($order->change, 2, ',', '.') }}</td>
             </tr>
         </table>
 

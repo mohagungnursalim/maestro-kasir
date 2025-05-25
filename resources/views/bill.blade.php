@@ -119,10 +119,15 @@
             <tbody>
                 @foreach ($billData['items'] as $item)
                 <tr>
-                    <td>{{ $item['name'] }}</td>
-                    <td class="right">{{ $item['qty'] }}x</td>
-                    <td class="right">{{ number_format($item['price'], 0, ',', '.') }}</td>
-                </tr>
+                    <td colspan="2">
+                        {{ $item['name'] }}<br>
+                        <small class="text-gray-500">{{ $item['qty'] }}x Rp{{ number_format($item['price'], 2, ',', '.') }}</small>
+                    </td>
+                    <td class="text-right">
+                        Rp{{ number_format($item['price'] * $item['qty'], 2, ',', '.') }}
+                    </td>
+                </tr>                
+                
                 @endforeach
             </tbody>
         </table>
@@ -132,7 +137,7 @@
         <table>
             <tr>
                 <td>Subtotal</td>
-                <td class="right">{{ number_format($billData['subtotal'], 0, ',', '.') }}</td>
+                <td class="right">{{ number_format($billData['subtotal'], 2, ',', '.') }}</td>
             </tr>
 
             @php
@@ -146,20 +151,20 @@
             @if ($taxPercentage)
             <tr>
                 <td>PPN ({{ number_format($taxPercentage, 0) }}%)</td>
-                <td class="right">{{ number_format($billData['tax'], 0, ',', '.') }}</td>
+                <td class="right">{{ number_format($billData['tax'], 2, ',', '.') }}</td>
             </tr>
             @endif
 
             @if ($discountPercentage)
             <tr>
                 <td>Diskon ({{ number_format($discountPercentage, 0) }}%)</td>
-                <td class="right">{{ number_format($billData['discount'], 0, ',', '.') }}</td>
+                <td class="right">{{ number_format($billData['discount'], 2, ',', '.') }}</td>
             </tr>
             @endif
 
             <tr class="total">
                 <td>Total Bayar</td>
-                <td class="right">{{ number_format($billData['total'], 0, ',', '.') }}</td>
+                <td class="right">{{ number_format($billData['total'], 2, ',', '.') }}</td>
             </tr>
         </table>
 

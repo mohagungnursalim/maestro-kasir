@@ -101,13 +101,13 @@
                         @if ($taxPercentage)
                             <div class="text-small-gray">({{ number_format($taxPercentage) }}%)</div>
                         @endif
-                        Rp{{ number_format($first->order->tax ?? 0, 0, ',', '.') }}
+                        Rp{{ number_format($first->order->tax ?? 2, 0, ',', '.') }}
                     </td>
                     <td class="center">
                         @if ($discountPercentage)
                             <div class="text-small-gray">({{ number_format($discountPercentage) }}%)</div>
                         @endif
-                        Rp{{ number_format($first->order->discount ?? 0, 0, ',', '.') }}
+                        Rp{{ number_format($first->order->discount ?? 2, 0, ',', '.') }}
                     </td>
                 </tr>
 
@@ -116,12 +116,16 @@
                         <td></td>
                         <td>{{ $transaction->product->name ?? '-' }}</td>
                         <td class="center">{{ $transaction->quantity }}</td>
-                        <td class="center">Rp{{ number_format($transaction->product->price, 2, ',', '.') }}</td>
+                        <td class="center">
+                            {{ $transaction->quantity }}x Rp{{ number_format($transaction->product->price, 2, ',', '.') }}<br>
+                            <small>= Rp{{ number_format($transaction->product->price * $transaction->quantity, 2, ',', '.') }}</small>
+                        </td>
                         <td></td>
                         <td></td>
                         <td></td>
                     </tr>
                 @endforeach
+
 
                 <tr>
                     <td colspan="7" class="bold center">Subtotal Produk: Rp{{ number_format($subtotalProduk, 2, ',', '.') }}</td>
@@ -130,10 +134,10 @@
                     <td colspan="7" class="bold center">Total Bayar (Setelah Diskon + Pajak): Rp{{ number_format($totalPay, 2, ',', '.') }}</td>
                 </tr>
                 <tr>
-                    <td colspan="7" class="bold center">Uang Pelanggan: Rp{{ number_format($first->order->customer_money ?? 0, 0, ',', '.') }}</td>
+                    <td colspan="7" class="bold center">Uang Pelanggan: Rp{{ number_format($first->order->customer_money ?? 2, 0, ',', '.') }}</td>
                 </tr>
                 <tr>
-                    <td colspan="7" class="bold center">Kembalian: Rp{{ number_format($first->order->change ?? 0, 0, ',', '.') }}</td>
+                    <td colspan="7" class="bold center">Kembalian: Rp{{ number_format($first->order->change ?? 2, 0, ',', '.') }}</td>
                 </tr>
             @endforeach
         </tbody>
