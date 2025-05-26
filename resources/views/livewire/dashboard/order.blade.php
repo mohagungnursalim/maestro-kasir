@@ -285,15 +285,15 @@
 
                                 {{-- Pajak --}}
                                 <div x-data="{ 
-                                    useTax: false, 
-                                    taxPercentage: @entangle('tax_percentage'),
-                                    resetTax() {
-                                        if (!this.useTax) {
-                                            $wire.tax_percentage = 0;
-                                            $wire.call('calculateTotal'); // 🚀 Paksa Livewire update total setelah reset pajak
-                                        } 
-                                    }
-                                }">
+                                            useTax: false, 
+                                            taxPercentage: @entangle('tax_percentage'),
+                                            resetTax() {
+                                                if (!this.useTax) {
+                                                    $wire.tax_percentage = 0;
+                                                    $wire.call('calculateTotal'); // 🚀 Paksa Livewire update total setelah reset pajak
+                                                } 
+                                            }
+                                        }">
 
                                     <!-- Toggle Pajak -->
                                     <label
@@ -336,68 +336,58 @@
                                 </div>
 
                                 {{-- Diskon --}}
-                                <div x-data="{ 
-                                    useDiscount: false, 
-                                    discountType: @entangle('discount_type'),
-                                    resetDiscount() {
-                                        if (!this.useDiscount) {
-                                            $wire.discount_value = 0; 
-                                            this.discountType = 'percentage';
-                                            $wire.call('updateTotal'); // 🚀 Paksa Livewire update total setelah reset
+                                <div x-data="{
+                                        useDiscount: false,
+                                        init() {
+                                            this.$watch('useDiscount', value => {
+                                                if (!value) {
+                                                    $wire.set('discount_percentage', 0)
+                                                    $wire.call('calculateTotal')
+                                                }
+                                            })
                                         }
-                                    }
-                                }">
+                                    }">
                                     <!-- Toggle Diskon -->
-                                    <label
-                                        class="inline-flex items-center me-5 peer-disabled:cursor-not-allowed cursor-pointer">
-                                        <input type="checkbox" id="discount" name="discount" class="sr-only peer disabled:cursor-not-allowed"
-                                            x-model="useDiscount" x-on:change="resetDiscount()">
+                                    <label class="inline-flex items-center me-5 peer-disabled:cursor-not-allowed cursor-pointer">
+                                        <input type="checkbox" id="discount" name="discount"
+                                            class="sr-only peer disabled:cursor-not-allowed"
+                                            x-model="useDiscount">
                                         <div class="relative w-11 h-6 bg-gray-200 rounded-full peer peer-focus:ring-4 
-                                                peer-focus:ring-purple-300 peer-checked:after:translate-x-full 
-                                                rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] 
-                                                after:absolute after:top-0.5 after:start-[2px] after:bg-white after:border-gray-300 after:border 
-                                                after:rounded-full after:h-5 after:w-5 after:transition-all 
-                                                peer-checked:bg-purple-600 peer-disabled:bg-gray-400">
+                                            peer-focus:ring-purple-300 peer-checked:after:translate-x-full 
+                                            rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] 
+                                            after:absolute after:top-0.5 after:start-[2px] after:bg-white after:border-gray-300 after:border 
+                                            after:rounded-full after:h-5 after:w-5 after:transition-all 
+                                            peer-checked:bg-purple-600 peer-disabled:bg-gray-400">
                                         </div>
-                                        <span
-                                            class="ms-3 text-sm font-medium text-gray-900 peer-disabled:text-gray-400">
+                                        <span class="ms-3 text-sm font-medium text-gray-900 peer-disabled:text-gray-400">
                                             Gunakan Diskon
                                         </span>
                                     </label>
-
-
-
-                                    <!-- Input Diskon (Disembunyikan jika tidak dicentang) -->
+                                
+                                    <!-- Input Diskon -->
                                     <div class="mt-2 flex space-x-2" x-show="useDiscount" x-transition>
-                                        <input @if (empty($cart)) disabled @endif type="number" id="discount_value"
-                                            name="discount_value" wire:model.live.debounce.300ms="discount_value"
-                                            x-on:input="
-                                            if ($event.target.value === '') $event.target.value = 0;
-                                            discountType = ($event.target.value > 100) ? 'nominal' : 'percentage';
-                                            $wire.call('updateTotal'); 
-                                        " class="w-full p-2 disabled:cursor-not-allowed text-gray-900 border border-gray-300 rounded-lg bg-gray-50 text-xs 
+                                        <input @if (empty($cart)) disabled @endif type="number"
+                                            id="discount_percentage" name="discount_percentage"
+                                            wire:model.live.debounce.300ms="discount_percentage"
+                                            class="w-full p-2 disabled:cursor-not-allowed text-gray-900 border border-gray-300 rounded-lg bg-gray-50 text-xs 
                                             focus:ring-blue-500 focus:border-blue-500"
-                                            placeholder="Masukkan diskon...">
-
-                                        <select @if (empty($cart)) disabled @endif id="discount_type" name="discount_type"
-                                            wire:model.live.debounce.300ms="discount_type" x-model="discountType"
-                                            class="disabled:cursor-not-allowed border rounded-lg text-gray-900 p-2 text-xs bg-gray-50">
-                                            <option value="percentage">%</option>
-                                            <option value="nominal">Rp</option>
-                                        </select>
+                                            placeholder="Masukkan diskon (contoh: 20 untuk 20%)">
+                                        <span class="p-2 text-gray-900 border border-gray-300 rounded-lg bg-gray-50 text-xs">%</span>
                                     </div>
-
+                                
+                                    <!-- Tampilkan Nilai Diskon dalam Rupiah -->
                                     <dl class="flex justify-between mt-3" x-show="useDiscount" x-transition>
-                                        <dt class="text-gray-500">Diskon</dt>
-                                        @if (!empty($cart)) <span
-                                            class="font-bold p-2 text-gray-900 border border-gray-300 rounded-lg bg-gray-50 text-xs">
-                                            @if($discount_type == 'percentage') Diskon {{ $discount_value }}%
-                                            @else Diskon Rp{{ number_format($discount_value, 2, ',', '.') }}
-                                            @endif</span>
+                                        <dt class="text-gray-500">Diskon ({{ $discount_percentage }}%)</dt>
+                                        @if (!empty($cart))
+                                            <span class="font-bold p-2 text-red-500 border border-gray-300 rounded-lg bg-gray-50 text-xs">
+                                                Rp{{ number_format($discount, 2, ',', '.') }}
+                                            </span>
                                         @endif
                                     </dl>
                                 </div>
+                                
 
+                                {{-- Metode Pembayaran --}}
                                 <div 
                                     x-data="{ 
                                         paymentMethod: @entangle('payment_method'), 
@@ -409,7 +399,7 @@
                                         }
                                     })">
 
-                                    <!-- Metode Pembayaran -->
+                                    <!-- Pilih Metode Pembayaran -->
                                     <div>
                                         <select x-model="paymentMethod" wire:model="payment_method" id="paymentMethod" name="paymentMethod"
                                             :disabled="@json(empty($cart))" class="block py-2.5 px-0 w-full text-sm text-gray-500 bg-transparent border-0 border-b-2 
@@ -504,11 +494,11 @@
                                 </button>
 
                                 @if (!empty($cart))
-                                <!-- Tombol Bersihkan Pesanan -->
+                                <!-- Tombol Kosongkan Pesanan -->
                                 <button wire:loading.remove wire:click="resetCart" wire:loading.attr="disabled"
                                     onclick="event.stopPropagation(); playSelectSound()" type="button"
                                     class="focus:outline-none text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 disabled:opacity-50 disabled:cursor-not-allowed">
-                                    Bersihkan Pesanan
+                                    Kosongkan Pesanan
                                 </button>
 
                                 <!-- Tombol Loading saat Reset -->

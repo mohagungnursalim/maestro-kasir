@@ -22,12 +22,12 @@ class Order extends Component
     public $payment_method = 'cash'; // Metode pembayaran default
     public $customerMoney = 0; // Uang pelanggan
     
-    public $discount_type = 'percentage';   // Tipe diskon (percentage/nominal)
-    public $discount_value = 0; // Nilai diskon
-    public $discount = 0; // Total diskon
+    public $discount = 0; // Diskon dalam Rupiah
+    public $discount_percentage = 0; // Diskon dalam persen
     
-    public $tax = 0; // Pajak dalam Rupiah
-    public $tax_percentage = 0; // Pajak default dalam persen
+    public $tax = 0;   // Pajak dalam Rupiah
+    public $tax_percentage = 0; // Pajak dalam persen
+    
     
     public $cart = []; // Keranjang belanja
     public $cartNotEmpty = false; // Status keranjang belanja
@@ -119,13 +119,6 @@ class Order extends Component
         $this->calculateChange();
     }
 
-    // Perbarui total saat diskon berubah
-    public function updatedDiscountValue($value)
-    {
-        // Pastikan nilai tetap 0 jika input kosong
-        $this->discount_value = $value === '' ? 0 : decimal($value);
-        $this->calculateTotal();
-    }
 
     // Tambahkan jumlah produk
     public function updateQuantity($index, $quantity)
@@ -160,31 +153,32 @@ class Order extends Component
         $this->calculateTotal();
     }
     
+    // Perbarui diskon saat persentase diskon berubah
+    public function updatedDiscountPercentage($value)
+    {
+        $this->discount_percentage = $value === '' ? 0 : (float) $value;
+        $this->calculateTotal();
+    }
+
     // Hitung total belanja
     public function calculateTotal()
     {
         $subtotal = collect($this->cart)->sum(fn($item) => $item['price'] * $item['quantity']);
     
-        // Hitung diskon
-        if ($this->discount_type === 'percentage') {
-            $discount = ($subtotal * $this->discount_value) / 100;
-        } else {
-            $discount = $this->discount_value;
-        }
+        // Hitung diskon berdasarkan persentase
+        $discount = ($subtotal * $this->discount_percentage) / 100;
     
-        // Hitung pajak berdasarkan persentase yang bisa diedit user
-        $taxRate = $this->tax_percentage / 100;
-        $tax = ($subtotal - $discount) * $taxRate;
+        // Hitung pajak berdasarkan persentase
+        $tax = (($subtotal - $discount) * $this->tax_percentage) / 100;
     
-        // Hitung total akhir
         $this->subtotal = $subtotal;
         $this->discount = $discount;
-        $this->tax = $tax; // Pajak dalam Rupiah
+        $this->tax = $tax;
         $this->total = $subtotal - $discount + $tax;
-    
-        // Hitung kembalian jika pelanggan sudah memasukkan uang
         $this->change = max($this->customerMoney - $this->total, 0);
     }
+    
+
     
 
     // Hitung kembalian
@@ -393,11 +387,11 @@ class Order extends Component
         $this->cart = [];
         $this->subtotal = 0;
         $this->tax = 0;
+        $this->discount = 0;
         $this->total = 0;
         $this->customerMoney = 0;
         $this->change = 0;
-        $this->discount_value = 0;
-        $this->discount_type = 'percentage';
+        $this->discount_percentage = 0;
         $this->tax_percentage = 0;
 
         $this->cartNotEmpty = false;
