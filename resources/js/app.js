@@ -84,14 +84,22 @@ document.addEventListener('livewire:navigated', () => {
 
         Livewire.on('insufficientPayment', (shortage) => {
             playErrorSound();
+        
+            const formattedShortage = parseFloat(shortage).toLocaleString('id-ID', {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            });
+        
             Swal.fire({
                 title: "Pembayaran Kurang!",
-                text: `Uang pelanggan kurang Rp${shortage.toLocaleString('id-ID')}!`,
+                text: `Uang pelanggan kurang Rp${formattedShortage}!`,
                 icon: "warning",
                 confirmButtonText: "Oke!",
                 confirmButtonColor: "#3085d6"
             });
         });
+        
+        
 
         Livewire.on('insufficientStock', (insufficientProducts) => {
             if (!Array.isArray(insufficientProducts) || insufficientProducts.length === 0) return;
