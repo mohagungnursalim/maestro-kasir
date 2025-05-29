@@ -440,6 +440,13 @@
                                             class="block w-full p-2 text-gray-900 border border-gray-300 rounded-lg bg-gray-50 text-xs 
                                                    focus:ring-blue-500 focus:border-blue-500 disabled:cursor-not-allowed" placeholder="Masukkan uang pelanggan...">
                                     </div>
+
+                                    <!-- Catatan -->
+                                    <template x-if="!isCash()">
+                                        <p class="text-xs text-gray-500 mt-1 italic">
+                                            Tidak perlu input uang pelanggan untuk metode non-tunai.
+                                        </p>
+                                    </template>
                                 </div>
 
                                 {{-- Subtotal --}}
