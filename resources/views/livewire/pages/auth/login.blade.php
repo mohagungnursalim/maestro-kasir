@@ -67,5 +67,8 @@ new #[Layout('layouts.guest')] class extends Component
                 {{ __('Log in') }}
             </x-primary-button>
         </div>
+        
     </form>
 </div>
+
+

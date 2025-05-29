@@ -45,7 +45,7 @@
             </button>
                 
                 <a href="/dashboard" class="flex ms-2 md:me-24">
-                    <img src="{{ asset($settings->store_logo ?? '/logo/default.png') }}" class="h-8 me-3" alt="FlowBite Logo" />
+                    <img src="{{ asset($settings->store_logo ?? '/logo/default.png') }}" class="h-8 me-3" alt="Store Logo" />
                     <span class="self-center text-xl font-serif font-semibold sm:text-2xl whitespace-nowrap tracking-wide italic">
                         {{ $settings->store_name ?? 'Nama Toko' }}
                     </span>
