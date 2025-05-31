@@ -7,8 +7,11 @@ use Carbon\Carbon;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithMapping;
+use Maatwebsite\Excel\Concerns\WithStyles;
+use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
-class TransactionExport implements FromCollection, WithHeadings, WithMapping
+
+class TransactionExport implements FromCollection, WithHeadings, WithMapping, WithStyles
 {
     protected $startDate;
     protected $endDate;
@@ -47,6 +50,22 @@ class TransactionExport implements FromCollection, WithHeadings, WithMapping
         ];
     }
 
+    public function styles(Worksheet $sheet)
+    {
+        return [
+            // Baris 1 itu heading
+            1 => [
+                'font' => ['bold' => true],
+                'alignment' => [
+                    'vertical' => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER,
+                    'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER,
+                    'wrapText' => true,
+                ],
+            ],
+        ];
+    }
+
+
     public function map($transaction): array
     {
         $order = $transaction->order;
@@ -57,14 +76,15 @@ class TransactionExport implements FromCollection, WithHeadings, WithMapping
             Carbon::parse($order->created_at)->format('d/m/Y H:i:s'),
             $transaction->product->name ?? '-',
             $transaction->quantity,
-            number_format($transaction->product->price ?? 0, 0, ',', '.'),
-            number_format($transaction->quantity * ($transaction->product->price ?? 0), 0, ',', '.'),
+            $transaction->product->price ?? 0,
+            $transaction->quantity * ($transaction->product->price ?? 0),
             $order->payment_method ?? '-',
-            number_format($order->tax ?? 0, 0, ',', '.'),
-            number_format($order->discount ?? 0, 0, ',', '.'),
-            number_format($order->grandtotal ?? 0, 0, ',', '.'),
-            number_format($order->customer_money ?? 0, 0, ',', '.'),
-            number_format($order->change ?? 0, 0, ',', '.'),
+            $order->tax ?? 0,
+            $order->discount ?? 0,
+            $order->grandtotal ?? 0,
+            $order->customer_money ?? 0,
+            $order->change ?? 0,
         ];
     }
+
 }
