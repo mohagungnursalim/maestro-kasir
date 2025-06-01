@@ -12,7 +12,7 @@ use Livewire\Component;
 class Dashboard extends Component
 {
     public $totalOrders;
-    public $totalSales;
+    public $totalActualSales;
     public $totalProductsSold;
 
     public $filterType = 'today'; // Default Hari Ini
@@ -41,8 +41,8 @@ class Dashboard extends Component
     
         $this->totalOrders = $queryOrders->count();
     
-        // Gunakan sum(subtotal) untuk total penjualan bersih (tanpa diskon & pajak)
-        $this->totalSales = $queryTransactions->sum('transaction_details.subtotal');
+        // Gunakan sum(subtotal) untuk total penjualan (+ diskon & pajak)
+        $this->totalActualSales = $queryTransactions->sum('transaction_details.subtotal');
     
         $this->totalProductsSold = $queryTransactions->sum('transaction_details.quantity');
     }

@@ -23,10 +23,10 @@
                     <p class="text-2xl font-bold text-green-600">{{ number_format($totalOrders, 0, ',', '.') }}</p>
                 </div>
         
-                <!-- Total Omset -->
+                <!-- Total Pembayaran -->
                 <div class="p-4 bg-white shadow rounded-lg">
-                    <h3 class="text-lg font-semibold text-gray-700">Total Omset</h3>
-                    <p class="text-2xl font-bold text-blue-600">Rp{{ number_format($totalSales, 2, ',', '.') }}</p>
+                    <h3 class="text-lg font-semibold text-gray-700">Total Pembayaran</h3>
+                    <p class="text-2xl font-bold text-blue-600">Rp{{ number_format($totalActualSales, 2, ',', '.') }}</p>
                 </div>
         
                 <!-- Total Produk Terjual -->
