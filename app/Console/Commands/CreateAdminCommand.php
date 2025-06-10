@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\Artisan;
 
 class CreateAdminCommand extends Command
 {
-    protected $signature = 'start:maestro-pos';
+    protected $signature = 'start:maestro-kasir';
     protected $description = 'Menjalankan RolePermissionSeeder,membuat akun owner & data toko';
 
     public function handle()
