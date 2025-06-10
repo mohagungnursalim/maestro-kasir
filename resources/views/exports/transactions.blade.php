@@ -67,7 +67,7 @@
         </thead>
         <tbody>
             @php
-                $grandTotalOmset = 0; // Total murni penjualan produk (tanpa PPN & diskon)
+                $grandTotalOmset = 0; // Total murni penjualan produk (tanpa Pajak & diskon)
             @endphp
 
             @foreach ($transactions as $order_id => $details)
@@ -144,7 +144,7 @@
     </table>
 
     <div style="margin-top: 20px; text-align: right; font-weight: bold; font-size: 18px;">
-        <p style="margin: 0;">Total Omset (Tanpa PPN & Diskon):</p>
+        <p style="margin: 0;">Total Omset (Tanpa Pajak & Diskon):</p>
         <p style="margin: 0; font-size: 18px;">Rp{{ number_format($grandTotalOmset, 2, ',', '.') }}</p>
     </div>
 </body>

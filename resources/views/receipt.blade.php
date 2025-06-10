@@ -157,7 +157,7 @@
 
             @if ($taxPercentage)
             <tr>
-                <td>PPN ({{ number_format($taxPercentage, 0) }}%)</td>
+                <td>Pajak PB1({{ number_format($taxPercentage, 0) }}%)</td>
                 <td class="right">{{ number_format($order->tax, 2, ',', '.') }}</td>
             </tr>
             @endif

@@ -326,7 +326,7 @@
 
                                     <!-- Pajak dalam Rupiah (Hanya Ditampilkan) -->
                                     <dl class="flex justify-between mt-3" x-show="useTax" x-transition>
-                                        <dt class="text-gray-500">PPN (<span
+                                        <dt class="text-gray-500">PB1 (<span
                                                 x-text="useTax ? taxPercentage : 0"></span>%)</dt>
                                         @if (!empty($cart)) <span
                                             class="font-bold p-2 text-red-500 border border-gray-300 rounded-lg bg-gray-50 text-xs">Rp{{ number_format($tax, 2, ',', '.') }}</span>
