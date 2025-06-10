@@ -1,6 +1,6 @@
-# POS Laravel Livewire
+# Maestro POS
 
-Sistem kasir modern berbasis Laravel, Livewire, AlpineJs dan TailwindCSS.
+Pos App berbasis Laravel, Livewire, AlpineJs dan TailwindCSS (Flowbite).
 
 ## 🚀 Fitur Utama
 
@@ -8,7 +8,7 @@ Sistem kasir modern berbasis Laravel, Livewire, AlpineJs dan TailwindCSS.
 - Manajemen Produk
 - Manajemen Supplier
 - Manajemen User
-- Manajemen Role
+- Manajemen Role & Permision
 - Order & Transaksi
 - Filter berdasarkan kasir/admin/owner
 - Export laporan PDF & Excel
