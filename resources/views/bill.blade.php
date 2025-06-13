@@ -172,7 +172,7 @@
 
     </div>
     <div class="powered-by">
-        <p>Powered by <a href="" target="_blank">Maestro-POS</a></p>
+        <p>Powered by <a href="" target="_blank">Maestro-Kasir</a></p>
     </div>
 
 </body>
