@@ -29,9 +29,9 @@
                
 
                 @if ($products)
-                <div class="container mx-auto mt-4 px-2 sm:px-4">
+                <div class="container mx-auto mt-4 px-4 sm:px-8">
                     <div class="overflow-x-auto">
-                        <div class="flex gap-4 w-max scroll-smooth snap-x snap-mandatory">
+                        <div class="flex gap-4 w-max mx-auto scroll-smooth snap-x snap-mandatory">
                             @forelse ($products as $product)
                             @php
                                 $isInCart = collect($cart)->contains('id', $product->id);
@@ -40,7 +40,7 @@
                                 <div
                                     class="bg-white rounded-lg shadow-sm overflow-hidden transition-all duration-300 hover:shadow-lg 
                                     {{ $isInCart ? 'opacity-75' : '' }} {{ $product->stock < 1 ? 'opacity-75' : '' }} flex flex-col">
-
+                
                                     <!-- Product Image -->
                                     <div class="relative aspect-square overflow-hidden bg-gray-100">
                                         <img
@@ -50,20 +50,20 @@
                                             loading="lazy"
                                             onerror="this.src='{{ asset('images/placeholder.png') }}'">
                                     </div>                                    
-
+                
                                     <!-- Product Details -->
                                     <div class="p-2 sm:p-3 flex-1 flex flex-col">
                                         <h3 class="text-xs sm:text-sm font-medium text-gray-800 line-clamp-2 mb-1 min-h-[2.5rem]"
                                             title="{{ $product->name }}">
                                             {{ $product->name }}
                                         </h3>
-
+                
                                         <div class="mt-auto space-y-2">
                                             <div class="flex justify-between items-center">
                                                 <span class="text-sm sm:text-base font-bold text-gray-900">
                                                     Rp{{ number_format($product->price, 2, ',', '.') }}
                                                 </span>
-
+                
                                                 <span
                                                     class="@if($product->stock < 1) bg-red-100 text-red-800 
                                                             @elseif($product->stock < 10) bg-yellow-100 text-yellow-800 
@@ -73,7 +73,7 @@
                                                     {{ $product->stock > 0 ? $product->stock : 'Habis' }}
                                                 </span>
                                             </div>
-
+                
                                             <!-- Add to Cart Button -->
                                             <div class="w-full">
                                                 @if (!$isInCart)
@@ -90,7 +90,7 @@
                                                     </svg>
                                                     <span>Tambah</span>
                                                 </button>
-
+                
                                                 <button wire:loading wire:target="addToCart({{ $product->id }})"
                                                     class="w-full bg-gray-900 text-white py-1.5 sm:py-2 px-2 sm:px-3 rounded text-xs sm:text-sm
                                                         flex items-center justify-center gap-1 cursor-wait">
@@ -135,6 +135,7 @@
                     </div>
                 </div>
                 @endif
+                
 
 
 
@@ -283,58 +284,6 @@
                             <p class="text-red-500 text-sm">*Harap terima uangnya sebelum proses pembayaran dimulai!</p>
                             <div class="space-y-4 mt-4">
 
-                                {{-- Pajak --}}
-                                <div x-data="{ 
-                                            useTax: false, 
-                                            taxPercentage: @entangle('tax_percentage'),
-                                            resetTax() {
-                                                if (!this.useTax) {
-                                                    $wire.tax_percentage = 0;
-                                                    $wire.call('calculateTotal'); // 🚀 Paksa Livewire update total setelah reset pajak
-                                                } 
-                                            }
-                                        }">
-
-                                    <!-- Toggle Pajak -->
-                                    <label
-                                        class="inline-flex items-center me-5 peer-disabled:cursor-not-allowed cursor-pointer">
-                                        <input type="checkbox" id="tax" name="tax" class="sr-only peer disabled:cursor-not-allowed"
-                                            x-model="useTax" x-on:change="resetTax()">
-                                        <div class="relative w-11 h-6 bg-gray-200 rounded-full peer peer-focus:ring-4 
-                                                peer-focus:ring-purple-300 peer-checked:after:translate-x-full 
-                                                rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] 
-                                                after:absolute after:top-0.5 after:start-[2px] after:bg-white after:border-gray-300 after:border 
-                                                after:rounded-full after:h-5 after:w-5 after:transition-all 
-                                                peer-checked:bg-purple-600 peer-disabled:bg-gray-400">
-                                        </div>
-                                        <span
-                                            class="ms-3 text-sm font-medium text-gray-900 peer-disabled:text-gray-400">
-                                            Gunakan Pajak
-                                        </span>
-                                    </label>
-
-                                    <!-- Input Pajak (Persentase) -->
-                                    <div class="mt-2 flex space-x-2" x-show="useTax" x-transition>
-                                        <input @if (empty($cart)) disabled @endif type="number" id="tax_percentage"
-                                            name="tax_percentage" wire:model.live.debounce.300ms="tax_percentage"
-                                            x-on:input="() => $wire.call('calculateTotal')" class="w-full p-2 disabled:cursor-not-allowed text-gray-900 border border-gray-300 rounded-lg bg-gray-50 text-xs 
-                                           focus:ring-blue-500 focus:border-blue-500"
-                                            placeholder="Masukkan pajak (contoh: 11 untuk 11%)">
-                                        <span
-                                            class="p-2 text-gray-900 border border-gray-300 rounded-lg bg-gray-50 text-xs">%</span>
-                                    </div>
-
-                                    <!-- Pajak dalam Rupiah (Hanya Ditampilkan) -->
-                                    <dl class="flex justify-between mt-3" x-show="useTax" x-transition>
-                                        <dt class="text-gray-500">PB1 (<span
-                                                x-text="useTax ? taxPercentage : 0"></span>%)</dt>
-                                        @if (!empty($cart)) <span
-                                            class="font-bold p-2 text-red-500 border border-gray-300 rounded-lg bg-gray-50 text-xs">Rp{{ number_format($tax, 2, ',', '.') }}</span>
-                                        @endif
-                                    </dl>
-
-                                </div>
-
                                 {{-- Diskon --}}
                                 <div x-data="{
                                         useDiscount: false,
@@ -456,6 +405,19 @@
                                         class="font-bold p-2 text-gray-900 border border-gray-300 rounded-lg bg-gray-50 text-xs">Rp{{ number_format($subtotal, 2, ',', '.') }}</span>
                                     @endif
                                 </dl>
+
+                                <!-- Pajak dalam Rupiah -->
+                                @if ($settings->is_tax)    
+                                    <dl class="flex justify-between mt-3">
+                                        <dt class="text-gray-500">Pajak PB1 (<span>{{ $tax_percentage }}</span>%)</dt>
+                                        
+                                        @if (!empty($cart) && isset($tax))
+                                            <span class="font-bold p-2 text-red-500 border border-gray-300 rounded-lg bg-gray-50 text-xs">
+                                                Rp{{ number_format($tax, 2, ',', '.') }}
+                                            </span>
+                                        @endif
+                                    </dl>
+                                @endif
 
                                 {{-- Total Bayar --}}
                                 <dl class="flex justify-between border-t pt-2">

@@ -114,5 +114,24 @@ document.addEventListener('livewire:navigated', () => {
         });
     }
 
+    // Fungsi untuk mengatur visibilitas input pajak
+    
+        const isTaxCheckbox = document.getElementById('isTaxCheckbox');
+        const taxInputGroup = document.getElementById('taxInputGroup');
+
+        function toggleTaxInput() {
+            if (isTaxCheckbox.checked) {
+                taxInputGroup.classList.remove('hidden');
+            } else {
+                taxInputGroup.classList.add('hidden');
+            }
+        }
+
+        // Jalankan saat load
+        toggleTaxInput();
+
+        // Jalankan saat user mengubah checkbox
+        isTaxCheckbox.addEventListener('change', toggleTaxInput);
+    
     
 });

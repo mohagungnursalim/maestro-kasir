@@ -5,6 +5,7 @@ namespace App\Livewire\Dashboard;
 use Livewire\Component;
 use App\Models\Product;
 use App\Models\Order as ModelsOrder;
+use App\Models\StoreSetting;
 use App\Models\TransactionDetail;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Auth;
@@ -25,8 +26,9 @@ class Order extends Component
     public $discount = 0; // Diskon dalam Rupiah
     public $discount_percentage = 0; // Diskon dalam persen
     
+    public $is_tax; // Apakah ada pajak
     public $tax = 0;   // Pajak dalam Rupiah
-    public $tax_percentage = 0; // Pajak dalam persen
+    public $tax_percentage; // Pajak dalam persen
     
     
     public $cart = []; // Keranjang belanja
@@ -40,6 +42,13 @@ class Order extends Component
     protected $listeners = [
         'refreshProductStock' => 'searchProduct',
     ];
+
+
+    public function mount()
+    {
+        $this->is_tax = StoreSetting::value('is_tax') ?? false; // Ambil setting pajak dari tabel store_settings
+        $this->tax_percentage = StoreSetting::value('tax') ?? 0; // Ambil persentase pajak dari tabel store_settings
+    }
 
     public function searchProduct()
     {
@@ -164,19 +173,23 @@ class Order extends Component
     public function calculateTotal()
     {
         $subtotal = collect($this->cart)->sum(fn($item) => $item['price'] * $item['quantity']);
-    
+
         // Hitung diskon berdasarkan persentase
         $discount = ($subtotal * $this->discount_percentage) / 100;
-    
-        // Hitung pajak berdasarkan persentase
-        $tax = (($subtotal - $discount) * $this->tax_percentage) / 100;
-    
+
+        // Pajak hanya dihitung jika is_tax true
+        $tax = 0;
+        if ($this->is_tax) {
+            $tax = (($subtotal - $discount) * $this->tax_percentage) / 100;
+        }
+
         $this->subtotal = $subtotal;
         $this->discount = $discount;
         $this->tax = $tax;
         $this->total = $subtotal - $discount + $tax;
         $this->change = max($this->customerMoney - $this->total, 0);
     }
+
     
 
     
@@ -392,7 +405,6 @@ class Order extends Component
         $this->customerMoney = 0;
         $this->change = 0;
         $this->discount_percentage = 0;
-        $this->tax_percentage = 0;
 
         $this->cartNotEmpty = false;
     }

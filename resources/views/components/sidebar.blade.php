@@ -157,17 +157,6 @@
             <hr>
             <a class="text-center text-xs text-gray-500">Pengaturan</a>
         </div>
-        <li>
-            <a 
-                class="flex items-center p-2 rounded-lg {{ Request::is('dashboard/profile') ? 'bg-purple-300 text-dark' : 'hover:bg-gray-200' }}"
-                @if (!Request::is('dashboard/profile'))
-                    wire:navigate href="/dashboard/profile"
-                @endif>
-                <i class="bi bi-person-lines-fill"></i>
-                <span class="flex-1 ms-3 whitespace-nowrap">Profil</span>
-            </a>
-        </li>
-
         @hasrole('admin|owner')
         <li>
             <a 

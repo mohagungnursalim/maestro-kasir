@@ -1,7 +1,7 @@
 <div>
 
     <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-        <p class="text-2xl font-bold">Pengaturan Toko</p>
+        <p class="text-2xl font-bold mb-4"><span class="text-transparent bg-clip-text bg-gradient-to-r to-green-600 from-gray-500">Pengaturan</span> <span class="underline underline-offset-3 decoration-8 decoration-green-500">Toko</span></p>
         <hr class="mb-3">
         @if (session('success'))
         <div x-data="{ show: true }" x-init="setTimeout(() => show = false, 1500)" x-show="show"
@@ -94,8 +94,8 @@
                 </template>
             </div>
 
-            <!-- Footer Struk -->
-            <p class="text-2xl font-bold">Pengaturan Struk</p>
+            <!-- Pengaturan Struk -->
+            <p class="text-2xl font-bold"><span class="text-transparent bg-clip-text bg-gradient-to-r to-blue-600 from-gray-500">Pengaturan</span> <span class="underline underline-offset-3 decoration-8 decoration-blue-500"> Struk</span></p>
             <hr class="mb-3">
             <div>
                 <label for="store_footer" class="block text-sm font-medium">Footer Struk Order</label>
@@ -105,6 +105,60 @@
                 <span class="text-red-500 text-sm">{{ $message }}</span>
                 @enderror
             </div>
+
+            <!-- Pengaturan Pajak -->
+            <p class="text-2xl font-bold"><span class="text-transparent bg-clip-text bg-gradient-to-r to-red-600 from-gray-500">Pengaturan</span> <span class="underline underline-offset-3 decoration-8 decoration-red-500">Pajak PB1</span></p>
+            <hr class="mb-3">
+            <div id="tax-setting-container">
+
+                <!-- Checkbox untuk mengaktifkan pajak -->
+                <label class="inline-flex flex-col items-start cursor-pointer">
+                    <span class="text-sm font-medium text-gray-900 mb-2">Gunakan Pajak?</span>
+                    <div class="flex items-center">
+                        <input type="checkbox" id="isTaxCheckbox" class="sr-only peer"
+                        wire:model="is_tax" onchange="toggleTaxInput()"
+                        @checked($settings->is_tax)>
+
+                        <div
+                            class="relative w-11 h-6 bg-gray-200 rounded-full peer-focus:ring-4 peer-focus:ring-purple-300 peer-checked:after:translate-x-full 
+                                   peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:start-[2px] after:bg-white after:border-gray-300 
+                                   after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-red-600">
+                        </div>
+                    </div>
+                </label>
+            
+                <!-- Input pajak -->
+                <div id="taxInputGroup" class="mt-3 hidden">
+                    <label for="tax" class="block text-sm font-medium">Tarif Pajak (%)</label>
+                    <input type="number" id="tax" name="tax" wire:model="tax"
+                        class="w-full border-gray-300 border rounded-md p-2" min="0" max="100" required>
+                    <span id="taxError" class="text-red-500 text-sm hidden">Masukkan tarif pajak yang valid.</span>
+                </div>
+            </div>
+
+            <!-- Pengaturan Produk -->
+            <p class="text-2xl font-bold"><span class="text-transparent bg-clip-text bg-gradient-to-r to-purple-600 from-gray-500">Pengaturan</span> <span class="underline underline-offset-3 decoration-8 decoration-purple-500">Produk</span></p>
+            <hr class="mb-3">
+            <div id="supplier-setting-container">
+
+                <label class="inline-flex flex-col items-start cursor-pointer">
+                    <span class="text-sm font-medium text-gray-900 mb-2">Aktifkan Supplier pada Produk?</span>
+                    <div class="flex items-center">
+                        <input type="checkbox" id="isSupplierCheckbox"
+                               class="sr-only peer"
+                               wire:model="is_supplier"
+                               @checked($settings->is_supplier)>
+                
+                        <div
+                            class="relative w-11 h-6 bg-gray-200 rounded-full peer-focus:ring-4 peer-focus:ring-purple-300 peer-checked:after:translate-x-full 
+                                   peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:start-[2px] after:bg-white after:border-gray-300 
+                                   after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-600">
+                        </div>
+                    </div>
+                </label>
+                
+            </div>
+                        
 
 
             <!-- Tombol Simpan -->

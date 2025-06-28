@@ -86,7 +86,9 @@
                                 <th scope="col" class="px-6 py-3 text-center">Gambar</th>
                                 <th scope="col" class="px-6 py-3 text-center">Nama Produk</th>
                                 <th scope="col" class="px-6 py-3 text-center">Sku</th>
+                                @if ($settings->is_supplier)    
                                 <th scope="col" class="px-6 py-3 text-center">Supplier</th>
+                                @endif
                                 <th scope="col" class="px-6 py-3 text-center">Harga</th>
                                 <th scope="col" class="px-6 py-3 text-center">Stok</th>
                                 <th scope="col" class="px-6 py-3 text-center">Satuan</th>
@@ -104,9 +106,11 @@
                                 <td class="px-6 py-4 text-center">
                                     <div class="h-4 bg-gray-300 rounded animate-pulse"></div>
                                 </td>
+                                @if ($settings->is_supplier) 
                                 <td class="px-6 py-4 text-center">
                                     <div class="h-4 bg-gray-300 rounded animate-pulse"></div>
                                 </td>
+                                @endif
                                 <td class="px-6 py-4 text-center">
                                     <div class="h-4 bg-gray-300 rounded animate-pulse"></div>
                                 </td>
@@ -149,7 +153,9 @@
                                         {{ $product->name }}
                                     </td>
                                     <td class="px-6 py-4 text-center">{{ $product->sku }}</td>
+                                    @if ($settings->is_supplier)
                                     <td class="px-6 py-4 text-center">{{ $product->supplier_name }}</td>
+                                    @endif
                                     <td class="px-6 py-4 text-center">
                                         Rp{{ number_format($product->price, 2, ',', '.') }}</td>
                                     <td class="px-6 py-4 text-center">{{ $product->stock }}</td>
@@ -285,7 +291,7 @@
                         @error('stock') <span class="text-red-500 text-xs">{{ $message }} @enderror
                     </div>
 
-
+                    @if ($settings->is_supplier)    
                     <div x-data="supplierSelect()"
                         x-init="fetchSuppliers(); window.addEventListener('addedSuccess', () => resetSupplier())"
                         class="relative">
@@ -320,6 +326,7 @@
                         <span class="text-red-500 text-xs">{{ $message }}</span>
                         @enderror
                     </div>
+                    @endif
 
 
                     <div class="sm:col-span-2" x-data="imageUploader()">
@@ -464,6 +471,7 @@
                         @error('stockUpdate') <span class="text-red-500 text-xs">{{ $message }} @enderror
                     </div>
 
+                    @if ($settings->is_supplier)      
                     <div x-data="supplierSelectUpdate()"
                         x-init='updateSupplier(@json(["id" => $supplier_idUpdate ?? null, "name" => $supplierName ?? ""]))'
                         class="relative">
@@ -489,6 +497,7 @@
                         <span class="text-red-500 text-xs">{{ $message }}</span>
                         @enderror
                     </div>
+                    @endif
 
 
                     <div class="sm:col-span-2" x-data="imageUploader()" x-init="init()">

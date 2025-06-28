@@ -15,11 +15,14 @@ return new class extends Migration
 
         Schema::create('store_settings', function (Blueprint $table) {
             $table->id();
-            $table->string('store_name')->nullable();
-            $table->string('store_address')->nullable();
-            $table->string('store_phone')->nullable();
-            $table->string('store_footer')->nullable();
-            $table->string('store_logo')->nullable();
+            $table->string('store_name')->default('Default Name');
+            $table->string('store_address')->default('Default Address');
+            $table->string('store_phone')->default('085756000000');
+            $table->string('store_footer')->default('Default Footer');
+            $table->string('store_logo')->nullable('Default Logo');
+            $table->boolean('is_tax')->default(false);
+            $table->decimal('tax', 3)->default(0);
+            $table->boolean('is_supplier')->default(false);
             $table->timestamps();
         });
         

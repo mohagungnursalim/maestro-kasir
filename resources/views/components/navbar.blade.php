@@ -30,10 +30,6 @@
             </div>
             <ul class="py-1" role="none">
                 <li>
-                    <a wire:navigate href="/dashboard" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                        role="menuitem">Dashboard</a>
-                </li>
-                <li>
                     <a wire:navigate href="/dashboard/profile" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                         role="menuitem">Profil</a>
                 </li>

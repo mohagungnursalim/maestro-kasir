@@ -109,7 +109,7 @@
                                 <th class="px-6 py-3 text-center">Harga</th>
                                 <th class="px-6 py-3 text-center">Subtotal</th>
                                 <th class="px-6 py-3 text-center">Metode</th>
-                                <th class="px-6 py-3 text-right">Pajak (PPN)</th>
+                                <th class="px-6 py-3 text-right">Pajak (PB1)</th>
                                 <th class="px-6 py-3 text-right">Diskon</th>
                                 <th class="px-6 py-3 text-right">Uang Pelanggan</th>
                                 <th class="px-6 py-3 text-right">Kembalian</th>
