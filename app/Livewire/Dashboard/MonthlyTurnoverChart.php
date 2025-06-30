@@ -19,9 +19,10 @@ class MonthlyTurnoverChart extends Component
     {
         $year = now()->year;
     
+        // sum omzet murni per bulan "dengan" diskon & pajak
         $query = DB::table('transaction_details')
             ->join('orders', 'transaction_details.order_id', '=', 'orders.id')
-            ->selectRaw('MONTH(orders.created_at) as month, SUM(transaction_details.original_subtotal) as total')
+            ->selectRaw('MONTH(orders.created_at) as month, SUM(transaction_details.subtotal) as total')
             ->whereYear('orders.created_at', $year);
     
         if (!Auth::user()->hasRole('admin|owner')) {
