@@ -114,24 +114,32 @@ document.addEventListener('livewire:navigated', () => {
         });
     }
 
-    // Fungsi untuk mengatur visibilitas input pajak
-    
-        const isTaxCheckbox = document.getElementById('isTaxCheckbox');
+   
+    // Buat fungsi dan assign ke window
+    window.toggleTaxInput = function () {
+        const isChecked = document.getElementById('isTaxCheckbox')?.checked;
         const taxInputGroup = document.getElementById('taxInputGroup');
 
-        function toggleTaxInput() {
-            if (isTaxCheckbox.checked) {
-                taxInputGroup.classList.remove('hidden');
-            } else {
-                taxInputGroup.classList.add('hidden');
-            }
+        if (isChecked && taxInputGroup) {
+            taxInputGroup.classList.remove('hidden');
+        } else if (taxInputGroup) {
+            taxInputGroup.classList.add('hidden');
         }
+    };
 
-        // Jalankan saat load
-        toggleTaxInput();
+    // Jalankan sekali saat halaman pertama kali dimuat
+    document.addEventListener('DOMContentLoaded', () => {
+        window.toggleTaxInput();
+    });
 
-        // Jalankan saat user mengubah checkbox
-        isTaxCheckbox.addEventListener('change', toggleTaxInput);
+    // Jalankan lagi saat Livewire nge-re-render komponen
+    document.addEventListener('livewire:load', () => {
+        Livewire.hook('message.processed', () => {
+            window.toggleTaxInput();
+        });
+    });
+
+    
     
     
 });
