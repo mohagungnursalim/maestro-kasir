@@ -92,7 +92,7 @@ class Order extends Component
                 'quantity' => 1,
                 'subtotal' => $product->price, // Tambahkan subtotal di awal
             ];
-            $this->cartNotEmpty = true; // ✅ Langsung set true
+            $this->cartNotEmpty = true; // Set true
             $this->calculateTotal();
         }
     }
@@ -242,7 +242,7 @@ class Order extends Component
 
         $billData['subtotal'] = $subtotal;
 
-        // Simpan sementara di cache (5 menit cukup)
+        // Simpan sementara di cache (5 menit)
         cache()->put('bill-preview:' . Auth::id(), $billData, now()->addMinutes(5));
 
         // Dispatch JS untuk buka tab baru
@@ -428,13 +428,15 @@ class Order extends Component
     // Refresh Cache stok produk
     protected function refreshCacheStock()
     {
+        // Ambil daftar semua cache key produk
         $cacheKeys = Cache::get('product_cache_keys', []);
 
         foreach ($cacheKeys as $key) {
+            // Hapus cache untuk setiap produk yang ada di cache
             Cache::forget($key);
         }
 
-        // Kosongkan arraynya supaya tidak numpuk
+        // Hapus cache yang menyimpan daftar semua cache key produk
         Cache::forget('product_cache_keys');
 
         // Muat ulang cache untuk current state pencarian
