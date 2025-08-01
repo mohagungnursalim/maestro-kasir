@@ -168,7 +168,7 @@ class Product extends Component
             'price' => 'required|numeric|min:0',
             'description' => 'required|string',
             'stock' => 'required|numeric|min:0',
-            'unit' => 'required|string|max:80',
+            'unit' => 'required|string|max:20',
             'supplier_id' => 'nullable|exists:suppliers,id',
             ], [
             'name.required' => 'Nama produk wajib diisi.',
@@ -190,7 +190,7 @@ class Product extends Component
             'stock.min' => 'Stok produk tidak boleh kurang dari 0.',
             'unit.required' => 'Satuan produk wajib diisi.',
             'unit.string' => 'Satuan produk harus berupa teks.',
-            'unit.max' => 'Satuan produk maksimal 10 karakter.',
+            'unit.max' => 'Satuan produk maksimal 20 karakter.',
             'supplier_id.exists' => 'Supplier tidak ditemukan.',
 
         ]);
@@ -265,7 +265,7 @@ class Product extends Component
             'priceUpdate' => 'required|numeric|min:0',
             'descriptionUpdate' => 'required|string',
             'stockUpdate' => 'required|numeric|min:0',
-            'unitUpdate' => 'required|string|max:80',
+            'unitUpdate' => 'required|string|max:20',
             'supplier_idUpdate' => 'nullable|exists:suppliers,id',
         ]);
 
