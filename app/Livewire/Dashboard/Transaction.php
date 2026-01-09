@@ -87,7 +87,6 @@ class Transaction extends Component
                         'orders.order_number as order_number',
                         'orders.payment_method as payment_method',
                         'orders.tax as tax',
-                        'orders.discount as discount',
                         'orders.customer_money as customer_money',
                         'orders.change as change',
                         'orders.grandtotal as grand_total',

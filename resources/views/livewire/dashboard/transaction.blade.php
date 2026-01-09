@@ -100,157 +100,113 @@
                 </div>
 
                 <div wire:init='loadInitialTransactions' class="relative overflow-x-auto shadow-md sm:rounded-lg">
-                    <table class="w-full text-sm text-left rtl:text-right text-gray-500">
-                        <thead class="text-xs text-white uppercase bg-gray-500">
+                    <table class="w-full text-sm text-left text-gray-500">
+                        <thead class="text-xs text-white uppercase bg-gray-600">
                             <tr>
-                                <th class="px-6 py-3">Order/Kasir</th>
-                                <th class="px-6 py-3">Produk</th>
-                                <th class="px-6 py-3 text-center">Jumlah</th>
-                                <th class="px-6 py-3 text-center">Harga</th>
-                                <th class="px-6 py-3 text-center">Subtotal</th>
-                                <th class="px-6 py-3 text-center">Metode</th>
-                                <th class="px-6 py-3 text-right">Pajak (PB1)</th>
-                                <th class="px-6 py-3 text-right">Diskon</th>
-                                <th class="px-6 py-3 text-right">Uang Pelanggan</th>
-                                <th class="px-6 py-3 text-right">Kembalian</th>
-                                <th class="px-6 py-3 text-right">Total Bayar</th>
-                                <th class="px-6 py-3 text-center">Tanggal</th>
+                                <th class="px-4 py-3">Order / Kasir</th>
+                                <th class="px-4 py-3">Produk</th>
+                                <th class="px-4 py-3 text-center">Qty</th>
+                                <th class="px-4 py-3 text-right">Harga</th>
+                                <th class="px-4 py-3 text-right">Subtotal</th>
+                                <th class="px-4 py-3 text-center">Metode</th>
+                                <th class="px-4 py-3 text-right">Pajak</th>
+                                <th class="px-4 py-3 text-right">Uang</th>
+                                <th class="px-4 py-3 text-right">Kembali</th>
+                                <th class="px-4 py-3 text-right">Total</th>
+                                <th class="px-4 py-3 text-center">Tanggal</th>
                             </tr>
                         </thead>
+
                         <tbody>
-                            @if (!$loaded)
-                            @for ($i = 0; $i < 3; $i++) {{-- 3 order dummy --}}
-                                {{-- Baris utama order --}}
-                                <tr class="bg-gray-200 font-bold">
-                                    <td class="px-6 py-4" colspan="1">
-                                        <div class="h-4 w-24 bg-gray-500 rounded animate-pulse mb-1"></div>
-                                        <div class="h-4 w-20 bg-gray-500 rounded animate-pulse"></div>
+                        {{-- LOADING --}}
+                        @if (!$loaded)
+                            @for ($i = 0; $i < 3; $i++)
+                                <tr class="bg-gray-200 animate-pulse">
+                                    @for ($c = 0; $c < 11; $c++)
+                                        <td class="px-4 py-4">
+                                            <div class="h-4 bg-gray-300 rounded"></div>
+                                        </td>
+                                    @endfor
+                                </tr>
+                            @endfor
+
+                        {{-- DATA --}}
+                        @else
+                            @forelse ($transactions as $orderId => $orderTransactions)
+
+                                @php
+                                    $order = $orderTransactions[0];
+                                    $base = $order->grand_total - $order->tax;
+                                    $taxPercentage = $base > 0 ? round(($order->tax / $base) * 100) : 0;
+                                @endphp
+
+                                {{-- HEADER ORDER --}}
+                                <tr class="bg-gray-200 font-bold text-gray-800">
+                                    <td class="px-4 py-3">
+                                        <div class="flex flex-col gap-1">
+                                            <span class="bg-green-600 text-white text-xs px-2 py-1 rounded w-fit">
+                                                {{ $order->order_number }}
+                                            </span>
+                                            <span class="bg-blue-600 text-white text-xs px-2 py-1 rounded w-fit">
+                                                {{ $order->user_name }}
+                                            </span>
+                                        </div>
                                     </td>
-                                    <td class="px-6 py-4 text-center font-bold" colspan="4"></td>
-                                    <td class="px-6 py-4 text-center">
-                                        <div class="h-4 w-20 bg-gray-300 rounded animate-pulse"></div>
+
+                                    <td colspan="4"></td>
+
+                                    <td class="px-4 py-3 text-center">{{ strtoupper($order->payment_method) }}</td>
+
+                                    <td class="px-4 py-3 text-right">
+                                        @if ($taxPercentage)
+                                            <span class="text-xs text-gray-600">({{ $taxPercentage }}%)</span>
+                                        @endif
+                                        Rp{{ number_format($order->tax, 0, ',', '.') }}
                                     </td>
-                                    <td class="px-6 py-4 text-center">
-                                        <div class="h-4 w-16 bg-gray-300 rounded animate-pulse mb-1"></div>
-                                        <div class="h-4 w-16 bg-gray-300 rounded animate-pulse"></div>
+
+                                    <td class="px-4 py-3 text-right">
+                                        Rp{{ number_format($order->customer_money, 0, ',', '.') }}
                                     </td>
-                                    <td class="px-6 py-4 text-right">
-                                        <div class="h-4 w-16 bg-gray-300 rounded animate-pulse mb-1"></div>
-                                        <div class="h-4 w-16 bg-gray-300 rounded animate-pulse"></div>
+
+                                    <td class="px-4 py-3 text-right">
+                                        Rp{{ number_format($order->change, 0, ',', '.') }}
                                     </td>
-                                    <td class="px-6 py-4 text-right">
-                                        <div class="h-4 w-20 bg-gray-300 rounded animate-pulse"></div>
+
+                                    <td class="px-4 py-3 text-right">
+                                        Rp{{ number_format($order->grand_total, 0, ',', '.') }}
                                     </td>
-                                    <td class="px-6 py-4 text-right">
-                                        <div class="h-4 w-20 bg-gray-300 rounded animate-pulse"></div>
-                                    </td>
-                                    <td class="px-6 py-4 text-right">
-                                        <div class="h-4 w-20 bg-gray-300 rounded animate-pulse"></div>
-                                    </td>
-                                    <td class="px-6 py-4 text-center">
-                                        <div class="h-4 w-28 bg-gray-300 rounded animate-pulse"></div>
+
+                                    <td class="px-4 py-3 text-center">
+                                        {{ $order->order_date }}
                                     </td>
                                 </tr>
-                        
-                                {{-- Baris produk di bawah order --}}
-                                @for ($j = 0; $j < 3; $j++) {{-- 2 produk dummy per order --}}
-                                    <tr class="bg-white border-b hover:bg-gray-300 text-gray-900">
-                                        <td class="px-6 py-4"></td>
-                                        <td class="px-6 py-4">
-                                            <div class="h-4 w-32 bg-gray-300 rounded animate-pulse"></div>
-                                        </td>
-                                        <td class="px-6 py-4 text-center">
-                                            <div class="h-4 w-12 bg-gray-300 rounded animate-pulse"></div>
-                                        </td>
-                                        <td class="px-6 py-4 text-right">
-                                            <div class="h-4 w-14 bg-gray-300 rounded animate-pulse"></div>
-                                        </td>
-                                        <td class="px-6 py-4 text-right">
-                                            <div class="h-4 w-16 bg-gray-300 rounded animate-pulse"></div>
-                                        </td>
-                                        {{-- Kosongkan kolom selanjutnya --}}
-                                        @for ($k = 0; $k < 7; $k++)
-                                            <td class="px-6 py-4"></td>
-                                        @endfor
-                                    </tr>
-                                @endfor
-                            @endfor
-                            @else
-                                @forelse ($transactions as $orderId => $orderTransactions)
-                                    <tr class="bg-gray-200 font-bold">
-                                        <td class="px-6 py-4">
-                                            <div class="flex flex-wrap items-center gap-2">
-                                                <span class="bg-green-500 text-white text-xs font-semibold px-3 py-1 rounded-md shadow-sm">
-                                                    {{ $orderTransactions[0]->order_number ?? '-' }}
-                                                </span>
-                                                <span class="bg-blue-500 text-white text-xs font-semibold px-3 py-1 rounded-md shadow-sm">
-                                                    {{ $orderTransactions[0]->user_name ?? '-' }}
-                                                </span>
-                                            </div>
-                                        </td>
-                                        <td class="px-6 py-4 text-center font-bold" colspan="4"></td>
-                                        <td class="px-6 py-4 text-center font-bold">
-                                            {{ $orderTransactions[0]->payment_method ?? '-' }}
-                                        </td>
-                                        @php
-                                            $order = $orderTransactions[0];
-                                            $base = $order->grand_total - $order->tax;
-                                            $taxPercentage = $base > 0 ? round(($order->tax / $base) * 100) : 0;
 
-                                            $originalPrice = $base + $order->discount;
-                                            $discountPercentage = $originalPrice > 0 ? round(($order->discount / $originalPrice) * 100) : 0;
-                                        @endphp
-
-                                        <td class="px-6 py-4 text-right font-bold">
-                                            @if ($taxPercentage)
-                                                <span class="text-xs text-gray-600">({{ number_format($taxPercentage) }}%)</span>
-                                            @endif
-                                            Rp{{ number_format($order->tax, 2, ',', '.') }} 
+                                {{-- DETAIL PRODUK --}}
+                                @foreach ($orderTransactions as $trx)
+                                    <tr class="bg-white border-b hover:bg-gray-100 text-gray-800">
+                                        <td></td>
+                                        <td class="px-4 py-2">{{ $trx->product_name }}</td>
+                                        <td class="px-4 py-2 text-center">{{ $trx->quantity }}</td>
+                                        <td class="px-4 py-2 text-right">Rp{{ number_format($trx->price, 0, ',', '.') }}</td>
+                                        <td class="px-4 py-2 text-right">
+                                            Rp{{ number_format($trx->price * $trx->quantity, 0, ',', '.') }}
                                         </td>
-
-                                        <td class="px-6 py-4 text-right font-bold">
-                                            @if ($discountPercentage)
-                                                <span class="text-xs text-gray-600">({{ number_format($discountPercentage) }}%)</span>
-                                            @endif
-                                            Rp{{ number_format($order->discount, 0, ',', '.') }} 
-                                        </td>
-              
-                                        <td class="px-6 py-4 text-right font-bold">
-                                            Rp{{ number_format($orderTransactions[0]->customer_money, 2,',','.') ?? '-' }}
-                                        </td>
-                                        <td class="px-6 py-4 text-right font-bold">
-                                            Rp{{ number_format($orderTransactions[0]->change, 2,',','.') ?? '-' }}
-                                        </td>
-                                        <td class="px-6 py-4 text-right font-bold">
-                                            Rp{{ number_format($orderTransactions[0]->grand_total, 2, ',', '.') ?? '-' }}
-                                        </td>
-                                        <td class="px-6 py-4 text-center font-bold">
-                                            {{ $orderTransactions[0]->order_date ?? '-' }}
-                                        </td>
+                                        <td colspan="6"></td>
                                     </tr>
-                    
-                                    @foreach ($orderTransactions as $transaction)
-                                        <tr class="bg-white border-b hover:bg-gray-300 text-gray-900">
-                                            <td class="px-6 py-4"></td>
-                                            <td class="px-6 py-4">{{ $transaction->product_name ?? '-' }}</td>
-                                            <td class="px-6 py-4 text-center">{{ $transaction->quantity ?? '-' }}</td>
-                                            <td class="px-6 py-4 text-right">Rp{{ number_format($transaction->price, 2, ',', '.') ?? '-' }}</td>
-                                            <td class="px-6 py-4 text-right">
-                                                Rp{{ number_format($transaction->quantity * $transaction->price, 2, ',', '.') ?? '-' }}
-                                            </td>
-                                            <td colspan="7"></td>
-                                        </tr>
-                                    @endforeach
-                                @empty
-                                    <tr>
-                                        <td colspan="12" class="text-center align-middle h-20">Tidak ada data ditemukan!</td>
-                                    </tr>
-                                @endforelse
-                            @endif
+                                @endforeach
+
+                            @empty
+                                <tr>
+                                    <td colspan="11" class="text-center py-10 text-gray-400 italic">
+                                        Tidak ada data transaksi
+                                    </td>
+                                </tr>
+                            @endforelse
+                        @endif
                         </tbody>
                     </table>
-                    
                 </div>
+
 
 
                 {{-- Tombol Load More --}}
