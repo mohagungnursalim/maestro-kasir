@@ -304,24 +304,19 @@
                                                    focus:border-gray-200 peer disabled:cursor-not-allowed">
 
                                             <option value="cash">Tunai</option>
-                                            <option value="credit_card">Kartu Kredit</option>
                                             <option value="debit_card">Kartu Debit</option>
 
-                                            <optgroup label="E-Wallet">
-                                                <option value="ewallet">E-Wallet (Umum)</option>
-                                                <option value="gopay">GoPay</option>
-                                                <option value="ovo">OVO</option>
-                                                <option value="dana">DANA</option>
-                                                <option value="linkaja">LinkAja</option>
-                                                <option value="shopeepay">ShopeePay</option>
-                                                <option value="grabpay">GrabPay</option>
-                                            </optgroup>
+                                            
+                                                <option value="ewallet">Qris</option>
+                                                
+                                            
 
                                             <optgroup label="Transfer Bank">
                                                 <option value="bca">BCA</option>
                                                 <option value="bri">BRI</option>
                                                 <option value="mandiri">Mandiri</option>
                                                 <option value="bni">BNI</option>
+                                                <option value="lainnya">Lainnya</option>
                                             </optgroup>
 
                                         </select>
@@ -333,17 +328,17 @@
                                             class="block mb-2 text-sm font-medium text-gray-900">Uang Pelanggan</label>
                                         <input type="number" id="customerMoney" name="customerMoney"
                                             wire:model.live.debounce.800ms="customerMoney"
-                                            :disabled="@json(empty($cart)) || !isCash()"
+                                            :disabled="@json(empty($cart))"
                                             class="block w-full p-2 text-gray-900 border border-gray-300 rounded-lg bg-gray-50 text-xs 
                                                    focus:ring-blue-500 focus:border-blue-500 disabled:cursor-not-allowed" placeholder="Masukkan uang pelanggan...">
                                     </div>
 
-                                    <!-- Catatan -->
+                                    {{-- <!-- Catatan -->
                                     <template x-if="!isCash()">
                                         <p class="text-xs text-gray-500 mt-1 italic">
                                             Tidak perlu input uang pelanggan untuk metode non-tunai.
                                         </p>
-                                    </template>
+                                    </template> --}}
                                 </div>
 
                                 {{-- Subtotal --}}

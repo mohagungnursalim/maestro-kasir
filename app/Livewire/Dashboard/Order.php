@@ -202,7 +202,7 @@ class Order extends Component
         $billData = [
             'tanggal' => now()->format('d-m-Y H:i'),
             'kasir' => Auth::user()->name ?? 'Owner',
-            'order_number' => 'ORD/' . now()->format('dmY') . '/' . Str::random(6),
+            'order_number' => 'ORD/' . now()->format('dmY') . '/' . Str::random(4),
             'items' => [],
             'subtotal' => 0,
             'tax' => $this->tax,
@@ -290,7 +290,7 @@ class Order extends Component
             // =========================
             $order = ModelsOrder::create([
                 'user_id' => Auth::id(),
-                'order_number' => 'ORD/' . now()->format('dmY') . '/' . Str::random(6),
+                'order_number' => 'ORD-' . now()->format('dmY') . '-' . Str::random(4),
                 'payment_method' => $this->payment_method,
                 'tax' => decimal($this->tax),
                 'customer_money' => $customerMoney,
