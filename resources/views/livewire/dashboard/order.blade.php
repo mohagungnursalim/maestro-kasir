@@ -284,58 +284,6 @@
                             <p class="text-red-500 text-sm">*Harap terima uangnya sebelum proses pembayaran dimulai!</p>
                             <div class="space-y-4 mt-4">
 
-                                {{-- Diskon --}}
-                                <div x-data="{
-                                        useDiscount: false,
-                                        init() {
-                                            this.$watch('useDiscount', value => {
-                                                if (!value) {
-                                                    $wire.set('discount_percentage', 0)
-                                                    $wire.call('calculateTotal')
-                                                }
-                                            })
-                                        }
-                                    }">
-                                    <!-- Toggle Diskon -->
-                                    <label class="inline-flex items-center me-5 peer-disabled:cursor-not-allowed cursor-pointer">
-                                        <input type="checkbox" id="discount" name="discount"
-                                            class="sr-only peer disabled:cursor-not-allowed"
-                                            x-model="useDiscount">
-                                        <div class="relative w-11 h-6 bg-gray-200 rounded-full peer peer-focus:ring-4 
-                                            peer-focus:ring-purple-300 peer-checked:after:translate-x-full 
-                                            rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] 
-                                            after:absolute after:top-0.5 after:start-[2px] after:bg-white after:border-gray-300 after:border 
-                                            after:rounded-full after:h-5 after:w-5 after:transition-all 
-                                            peer-checked:bg-purple-600 peer-disabled:bg-gray-400">
-                                        </div>
-                                        <span class="ms-3 text-sm font-medium text-gray-900 peer-disabled:text-gray-400">
-                                            Gunakan Diskon
-                                        </span>
-                                    </label>
-                                
-                                    <!-- Input Diskon -->
-                                    <div class="mt-2 flex space-x-2" x-show="useDiscount" x-transition>
-                                        <input @if (empty($cart)) disabled @endif type="number"
-                                            id="discount_percentage" name="discount_percentage"
-                                            wire:model.live.debounce.300ms="discount_percentage"
-                                            class="w-full p-2 disabled:cursor-not-allowed text-gray-900 border border-gray-300 rounded-lg bg-gray-50 text-xs 
-                                            focus:ring-blue-500 focus:border-blue-500"
-                                            placeholder="Masukkan diskon (contoh: 20 untuk 20%)">
-                                        <span class="p-2 text-gray-900 border border-gray-300 rounded-lg bg-gray-50 text-xs">%</span>
-                                    </div>
-                                
-                                    <!-- Tampilkan Nilai Diskon dalam Rupiah -->
-                                    <dl class="flex justify-between mt-3" x-show="useDiscount" x-transition>
-                                        <dt class="text-gray-500">Diskon ({{ $discount_percentage }}%)</dt>
-                                        @if (!empty($cart))
-                                            <span class="font-bold p-2 text-red-500 border border-gray-300 rounded-lg bg-gray-50 text-xs">
-                                                Rp{{ number_format($discount, 2, ',', '.') }}
-                                            </span>
-                                        @endif
-                                    </dl>
-                                </div>
-                                
-
                                 {{-- Metode Pembayaran --}}
                                 <div 
                                     x-data="{ 
@@ -356,24 +304,19 @@
                                                    focus:border-gray-200 peer disabled:cursor-not-allowed">
 
                                             <option value="cash">Tunai</option>
-                                            <option value="credit_card">Kartu Kredit</option>
                                             <option value="debit_card">Kartu Debit</option>
 
-                                            <optgroup label="E-Wallet">
-                                                <option value="ewallet">E-Wallet (Umum)</option>
-                                                <option value="gopay">GoPay</option>
-                                                <option value="ovo">OVO</option>
-                                                <option value="dana">DANA</option>
-                                                <option value="linkaja">LinkAja</option>
-                                                <option value="shopeepay">ShopeePay</option>
-                                                <option value="grabpay">GrabPay</option>
-                                            </optgroup>
+                                            
+                                                <option value="ewallet">Qris</option>
+                                                
+                                            
 
                                             <optgroup label="Transfer Bank">
                                                 <option value="bca">BCA</option>
                                                 <option value="bri">BRI</option>
                                                 <option value="mandiri">Mandiri</option>
                                                 <option value="bni">BNI</option>
+                                                <option value="lainnya">Lainnya</option>
                                             </optgroup>
 
                                         </select>
@@ -385,17 +328,17 @@
                                             class="block mb-2 text-sm font-medium text-gray-900">Uang Pelanggan</label>
                                         <input type="number" id="customerMoney" name="customerMoney"
                                             wire:model.live.debounce.800ms="customerMoney"
-                                            :disabled="@json(empty($cart)) || !isCash()"
+                                            :disabled="@json(empty($cart))"
                                             class="block w-full p-2 text-gray-900 border border-gray-300 rounded-lg bg-gray-50 text-xs 
                                                    focus:ring-blue-500 focus:border-blue-500 disabled:cursor-not-allowed" placeholder="Masukkan uang pelanggan...">
                                     </div>
 
-                                    <!-- Catatan -->
+                                    {{-- <!-- Catatan -->
                                     <template x-if="!isCash()">
                                         <p class="text-xs text-gray-500 mt-1 italic">
                                             Tidak perlu input uang pelanggan untuk metode non-tunai.
                                         </p>
-                                    </template>
+                                    </template> --}}
                                 </div>
 
                                 {{-- Subtotal --}}

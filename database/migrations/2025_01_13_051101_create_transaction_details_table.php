@@ -17,13 +17,12 @@ return new class extends Migration
             $table->id();
             $table->foreignId('order_id')->constrained('orders')->onDelete('cascade');
             $table->foreignId('product_id')->constrained('products')->onDelete('cascade');
-            $table->integer('quantity'); // Jumlah produk yang dipesan
-            $table->decimal('price', 10, 2); // Harga produk saat transaksi
-            $table->decimal('subtotal', 12, 2); // Total harga produk * quantity
-            $table->decimal('original_price', 10, 2);
-            $table->decimal('original_subtotal', 12, 2);
-            $table->timestamps(); // created_at & updated_at otomatis
+            $table->integer('quantity'); // Jumlah produk
+            $table->decimal('price', 12, 2); // Harga satuan saat transaksi
+            $table->decimal('subtotal', 14, 2); // price * quantity
+            $table->timestamps();
         });
+
         
 
         Schema::enableForeignKeyConstraints();

@@ -141,25 +141,17 @@
             </tr>
 
             @php
-            $hargaAwal = $billData['total'] + $billData['discount'] - $billData['tax'];
-            $hargaSetelahDiskon = $hargaAwal - $billData['discount'];
-
-            $taxPercentage = $hargaSetelahDiskon > 0 ? ($billData['tax'] / $hargaSetelahDiskon) * 100 : 0;
-            $discountPercentage = $hargaAwal > 0 ? ($billData['discount'] / $hargaAwal) * 100 : 0;
+                // Pajak dihitung dari subtotal
+                $taxPercentage = $billData['subtotal'] > 0
+                    ? ($billData['tax'] / $billData['subtotal']) * 100
+                    : 0;
             @endphp
 
             @if ($taxPercentage)
-            <tr>
-                <td>Pajak PB1 ({{ number_format($taxPercentage, 0) }}%)</td>
-                <td class="right">{{ number_format($billData['tax'], 2, ',', '.') }}</td>
-            </tr>
-            @endif
-
-            @if ($discountPercentage)
-            <tr>
-                <td>Diskon ({{ number_format($discountPercentage, 0) }}%)</td>
-                <td class="right">{{ number_format($billData['discount'], 2, ',', '.') }}</td>
-            </tr>
+                <tr>
+                    <td>Pajak PB1 ({{ number_format($taxPercentage, 0) }}%)</td>
+                    <td class="right">{{ number_format($billData['tax'], 2, ',', '.') }}</td>
+                </tr>
             @endif
 
             <tr class="total">
@@ -167,6 +159,7 @@
                 <td class="right">{{ number_format($billData['total'], 2, ',', '.') }}</td>
             </tr>
         </table>
+
 
         <div class="line"></div>
 

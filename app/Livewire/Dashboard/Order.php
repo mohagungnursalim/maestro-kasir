@@ -23,9 +23,6 @@ class Order extends Component
     public $payment_method = 'cash'; // Metode pembayaran default
     public $customerMoney = 0; // Uang pelanggan
     
-    public $discount = 0; // Diskon dalam Rupiah
-    public $discount_percentage = 0; // Diskon dalam persen
-    
     public $is_tax; // Apakah ada pajak
     public $tax = 0;   // Pajak dalam Rupiah
     public $tax_percentage; // Pajak dalam persen
@@ -161,38 +158,24 @@ class Order extends Component
         $this->tax_percentage = $value === '' ? 0 : (float) $value;
         $this->calculateTotal();
     }
-    
-    // Perbarui diskon saat persentase diskon berubah
-    public function updatedDiscountPercentage($value)
-    {
-        $this->discount_percentage = $value === '' ? 0 : (float) $value;
-        $this->calculateTotal();
-    }
 
     // Hitung total belanja
     public function calculateTotal()
     {
         $subtotal = collect($this->cart)->sum(fn($item) => $item['price'] * $item['quantity']);
 
-        // Hitung diskon berdasarkan persentase
-        $discount = ($subtotal * $this->discount_percentage) / 100;
-
         // Pajak hanya dihitung jika is_tax true
         $tax = 0;
         if ($this->is_tax) {
-            $tax = (($subtotal - $discount) * $this->tax_percentage) / 100;
+            $tax = ($subtotal * $this->tax_percentage) / 100;
         }
 
         $this->subtotal = $subtotal;
-        $this->discount = $discount;
         $this->tax = $tax;
-        $this->total = $subtotal - $discount + $tax;
+        $this->total = $subtotal + $tax;
         $this->change = max($this->customerMoney - $this->total, 0);
     }
 
-    
-
-    
 
     // Hitung kembalian
     public function calculateChange()
@@ -219,10 +202,9 @@ class Order extends Component
         $billData = [
             'tanggal' => now()->format('d-m-Y H:i'),
             'kasir' => Auth::user()->name ?? 'Owner',
-            'order_number' => 'ORD/' . now()->format('dmY') . '/' . Str::random(6),
+            'order_number' => 'ORD/' . now()->format('dmY') . '/' . Str::random(4),
             'items' => [],
             'subtotal' => 0,
-            'discount' => $this->discount,
             'tax' => $this->tax,
             'total' => $this->total,
         ];
@@ -256,21 +238,21 @@ class Order extends Component
         $userKey = 'order-process:user-' . Auth::id(); 
         $maxAttempts = 5; 
         $decaySeconds = 2; 
-    
+
         if (RateLimiter::tooManyAttempts($userKey, $maxAttempts)) {
             $this->dispatch('errorPayment', 'Terlalu banyak permintaan, coba lagi dalam 2 detik.');
             return;
         }
         RateLimiter::hit($userKey, $decaySeconds);
-    
+
         if (empty($this->cart)) {
             $this->dispatch('nullPaymentSelected');
             return;
         }
-    
+
         $customerMoney = decimal($this->customerMoney);
         $total = decimal($this->total);
-    
+
         if ($this->payment_method === 'cash') {
             if (bccomp($customerMoney, $total, 2) === -1) {
                 $shortage = bcsub($total, $customerMoney, 2);
@@ -279,119 +261,108 @@ class Order extends Component
             }
         } else {
             $this->customerMoney = $total;
+            $customerMoney = $total;
         }
-    
+
         DB::beginTransaction();
         try {
             $productUpdates = [];
             $insufficientProducts = [];
-    
+
+            // Lock produk biar aman dari race condition
             $productIds = collect($this->cart)->pluck('id');
-            $products = Product::with('supplier')->whereIn('id', $productIds)->get()->keyBy('id');
-    
+            $products = Product::whereIn('id', $productIds)->lockForUpdate()->get()->keyBy('id');
+
             foreach ($this->cart as $item) {
                 if (!isset($products[$item['id']]) || $products[$item['id']]->stock < $item['quantity']) {
                     $insufficientProducts[] = $products[$item['id']]->name ?? 'Produk Tidak Ditemukan';
                 }
             }
-    
+
             if (!empty($insufficientProducts)) {
                 DB::rollBack();
                 $this->dispatch('insufficientStock', $insufficientProducts);
                 return;
             }
-    
-            $this->calculateChange();
-    
-            $totalBeforeDiscount = '0';
-            foreach ($this->cart as $item) {
-                $itemPrice = decimal($item['price']);
-                $itemQuantity = (string) $item['quantity'];
-                $itemTotal = bcmul($itemPrice, $itemQuantity, 2);
-                $totalBeforeDiscount = bcadd($totalBeforeDiscount, $itemTotal, 2);
-            }
-    
-            $discount = decimal($this->discount);
-    
+
+            // =========================
+            // CREATE ORDER
+            // =========================
             $order = ModelsOrder::create([
-                'user_id' => Auth::user()->id,
-                'order_number' => 'ORD/' . now()->format('dmY') . '/' . Str::random(6),
+                'user_id' => Auth::id(),
+                'order_number' => 'ORD-' . now()->format('dmY') . '-' . Str::random(4),
                 'payment_method' => $this->payment_method,
-                'tax' => $this->tax,
-                'discount' => $discount,
+                'tax' => decimal($this->tax),
                 'customer_money' => $customerMoney,
-                'change' => '0', // sementara
+                'change' => '0', // nanti diupdate
                 'grandtotal' => $total,
+                'status' => 'paid', // atau 'completed'
             ]);
-    
+
+            // =========================
+            // INSERT TRANSACTION DETAILS
+            // =========================
             $transactionDetails = [];
-            $sumSubtotal = '0';
-    
+
             foreach ($this->cart as $item) {
                 $itemPrice = decimal($item['price']);
                 $itemQuantity = (string) $item['quantity'];
-                $itemTotal = bcmul($itemPrice, $itemQuantity, 2); // harga asli x qty
-    
-                // Diskon proporsional
-                $itemDiscount = '0';
-                if (bccomp($totalBeforeDiscount, '0', 2) === 1) {
-                    $ratio = bcdiv($itemTotal, $totalBeforeDiscount, 10);
-                    $itemDiscount = bcmul($ratio, $discount, 2);
-                }
-    
-                $itemSubtotal = bcsub($itemTotal, $itemDiscount, 2);
-                $sumSubtotal = bcadd($sumSubtotal, $itemSubtotal, 2);
-    
+                $itemSubtotal = bcmul($itemPrice, $itemQuantity, 2);
+
                 $transactionDetails[] = [
                     'order_id' => $order->id,
                     'product_id' => $item['id'],
                     'quantity' => $itemQuantity,
                     'price' => $itemPrice,
                     'subtotal' => $itemSubtotal,
-                    'original_price' => $itemPrice,
-                    'original_subtotal' => $itemTotal,
                     'created_at' => now(),
                     'updated_at' => now(),
                 ];
-    
+
                 $productUpdates[$item['id']] = $item['quantity'];
             }
-    
+
             TransactionDetail::insert($transactionDetails);
-    
-            // Update stock dan sold_count
-            $updateQuery = "UPDATE products SET stock = CASE";
-            $updateSoldCount = ", sold_count = CASE";
-            foreach ($productUpdates as $productId => $quantity) {
-                $updateQuery .= " WHEN id = $productId THEN stock - $quantity";
-                $updateSoldCount .= " WHEN id = $productId THEN sold_count + $quantity";
+
+            // =========================
+            // UPDATE STOCK & SOLD COUNT
+            // =========================
+            foreach ($productUpdates as $productId => $qty) {
+                Product::where('id', $productId)->update([
+                    'stock' => DB::raw("stock - $qty"),
+                    'sold_count' => DB::raw("sold_count + $qty"),
+                ]);
             }
-            $updateQuery .= " END" . $updateSoldCount . " END WHERE id IN (" . implode(',', array_keys($productUpdates)) . ")";
-            DB::statement($updateQuery);
-    
-            // Hitung kembalian
+
+            // =========================
+            // UPDATE CHANGE
+            // =========================
             $change = bcsub($customerMoney, $total, 2);
             $order->change = $change;
             $order->save();
-    
+
             DB::commit();
-    
+
+            // =========================
+            // RESET & REFRESH
+            // =========================
             $this->refreshCacheStock();
             $this->refreshCacheTransactionDetail();
-    
+
             $this->dispatch('refreshProductStock');
             $this->dispatch('successPayment');
-    
+
             $this->resetCart();
-    
+
             $this->dispatch('printReceipt', $order->id);
-    
+
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error($e->getMessage());
-            $this->dispatch('errorPayment');
+            $this->dispatch('errorPayment', $e->getMessage());
         }
     }
+
     
 
     // Reset keranjang
@@ -400,11 +371,9 @@ class Order extends Component
         $this->cart = [];
         $this->subtotal = 0;
         $this->tax = 0;
-        $this->discount = 0;
         $this->total = 0;
         $this->customerMoney = 0;
         $this->change = 0;
-        $this->discount_percentage = 0;
 
         $this->cartNotEmpty = false;
     }
