@@ -21,7 +21,7 @@ class Order extends Component
     public $limitProducts = 8; // Batas produk yang ditampilkan
 
     public $payment_method = 'cash'; // Metode pembayaran default
-    public $customerMoney = 0; // Uang pelanggan
+    public $customerMoney = null; // Uang pelanggan
     
     public $is_tax; // Apakah ada pajak
     public $tax = 0;   // Pajak dalam Rupiah
@@ -144,10 +144,13 @@ class Order extends Component
             unset($this->cart[$index]);
             $this->cart = array_values($this->cart);
             $this->calculateTotal();
-            $this->customerMoney = 0;
+            $this->customerMoney = null;
             $this->change = 0;
 
             $this->cartNotEmpty = false;
+
+            $this->dispatch('resetCustomerMoneyInput');
+
         }
     }
 
@@ -353,6 +356,8 @@ class Order extends Component
             $this->dispatch('successPayment');
 
             $this->resetCart();
+            $this->dispatch('resetCustomerMoneyInput');
+
 
             $this->dispatch('printReceipt', $order->id);
 
@@ -372,8 +377,10 @@ class Order extends Component
         $this->subtotal = 0;
         $this->tax = 0;
         $this->total = 0;
-        $this->customerMoney = 0;
+        $this->customerMoney = null;
         $this->change = 0;
+
+        $this->dispatch('resetCustomerMoneyInput');
 
         $this->cartNotEmpty = false;
     }

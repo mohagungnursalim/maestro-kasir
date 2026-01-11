@@ -323,15 +323,23 @@
                                     </div>
 
                                     <!-- Input Uang Pelanggan -->
-                                    <div class="mt-3">
-                                        <label for="customerMoney"
-                                            class="block mb-2 text-sm font-medium text-gray-900">Uang Pelanggan</label>
-                                        <input type="number" id="customerMoney" name="customerMoney"
-                                            wire:model.live.debounce.800ms="customerMoney"
+                                    <div class="mt-3" x-data="moneyInput()">
+                                        <label class="block mb-2 text-sm font-medium text-gray-900">
+                                            Uang Pelanggan
+                                        </label>
+
+                                        <input type="text"
+                                            x-ref="input"
+                                            x-on:input="onInput($event)"
+                                            x-on:focus="if(display === '0') display = ''"
+                                            x-bind:value="display"
                                             :disabled="@json(empty($cart))"
-                                            class="block w-full p-2 text-gray-900 border border-gray-300 rounded-lg bg-gray-50 text-xs 
-                                                   focus:ring-blue-500 focus:border-blue-500 disabled:cursor-not-allowed" placeholder="Masukkan uang pelanggan...">
+                                            class="block w-full p-2 text-gray-900 border border-gray-300 rounded-lg bg-gray-50 text-xs
+                                                focus:ring-blue-500 focus:border-blue-500 disabled:cursor-not-allowed"
+                                            placeholder="Masukkan uang pelanggan...">
                                     </div>
+
+
 
                                     {{-- <!-- Catatan -->
                                     <template x-if="!isCash()">
@@ -456,6 +464,39 @@
             window.open(url, '_blank', 'width=640,height=600');
         });
     </script>
+    <script>
+        document.addEventListener('alpine:init', () => {
+            Alpine.data('moneyInput', () => ({
+                display: '',
+                raw: @entangle('customerMoney').live,
+
+                format(n) {
+                    if (!n) return '';
+                    return new Intl.NumberFormat('id-ID').format(n);
+                },
+                init() {
+                    window.addEventListener('resetCustomerMoneyInput', () => {
+                        this.display = '';
+                        this.raw = 0;
+                    });
+                },
+
+                onInput(e) {
+                    let value = e.target.value.replace(/[^0-9]/g, '');
+
+                    // Format value
+                    this.display = this.format(value);
+
+                    // Delay kirim ke Livewire 500ms
+                    clearTimeout(this._timer);
+                    this._timer = setTimeout(() => {
+                        this.raw = value === '' ? 0 : parseInt(value);
+                    }, 500);
+                }
+            }));
+        });
+    </script>
+
 
 </div>
 </div>
