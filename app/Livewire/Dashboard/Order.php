@@ -7,12 +7,14 @@ use App\Models\Product;
 use App\Models\Order as ModelsOrder;
 use App\Models\StoreSetting;
 use App\Models\TransactionDetail;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use PhpParser\Node\Expr\AssignOp\Mod;
 
 class Order extends Component
 {
@@ -202,10 +204,12 @@ class Order extends Component
             return;
         }
 
+        $orderNumber = $this->generateOrderNumber();
+
         $billData = [
             'tanggal' => now()->format('d-m-Y H:i'),
             'kasir' => Auth::user()->name ?? 'Owner',
-            'order_number' => 'ORD/' . now()->format('dmY') . '/' . Str::random(4),
+            'order_number' => $orderNumber,
             'items' => [],
             'subtotal' => 0,
             'tax' => $this->tax,
@@ -233,6 +237,25 @@ class Order extends Component
         // Dispatch JS untuk buka tab baru
         $this->dispatch('showBillPrintPopup', route('order.bill'));
         
+    }
+
+    public static function generateOrderNumber(): string
+    {
+        $today = now()->format('dmY');
+
+        $last = ModelsOrder::whereDate('created_at', now())
+            ->where('order_number', 'like', "ORD-$today-%")
+            ->orderBy('id', 'desc')
+            ->first();
+
+        if (!$last) {
+            $nextNumber = 1;
+        } else {
+            $lastNumber = (int) substr($last->order_number, -4);
+            $nextNumber = $lastNumber + 1;
+        }
+
+        return 'ORD-' . $today . '-' . str_pad($nextNumber, 4, '0', STR_PAD_LEFT);
     }
 
     // Proses Order 
@@ -288,12 +311,14 @@ class Order extends Component
                 return;
             }
 
+            $orderNumber = $this->generateOrderNumber();
+
             // =========================
             // CREATE ORDER
             // =========================
             $order = ModelsOrder::create([
                 'user_id' => Auth::id(),
-                'order_number' => 'ORD-' . now()->format('dmY') . '-' . Str::random(4),
+                'order_number' => $orderNumber,
                 'payment_method' => $this->payment_method,
                 'tax' => decimal($this->tax),
                 'customer_money' => $customerMoney,
