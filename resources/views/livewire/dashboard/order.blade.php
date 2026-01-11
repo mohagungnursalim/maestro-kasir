@@ -323,61 +323,61 @@
                                     </div>
 
                                     <!-- Input Uang Pelanggan -->
-                                   <div class="mt-3" 
-                                        x-data="{
-                                            display: '',
-                                            raw: @entangle('customerMoney').live,
-                                            _timer: null,
+                                    <div class="mt-3" 
+                                            x-data="{
+                                                display: '',
+                                                raw: @entangle('customerMoney').live,
+                                                _timer: null,
 
-                                            format(n) {
-                                                if (!n) return '';
-                                                return new Intl.NumberFormat('id-ID').format(n);
-                                            },
+                                                format(n) {
+                                                    if (!n) return '';
+                                                    return new Intl.NumberFormat('id-ID').format(n);
+                                                },
 
-                                            init() {
-                                                // Inisialisasi format saat load
-                                                if(this.raw) this.display = this.format(this.raw);
+                                                init() {
+                                                    // Inisialisasi format saat load
+                                                    if(this.raw) this.display = this.format(this.raw);
 
-                                                // Listener untuk reset
-                                                window.addEventListener('resetCustomerMoneyInput', () => {
-                                                    this.display = '';
-                                                    this.raw = 0;
-                                                });
-                                                
-                                                // Opsional: Watch jika Livewire mengupdate nilai dari server
-                                                this.$watch('raw', (value) => {
-                                                    // Cek agar tidak konflik saat mengetik
-                                                    if (document.activeElement !== this.$refs.input) {
-                                                        this.display = this.format(value);
-                                                    }
-                                                });
-                                            },
+                                                    // Listener untuk reset
+                                                    window.addEventListener('resetCustomerMoneyInput', () => {
+                                                        this.display = '';
+                                                        this.raw = 0;
+                                                    });
+                                                    
+                                                    // Opsional: Watch jika Livewire mengupdate nilai dari server
+                                                    this.$watch('raw', (value) => {
+                                                        // Cek agar tidak konflik saat mengetik
+                                                        if (document.activeElement !== this.$refs.input) {
+                                                            this.display = this.format(value);
+                                                        }
+                                                    });
+                                                },
 
-                                            onInput(e) {
-                                                let value = e.target.value.replace(/[^0-9]/g, '');
-                                                this.display = this.format(value);
+                                                onInput(e) {
+                                                    let value = e.target.value.replace(/[^0-9]/g, '');
+                                                    this.display = this.format(value);
 
-                                                clearTimeout(this._timer);
-                                                this._timer = setTimeout(() => {
-                                                    this.raw = value === '' ? 0 : parseInt(value);
-                                                }, 500);
-                                            }
-                                        }">
-                                        <label class="block mb-2 text-sm font-medium text-gray-900">
-                                            Uang Pelanggan
-                                        </label>
+                                                    clearTimeout(this._timer);
+                                                    this._timer = setTimeout(() => {
+                                                        this.raw = value === '' ? 0 : parseInt(value);
+                                                    }, 500);
+                                                }
+                                            }">
+                                            <label class="block mb-2 text-sm font-medium text-gray-900">
+                                                Uang Pelanggan
+                                            </label>
 
-                                        <input type="text"
-                                            x-ref="input"
-                                            x-on:input="onInput($event)"
-                                            x-on:focus="if(display === '0') display = ''"
-                                            x-bind:value="display"
-                                            :disabled="@json(empty($cart))"
-                                            class="block w-full p-2 text-gray-900 border border-gray-300 rounded-lg bg-gray-50 text-xs focus:ring-blue-500 focus:border-blue-500 disabled:cursor-not-allowed"
-                                            placeholder="Masukkan uang pelanggan...">
+                                            <input type="text"
+                                                x-ref="input"
+                                                x-on:input="onInput($event)"
+                                                x-on:focus="if(display === '0') display = ''"
+                                                x-bind:value="display"
+                                                :disabled="@json(empty($cart))"
+                                                class="block w-full p-2 text-gray-900 border border-gray-300 rounded-lg bg-gray-50 text-xs focus:ring-blue-500 focus:border-blue-500 disabled:cursor-not-allowed"
+                                                placeholder="Masukkan uang pelanggan...">
+                                        </div>
+                    
                                     </div>
-                   
-                                </div>
 
                                 {{-- Subtotal --}}
                                 <dl class="flex justify-between">
@@ -423,7 +423,7 @@
                                     x-on:click="disabled = true; setTimeout(() => disabled = false, 2000)"
                                     wire:click="processOrder" wire:loading.remove wire:target="processOrder"
                                     wire:loading.attr="disabled" type="button"
-                                    class="text-white bg-gradient-to-r from-purple-500 to-pink-500 hover:bg-gradient-to-l focus:ring-4 focus:outline-none focus:ring-purple-200 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                                    class="focus:outline-none text-white bg-green-500 hover:bg-green-700 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 disabled:opacity-50 disabled:cursor-not-allowed"
                                     @disabled(empty($cart))>
                                     Proses
                                 </button>
@@ -432,7 +432,7 @@
 
                                 <!-- Tombol Loading saat Memproses -->
                                 <button disabled wire:loading wire:target="processOrder"
-                                    class="text-white bg-gradient-to-r from-purple-500 to-pink-500 hover:bg-gradient-to-l focus:ring-4 focus:outline-none focus:ring-purple-200 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2 disabled:opacity-50 disabled:cursor-not-allowed">
+                                    class="focus:outline-none text-white bg-green-500 hover:bg-green-700 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 disabled:opacity-50 disabled:cursor-not-allowed">
                                     Memproses..
                                     <svg class="inline w-4 h-4 text-white animate-spin ml-2"
                                         xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">

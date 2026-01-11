@@ -128,7 +128,7 @@
                 </label>
             
                 <!-- Input pajak -->
-                <div id="taxInputGroup" class="mt-3 hidden">
+                <div id="taxInputGroup" class="mt-3 @if(!$settings->is_tax) hidden @endif">
                     <label for="tax" class="block text-sm font-medium">Tarif Pajak (%)</label>
                     <input type="number" id="tax" name="tax" wire:model="tax"
                         class="w-full border-gray-300 border rounded-md p-2" min="0" max="100" required>
