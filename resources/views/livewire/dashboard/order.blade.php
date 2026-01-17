@@ -191,6 +191,7 @@
                                 <!-- Qty Control -->
                                 <div x-data="{ quantity: {{ $item['quantity'] }} }" class="flex items-center gap-1">
 
+                                    {{-- Button (-) --}}
                                     <button type="button"
                                         class="w-6 h-6 flex items-center justify-center border rounded bg-gray-100 hover:bg-gray-200"
                                         x-on:click="
@@ -199,16 +200,17 @@
                                                 clearTimeout(window.qtyTimeout);
                                                 window.qtyTimeout = setTimeout(() => {
                                                     $wire.updateQuantity({{ $index }}, quantity);
-                                                }, 400);
+                                                }, 500);
                                             }
                                         ">
                                         −
                                     </button>
 
-                                <input type="number" min="1" class="w-14 h-7 text-center text-xs font-semibold border border-gray-300 rounded text-gray-900 bg-white focus:outline-none focus:ring-1 focus:ring-blue-500"
+                                    <input type="number" min="1" class="w-14 h-7 text-center text-xs font-semibold border border-gray-300 rounded text-gray-900 bg-white focus:outline-none focus:ring-1 focus:ring-blue-500"
                                             x-model.number="quantity"
                                             x-on:input.debounce.400ms="$wire.updateQuantity({{ $index }}, quantity)">
 
+                                    {{-- Button (+) --}}
                                     <button type="button"
                                         class="w-6 h-6 flex items-center justify-center border rounded bg-gray-100 hover:bg-gray-200"
                                         x-on:click="
@@ -216,7 +218,7 @@
                                             clearTimeout(window.qtyTimeout);
                                             window.qtyTimeout = setTimeout(() => {
                                                 $wire.updateQuantity({{ $index }}, quantity);
-                                            }, 400);
+                                            }, 500);
                                         ">
                                         +
                                     </button>
