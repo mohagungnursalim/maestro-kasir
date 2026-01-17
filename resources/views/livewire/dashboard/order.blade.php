@@ -26,7 +26,7 @@
                     </form>
                 </div>
 
-               
+
 
                 @if ($products)
                 <div class="container mx-auto mt-4 px-4 sm:px-8">
@@ -34,89 +34,93 @@
                         <div class="flex gap-4 w-max mx-auto scroll-smooth snap-x snap-mandatory">
                             @forelse ($products as $product)
                             @php
-                                $isInCart = collect($cart)->contains('id', $product->id);
+                            $isInCart = collect($cart)->contains('id', $product->id);
                             @endphp
-                            <div class="w-[45vw] sm:w-[22vw] md:w-[18vw] lg:w-[15vw] xl:w-[12vw] min-w-[160px] flex-shrink-0 snap-start">
+                            <div
+                                class="w-[45vw] sm:w-[22vw] md:w-[18vw] lg:w-[15vw] xl:w-[12vw] min-w-[160px] flex-shrink-0 snap-start">
                                 <div
                                     class="bg-white rounded-lg shadow-sm overflow-hidden transition-all duration-300 hover:shadow-lg 
                                     {{ $isInCart ? 'opacity-75' : '' }} {{ $product->stock < 1 ? 'opacity-75' : '' }} flex flex-col">
-                
-                                    <!-- Product Image -->
-                                    <div class="relative aspect-square overflow-hidden bg-gray-100">
-                                        <img
-                                            class="absolute inset-0 w-full h-full object-cover object-center transition-all duration-300 hover:scale-105"
-                                            src="{{ asset('storage/' . $product->image) }}"
-                                            alt="{{ $product->name }}"
-                                            loading="lazy"
-                                            onerror="this.src='{{ asset('images/placeholder.png') }}'">
-                                    </div>                                    
-                
-                                    <!-- Product Details -->
-                                    <div class="p-2 sm:p-3 flex-1 flex flex-col">
-                                        <h3 class="text-xs sm:text-sm font-medium text-gray-800 line-clamp-2 mb-1 min-h-[2.5rem]"
-                                            title="{{ $product->name }}">
-                                            {{ $product->name }}
-                                        </h3>
-                
-                                        <div class="mt-auto space-y-2">
-                                            <div class="flex justify-between items-center">
-                                                <span class="text-sm sm:text-base font-bold text-gray-900">
-                                                    Rp{{ number_format($product->price, 2, ',', '.') }}
-                                                </span>
-                
-                                                <span
-                                                    class="@if($product->stock < 1) bg-red-100 text-red-800 
-                                                            @elseif($product->stock < 10) bg-yellow-100 text-yellow-800 
-                                                            @else bg-blue-100 text-blue-800 
-                                                            @endif 
-                                                            inline-flex items-center text-[10px] sm:text-xs px-1.5 py-0.5 rounded-full">
-                                                    {{ $product->stock > 0 ? $product->stock : 'Habis' }}
-                                                </span>
-                                            </div>
-                
-                                            <!-- Add to Cart Button -->
-                                            <div class="w-full">
-                                                @if (!$isInCart)
-                                                <button wire:click="addToCart({{ $product->id }})" wire:loading.remove
-                                                    wire:target="addToCart({{ $product->id }})" onclick="playSelectSound()"
-                                                    @if($product->stock < 1) disabled @endif
-                                                    class="w-full bg-gray-900 text-white py-1.5 sm:py-2 px-2 sm:px-3 rounded text-xs sm:text-sm
-                                                        hover:bg-gray-800 transition duration-200 flex items-center 
-                                                        justify-center gap-1 disabled:bg-gray-300 disabled:cursor-not-allowed">
-                                                    <svg class="w-3 h-3 sm:w-4 sm:h-4" fill="none" stroke="currentColor"
-                                                        viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round"
-                                                            stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                                                    </svg>
-                                                    <span>Tambah</span>
-                                                </button>
-                
-                                                <button wire:loading wire:target="addToCart({{ $product->id }})"
-                                                    class="w-full bg-gray-900 text-white py-1.5 sm:py-2 px-2 sm:px-3 rounded text-xs sm:text-sm
-                                                        flex items-center justify-center gap-1 cursor-wait">
-                                                    <svg class="animate-spin w-3 h-3 sm:w-4 sm:h-4" fill="none"
-                                                        viewBox="0 0 24 24">
-                                                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor"
-                                                            stroke-width="4" />
-                                                        <path class="opacity-75" fill="currentColor"
-                                                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                                                    </svg>
-                                                </button>
-                                                @else
-                                                <button disabled
-                                                    class="w-full bg-green-100 text-green-800 py-1.5 sm:py-2 px-2 sm:px-3 rounded text-xs sm:text-sm
-                                                        flex items-center justify-center gap-1 cursor-not-allowed">
-                                                    <svg class="w-3 h-3 sm:w-4 sm:h-4" fill="none" stroke="currentColor"
-                                                        viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                            d="M5 13l4 4L19 7" />
-                                                    </svg>
-                                                    <span>Di Keranjang</span>
-                                                </button>
-                                                @endif
+
+                                    <div class="flex gap-2 p-2 border rounded-lg hover:shadow-sm transition bg-white">
+
+                                        <!-- Product Image -->
+                                        <div class="relative w-14 h-14 overflow-hidden bg-gray-100 rounded">
+                                            <img class="w-full h-full object-cover object-center transition-all duration-300 hover:scale-105"
+                                                src="{{ asset('storage/' . $product->image) }}"
+                                                alt="{{ $product->name }}" loading="lazy"
+                                                onerror="this.src='{{ asset('images/placeholder.png') }}'">
+                                        </div>
+
+                                        <!-- Product Details -->
+                                        <div class="flex-1 flex flex-col min-w-0">
+
+                                            <!-- Product Name -->
+                                            <h3 class="text-xs leading-tight font-medium text-gray-800 line-clamp-2 min-h-[2rem]"
+                                                title="{{ $product->name }}">
+                                                {{ $product->name }}
+                                            </h3>
+
+                                            <div class="mt-auto space-y-1">
+
+                                                <!-- Price & Stock -->
+                                                <div class="flex justify-between items-center">
+                                                    <span class="text-xs font-bold text-gray-900">
+                                                        Rp{{ number_format($product->price, 0, ',', '.') }}
+                                                    </span>
+
+                                                    <span class="@if($product->stock < 1) bg-red-100 text-red-800 
+                                                    @elseif($product->stock < 10) bg-yellow-100 text-yellow-800 
+                                                    @else bg-blue-100 text-blue-800 
+                                                    @endif 
+                                                    inline-flex items-center text-xs px-1 py-0.5 rounded">
+                                                        {{ $product->stock > 0 ? $product->stock : 'Habis' }}
+                                                    </span>
+                                                </div>
+
+                                                <!-- Add to Cart Button -->
+                                                <div class="w-full">
+                                                    @if (!$isInCart)
+                                                    <button wire:click="addToCart({{ $product->id }})"
+                                                        wire:loading.remove wire:target="addToCart({{ $product->id }})"
+                                                        onclick="playSelectSound()" @if($product->stock < 1) disabled
+                                                            @endif class="w-full bg-gray-900 text-white py-0.5 px-2 rounded text-xs hover:bg-gray-800 transition flex items-center justify-center gap-1 disabled:bg-gray-300 disabled:cursor-not-allowed">
+
+                                                            <svg class="w-3 h-3" fill="none" stroke="currentColor"
+                                                                viewBox="0 0 24 24">
+                                                                <path stroke-linecap="round" stroke-linejoin="round"
+                                                                    stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                                                            </svg>
+                                                            <span>Tambah</span>
+                                                    </button>
+
+                                                    <button wire:loading wire:target="addToCart({{ $product->id }})"
+                                                        class="w-full bg-gray-900 text-white py-0.5 px-2 rounded text-xs flex items-center justify-center gap-1 cursor-wait">
+                                                        <svg class="animate-spin w-3 h-3" fill="none"
+                                                            viewBox="0 0 24 24">
+                                                            <circle class="opacity-25" cx="12" cy="12" r="10"
+                                                                stroke="currentColor" stroke-width="4" />
+                                                            <path class="opacity-75" fill="currentColor"
+                                                                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                                                        </svg>
+                                                    </button>
+                                                    @else
+                                                    <button disabled class="w-full bg-green-100 text-green-800 py-0.5 px-2 rounded text-xs flex items-center justify-center gap-1 cursor-not-allowed">
+                                                        <svg class="w-3 h-3" fill="none" stroke="currentColor"
+                                                            viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                                stroke-width="2" d="M5 13l4 4L19 7" />
+                                                        </svg>
+                                                        <span>Ditambahkan</span>
+                                                    </button>
+                                                    @endif
+                                                </div>
+
                                             </div>
                                         </div>
                                     </div>
+
+
                                 </div>
                             </div>
                             @empty
@@ -135,7 +139,7 @@
                     </div>
                 </div>
                 @endif
-                
+
 
 
 
@@ -143,139 +147,108 @@
                 <!-- Keranjang Belanja -->
                 <h2 class="text-xl font-semibold text-gray-900 sm:text-2xl mt-6">Pesanan</h2>
                 <div class="mt-6 sm:mt-8 md:gap-6 lg:flex lg:items-start">
-                    <div class="w-full lg:w-2/3 max-h-[60vh] overflow-y-auto custom-scrollbar">
-                        <div class="space-y-6">
-                            @if (empty($cart))
-                            <div class="text-center mt-9">
-                                <h2 class="text-gray-500">Pesanan Kosong <i class="bi bi-receipt"></i></h2>
+                    
+                 <!-- Daftar Item Pesanan -->
+                <div class="w-full lg:w-2/3 max-h-[60vh] overflow-y-auto custom-scrollbar">
+
+                    <div class="space-y-2">
+
+                        @if (empty($cart))
+                            <div class="text-center mt-9 text-sm text-gray-500">
+                                Pesanan Kosong 🧾
                             </div>
-                            @else
-                            @foreach ($cart as $index => $item)
-                            <div class="rounded-lg border border-gray-200 bg-white p-4 shadow-sm md:p-6">
-                                <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
-                                    <div class="flex-1">
-                                        <span class="text-base font-medium text-gray-900">{{ $item['name'] }}</span>
-                                        <div class="flex items-center gap-4 mt-2">
-                                            <button wire:loading.remove wire:target='removeFromCart({{ $index }})'
-                                                wire:click="removeFromCart({{ $index }})"
-                                                onclick="event.stopPropagation(); playSelectSound()" type="button"
-                                                class="text-sm text-red-600 hover:underline">Hapus</button>
-                                            <button wire:loading wire:target='removeFromCart({{ $index }})'
-                                                type="button" class="text-sm text-red-600 hover:underline">
-                                                Hapus
-                                                <svg class="inline w-4 h-4 text-gray-900 animate-spin ml-2"
-                                                    xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                                    <circle class="opacity-25" cx="12" cy="12" r="10"
-                                                        stroke="currentColor" stroke-width="4"></circle>
-                                                    <path class="opacity-75" fill="currentColor"
-                                                        d="M4 12a8 8 0 018-8v4a4 4 0 100 8v4a8 8 0 01-8-8z"></path>
-                                                </svg>
-                                            </button>
-                                        </div>
-                                    </div>
-                                    <div class="flex items-center justify-between md:order-3 md:justify-end">
+                        @else
 
-                                        <div x-data="{ quantity: {{ $item['quantity'] }} }" class="flex items-center">
-                                            <!-- Tombol Kurangi (-) dengan delay 500ms -->
-                                            <button type="button" x-on:click="
-                                                    if (quantity > 1) { 
-                                                        quantity--; 
-                                                        clearTimeout(window.qtyTimeout);
-                                                        window.qtyTimeout = setTimeout(() => { 
-                                                            $wire.updateQuantity({{ $index }}, quantity); 
-                                                        }, 500);
-                                                    }"
-                                                class="inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-md border border-gray-300 bg-gray-100 hover:bg-gray-200 focus:outline-none">
-                                                <svg class="h-2.5 w-2.5 text-gray-900" aria-hidden="true"
-                                                    xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 18 18">
-                                                    <path stroke="currentColor" stroke-linecap="round"
-                                                        stroke-linejoin="round" stroke-width="2" d="M1 9h16"></path>
-                                                </svg>
-                                            </button>
+                        @foreach ($cart as $index => $item)
 
+                        <div class="border rounded-md bg-white px-3 py-2 text-sm">
 
-                                            <!-- Input Jumlah -->
-                                            <input id="cart.{{ $index }}.quantity" name="cart.{{ $index }}.quantity"
-                                                type="number" min="1" x-model="quantity"
-                                                x-on:input.debounce.500ms="$wire.updateQuantity({{ $index }}, quantity)"
-                                                class="w-14 border-0 bg-transparent text-center text-sm font-medium text-gray-900 focus:outline-none">
+                            <div class="flex items-center gap-2">
 
-                                            <!-- Tombol Tambah (+) dengan delay 500ms -->
-                                            <button type="button" x-on:click="
-                                                            quantity++;
-                                                            clearTimeout(window.qtyTimeout);
-                                                            window.qtyTimeout = setTimeout(() => { 
-                                                                $wire.updateQuantity({{ $index }}, quantity); 
-                                                            }, 500);
-                                                        "
-                                                class="inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-md border border-gray-300 bg-gray-100 hover:bg-gray-200 focus:outline-none">
-                                                <svg class="h-2.5 w-2.5 text-gray-900" aria-hidden="true"
-                                                    xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 18 18">
-                                                    <path stroke="currentColor" stroke-linecap="round"
-                                                        stroke-linejoin="round" stroke-width="2" d="M9 1v16M1 9h16">
-                                                    </path>
-                                                </svg>
-                                            </button>
+                                <!-- Nama & Batal -->
+                                <div class="flex-1 min-w-0">
+                                    <div class="flex justify-between items-center gap-2">
+                                        <span class="font-medium text-gray-900 truncate">
+                                            {{ $item['name'] }}
+                                        </span>
 
-                                        </div>
+                                        <!-- Hapus -->
+                                        <button wire:click="removeFromCart({{ $index }})"
+                                            wire:loading.remove
+                                            wire:target="removeFromCart({{ $index }})"
+                                            onclick="event.stopPropagation(); playSelectSound()"
+                                            class="text-xs text-red-600 hover:underline">
+                                            Batal
+                                        </button>
 
-                                        <div class="text-end md:order-4 md:w-32">
-                                            <p class="text-base font-bold text-gray-900">
-                                                Rp{{ number_format($item['price'] * $item['quantity'], 2, ',', '.') }}
-                                            </p>                                            
-                                        </div>
+                                        <span wire:loading wire:target="removeFromCart({{ $index }})"
+                                            class="text-xs text-gray-400 animate-pulse">
+                                            Membatalkan..
+                                        </span>
                                     </div>
                                 </div>
+
+                                <!-- Qty Control -->
+                                <div x-data="{ quantity: {{ $item['quantity'] }} }" class="flex items-center gap-1">
+
+                                    <button type="button"
+                                        class="w-6 h-6 flex items-center justify-center border rounded bg-gray-100 hover:bg-gray-200"
+                                        x-on:click="
+                                            if (quantity > 1) {
+                                                quantity--;
+                                                clearTimeout(window.qtyTimeout);
+                                                window.qtyTimeout = setTimeout(() => {
+                                                    $wire.updateQuantity({{ $index }}, quantity);
+                                                }, 400);
+                                            }
+                                        ">
+                                        −
+                                    </button>
+
+                                <input type="number" min="1" class="w-14 h-7 text-center text-xs font-semibold border border-gray-300 rounded text-gray-900 bg-white focus:outline-none focus:ring-1 focus:ring-blue-500"
+                                            x-model.number="quantity"
+                                            x-on:input.debounce.400ms="$wire.updateQuantity({{ $index }}, quantity)">
+
+                                    <button type="button"
+                                        class="w-6 h-6 flex items-center justify-center border rounded bg-gray-100 hover:bg-gray-200"
+                                        x-on:click="
+                                            quantity++;
+                                            clearTimeout(window.qtyTimeout);
+                                            window.qtyTimeout = setTimeout(() => {
+                                                $wire.updateQuantity({{ $index }}, quantity);
+                                            }, 400);
+                                        ">
+                                        +
+                                    </button>
+
+                                </div>
+
+                                <!-- Subtotal -->
+                                <div class="w-24 text-right font-semibold text-gray-900 text-xs">
+                                    Rp{{ number_format($item['price'] * $item['quantity'], 0, ',', '.') }}
+                                </div>
+
                             </div>
-                            @endforeach
-                            @endif
+
                         </div>
-                        <!-- Tombol Konfirmasi -->
-                        @if (!empty($cart))
-                        <div class="flex justify-center mt-6">
-                            <button 
-                                x-data 
-                                @click="$dispatch('open-print-preview')" 
-                                class="px-4 py-2 bg-blue-600 text-white font-semibold rounded-md block text-white bg-gray-700 hover:bg-gray-800  transition">
-                                Cetak Tagihan/Tiket
-                            </button>
-                        </div>
+
+                        @endforeach
                         @endif
 
-                        <!-- Modal Konfirmasi -->
-                        <div 
-                        x-data="{ show: false }" 
-                        x-on:open-print-preview.window="show = true" 
-                        x-show="show" 
-                        class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50"
-                        x-cloak>
-                        <div class="bg-white p-6 rounded-md w-96 shadow-lg">
-                            <h2 class="text-lg font-bold mb-4 text-gray-800">Konfirmasi</h2>
-                            <p class="text-gray-600 mb-4">Ingin cetak tagihan di tab baru?</p>
-
-                            <div class="flex justify-center space-x-2">
-
-                                {{-- Batal Cetak --}}
-                                <button 
-                                    @click="show = false" 
-                                    class="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400">
-                                    Batal
-                                </button>
-                            
-                                {{-- Tombol Cetak --}}
-                                <button 
-                                    wire:click="billPayment"
-                                    wire:loading.attr="disabled"
-                                    @click="show = false"
-                                    class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700">
-                                    Cetak
-                                </button>
-                            </div>                            
-                            
-                        </div>
-                        </div>
-
                     </div>
+
+                    <!-- Tombol Cetak -->
+                    @if (!empty($cart))
+                    <div class="flex justify-center mt-4">
+                        <button x-data @click="$dispatch('open-print-preview')"
+                            class="px-4 py-2 text-sm bg-gray-800 text-white rounded hover:bg-gray-900 transition">
+                            Cetak Tagihan
+                        </button>
+                    </div>
+                    @endif
+
+                </div>
+
 
 
                     <!-- Total dan Pembayaran -->
@@ -285,12 +258,10 @@
                             <div class="space-y-4 mt-4">
 
                                 {{-- Metode Pembayaran --}}
-                                <div 
-                                    x-data="{ 
+                                <div x-data="{ 
                                         paymentMethod: @entangle('payment_method'), 
                                         isCash() { return this.paymentMethod === 'cash'; }
-                                    }"
-                                    x-init="$watch('paymentMethod', value => {
+                                    }" x-init="$watch('paymentMethod', value => {
                                         if (value !== 'cash') {
                                             @this.set('customerMoney', 0);
                                         }
@@ -298,18 +269,18 @@
 
                                     <!-- Pilih Metode Pembayaran -->
                                     <div>
-                                        <select x-model="paymentMethod" wire:model="payment_method" id="paymentMethod" name="paymentMethod"
-                                            :disabled="@json(empty($cart))" class="block py-2.5 px-0 w-full text-sm text-gray-500 bg-transparent border-0 border-b-2 
+                                        <select x-model="paymentMethod" wire:model="payment_method" id="paymentMethod"
+                                            name="paymentMethod" :disabled="@json(empty($cart))" class="block py-2.5 px-0 w-full text-sm text-gray-500 bg-transparent border-0 border-b-2 
                                                    border-gray-200 appearance-none focus:outline-none focus:ring-0 
                                                    focus:border-gray-200 peer disabled:cursor-not-allowed">
 
                                             <option value="cash">Tunai</option>
                                             <option value="debit_card">Kartu Debit</option>
 
-                                            
-                                                <option value="ewallet">Qris</option>
-                                                
-                                            
+
+                                            <option value="ewallet">Qris</option>
+
+
 
                                             <optgroup label="Transfer Bank">
                                                 <option value="bca">BCA</option>
@@ -323,8 +294,7 @@
                                     </div>
 
                                     <!-- Input Uang Pelanggan -->
-                                    <div class="mt-3" 
-                                            x-data="{
+                                    <div class="mt-3" x-data="{
                                                 display: '',
                                                 raw: @entangle('customerMoney').live,
                                                 _timer: null,
@@ -363,21 +333,18 @@
                                                     }, 500);
                                                 }
                                             }">
-                                            <label class="block mb-2 text-sm font-medium text-gray-900">
-                                                Uang Pelanggan
-                                            </label>
+                                        <label class="block mb-2 text-sm font-medium text-gray-900">
+                                            Uang Pelanggan
+                                        </label>
 
-                                            <input type="text"
-                                                x-ref="input"
-                                                x-on:input="onInput($event)"
-                                                x-on:focus="if(display === '0') display = ''"
-                                                x-bind:value="display"
-                                                :disabled="@json(empty($cart))"
-                                                class="block w-full p-2 text-gray-900 border border-gray-300 rounded-lg bg-gray-50 text-xs focus:ring-blue-500 focus:border-blue-500 disabled:cursor-not-allowed"
-                                                placeholder="Masukkan uang pelanggan...">
-                                        </div>
-                    
+                                        <input type="text" x-ref="input" x-on:input="onInput($event)"
+                                            x-on:focus="if(display === '0') display = ''" x-bind:value="display"
+                                            :disabled="@json(empty($cart))"
+                                            class="block w-full p-2 text-gray-900 border border-gray-300 rounded-lg bg-gray-50 text-xs focus:ring-blue-500 focus:border-blue-500 disabled:cursor-not-allowed"
+                                            placeholder="Masukkan uang pelanggan...">
                                     </div>
+
+                                </div>
 
                                 {{-- Subtotal --}}
                                 <dl class="flex justify-between">
@@ -388,16 +355,17 @@
                                 </dl>
 
                                 <!-- Pajak dalam Rupiah -->
-                                @if ($settings->is_tax)    
-                                    <dl class="flex justify-between mt-3">
-                                        <dt class="text-gray-500">Pajak PB1 (<span>{{ $tax_percentage }}</span>%)</dt>
-                                        
-                                        @if (!empty($cart) && isset($tax))
-                                            <span class="font-bold p-2 text-red-500 border border-gray-300 rounded-lg bg-gray-50 text-xs">
-                                                Rp{{ number_format($tax, 2, ',', '.') }}
-                                            </span>
-                                        @endif
-                                    </dl>
+                                @if ($settings->is_tax)
+                                <dl class="flex justify-between mt-3">
+                                    <dt class="text-gray-500">Pajak PB1 (<span>{{ $tax_percentage }}</span>%)</dt>
+
+                                    @if (!empty($cart) && isset($tax))
+                                    <span
+                                        class="font-bold p-2 text-red-500 border border-gray-300 rounded-lg bg-gray-50 text-xs">
+                                        Rp{{ number_format($tax, 2, ',', '.') }}
+                                    </span>
+                                    @endif
+                                </dl>
                                 @endif
 
                                 {{-- Total Bayar --}}
@@ -473,7 +441,7 @@
                 </div>
             </div>
         </section>
-    </div>  
+    </div>
     @endcan
     <script>
         Livewire.on('printReceipt', orderId => {
@@ -486,6 +454,7 @@
                 alert("Popup blocked! Please allow popups for this site.");
             }
         });
+
     </script>
 
     <script>
@@ -493,6 +462,7 @@
             const url = event.detail;
             window.open(url, '_blank', 'width=640,height=600');
         });
+
     </script>
 
 </div>
