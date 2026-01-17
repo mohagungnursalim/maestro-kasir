@@ -1,7 +1,7 @@
 <div class="py-12">
     @can('Lihat')
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <section class="bg-white py-8 antialiased md:py-16">
+        <section class="bg-yellow-50 py-8 antialiased md:py-16">
             <div class="mx-auto max-w-screen-lg px-4">
                 <!-- Pencarian Produk -->
                 <div>
@@ -16,7 +16,7 @@
                                 </svg>
                             </div>
                             <input wire:model="search" type="search" id="search" name="search"
-                                class="block w-full p-4 ps-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500"
+                                class="bg-white block w-full p-4 ps-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500"
                                 placeholder="Cari produk.." />
                             <button wire:loading.remove wire:target='search' type="submit"
                                 class="text-white absolute end-2.5 bottom-2.5 bg-blue-600 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-4 py-2">Cari</button>
@@ -404,7 +404,7 @@
                                 <dl class="flex justify-between border-t pt-2">
                                     <dt class="font-bold text-gray-900">Total Bayar</dt>
                                     @if (!empty($cart)) <span
-                                        class="font-bold p-2 text-gray-900 border border-blue-300 rounded-lg bg-blue-50 text-xs">Rp{{ number_format($total, 2, ',', '.') }}</span>
+                                        class="font-bold p-2 text-gray-900 border border-green-300 rounded-lg bg-green-50 text-xs">Rp{{ number_format($total, 2, ',', '.') }}</span>
                                     @endif
                                 </dl>
 
@@ -412,7 +412,7 @@
                                 <dl class="flex justify-between">
                                     <dt class="font-bold text-gray-900">Uang Kembali</dt>
                                     @if (!empty($cart)) <span
-                                        class="font-bold p-2 text-gray-900 border border-green-300 rounded-lg bg-green-50 text-xs">Rp{{ number_format($change, 2, ',', '.') }}</span>
+                                        class="font-bold p-2 text-gray-900 border border-blue-300 rounded-lg bg-blue-50 text-xs">Rp{{ number_format($change, 2, ',', '.') }}</span>
                                     @endif
                                 </dl>
                             </div>
