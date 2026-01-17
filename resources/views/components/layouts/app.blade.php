@@ -62,7 +62,7 @@
 <x-sidebar />
 
 <div class="p-4 ">
-    <div class="p-4 border-2 border-gray-200 border rounded-lg mt-14">
+    <div class="p-4 border-2 border-gray-200 border rounded-lg mt-14 bg-gray-50">
         <!-- Page Content -->
         <main>
             {{ $slot }}
