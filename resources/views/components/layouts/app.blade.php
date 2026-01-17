@@ -18,6 +18,8 @@
         'resources/js/app.js',
     ])
     
+    {{-- Fontawesome --}}
+    <script src="https://kit.fontawesome.com/e45dd697a1.js" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/flowbite@2.5.2/dist/flowbite.min.js"></script>
     <link href="https://cdn.jsdelivr.net/npm/flowbite@2.5.2/dist/flowbite.min.css" rel="stylesheet" />
     {{-- <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script> --}}

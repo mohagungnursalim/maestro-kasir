@@ -7,26 +7,41 @@
                 <div>
                     <form wire:submit.prevent="searchProduct" class="max-w-md mx-auto">
                         <label for="search" class="mb-2 text-sm font-medium text-gray-900 sr-only">Search</label>
+
                         <div class="relative">
+                            <!-- Icon -->
                             <div class="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
-                                <svg class="w-4 h-4 text-gray-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"
-                                    fill="none" viewBox="0 0 20 20">
+                                <svg class="w-4 h-4 text-gray-500" aria-hidden="true"
+                                    xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20">
                                     <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
                                         stroke-width="2" d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z" />
                                 </svg>
                             </div>
-                            <input wire:model="search" type="search" id="search" name="search"
-                                class="bg-white block w-full p-4 ps-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500"
+
+                            <!-- Input -->
+                            <input wire:model.defer="search" type="search" id="search" name="search"
+                                class="bg-white block w-full p-4 ps-10 text-sm text-gray-900 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
                                 placeholder="Cari produk.." />
-                            <button wire:loading.remove wire:target='search' type="submit"
-                                class="text-white absolute end-2.5 bottom-2.5 bg-blue-600 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-4 py-2">Cari</button>
-                            <button disabled wire:loading wire:target='search'
-                                class="text-white absolute end-2.5 bottom-2.5 bg-blue-600 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-4 py-2">Mencari..</button>
+
+                            <!-- Button Normal -->
+                            <button type="submit"
+                                wire:loading.remove
+                                wire:target="searchProduct"
+                                class="text-gray-900 absolute end-2.5 bottom-2.5 bg-yellow-300 hover:bg-yellow-400 focus:ring-4 focus:outline-none focus:ring-yellow-200 font-medium rounded-lg text-sm px-4 py-2 flex items-center gap-2">
+                                Cari
+                            </button>
+
+                            <!-- Button Loading -->
+                            <button type="button" disabled
+                                wire:loading
+                                wire:target="searchProduct"
+                                class="text-gray-900 absolute end-2.5 bottom-2.5 bg-yellow-300 opacity-70 font-medium rounded-lg text-sm px-4 py-2 flex items-center gap-2">
+                                <i class="fas fa-spinner fa-spin"></i>
+                            </button>
+
                         </div>
                     </form>
                 </div>
-
-
 
                 @if ($products)
                 <div class="container mx-auto mt-4 px-4 sm:px-8">
@@ -96,13 +111,8 @@
 
                                                     <button wire:loading wire:target="addToCart({{ $product->id }})"
                                                         class="w-full bg-gray-900 text-white py-0.5 px-2 rounded text-xs flex items-center justify-center gap-1 cursor-wait">
-                                                        <svg class="animate-spin w-3 h-3" fill="none"
-                                                            viewBox="0 0 24 24">
-                                                            <circle class="opacity-25" cx="12" cy="12" r="10"
-                                                                stroke="currentColor" stroke-width="4" />
-                                                            <path class="opacity-75" fill="currentColor"
-                                                                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-                                                        </svg>
+                                                        <i class="fas fa-spinner fa-spin"></i>
+
                                                     </button>
                                                     @else
                                                     <button disabled class="w-full bg-green-100 text-green-800 py-0.5 px-2 rounded text-xs flex items-center justify-center gap-1 cursor-not-allowed">
@@ -183,7 +193,7 @@
 
                                         <span wire:loading wire:target="removeFromCart({{ $index }})"
                                             class="text-xs text-gray-400 animate-pulse">
-                                            Membatalkan..
+                                            <i class="fas fa-spinner fa-spin"></i>
                                         </span>
                                     </div>
                                 </div>
@@ -404,13 +414,7 @@
                                 <button disabled wire:loading wire:target="processOrder"
                                     class="focus:outline-none text-white bg-green-500 hover:bg-green-700 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 disabled:opacity-50 disabled:cursor-not-allowed">
                                     Memproses..
-                                    <svg class="inline w-4 h-4 text-white animate-spin ml-2"
-                                        xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor"
-                                            stroke-width="4"></circle>
-                                        <path class="opacity-75" fill="currentColor"
-                                            d="M4 12a8 8 0 018-8v4a4 4 0 100 8v4a8 8 0 01-8-8z"></path>
-                                    </svg>
+                                    <i class="fas fa-spinner fa-spin"></i>   
                                 </button>
 
                                 @if (!empty($cart))
@@ -425,13 +429,7 @@
                                 <button disabled wire:loading wire:target="resetCart"
                                     class="focus:outline-none text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 disabled:opacity-50 disabled:cursor-not-allowed">
                                     Loading..
-                                    <svg class="inline w-4 h-4 text-white animate-spin ml-2"
-                                        xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor"
-                                            stroke-width="4"></circle>
-                                        <path class="opacity-75" fill="currentColor"
-                                            d="M4 12a8 8 0 018-8v4a4 4 0 100 8v4a8 8 0 01-8-8z"></path>
-                                    </svg>
+                                    <i class="fas fa-spinner fa-spin"></i>                     
                                 </button>
                                 @endif
                             </div>
