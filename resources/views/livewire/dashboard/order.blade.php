@@ -252,14 +252,63 @@
                     <!-- Tombol Cetak -->
                     @if (!empty($cart))
                     <div class="flex justify-center mt-4">
-                        <button x-data @click="$dispatch('open-print-preview')"
-                            class="px-4 py-2 text-sm bg-gray-800 text-white rounded hover:bg-gray-900 transition">
+                        <button x-data @click="$dispatch('open-print-modal')"
+                            class="px-4 py-2 bg-gray-800 text-white rounded-lg hover:bg-gray-900 transition">
                             Cetak Tagihan
                         </button>
+
                     </div>
                     @endif
 
+                        {{-- Modal Cetak Tagihan/Bill --}}
+                        <div x-data="{ show: false }" x-on:open-print-modal.window="show = true" x-show="show" x-cloak class="fixed inset-0 z-50 flex items-center justify-center">
+                            <!-- Backdrop -->
+                            <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" @click="show = false"></div>
+
+                            <!-- Modal Box -->
+                            <div x-show="show" x-transition class="relative bg-white w-full max-w-md rounded-xl shadow-2xl p-6">
+                               
+                                <!-- Icon -->
+                                <div class="flex justify-center mb-4">
+                                    <div class="w-12 h-12 flex items-center justify-center rounded-full bg-yellow-100 text-yellow-600">
+                                    <i class="fas fa-question fa-2x"></i>
+                                    </div>
+                                </div>
+
+                                <!-- Title -->
+                                <h2 class="text-lg font-bold text-center text-gray-800 mb-2">
+                                    Konfirmasi Cetak
+                                </h2>
+
+                                <!-- Desc -->
+                                <p class="text-center text-gray-600 mb-6">
+                                    Ingin cetak tagihan baru?
+                                </p>
+
+                                <!-- Actions -->
+                                <div class="flex justify-center gap-3">
+                                    <button 
+                                        @click="show = false"
+                                        class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition"
+                                    >
+                                        Batal
+                                    </button>
+
+                                    <button 
+                                        wire:click="billPayment"
+                                        wire:loading.attr="disabled"
+                                        @click="show = false"
+                                        class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition"
+                                    >
+                                        Cetak
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        
                 </div>
+                      
+
 
 
 
