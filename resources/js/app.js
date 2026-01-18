@@ -64,7 +64,7 @@ document.addEventListener('livewire:navigated', () => {
                 icon: "success",
                 title: "Pembayaran berhasil 🙌!",
                 showConfirmButton: false,
-                timer: 10000,
+                timer: 5000,
                 timerProgressBar: true
             });
         });
@@ -77,7 +77,7 @@ document.addEventListener('livewire:navigated', () => {
                 icon: "error",
                 title: "Pembayaran gagal 🥲!",
                 showConfirmButton: false,
-                timer: 10000,
+                timer: 5000,
                 timerProgressBar: true
             });
         });

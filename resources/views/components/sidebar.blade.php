@@ -2,7 +2,7 @@
  
  <!-- drawer component -->
 <div id="drawer-navigation"
-    class="pt-20 fixed top-0 left-0 z-40 w-64 h-screen p-4 overflow-y-auto transition-transform -translate-x-full bg-yellow-100 dark:bg-gray-800"
+    class="pt-20 fixed top-0 left-0 z-40 w-64 h-screen p-4 overflow-y-auto transition-transform -translate-x-full bg-gray-50 dark:bg-gray-800"
     tabindex="-1"
     aria-labelledby="drawer-navigation-label">
      
@@ -19,7 +19,7 @@
         
         <li>
             <a 
-                class="flex items-center p-2 rounded-lg {{ Request::is('dashboard') ? 'bg-purple-300 text-dark' : 'hover:bg-gray-200' }}"
+                class="flex items-center p-2 rounded-lg {{ Request::is('dashboard') ? 'bg-yellow-300 text-dark' : 'hover:bg-gray-200' }}"
                 @if (!Request::is('dashboard'))
                     wire:navigate href="/dashboard"
                 @endif>
@@ -35,7 +35,7 @@
         @hasrole('admin|owner|kasir')
         <li>
             <a 
-                class="flex items-center p-2 rounded-lg {{ Request::is('dashboard/orders') ? 'bg-purple-300 text-dark' : 'hover:bg-gray-200' }}"
+                class="flex items-center p-2 rounded-lg {{ Request::is('dashboard/orders') ? 'bg-yellow-300 text-dark' : 'hover:bg-gray-200' }}"
                 @if (!Request::is('dashboard/orders'))
                     wire:navigate href="/dashboard/orders"
                 @endif>
@@ -63,7 +63,7 @@
                 
                 <a 
                     @if (Request::is('dashboard/transactions'))
-                        class="flex items-center p-2 rounded-lg bg-purple-300 text-dark"
+                        class="flex items-center p-2 rounded-lg bg-yellow-300 text-dark"
                     @else
                         wire:navigate href="/dashboard/transactions" 
                         class="flex items-center p-2 rounded-lg hover:bg-gray-200"
@@ -76,7 +76,7 @@
                 @hasrole('admin|owner')
                 <a 
                     @if (Request::is('dashboard/reports'))
-                        class="flex items-center p-2 rounded-lg bg-purple-300 text-dark"
+                        class="flex items-center p-2 rounded-lg bg-yellow-300 text-dark"
                     @else
                         wire:navigate href="/dashboard/reports" 
                         class="flex items-center p-2 rounded-lg hover:bg-gray-200"
@@ -112,7 +112,7 @@
                 
                 <a 
                     @if (Request::is('dashboard/products'))
-                        class="flex items-center p-2 rounded-lg bg-purple-300 text-dark"
+                        class="flex items-center p-2 rounded-lg bg-yellow-300 text-dark"
                     @else
                         wire:navigate href="/dashboard/products" 
                         class="flex items-center p-2 rounded-lg hover:bg-gray-200"
@@ -125,7 +125,7 @@
                 @hasrole('admin|owner')
                 <a 
                     @if (Request::is('dashboard/suppliers'))
-                        class="flex items-center p-2 rounded-lg bg-purple-300 text-dark"
+                        class="flex items-center p-2 rounded-lg bg-yellow-300 text-dark"
                     @else
                         wire:navigate href="/dashboard/suppliers" 
                         class="flex items-center p-2 rounded-lg hover:bg-gray-200"
@@ -139,7 +139,7 @@
                 @hasrole('admin|owner')
                 <a 
                     @if (Request::is('dashboard/units'))
-                        class="flex items-center p-2 rounded-lg bg-purple-300 text-dark"
+                        class="flex items-center p-2 rounded-lg bg-yellow-300 text-dark"
                     @else
                         wire:navigate href="/dashboard/units" 
                         class="flex items-center p-2 rounded-lg hover:bg-gray-200"
@@ -160,7 +160,7 @@
         @hasrole('admin|owner')
         <li>
             <a 
-                class="flex items-center p-2 rounded-lg {{ Request::is('dashboard/store-settings') ? 'bg-purple-300 text-dark' : 'hover:bg-gray-200' }}"
+                class="flex items-center p-2 rounded-lg {{ Request::is('dashboard/store-settings') ? 'bg-yellow-300 text-dark' : 'hover:bg-gray-200' }}"
                 @if (!Request::is('dashboard/store-settings'))
                     wire:navigate href="/dashboard/store-settings"
                 @endif>
@@ -171,7 +171,7 @@
         
         <li>
             <a 
-                class="flex items-center p-2 rounded-lg {{ Request::is('dashboard/users-management') ? 'bg-purple-300 text-dark' : 'hover:bg-gray-200' }}"
+                class="flex items-center p-2 rounded-lg {{ Request::is('dashboard/users-management') ? 'bg-yellow-300 text-dark' : 'hover:bg-gray-200' }}"
                 @if (!Request::is('dashboard/users-management'))
                     wire:navigate href="/dashboard/users-management"
                 @endif>
@@ -182,7 +182,7 @@
 
         <li>
             <a 
-                class="flex items-center p-2 rounded-lg {{ Request::is('dashboard/roles-permission') ? 'bg-purple-300 text-dark' : 'hover:bg-gray-200' }}"
+                class="flex items-center p-2 rounded-lg {{ Request::is('dashboard/roles-permission') ? 'bg-yellow-300 text-dark' : 'hover:bg-gray-200' }}"
                 @if (!Request::is('dashboard/roles-permission'))
                     wire:navigate href="/dashboard/roles-permission"
                 @endif>
