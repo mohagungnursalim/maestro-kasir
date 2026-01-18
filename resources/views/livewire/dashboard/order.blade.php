@@ -335,19 +335,19 @@
                                                    border-gray-200 appearance-none focus:outline-none focus:ring-0 
                                                    focus:border-gray-200 peer disabled:cursor-not-allowed">
 
-                                            <option value="cash">Tunai</option>
-                                            <option value="debit_card">Kartu Debit</option>
+                                            <option value="CASH">Tunai</option>
+                                            <option value="DEBIT_CARD">Kartu Debit</option>
 
 
-                                            <option value="ewallet">Qris</option>
+                                            <option value="QRIS">QRIS</option>
 
 
 
                                             <optgroup label="Transfer Bank">
-                                                <option value="bca">BCA</option>
-                                                <option value="bri">BRI</option>
-                                                <option value="mandiri">Mandiri</option>
-                                                <option value="bni">BNI</option>
+                                                <option value="BCA">BCA</option>
+                                                <option value="BRI">BRI</option>
+                                                <option value="MANDIRI">Mandiri</option>
+                                                <option value="BNI">BNI</option>
                                                 <option value="lainnya">Lainnya</option>
                                             </optgroup>
 

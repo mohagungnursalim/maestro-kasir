@@ -22,7 +22,7 @@ class Order extends Component
     public $products = []; // Daftar produk
     public $limitProducts = 8; // Batas produk yang ditampilkan
 
-    public $payment_method = 'cash'; // Metode pembayaran default
+    public $payment_method = 'CASH'; // Metode pembayaran default
     public $customerMoney = null; // Uang pelanggan
     
     public $is_tax; // Apakah ada pajak
@@ -279,16 +279,12 @@ class Order extends Component
         $customerMoney = decimal($this->customerMoney);
         $total = decimal($this->total);
 
-        if ($this->payment_method === 'cash') {
-            if (bccomp($customerMoney, $total, 2) === -1) {
+         if (bccomp($customerMoney, $total, 2) === -1){
                 $shortage = bcsub($total, $customerMoney, 2);
                 $this->dispatch('insufficientPayment', $shortage);
                 return;
-            }
-        } else {
-            $this->customerMoney = $total;
-            $customerMoney = $total;
-        }
+         }
+       
 
         DB::beginTransaction();
         try {
