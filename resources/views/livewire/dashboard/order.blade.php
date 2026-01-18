@@ -165,7 +165,7 @@
 
                         @if (empty($cart))
                             <div class="text-center mt-9 text-sm text-gray-500">
-                                Pesanan Kosong 🧾
+                                Pesanan Kosong <i class="far fa-list-alt"></i>
                             </div>
                         @else
 
@@ -305,7 +305,7 @@
                                 </div>
                             </div>
                         </div>
-                        
+
                 </div>
                       
 
