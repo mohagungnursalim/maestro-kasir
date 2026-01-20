@@ -274,10 +274,6 @@ class Order extends Component
         }
         RateLimiter::hit($userKey, $decaySeconds);
 
-        if (empty($this->cart)) {
-            $this->dispatch('nullPaymentSelected');
-            return;
-        }
 
         DB::beginTransaction();
         try {
