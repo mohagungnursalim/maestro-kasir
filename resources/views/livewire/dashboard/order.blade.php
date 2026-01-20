@@ -318,17 +318,66 @@
                             <p class="text-red-500 text-sm">*Harap terima uangnya sebelum proses pembayaran dimulai!</p>
                             <div class="space-y-4 mt-4">
 
-                                {{-- Metode Pembayaran --}}
-                                <div x-data="{ 
-                                        paymentMethod: @entangle('payment_method'), 
-                                        isCash() { return this.paymentMethod === 'cash'; }
-                                    }" x-init="$watch('paymentMethod', value => {
-                                        if (value !== 'cash') {
-                                            @this.set('customerMoney', 0);
-                                        }
-                                    })">
+                                
+                                <div>
+                                    @if(!empty($cart))
+                                    {{-- Jenis Pesanan --}}
+                                    <div>
+                                        <label class="block mb-2 text-sm font-medium text-gray-900">Jenis Pesanan</label>
 
-                                    <!-- Pilih Metode Pembayaran -->
+                                        <div class="grid grid-cols-2 gap-2">
+                                            <button type="button"
+                                                wire:click="$set('order_type', 'DINE_IN')"
+                                                class="py-2 rounded-lg text-sm font-semibold border transition
+                                                {{ $order_type === 'DINE_IN' ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-100' }}"
+                                                :disabled="@json(empty($cart))">
+                                                🍽️ Makan ditempat
+                                            </button>
+
+                                            <button type="button"
+                                                wire:click="$set('order_type', 'TAKEAWAY')"
+                                                class="py-2 rounded-lg text-sm font-semibold border transition
+                                                {{ $order_type === 'TAKEAWAY' ? 'bg-orange-500 text-white border-orange-500' : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-100' }}"
+                                                :disabled="@json(empty($cart))">
+                                                🥡 Bungkus
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    @if ($order_type === 'DINE_IN')
+                                    <div>
+                                        <label class="block mb-2 text-sm font-medium text-gray-900">
+                                            Nomor Meja
+                                        </label>
+
+                                        <input type="text"
+                                            wire:model.defer="desk_number"
+                                            :disabled="@json(empty($cart))"
+                                            class="block w-full p-2 text-gray-900 border border-gray-300 rounded-lg bg-gray-50 text-xs
+                                                focus:ring-blue-500 focus:border-blue-500 disabled:cursor-not-allowed"
+                                            placeholder="Contoh: A1, 12, VIP-3">
+                                    </div>
+                                    @endif
+
+                                    {{-- Catatan Pesanan --}}
+                                    <div>
+                                        <label class="block mb-2 text-sm font-medium text-gray-900">
+                                            Catatan Pesanan
+                                        </label>
+
+                                        <textarea
+                                            wire:model.defer="note"
+                                            rows="2"
+                                            :disabled="@json(empty($cart))"
+                                            class="block w-full p-2 text-gray-900 border border-gray-300 rounded-lg bg-gray-50 text-xs
+                                                focus:ring-blue-500 focus:border-blue-500 disabled:cursor-not-allowed"
+                                            placeholder="Contoh: kurang pedas, tanpa es, dll..."></textarea>
+                                    </div>
+                                    @endif
+                                    
+
+
+                                    {{-- Pilih Metode Pembayaran --}}
                                     <div>
                                         <select x-model="paymentMethod" wire:model="payment_method" id="paymentMethod"
                                             name="paymentMethod" :disabled="@json(empty($cart))" class="block py-2.5 px-0 w-full text-sm text-gray-500 bg-transparent border-0 border-b-2 
@@ -337,12 +386,7 @@
 
                                             <option value="CASH">Tunai</option>
                                             <option value="DEBIT_CARD">Kartu Debit</option>
-
-
                                             <option value="QRIS">QRIS</option>
-
-
-
                                             <optgroup label="Transfer Bank">
                                                 <option value="BCA">BCA</option>
                                                 <option value="BRI">BRI</option>
@@ -354,7 +398,7 @@
                                         </select>
                                     </div>
 
-                                    <!-- Input Uang Pelanggan -->
+                                    {{-- Input Uang Pelanggan --}}
                                     <div class="mt-3" x-data="{
                                                 display: '',
                                                 raw: @entangle('customerMoney').live,
@@ -411,7 +455,7 @@
                                 <dl class="flex justify-between">
                                     <dt class="text-gray-500">Sub Total</dt>
                                     @if (!empty($cart)) <span
-                                        class="font-bold p-2 text-gray-900 border border-gray-300 rounded-lg bg-gray-50 text-xs">Rp{{ number_format($subtotal, 2, ',', '.') }}</span>
+                                        class="font-bold p-2 text-gray-900 border border-gray-300 rounded-lg bg-gray-50 text-xs">Rp{{ number_format($subtotal, 0, ',', '.') }}</span>
                                     @endif
                                 </dl>
 
@@ -423,7 +467,7 @@
                                     @if (!empty($cart) && isset($tax))
                                     <span
                                         class="font-bold p-2 text-red-500 border border-gray-300 rounded-lg bg-gray-50 text-xs">
-                                        Rp{{ number_format($tax, 2, ',', '.') }}
+                                        Rp{{ number_format($tax, 0, ',', '.') }}
                                     </span>
                                     @endif
                                 </dl>
@@ -433,7 +477,7 @@
                                 <dl class="flex justify-between border-t pt-2">
                                     <dt class="font-bold text-gray-900">Total Bayar</dt>
                                     @if (!empty($cart)) <span
-                                        class="font-bold p-2 text-gray-900 border border-green-300 rounded-lg bg-green-50 text-xs">Rp{{ number_format($total, 2, ',', '.') }}</span>
+                                        class="font-bold p-2 text-gray-900 border border-green-300 rounded-lg bg-green-50 text-xs">Rp{{ number_format($total, 0, ',', '.') }}</span>
                                     @endif
                                 </dl>
 
@@ -441,7 +485,7 @@
                                 <dl class="flex justify-between">
                                     <dt class="font-bold text-gray-900">Uang Kembali</dt>
                                     @if (!empty($cart)) <span
-                                        class="font-bold p-2 text-gray-900 border border-blue-300 rounded-lg bg-blue-50 text-xs">Rp{{ number_format($change, 2, ',', '.') }}</span>
+                                        class="font-bold p-2 text-gray-900 border border-blue-300 rounded-lg bg-blue-50 text-xs">Rp{{ number_format($change, 0, ',', '.') }}</span>
                                     @endif
                                 </dl>
                             </div>
