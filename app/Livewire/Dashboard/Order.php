@@ -21,6 +21,9 @@ class Order extends Component
     public $search = ''; // Pencarian produk
     public $products = []; // Daftar produk
     public $limitProducts = 8; // Batas produk yang ditampilkan
+    public $order_type = 'DINE_IN';
+    public $desk_number = null;
+    public $note = null;
 
     public $payment_method = 'CASH'; // Metode pembayaran default
     public $customerMoney = null; // Uang pelanggan
@@ -307,6 +310,12 @@ class Order extends Component
                 return;
             }
 
+            if ($this->order_type === 'DINE_IN' && empty($this->desk_number)) {
+                $this->dispatch('notify', type: 'error', message: 'Nomor meja wajib diisi untuk Dine In!');
+                return;
+            }
+
+
             $orderNumber = $this->generateOrderNumber();
 
             // =========================
@@ -315,12 +324,15 @@ class Order extends Component
             $order = ModelsOrder::create([
                 'user_id' => Auth::id(),
                 'order_number' => $orderNumber,
+                'order_type' => $this->order_type,
+                'desk_number' => $this->order_type === 'DINE_IN' ? $this->desk_number : null,
+                'note' => $this->note,
                 'payment_method' => $this->payment_method,
                 'tax' => decimal($this->tax),
                 'customer_money' => $customerMoney,
-                'change' => '0', // nanti diupdate
+                'change' => 0, 
                 'grandtotal' => $total,
-                'status' => 'paid', // atau 'completed'
+                'status' => 'PAID',
             ]);
 
             // =========================
