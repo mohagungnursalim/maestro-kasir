@@ -261,7 +261,7 @@ class Order extends Component
         return 'ORD-' . $today . '-' . str_pad($nextNumber, 4, '0', STR_PAD_LEFT);
     }
 
-    // Proses Order 
+    // Proses pembayaran
     public function processOrder()
     {
         $userKey = 'order-process:user-' . Auth::id(); 
@@ -279,25 +279,20 @@ class Order extends Component
             return;
         }
 
-        $customerMoney = decimal($this->customerMoney);
-        $total = decimal($this->total);
-
-         if (bccomp($customerMoney, $total, 2) === -1){
-                $shortage = bcsub($total, $customerMoney, 2);
-                $this->dispatch('insufficientPayment', $shortage);
-                return;
-         }
-       
-
         DB::beginTransaction();
         try {
+            // =========================
+            // LOCK PRODUCT
+            // =========================
             $productUpdates = [];
             $insufficientProducts = [];
 
-            // Lock produk biar aman dari race condition
             $productIds = collect($this->cart)->pluck('id');
             $products = Product::whereIn('id', $productIds)->lockForUpdate()->get()->keyBy('id');
 
+            // =========================
+            // VALIDATE STOCK
+            // =========================
             foreach ($this->cart as $item) {
                 if (!isset($products[$item['id']]) || $products[$item['id']]->stock < $item['quantity']) {
                     $insufficientProducts[] = $products[$item['id']]->name ?? 'Produk Tidak Ditemukan';
@@ -310,17 +305,55 @@ class Order extends Component
                 return;
             }
 
+            // =========================
+            // VALIDATE ORDER TYPE
+            // =========================
             if ($this->order_type === 'DINE_IN' && empty($this->desk_number)) {
-                $this->dispatch('notify', type: 'error', message: 'Nomor meja wajib diisi untuk Dine In!');
+                DB::rollBack();
+                $this->dispatch('errorOrderType');
                 return;
             }
 
+            // =========================
+            // HITUNG ULANG TOTAL
+            // =========================
+            $total = '0';
 
-            $orderNumber = $this->generateOrderNumber();
+            foreach ($this->cart as $item) {
+                $price = decimal($item['price']);
+                $qty   = (string) $item['quantity'];
+                $subtotal = bcmul($price, $qty, 2);
+                $total = bcadd($total, $subtotal, 2);
+            }
+
+            // Tambah pajak kalau ada
+            $tax = decimal($this->tax);
+            $total = bcadd($total, $tax, 2);
+
+            // =========================
+            // VALIDATE TOTAL
+            // =========================
+            if (bccomp($total, '0', 2) <= 0) {
+                throw new \Exception("TOTAL INVALID: $total");
+            }
+
+            // =========================
+            // VALIDATE CUSTOMER MONEY
+            // =========================
+            $customerMoney = decimal($this->customerMoney);
+
+            if (bccomp($customerMoney, $total, 2) === -1) {
+                DB::rollBack();
+                $shortage = bcsub($total, $customerMoney, 2);
+                $this->dispatch('insufficientPayment', $shortage);
+                return;
+            }
 
             // =========================
             // CREATE ORDER
             // =========================
+            $orderNumber = $this->generateOrderNumber();
+
             $order = ModelsOrder::create([
                 'user_id' => Auth::id(),
                 'order_number' => $orderNumber,
@@ -328,15 +361,15 @@ class Order extends Component
                 'desk_number' => $this->order_type === 'DINE_IN' ? $this->desk_number : null,
                 'note' => $this->note,
                 'payment_method' => $this->payment_method,
-                'tax' => decimal($this->tax),
+                'tax' => $tax,
                 'customer_money' => $customerMoney,
-                'change' => 0, 
+                'change' => '0.00',
                 'grandtotal' => $total,
                 'status' => 'PAID',
             ]);
 
             // =========================
-            // INSERT TRANSACTION DETAILS
+            // INSERT DETAILS
             // =========================
             $transactionDetails = [];
 
@@ -361,7 +394,7 @@ class Order extends Component
             TransactionDetail::insert($transactionDetails);
 
             // =========================
-            // UPDATE STOCK & SOLD COUNT
+            // UPDATE STOCK
             // =========================
             foreach ($productUpdates as $productId => $qty) {
                 Product::where('id', $productId)->update([
@@ -380,7 +413,7 @@ class Order extends Component
             DB::commit();
 
             // =========================
-            // RESET & REFRESH
+            // RESET UI
             // =========================
             $this->refreshCacheStock();
             $this->refreshCacheTransactionDetail();
@@ -390,8 +423,6 @@ class Order extends Component
 
             $this->resetCart();
             $this->dispatch('resetCustomerMoneyInput');
-
-
             $this->dispatch('printReceipt', $order->id);
 
         } catch (\Exception $e) {
@@ -400,6 +431,7 @@ class Order extends Component
             $this->dispatch('errorPayment', $e->getMessage());
         }
     }
+
 
     
 

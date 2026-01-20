@@ -56,6 +56,24 @@ document.addEventListener('livewire:navigated', () => {
     if (!window.livewireEventRegistered) {
         window.livewireEventRegistered = true;
 
+        Livewire.on('errorOrderType', (shortage) => {
+            playErrorSound();
+        
+            const formattedShortage = parseFloat(shortage).toLocaleString('id-ID', {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            });
+        
+            Swal.fire({
+                title: "Oops!",
+                text: `Nomor meja wajib diisi untuk,jika makan ditempat!`,
+                icon: "warning",
+                confirmButtonText: "Oke!",
+                confirmButtonColor: "#3085d6"
+            });
+        });
+
+        
         Livewire.on('successPayment', () => {
             playSuccessSound();
             Swal.fire({

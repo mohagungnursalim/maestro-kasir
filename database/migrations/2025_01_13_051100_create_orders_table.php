@@ -28,7 +28,7 @@ return new class extends Migration
             $table->decimal('tax', 10, 2)->default(0);
             $table->decimal('customer_money', 12, 2)->nullable();
             $table->decimal('change', 12, 2)->nullable();
-            $table->decimal('grand_total', 12, 2)->default(0);
+            $table->decimal('grandtotal', 12, 2)->default(0);
             $table->timestamps();
         });
 
