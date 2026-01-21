@@ -158,170 +158,165 @@
                 <h2 class="text-xl font-semibold text-gray-900 sm:text-2xl mt-6">Pesanan</h2>
                 <div class="mt-6 sm:mt-8 md:gap-6 lg:flex lg:items-start">
                     
-                 <!-- Daftar Item Pesanan -->
-                <div class="w-full lg:w-2/3 max-h-[60vh] overflow-y-auto custom-scrollbar">
+                    <!-- Daftar Item Pesanan -->
+                    <div class="w-full lg:w-2/3 max-h-[60vh] overflow-y-auto custom-scrollbar">
 
-                    <div class="space-y-2">
+                        <div class="space-y-2">
 
-                        @if (empty($cart))
-                            <div class="text-center mt-9 text-sm text-gray-500">
-                                Pesanan Kosong <i class="far fa-list-alt"></i>
-                            </div>
-                        @else
+                            @if (empty($cart))
+                                <div class="text-center mt-9 text-sm text-gray-500">
+                                    Pesanan Kosong <i class="far fa-list-alt"></i>
+                                </div>
+                            @else
 
-                        @foreach ($cart as $index => $item)
+                            @foreach ($cart as $index => $item)
 
-                        <div class="border rounded-md bg-white px-3 py-2 text-sm">
+                            <div class="border rounded-md bg-white px-3 py-2 text-sm">
 
-                            <div class="flex items-center gap-2">
+                                <div class="flex items-center gap-2">
 
-                                <!-- Nama & Batal -->
-                                <div class="flex-1 min-w-0">
-                                    <div class="flex justify-between items-center gap-2">
-                                        <span class="font-medium text-gray-900 truncate">
-                                            {{ $item['name'] }}
-                                        </span>
+                                    <!-- Nama & Batal -->
+                                    <div class="flex-1 min-w-0">
+                                        <div class="flex justify-between items-center gap-2">
+                                            <span class="font-medium text-gray-900 truncate">
+                                                {{ $item['name'] }}
+                                            </span>
 
-                                        <!-- Hapus -->
-                                        <button wire:click="removeFromCart({{ $index }})"
-                                            wire:loading.remove
-                                            wire:target="removeFromCart({{ $index }})"
-                                            onclick="event.stopPropagation(); playSelectSound()"
-                                            class="text-xs text-red-600 hover:underline">
-                                            Batal
+                                            <!-- Hapus -->
+                                            <button wire:click="removeFromCart({{ $index }})"
+                                                wire:loading.remove
+                                                wire:target="removeFromCart({{ $index }})"
+                                                onclick="event.stopPropagation(); playSelectSound()"
+                                                class="text-xs text-red-600 hover:underline">
+                                                Batal
+                                            </button>
+
+                                            <span wire:loading wire:target="removeFromCart({{ $index }})"
+                                                class="text-xs text-gray-400 animate-pulse">
+                                                <i class="fas fa-spinner fa-spin"></i>
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                    <!-- Qty Control -->
+                                    <div x-data="{ quantity: {{ $item['quantity'] }} }" class="flex items-center gap-1">
+
+                                        {{-- Button (-) --}}
+                                        <button type="button"
+                                            class="w-6 h-6 flex items-center justify-center border rounded bg-gray-100 hover:bg-gray-200"
+                                            x-on:click="
+                                                if (quantity > 1) {
+                                                    quantity--;
+                                                    clearTimeout(window.qtyTimeout);
+                                                    window.qtyTimeout = setTimeout(() => {
+                                                        $wire.updateQuantity({{ $index }}, quantity);
+                                                    }, 500);
+                                                }
+                                            ">
+                                            −
                                         </button>
 
-                                        <span wire:loading wire:target="removeFromCart({{ $index }})"
-                                            class="text-xs text-gray-400 animate-pulse">
-                                            <i class="fas fa-spinner fa-spin"></i>
-                                        </span>
-                                    </div>
-                                </div>
+                                        <input type="number" min="1" class="w-14 h-7 text-center text-xs font-semibold border border-gray-300 rounded text-gray-900 bg-white focus:outline-none focus:ring-1 focus:ring-blue-500"
+                                                x-model.number="quantity"
+                                                x-on:input.debounce.400ms="$wire.updateQuantity({{ $index }}, quantity)">
 
-                                <!-- Qty Control -->
-                                <div x-data="{ quantity: {{ $item['quantity'] }} }" class="flex items-center gap-1">
-
-                                    {{-- Button (-) --}}
-                                    <button type="button"
-                                        class="w-6 h-6 flex items-center justify-center border rounded bg-gray-100 hover:bg-gray-200"
-                                        x-on:click="
-                                            if (quantity > 1) {
-                                                quantity--;
+                                        {{-- Button (+) --}}
+                                        <button type="button"
+                                            class="w-6 h-6 flex items-center justify-center border rounded bg-gray-100 hover:bg-gray-200"
+                                            x-on:click="
+                                                quantity++;
                                                 clearTimeout(window.qtyTimeout);
                                                 window.qtyTimeout = setTimeout(() => {
                                                     $wire.updateQuantity({{ $index }}, quantity);
                                                 }, 500);
-                                            }
-                                        ">
-                                        −
-                                    </button>
+                                            ">
+                                            +
+                                        </button>
 
-                                    <input type="number" min="1" class="w-14 h-7 text-center text-xs font-semibold border border-gray-300 rounded text-gray-900 bg-white focus:outline-none focus:ring-1 focus:ring-blue-500"
-                                            x-model.number="quantity"
-                                            x-on:input.debounce.400ms="$wire.updateQuantity({{ $index }}, quantity)">
+                                    </div>
 
-                                    {{-- Button (+) --}}
-                                    <button type="button"
-                                        class="w-6 h-6 flex items-center justify-center border rounded bg-gray-100 hover:bg-gray-200"
-                                        x-on:click="
-                                            quantity++;
-                                            clearTimeout(window.qtyTimeout);
-                                            window.qtyTimeout = setTimeout(() => {
-                                                $wire.updateQuantity({{ $index }}, quantity);
-                                            }, 500);
-                                        ">
-                                        +
-                                    </button>
+                                    <!-- Subtotal -->
+                                    <div class="w-24 text-right font-semibold text-gray-900 text-xs">
+                                        Rp{{ number_format($item['price'] * $item['quantity'], 0, ',', '.') }}
+                                    </div>
 
-                                </div>
-
-                                <!-- Subtotal -->
-                                <div class="w-24 text-right font-semibold text-gray-900 text-xs">
-                                    Rp{{ number_format($item['price'] * $item['quantity'], 0, ',', '.') }}
                                 </div>
 
                             </div>
 
+                            @endforeach
+                            @endif
+
                         </div>
 
-                        @endforeach
+                        <!-- Tombol Cetak -->
+                        @if (!empty($cart))
+                        <div class="flex justify-center mt-4">
+                            <button x-data @click="$dispatch('open-print-modal')"
+                                class="px-4 py-2 bg-gray-800 text-white rounded-lg hover:bg-gray-900 transition">
+                                Cetak Tagihan
+                            </button>
+
+                        </div>
                         @endif
 
-                    </div>
+                            {{-- Modal Cetak Tagihan/Bill --}}
+                            <div x-data="{ show: false }" x-on:open-print-modal.window="show = true" x-show="show" x-cloak class="fixed inset-0 z-50 flex items-center justify-center">
+                                <!-- Backdrop -->
+                                <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" @click="show = false"></div>
 
-                    <!-- Tombol Cetak -->
-                    @if (!empty($cart))
-                    <div class="flex justify-center mt-4">
-                        <button x-data @click="$dispatch('open-print-modal')"
-                            class="px-4 py-2 bg-gray-800 text-white rounded-lg hover:bg-gray-900 transition">
-                            Cetak Tagihan
-                        </button>
+                                <!-- Modal Box -->
+                                <div x-show="show" x-transition class="relative bg-white w-full max-w-md rounded-xl shadow-2xl p-6">
+                                
+                                    <!-- Icon -->
+                                    <div class="flex justify-center mb-4">
+                                        <div class="w-12 h-12 flex items-center justify-center rounded-full bg-yellow-100 text-yellow-600">
+                                        <i class="fas fa-question fa-2x"></i>
+                                        </div>
+                                    </div>
 
-                    </div>
-                    @endif
+                                    <!-- Title -->
+                                    <h2 class="text-lg font-bold text-center text-gray-800 mb-2">
+                                        Konfirmasi Cetak
+                                    </h2>
 
-                        {{-- Modal Cetak Tagihan/Bill --}}
-                        <div x-data="{ show: false }" x-on:open-print-modal.window="show = true" x-show="show" x-cloak class="fixed inset-0 z-50 flex items-center justify-center">
-                            <!-- Backdrop -->
-                            <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" @click="show = false"></div>
+                                    <!-- Desc -->
+                                    <p class="text-center text-gray-600 mb-6">
+                                        Ingin cetak tagihan baru?
+                                    </p>
 
-                            <!-- Modal Box -->
-                            <div x-show="show" x-transition class="relative bg-white w-full max-w-md rounded-xl shadow-2xl p-6">
-                               
-                                <!-- Icon -->
-                                <div class="flex justify-center mb-4">
-                                    <div class="w-12 h-12 flex items-center justify-center rounded-full bg-yellow-100 text-yellow-600">
-                                    <i class="fas fa-question fa-2x"></i>
+                                    <!-- Actions -->
+                                    <div class="flex justify-center gap-3">
+                                        <button 
+                                            @click="show = false"
+                                            class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition"
+                                        >
+                                            Batal
+                                        </button>
+
+                                        <button 
+                                            wire:click="billPayment"
+                                            wire:loading.attr="disabled"
+                                            @click="show = false"
+                                            class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition"
+                                        >
+                                            Cetak
+                                        </button>
                                     </div>
                                 </div>
-
-                                <!-- Title -->
-                                <h2 class="text-lg font-bold text-center text-gray-800 mb-2">
-                                    Konfirmasi Cetak
-                                </h2>
-
-                                <!-- Desc -->
-                                <p class="text-center text-gray-600 mb-6">
-                                    Ingin cetak tagihan baru?
-                                </p>
-
-                                <!-- Actions -->
-                                <div class="flex justify-center gap-3">
-                                    <button 
-                                        @click="show = false"
-                                        class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition"
-                                    >
-                                        Batal
-                                    </button>
-
-                                    <button 
-                                        wire:click="billPayment"
-                                        wire:loading.attr="disabled"
-                                        @click="show = false"
-                                        class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition"
-                                    >
-                                        Cetak
-                                    </button>
-                                </div>
                             </div>
-                        </div>
 
-                </div>
-                      
-
-
-
-
+                    </div>
+                    
                     <!-- Total dan Pembayaran -->
                     <div class="w-full lg:w-1/3 mt-6 lg:mt-0">
                         <div class="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
-                            <p class="text-red-500 text-sm">*Harap terima uangnya sebelum proses pembayaran dimulai!</p>
+                            <p class="text-red-500 text-sm">*Harap pastikan data pesanan benar sebelum disimpan / dibayar</p>
+
                             <div class="space-y-4 mt-4">
 
-                                
-                                <div>
-                                    @if(!empty($cart))
-                                    {{-- Jenis Pesanan --}}
+                                @if(!empty($cart))
+                                    {{-- ==================== JENIS PESANAN ==================== --}}
                                     <div>
                                         <label class="block mb-2 text-sm font-medium text-gray-900">Jenis Pesanan</label>
 
@@ -329,206 +324,175 @@
                                             <button type="button"
                                                 wire:click="$set('order_type', 'DINE_IN')"
                                                 class="py-2 rounded-lg text-sm font-semibold border transition
-                                                {{ $order_type === 'DINE_IN' ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-100' }}"
-                                                :disabled="@json(empty($cart))">
-                                                🍽️ Makan ditempat
+                                                {{ $order_type === 'DINE_IN' ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-100' }}">
+                                                🍽️ Makan di Tempat
                                             </button>
 
                                             <button type="button"
                                                 wire:click="$set('order_type', 'TAKEAWAY')"
                                                 class="py-2 rounded-lg text-sm font-semibold border transition
-                                                {{ $order_type === 'TAKEAWAY' ? 'bg-orange-500 text-white border-orange-500' : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-100' }}"
-                                                :disabled="@json(empty($cart))">
+                                                {{ $order_type === 'TAKEAWAY' ? 'bg-orange-500 text-white border-orange-500' : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-100' }}">
                                                 🥡 Bungkus
                                             </button>
                                         </div>
                                     </div>
 
+                                    {{-- ==================== NOMOR MEJA ==================== --}}
                                     @if ($order_type === 'DINE_IN')
                                     <div>
-                                        <label class="block mb-2 text-sm font-medium text-gray-900">
-                                            Nomor Meja
-                                        </label>
-
+                                        <label class="block mb-2 text-sm font-medium text-gray-900">Nomor Meja</label>
                                         <input type="text"
                                             wire:model.defer="desk_number"
-                                            :disabled="@json(empty($cart))"
-                                            class="block w-full p-2 text-gray-900 border border-gray-300 rounded-lg bg-gray-50 text-xs
-                                                focus:ring-blue-500 focus:border-blue-500 disabled:cursor-not-allowed"
+                                            class="block w-full p-2 border rounded-lg text-sm bg-gray-50"
                                             placeholder="Contoh: A1, 12, VIP-3">
                                     </div>
                                     @endif
 
-                                    {{-- Catatan Pesanan --}}
+                                    {{-- ==================== CATATAN ==================== --}}
                                     <div>
-                                        <label class="block mb-2 text-sm font-medium text-gray-900">
-                                            Catatan Pesanan
-                                        </label>
-
-                                        <textarea
-                                            wire:model.defer="note"
-                                            rows="2"
-                                            :disabled="@json(empty($cart))"
-                                            class="block w-full p-2 text-gray-900 border border-gray-300 rounded-lg bg-gray-50 text-xs
-                                                focus:ring-blue-500 focus:border-blue-500 disabled:cursor-not-allowed"
-                                            placeholder="Contoh: kurang pedas, tanpa es, dll..."></textarea>
+                                        <label class="block mb-2 text-sm font-medium text-gray-900">Catatan</label>
+                                        <textarea wire:model.defer="note" rows="2"
+                                            class="block w-full p-2 border rounded-lg text-sm bg-gray-50"
+                                            placeholder="Contoh: jangan pedas, dll..."></textarea>
                                     </div>
-                                    @endif
-                                    
 
-
-                                    {{-- Pilih Metode Pembayaran --}}
+                                    {{-- ==================== MODE PEMBAYARAN ==================== --}}
                                     <div>
-                                        <select x-model="paymentMethod" wire:model="payment_method" id="paymentMethod"
-                                            name="paymentMethod" :disabled="@json(empty($cart))" class="block py-2.5 px-0 w-full text-sm text-gray-500 bg-transparent border-0 border-b-2 
-                                                   border-gray-200 appearance-none focus:outline-none focus:ring-0 
-                                                   focus:border-gray-200 peer disabled:cursor-not-allowed">
+                                        <label class="block mb-2 text-sm font-medium text-gray-900">Mode Pembayaran</label>
 
+                                        <div class="grid grid-cols-2 gap-2">
+                                            <button type="button"
+                                                wire:click="$set('payment_mode', 'PAY_NOW')"
+                                                class="py-2 rounded-lg text-sm font-semibold border transition
+                                                {{ $payment_mode === 'PAY_NOW' ? 'bg-green-600 text-white border-green-600' : 'bg-white text-gray-700 border-gray-300' }}">
+                                                💳 Bayar Sekarang
+                                            </button>
+
+                                            <button type="button"
+                                                wire:click="$set('payment_mode', 'PAY_LATER')"
+                                                class="py-2 rounded-lg text-sm font-semibold border transition
+                                                {{ $payment_mode === 'PAY_LATER' ? 'bg-gray-500 text-white border-gray-500' : 'bg-white text-gray-700 border-gray-300' }}">
+                                                🕒 Bayar Nanti
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    {{-- ==================== METODE BAYAR ==================== --}}
+                                    @if($payment_mode === 'PAY_NOW')
+                                    <div>
+                                        <select class="block w-full p-2 border rounded-lg text-sm bg-gray-50" wire:model="payment_method"
+                                            class="block w-full border-b text-sm py-2 bg-transparent">
                                             <option value="CASH">Tunai</option>
-                                            <option value="DEBIT_CARD">Kartu Debit</option>
                                             <option value="QRIS">QRIS</option>
-                                            <optgroup label="Transfer Bank">
-                                                <option value="BCA">BCA</option>
-                                                <option value="BRI">BRI</option>
-                                                <option value="MANDIRI">Mandiri</option>
-                                                <option value="BNI">BNI</option>
-                                                <option value="lainnya">Lainnya</option>
-                                            </optgroup>
-
+                                            <option value="DEBIT_CARD">Debit</option>
+                                            <option value="BCA">BCA</option>
+                                            <option value="BRI">BRI</option>
+                                            <option value="MANDIRI">Mandiri</option>
                                         </select>
                                     </div>
+                                    @endif
 
-                                    {{-- Input Uang Pelanggan --}}
-                                    <div class="mt-3" x-data="{
-                                                display: '',
-                                                raw: @entangle('customerMoney').live,
-                                                _timer: null,
+                                    {{-- ==================== UANG PELANGGAN ==================== --}}
+                                    @if($payment_mode === 'PAY_NOW')
+                                    <div 
+                                        x-data="{
+                                            display: '',
+                                            raw: @entangle('customerMoney').live,
+                                            _timer: null,
 
-                                                format(n) {
-                                                    if (!n) return '';
-                                                    return new Intl.NumberFormat('id-ID').format(n);
-                                                },
+                                            format(n) { return n ? new Intl.NumberFormat('id-ID').format(n) : ''; },
 
-                                                init() {
-                                                    // Inisialisasi format saat load
-                                                    if(this.raw) this.display = this.format(this.raw);
-
-                                                    // Listener untuk reset
-                                                    window.addEventListener('resetCustomerMoneyInput', () => {
+                                            init() {
+                                                // Reset kalau mode ganti ke PAY_LATER
+                                                this.$watch('$wire.payment_mode', (val) => {
+                                                    if (val === 'PAY_LATER') {
                                                         this.display = '';
                                                         this.raw = 0;
-                                                    });
-                                                    
-                                                    // Opsional: Watch jika Livewire mengupdate nilai dari server
-                                                    this.$watch('raw', (value) => {
-                                                        // Cek agar tidak konflik saat mengetik
-                                                        if (document.activeElement !== this.$refs.input) {
-                                                            this.display = this.format(value);
-                                                        }
-                                                    });
-                                                },
+                                                    }
+                                                });
+                                            },
 
-                                                onInput(e) {
-                                                    let value = e.target.value.replace(/[^0-9]/g, '');
-                                                    this.display = this.format(value);
+                                            onInput(e) {
+                                                let v = e.target.value.replace(/[^0-9]/g, '');
+                                                this.display = this.format(v);
 
-                                                    clearTimeout(this._timer);
-                                                    this._timer = setTimeout(() => {
-                                                        this.raw = value === '' ? 0 : parseInt(value);
-                                                    }, 500);
-                                                }
-                                            }">
-                                        <label class="block mb-2 text-sm font-medium text-gray-900">
-                                            Uang Pelanggan
-                                        </label>
-
-                                        <input type="text" x-ref="input" x-on:input="onInput($event)"
-                                            x-on:focus="if(display === '0') display = ''" x-bind:value="display"
-                                            :disabled="@json(empty($cart))"
-                                            class="block w-full p-2 text-gray-900 border border-gray-300 rounded-lg bg-gray-50 text-xs focus:ring-blue-500 focus:border-blue-500 disabled:cursor-not-allowed"
-                                            placeholder="Masukkan uang pelanggan...">
+                                                clearTimeout(this._timer);
+                                                this._timer = setTimeout(() => {
+                                                    this.raw = v === '' ? 0 : parseInt(v);
+                                                }, 400);
+                                            }
+                                        }">
+                                        <label class="block mb-2 text-sm font-medium">Uang Pelanggan</label>
+                                        <input type="text"
+                                            x-on:input="onInput($event)"
+                                            x-bind:value="display"
+                                            class="block w-full p-2 border rounded-lg text-sm bg-gray-50"
+                                            placeholder="Masukkan uang...">
                                     </div>
-
-                                </div>
-
-                                {{-- Subtotal --}}
-                                <dl class="flex justify-between">
-                                    <dt class="text-gray-500">Sub Total</dt>
-                                    @if (!empty($cart)) <span
-                                        class="font-bold p-2 text-gray-900 border border-gray-300 rounded-lg bg-gray-50 text-xs">Rp{{ number_format($subtotal, 0, ',', '.') }}</span>
                                     @endif
-                                </dl>
 
-                                <!-- Pajak dalam Rupiah -->
-                                @if ($settings->is_tax)
-                                <dl class="flex justify-between mt-3">
-                                    <dt class="text-gray-500">Pajak PB1 (<span>{{ $tax_percentage }}</span>%)</dt>
 
-                                    @if (!empty($cart) && isset($tax))
-                                    <span
-                                        class="font-bold p-2 text-red-500 border border-gray-300 rounded-lg bg-gray-50 text-xs">
-                                        Rp{{ number_format($tax, 0, ',', '.') }}
-                                    </span>
-                                    @endif
-                                </dl>
                                 @endif
 
-                                {{-- Total Bayar --}}
-                                <dl class="flex justify-between border-t pt-2">
-                                    <dt class="font-bold text-gray-900">Total Bayar</dt>
-                                    @if (!empty($cart)) <span
-                                        class="font-bold p-2 text-gray-900 border border-green-300 rounded-lg bg-green-50 text-xs">Rp{{ number_format($total, 0, ',', '.') }}</span>
-                                    @endif
-                                </dl>
+                                {{-- ==================== RINGKASAN ==================== --}}
+                                <dl class="flex justify-between"><dt>Sub Total</dt><dd class="text-gray-900 font-bold">Rp{{ number_format($subtotal,0,',','.') }}</dd></dl>
+                                @if ($settings->is_tax == true)
+                                <dl class="flex justify-between"><dt>Pajak</dt><dd class="text-red-500">Rp{{ number_format($tax,0,',','.') }}</dd></dl>
+                                @endif
+                                <dl class="flex justify-between font-bold border-t pt-2"><dt>Total</dt><dd class="text-green-500 font-bold">Rp{{ number_format($total,0,',','.') }}</dd></dl>
+                                <dl class="flex justify-between"><dt>Kembalian</dt><dd class="text-blue-500 font-bold">Rp{{ number_format($change,0,',','.') }}</dd></dl>
 
-                                {{-- Uang Kembali --}}
-                                <dl class="flex justify-between">
-                                    <dt class="font-bold text-gray-900">Uang Kembali</dt>
-                                    @if (!empty($cart)) <span
-                                        class="font-bold p-2 text-gray-900 border border-blue-300 rounded-lg bg-blue-50 text-xs">Rp{{ number_format($change, 0, ',', '.') }}</span>
-                                    @endif
-                                </dl>
                             </div>
-                            <div class="flex justify-center mt-4">
-                                <!-- Tombol Proses -->
-                                @if (!empty($cart))
-                                <button x-data="{ disabled: false }" :disabled="disabled"
-                                    x-on:click="disabled = true; setTimeout(() => disabled = false, 2000)"
-                                    wire:click="processOrder" wire:loading.remove wire:target="processOrder"
-                                    wire:loading.attr="disabled" type="button"
-                                    class="focus:outline-none text-white bg-green-500 hover:bg-green-700 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 disabled:opacity-50 disabled:cursor-not-allowed"
-                                    @disabled(empty($cart))>
-                                    Proses
-                                </button>
 
-                                @endif
-
-                                <!-- Tombol Loading saat Memproses -->
-                                <button disabled wire:loading wire:target="processOrder"
-                                    class="focus:outline-none text-white bg-green-500 hover:bg-green-700 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 disabled:opacity-50 disabled:cursor-not-allowed">
-                                    Memproses..
-                                    <i class="fas fa-spinner fa-spin"></i>   
+                            {{-- ==================== TOMBOL ==================== --}}
+                            <div class="flex justify-center mt-6">
+                                <button wire:click="processOrder"
+                                    class="bg-green-600 text-white px-4 py-2 rounded-lg w-full">
+                                    {{ $selectedUnpaidOrderId ? 'Bayar Pesanan' : ($payment_mode === 'PAY_NOW' ? 'Bayar Sekarang' : 'Simpan Pesanan') }}
                                 </button>
-
-                                @if (!empty($cart))
-                                <!-- Tombol Kosongkan Pesanan -->
-                                <button wire:loading.remove wire:click="resetCart" wire:loading.attr="disabled"
-                                    onclick="event.stopPropagation(); playSelectSound()" type="button"
-                                    class="focus:outline-none text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 disabled:opacity-50 disabled:cursor-not-allowed">
-                                    Kosongkan Pesanan
-                                </button>
-
-                                <!-- Tombol Loading saat Reset -->
-                                <button disabled wire:loading wire:target="resetCart"
-                                    class="focus:outline-none text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 disabled:opacity-50 disabled:cursor-not-allowed">
-                                    Loading..
-                                    <i class="fas fa-spinner fa-spin"></i>                     
-                                </button>
-                                @endif
                             </div>
 
                         </div>
                     </div>
+
+                    {{-- ================= UNPAID LIST ================= --}}
+                    @if(count($unpaidOrders) === 0)
+
+                    @else
+                    <div class="rounded-lg border border-orange-200 bg-orange-50 p-4 shadow-sm">
+                        <h3 class="font-bold text-orange-700 mb-3">🕒 Belum Dibayar</h3>
+
+                       
+                            <div class="space-y-2 max-h-[400px] overflow-y-auto">
+                                @foreach($unpaidOrders as $order)
+                                    <button
+                                        wire:click="selectUnpaidOrder({{ $order->id }})"
+                                        class="w-full text-left p-3 rounded border bg-white hover:bg-orange-100 transition">
+
+                                        <div class="flex justify-between">
+                                            <div>
+                                                <div class="font-semibold text-sm">
+                                                    Meja: {{ $order->desk_number ?? '-' }}
+                                                </div>
+                                                <div class="text-xs text-gray-500">
+                                                    {{ $order->order_number }}
+                                                </div>
+                                            </div>
+
+                                            <div class="text-right">
+                                                <div class="text-sm font-bold text-orange-600">
+                                                    Rp{{ number_format($order->grandtotal,0,',','.') }}
+                                                </div>
+                                                <div class="text-xs text-gray-400">
+                                                    {{ $order->created_at->diffForHumans() }}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </button>
+                                @endforeach
+                            </div>
+                        </div>
+                        @endif
 
 
                 </div>

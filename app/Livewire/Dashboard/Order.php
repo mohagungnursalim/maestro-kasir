@@ -24,6 +24,12 @@ class Order extends Component
     public $order_type = 'DINE_IN';
     public $desk_number = null;
     public $note = null;
+    public $payment_mode = 'PAY_NOW'; // PAY_NOW | PAY_LATER
+
+    public $unpaidOrders = [];
+    public $selectedUnpaidOrderId = null;
+
+
 
     public $payment_method = 'CASH'; // Metode pembayaran default
     public $customerMoney = null; // Uang pelanggan
@@ -45,11 +51,21 @@ class Order extends Component
         'refreshProductStock' => 'searchProduct',
     ];
 
+    
 
     public function mount()
     {
+        $this->loadUnpaidOrders();
         $this->is_tax = StoreSetting::value('is_tax') ?? false; // Ambil setting pajak dari tabel store_settings
         $this->tax_percentage = StoreSetting::value('tax') ?? 0; // Ambil persentase pajak dari tabel store_settings
+    }
+
+    public function loadUnpaidOrders()
+    {
+        $this->unpaidOrders = ModelsOrder::where('payment_status', 'UNPAID')
+            ->orderBy('created_at', 'asc')
+            ->limit(20)
+            ->get();
     }
 
     public function searchProduct()
@@ -118,6 +134,14 @@ class Order extends Component
         $this->payment_method = $value;
     }
 
+    public function updatedPaymentMode($value)
+    {
+        if ($value === 'PAY_LATER') {
+            $this->customerMoney = 0;
+        }
+    }
+
+
     // Reset diskon saat checkbox diskon diubah
     public function updateTotal()
     {
@@ -154,7 +178,6 @@ class Order extends Component
 
             $this->cartNotEmpty = false;
 
-            $this->dispatch('resetCustomerMoneyInput');
 
         }
     }
@@ -242,6 +265,7 @@ class Order extends Component
         
     }
 
+    // Generate nomor order unik
     public static function generateOrderNumber(): string
     {
         $today = now()->format('dmY');
@@ -261,137 +285,195 @@ class Order extends Component
         return 'ORD-' . $today . '-' . str_pad($nextNumber, 4, '0', STR_PAD_LEFT);
     }
 
+    // Pilih order unpaid untuk diload ke cart
+    public function selectUnpaidOrder($orderId)
+    {
+        $order = ModelsOrder::with('transactionDetails.product')->findOrFail($orderId);
+
+        // Reset cart
+        $this->resetCart();
+
+        // Load ke cart
+        foreach ($order->transactionDetails as $item) {
+            $this->cart[] = [
+                'id' => $item->product_id,
+                'name' => $item->product->name,
+                'price' => $item->price,
+                'quantity' => $item->quantity,
+            ];
+        }
+
+        // Load metadata
+        $this->selectedUnpaidOrderId = $order->id;
+        $this->order_type = $order->order_type;
+        $this->desk_number = $order->desk_number;
+        $this->note = $order->note;
+        $this->payment_mode = 'PAY_NOW';
+        $this->calculateTotal();
+
+        // Notifikasi ke UI saat load ke cart
+        $this->dispatch('orderUnpaid');
+    }
+
+
     // Proses pembayaran
     public function processOrder()
     {
-        $userKey = 'order-process:user-' . Auth::id(); 
-        $maxAttempts = 5; 
-        $decaySeconds = 2; 
-
-        if (RateLimiter::tooManyAttempts($userKey, $maxAttempts)) {
-            $this->dispatch('errorPayment', 'Terlalu banyak permintaan, coba lagi dalam 2 detik.');
+        $userKey = 'order-process:user-' . Auth::id();
+        if (RateLimiter::tooManyAttempts($userKey, 5)) {
+            $this->dispatch('errorPayment', 'Terlalu banyak request, tunggu sebentar.');
             return;
         }
-        RateLimiter::hit($userKey, $decaySeconds);
+        RateLimiter::hit($userKey, 2);
 
+        if (empty($this->cart) && !$this->selectedUnpaidOrderId) {
+            $this->dispatch('nullPaymentSelected');
+            return;
+        }
 
         DB::beginTransaction();
+
         try {
-            // =========================
-            // LOCK PRODUCT
-            // =========================
-            $productUpdates = [];
-            $insufficientProducts = [];
 
-            $productIds = collect($this->cart)->pluck('id');
-            $products = Product::whereIn('id', $productIds)->lockForUpdate()->get()->keyBy('id');
+            // =====================================================
+            // BAYAR ORDER UNPAID YANG SUDAH ADA
+            // =====================================================
+            if ($this->selectedUnpaidOrderId) {
 
-            // =========================
-            // VALIDATE STOCK
-            // =========================
-            foreach ($this->cart as $item) {
-                if (!isset($products[$item['id']]) || $products[$item['id']]->stock < $item['quantity']) {
-                    $insufficientProducts[] = $products[$item['id']]->name ?? 'Produk Tidak Ditemukan';
+                $order = ModelsOrder::lockForUpdate()->findOrFail($this->selectedUnpaidOrderId);
+
+                if ($order->payment_status === 'PAID') {
+                    throw new \Exception("Order ini sudah dibayar.");
                 }
-            }
 
-            if (!empty($insufficientProducts)) {
-                DB::rollBack();
-                $this->dispatch('insufficientStock', $insufficientProducts);
+                $total = decimal($order->grandtotal);
+                $customerMoney = decimal($this->customerMoney);
+
+                if (bccomp($customerMoney, $total, 2) === -1) {
+                    $shortage = bcsub($total, $customerMoney, 2);
+                    DB::rollBack();
+                    $this->dispatch('insufficientPayment', $shortage);
+                    return;
+                }
+
+                $order->update([
+                    'payment_status' => 'PAID',
+                    'payment_mode' => 'PAY_NOW',
+                    'payment_method' => $this->payment_method,
+                    'customer_money' => $customerMoney,
+                    'change' => bcsub($customerMoney, $total, 2),
+                    'paid_at' => now(),
+                ]);
+
+                DB::commit();
+
+                // UI Reset
+                $this->selectedUnpaidOrderId = null;
+                $this->resetCart();
+
+                $this->dispatch('successPayment');
+                $this->dispatch('printReceipt', $order->id);
+                $this->loadUnpaidOrders();
+
                 return;
             }
 
-            // =========================
-            // VALIDATE ORDER TYPE
-            // =========================
+            // =====================================================
+            // BUAT ORDER BARU (PAY_NOW / PAY_LATER)
+            // =====================================================
+
+            // LOCK PRODUCT
+            $productUpdates = [];
+            $productIds = collect($this->cart)->pluck('id');
+            $products = Product::whereIn('id', $productIds)->lockForUpdate()->get()->keyBy('id');
+
+            foreach ($this->cart as $item) {
+                if (!isset($products[$item['id']]) || $products[$item['id']]->stock < $item['quantity']) {
+                    throw new \Exception("Stock tidak cukup: " . ($products[$item['id']]->name ?? 'Unknown'));
+                }
+            }
+
+            // VALIDASI MEJA
             if ($this->order_type === 'DINE_IN' && empty($this->desk_number)) {
-                DB::rollBack();
                 $this->dispatch('errorOrderType');
                 return;
             }
 
-            // =========================
-            // HITUNG ULANG TOTAL
-            // =========================
+            // HITUNG TOTAL
             $total = '0';
-
             foreach ($this->cart as $item) {
-                $price = decimal($item['price']);
-                $qty   = (string) $item['quantity'];
-                $subtotal = bcmul($price, $qty, 2);
+                $subtotal = bcmul(decimal($item['price']), (string)$item['quantity'], 2);
                 $total = bcadd($total, $subtotal, 2);
             }
 
-            // Tambah pajak kalau ada
             $tax = decimal($this->tax);
             $total = bcadd($total, $tax, 2);
 
-            // =========================
-            // VALIDATE TOTAL
-            // =========================
             if (bccomp($total, '0', 2) <= 0) {
-                throw new \Exception("TOTAL INVALID: $total");
+                throw new \Exception("Total tidak valid");
             }
 
-            // =========================
-            // VALIDATE CUSTOMER MONEY
-            // =========================
-            $customerMoney = decimal($this->customerMoney);
+            // LOGIC PAYMENT
+            $customerMoney = null;
+            $change = null;
+            $paymentStatus = 'UNPAID';
+            $paidAt = null;
 
-            if (bccomp($customerMoney, $total, 2) === -1) {
-                DB::rollBack();
-                $shortage = bcsub($total, $customerMoney, 2);
-                $this->dispatch('insufficientPayment', $shortage);
-                return;
+            if ($this->payment_mode === 'PAY_NOW') {
+                $customerMoney = decimal($this->customerMoney);
+
+                if (bccomp($customerMoney, $total, 2) === -1) {
+                    $shortage = bcsub($total, $customerMoney, 2);
+                    DB::rollBack();
+                    $this->dispatch('insufficientPayment', $shortage);
+                    return;
+                }
+
+                $change = bcsub($customerMoney, $total, 2);
+                $paymentStatus = 'PAID';
+                $paidAt = now();
             }
 
-            // =========================
             // CREATE ORDER
-            // =========================
-            $orderNumber = $this->generateOrderNumber();
-
             $order = ModelsOrder::create([
                 'user_id' => Auth::id(),
-                'order_number' => $orderNumber,
+                'order_number' => $this->generateOrderNumber(),
                 'order_type' => $this->order_type,
                 'desk_number' => $this->order_type === 'DINE_IN' ? $this->desk_number : null,
                 'note' => $this->note,
                 'payment_method' => $this->payment_method,
                 'tax' => $tax,
                 'customer_money' => $customerMoney,
-                'change' => '0.00',
+                'change' => $change,
                 'grandtotal' => $total,
-                'status' => 'PAID',
+                'payment_status' => $paymentStatus,
+                'payment_mode' => $this->payment_mode,
+                'paid_at' => $paidAt,
             ]);
 
-            // =========================
-            // INSERT DETAILS
-            // =========================
-            $transactionDetails = [];
+            // INSERT DETAILS + POTONG STOK
+            $details = [];
 
             foreach ($this->cart as $item) {
-                $itemPrice = decimal($item['price']);
-                $itemQuantity = (string) $item['quantity'];
-                $itemSubtotal = bcmul($itemPrice, $itemQuantity, 2);
+                $price = decimal($item['price']);
+                $qty   = (string) $item['quantity'];
+                $subtotal = bcmul($price, $qty, 2);
 
-                $transactionDetails[] = [
+                $details[] = [
                     'order_id' => $order->id,
                     'product_id' => $item['id'],
-                    'quantity' => $itemQuantity,
-                    'price' => $itemPrice,
-                    'subtotal' => $itemSubtotal,
+                    'quantity' => $qty,
+                    'price' => $price,
+                    'subtotal' => $subtotal,
                     'created_at' => now(),
                     'updated_at' => now(),
                 ];
 
-                $productUpdates[$item['id']] = $item['quantity'];
+                $productUpdates[$item['id']] = $qty;
             }
 
-            TransactionDetail::insert($transactionDetails);
+            TransactionDetail::insert($details);
 
-            // =========================
-            // UPDATE STOCK
-            // =========================
             foreach ($productUpdates as $productId => $qty) {
                 Product::where('id', $productId)->update([
                     'stock' => DB::raw("stock - $qty"),
@@ -399,27 +481,25 @@ class Order extends Component
                 ]);
             }
 
-            // =========================
-            // UPDATE CHANGE
-            // =========================
-            $change = bcsub($customerMoney, $total, 2);
-            $order->change = $change;
-            $order->save();
-
             DB::commit();
 
-            // =========================
-            // RESET UI
-            // =========================
+            // REFRESH CACHE
             $this->refreshCacheStock();
             $this->refreshCacheTransactionDetail();
-
-            $this->dispatch('refreshProductStock');
-            $this->dispatch('successPayment');
-
+            
+            // UI RESET
             $this->resetCart();
-            $this->dispatch('resetCustomerMoneyInput');
-            $this->dispatch('printReceipt', $order->id);
+            $this->dispatch('refreshProductStock');
+
+            // NOTIFIKASI BERHASIL
+            if ($paymentStatus === 'PAID') {
+                $this->dispatch('successPayment');
+                $this->dispatch('printReceipt', $order->id);
+            } else {
+                $this->dispatch('successSaveOrder');
+            }
+
+            $this->loadUnpaidOrders();
 
         } catch (\Exception $e) {
             DB::rollBack();
@@ -441,7 +521,10 @@ class Order extends Component
         $this->customerMoney = null;
         $this->change = 0;
 
-        $this->dispatch('resetCustomerMoneyInput');
+        $this->order_type = 'DINE_IN';
+        $this->desk_number = null;
+        $this->note = null;
+        $this->payment_mode = 'PAY_NOW';
 
         $this->cartNotEmpty = false;
     }
