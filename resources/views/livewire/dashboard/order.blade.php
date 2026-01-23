@@ -342,7 +342,7 @@
                                     <div>
                                         <label class="block mb-2 text-sm font-medium text-gray-900">Nomor Meja</label>
                                         <input type="text"
-                                            wire:model.defer="desk_number"
+                                            wire:model.live.lazy="desk_number"
                                             class="block w-full p-2 border rounded-lg text-sm bg-gray-50"
                                             placeholder="Contoh: A1, 12, VIP-3">
                                     </div>
@@ -446,11 +446,28 @@
 
                             {{-- ==================== TOMBOL ==================== --}}
                             <div class="flex justify-center mt-6">
-                                <button wire:click="processOrder"
-                                    class="bg-green-600 text-white px-4 py-2 rounded-lg w-full">
-                                    {{ $selectedUnpaidOrderId ? 'Bayar Pesanan' : ($payment_mode === 'PAY_NOW' ? 'Bayar Sekarang' : 'Simpan Pesanan') }}
+                                <button wire:click="processOrder" @if(empty($cart)) disabled @endif
+                                    class="bg-green-600 @if(empty($cart)) opacity-50 @endif text-white px-4 py-2 rounded-lg w-full">
+
+                                    @if($selectedUnpaidOrderId)
+                                        {{-- Sedang buka order UNPAID --}}
+                                        @if($payment_mode === 'PAY_NOW')
+                                            Bayar Pesanan
+                                        @else
+                                            Update Pesanan
+                                        @endif
+                                    @else
+                                        {{-- Order baru --}}
+                                        @if($payment_mode === 'PAY_NOW')
+                                            Bayar Sekarang
+                                        @else
+                                            Simpan Pesanan
+                                        @endif
+                                    @endif
+
                                 </button>
                             </div>
+
 
                         </div>
                     </div>
