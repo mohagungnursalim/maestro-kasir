@@ -56,6 +56,50 @@ document.addEventListener('livewire:navigated', () => {
     if (!window.livewireEventRegistered) {
         window.livewireEventRegistered = true;
 
+        Livewire.on('errorOrderType', (shortage) => {
+            playErrorSound();
+        
+            const formattedShortage = parseFloat(shortage).toLocaleString('id-ID', {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            });
+        
+            Swal.fire({
+                title: "Oops!",
+                text: `Nomor meja wajib diisi,jika makan/minum ditempat!`,
+                icon: "warning",
+                confirmButtonText: "Oke!",
+                confirmButtonColor: "#3085d6"
+            });
+        });
+
+
+        Livewire.on('successSaveOrder', () => {
+            playSuccessSound();
+            Swal.fire({
+                toast: true,
+                position: "top-end",
+                icon: "success",
+                title: "Order ditambahkan ke bayar nanti!",
+                showConfirmButton: false,
+                timer: 3000,
+                timerProgressBar: true
+            });
+        });
+
+         Livewire.on('orderUnpaid', () => {
+            playSelectSound();
+            Swal.fire({
+                toast: true,
+                position: "top-end",
+                icon: "success",
+                title: "Order ditambahkan ke Cart!",
+                showConfirmButton: false,
+                timer: 3000,
+                timerProgressBar: true
+            });
+        });
+        
         Livewire.on('successPayment', () => {
             playSuccessSound();
             Swal.fire({

@@ -16,11 +16,12 @@ return new class extends Migration
         Schema::create('orders', function (Blueprint $table) {
             $table->id();
 
-            $table->foreignId('user_id')
-                ->constrained('users')
-                ->onDelete('cascade');
+            $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
             $table->string('order_number')->unique(); // Nomor unik untuk setiap pesanan
-            $table->string('status')->default('PAID'); // PAID, CANCELLED
+            $table->string('payment_status')->default('UNPAID'); // UNPAID, PAID, CANCELLED
+            $table->string('payment_mode')->default('PAY_NOW'); // PAY_NOW, PAY_LATER
+            $table->timestamp('paid_at')->nullable();
+
             $table->string('order_type')->default('DINE_IN'); // DINE_IN, TAKEAWAY
             $table->string('note')->nullable(); // Catatan tambahan dari pelanggan
             $table->string('desk_number')->nullable(); // Nomor meja hanya relevan kalau DINE_IN
@@ -28,7 +29,7 @@ return new class extends Migration
             $table->decimal('tax', 10, 2)->default(0);
             $table->decimal('customer_money', 12, 2)->nullable();
             $table->decimal('change', 12, 2)->nullable();
-            $table->decimal('grand_total', 12, 2)->default(0);
+            $table->decimal('grandtotal', 12, 2)->default(0);
             $table->timestamps();
         });
 
