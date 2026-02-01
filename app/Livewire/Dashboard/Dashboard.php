@@ -42,7 +42,7 @@ class Dashboard extends Component
         $this->totalOrders = $queryOrders->count();
     
         // sum total penjualan "tanpa" diskon & pajak
-        $this->totalActualSales = $queryTransactions->sum('transaction_details.original_subtotal');
+        $this->totalActualSales = $queryTransactions->sum('transaction_details.subtotal');
     
         $this->totalProductsSold = $queryTransactions->sum('transaction_details.quantity');
     }
