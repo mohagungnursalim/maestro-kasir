@@ -29,7 +29,9 @@ class Order extends Component
     public $unpaidOrders = [];
     public $selectedUnpaidOrderId = null;
 
-
+    public $showNoteModal = false;
+    public $noteProductId = null;
+    public $tempProductNote = '';
 
     public $payment_method = 'CASH'; // Metode pembayaran default
     public $customerMoney = null; // Uang pelanggan
@@ -53,6 +55,7 @@ class Order extends Component
 
     
 
+    // Inisialisasi komponen
     public function mount()
     {
         $this->loadUnpaidOrders();
@@ -60,6 +63,7 @@ class Order extends Component
         $this->tax_percentage = StoreSetting::value('tax') ?? 0; // Ambil persentase pajak dari tabel store_settings
     }
 
+    // Load unpaid orders
     public function loadUnpaidOrders()
     {
         $this->unpaidOrders = ModelsOrder::where('payment_status', 'UNPAID')
@@ -68,6 +72,7 @@ class Order extends Component
             ->get();
     }
 
+    // Cari produk dengan caching
     public function searchProduct()
     {
         $cacheKey = "products_{$this->search}_{$this->limitProducts}";
@@ -92,8 +97,45 @@ class Order extends Component
         });
     }
 
+    // Buka modal penambahan catatan produk
+    public function openAddToCartModal($productId)
+    {
+        $this->noteProductId = $productId;
+        $this->tempProductNote = '';
+        $this->showNoteModal = true;
+    }
 
-    // Saat tambah produk ke cart, langsung update cartNotEmpty
+    // Konfirmasi penambahan produk ke keranjang dengan catatan
+    public function confirmAddToCart()
+    {
+        if (!$this->noteProductId) return;
+
+        $product = collect($this->products)->firstWhere('id', $this->noteProductId);
+
+        if (!$product){
+            $product = Product::findOrFail($this->noteProductId);
+        }
+
+        if ($product) {
+            $this->cart[] = [
+                'id' => $product->id,
+                'name' => $product->name,
+                'price' => $product->price,
+                'quantity' => 1,
+                'subtotal' => $product->price,
+                'product_note' => $this->tempProductNote ?: null,
+            ];
+            $this->cartNotEmpty = true;
+            $this->calculateTotal();
+        }
+
+        // reset modal
+        $this->showNoteModal = false;
+        $this->noteProductId = null;
+        $this->tempProductNote = '';
+    }
+
+    // Tambahkan produk ke keranjang
     public function addToCart($productId)
     {
         $product = collect($this->products)->firstWhere('id', $productId);
@@ -109,9 +151,18 @@ class Order extends Component
                 'price' => $product->price,
                 'quantity' => 1,
                 'subtotal' => $product->price, // Tambahkan subtotal di awal
+                'product_note' => null,
             ];
             $this->cartNotEmpty = true; // Set true
             $this->calculateTotal();
+        }
+    }
+
+    // Perbarui catatan produk di keranjang
+    public function updateItemNote($index, $note)
+    {
+        if (isset($this->cart[$index])) {
+            $this->cart[$index]['product_note'] = trim($note);
         }
     }
 
@@ -134,6 +185,7 @@ class Order extends Component
         $this->payment_method = $value;
     }
 
+    // Perbarui mode pembayaran
     public function updatedPaymentMode($value)
     {
         if ($value === 'PAY_LATER') {
@@ -300,6 +352,7 @@ class Order extends Component
                 'name' => $item->product->name,
                 'price' => $item->price,
                 'quantity' => $item->quantity,
+                'product_note' => $item->product_note,
             ];
         }
 
@@ -316,382 +369,7 @@ class Order extends Component
     }
 
 
-    // Proses pembayaran
-    // public function processOrder()
-    // {
-    //     $userKey = 'order-process:user-' . Auth::id();
-    //     if (RateLimiter::tooManyAttempts($userKey, 5)) {
-    //         $this->dispatch('errorPayment', 'Terlalu banyak request, tunggu sebentar.');
-    //         return;
-    //     }
-    //     RateLimiter::hit($userKey, 2);
-
-    //     if (empty($this->cart) && !$this->selectedUnpaidOrderId) {
-    //         $this->dispatch('nullPaymentSelected');
-    //         return;
-    //     }
-
-    //     DB::beginTransaction();
-
-    //     try {
-
-    //         // =====================================================
-    //         // BAYAR ORDER UNPAID YANG SUDAH ADA
-    //         // =====================================================
-    //         if ($this->selectedUnpaidOrderId) {
-
-    //             $order = ModelsOrder::lockForUpdate()->findOrFail($this->selectedUnpaidOrderId);
-
-    //             if ($order->payment_status === 'PAID') {
-    //                 throw new \Exception("Order ini sudah dibayar.");
-    //             }
-
-    //             $total = decimal($order->grandtotal);
-    //             $customerMoney = decimal($this->customerMoney);
-
-    //             if (bccomp($customerMoney, $total, 2) === -1) {
-    //                 $shortage = bcsub($total, $customerMoney, 2);
-    //                 DB::rollBack();
-    //                 $this->dispatch('insufficientPayment', $shortage);
-    //                 return;
-    //             }
-
-    //             $order->update([
-    //                 'payment_status' => 'PAID',
-    //                 'payment_mode' => 'PAY_NOW',
-    //                 'payment_method' => $this->payment_method,
-    //                 'customer_money' => $customerMoney,
-    //                 'change' => bcsub($customerMoney, $total, 2),
-    //                 'paid_at' => now(),
-    //             ]);
-
-    //             DB::commit();
-
-    //             // UI Reset
-    //             $this->selectedUnpaidOrderId = null;
-    //             $this->resetCart();
-
-    //             $this->dispatch('successPayment');
-    //             $this->dispatch('printReceipt', $order->id);
-    //             $this->loadUnpaidOrders();
-
-    //             return;
-    //         }
-
-    //         // =====================================================
-    //         // BUAT ORDER BARU (PAY_NOW / PAY_LATER)
-    //         // =====================================================
-
-    //         // LOCK PRODUCT
-    //         $productUpdates = [];
-    //         $productIds = collect($this->cart)->pluck('id');
-    //         $products = Product::whereIn('id', $productIds)->lockForUpdate()->get()->keyBy('id');
-
-    //         foreach ($this->cart as $item) {
-    //             if (!isset($products[$item['id']]) || $products[$item['id']]->stock < $item['quantity']) {
-    //                 throw new \Exception("Stock tidak cukup: " . ($products[$item['id']]->name ?? 'Unknown'));
-    //             }
-    //         }
-
-    //         // VALIDASI MEJA
-    //         if ($this->order_type === 'DINE_IN' && empty($this->desk_number)) {
-    //             $this->dispatch('errorOrderType');
-    //             return;
-    //         }
-
-    //         // HITUNG TOTAL
-    //         $total = '0';
-    //         foreach ($this->cart as $item) {
-    //             $subtotal = bcmul(decimal($item['price']), (string)$item['quantity'], 2);
-    //             $total = bcadd($total, $subtotal, 2);
-    //         }
-
-    //         $tax = decimal($this->tax);
-    //         $total = bcadd($total, $tax, 2);
-
-    //         if (bccomp($total, '0', 2) <= 0) {
-    //             throw new \Exception("Total tidak valid");
-    //         }
-
-    //         // LOGIC PAYMENT
-    //         $customerMoney = null;
-    //         $change = null;
-    //         $paymentStatus = 'UNPAID';
-    //         $paidAt = null;
-
-    //         if ($this->payment_mode === 'PAY_NOW') {
-    //             $customerMoney = decimal($this->customerMoney);
-
-    //             if (bccomp($customerMoney, $total, 2) === -1) {
-    //                 $shortage = bcsub($total, $customerMoney, 2);
-    //                 DB::rollBack();
-    //                 $this->dispatch('insufficientPayment', $shortage);
-    //                 return;
-    //             }
-
-    //             $change = bcsub($customerMoney, $total, 2);
-    //             $paymentStatus = 'PAID';
-    //             $paidAt = now();
-    //         }
-
-    //         // CREATE ORDER
-    //         $order = ModelsOrder::create([
-    //             'user_id' => Auth::id(),
-    //             'order_number' => $this->generateOrderNumber(),
-    //             'order_type' => $this->order_type,
-    //             'desk_number' => $this->order_type === 'DINE_IN' ? $this->desk_number : null,
-    //             'note' => $this->note,
-    //             'payment_method' => $this->payment_method,
-    //             'tax' => $tax,
-    //             'customer_money' => $customerMoney,
-    //             'change' => $change,
-    //             'grandtotal' => $total,
-    //             'payment_status' => $paymentStatus,
-    //             'payment_mode' => $this->payment_mode,
-    //             'paid_at' => $paidAt,
-    //         ]);
-
-    //         // INSERT DETAILS + POTONG STOK
-    //         $details = [];
-
-    //         foreach ($this->cart as $item) {
-    //             $price = decimal($item['price']);
-    //             $qty   = (string) $item['quantity'];
-    //             $subtotal = bcmul($price, $qty, 2);
-
-    //             $details[] = [
-    //                 'order_id' => $order->id,
-    //                 'product_id' => $item['id'],
-    //                 'quantity' => $qty,
-    //                 'price' => $price,
-    //                 'subtotal' => $subtotal,
-    //                 'created_at' => now(),
-    //                 'updated_at' => now(),
-    //             ];
-
-    //             $productUpdates[$item['id']] = $qty;
-    //         }
-
-    //         TransactionDetail::insert($details);
-
-    //         foreach ($productUpdates as $productId => $qty) {
-    //             Product::where('id', $productId)->update([
-    //                 'stock' => DB::raw("stock - $qty"),
-    //                 'sold_count' => DB::raw("sold_count + $qty"),
-    //             ]);
-    //         }
-
-    //         DB::commit();
-
-    //         // REFRESH CACHE
-    //         $this->refreshCacheStock();
-    //         $this->refreshCacheTransactionDetail();
-            
-    //         // UI RESET
-    //         $this->resetCart();
-    //         $this->dispatch('refreshProductStock');
-
-    //         // NOTIFIKASI BERHASIL
-    //         if ($paymentStatus === 'PAID') {
-    //             $this->dispatch('successPayment');
-    //             $this->dispatch('printReceipt', $order->id);
-    //         } else {
-    //             $this->dispatch('successSaveOrder');
-    //         }
-
-    //         $this->loadUnpaidOrders();
-
-    //     } catch (\Exception $e) {
-    //         DB::rollBack();
-    //         Log::error($e->getMessage());
-    //         $this->dispatch('errorPayment', $e->getMessage());
-    //     }
-    // }
-
-    // 2
-    // public function processOrder()
-    // {
-    //     $userKey = 'order-process:user-' . Auth::id();
-    //     if (RateLimiter::tooManyAttempts($userKey, 5)) {
-    //         $this->dispatch('errorPayment', 'Terlalu banyak request, tunggu sebentar.');
-    //         return;
-    //     }
-    //     RateLimiter::hit($userKey, 2);
-
-    //     if (empty($this->cart) && !$this->selectedUnpaidOrderId) {
-    //         $this->dispatch('nullPaymentSelected');
-    //         return;
-    //     }
-
-    //     DB::beginTransaction();
-
-    //     try {
-
-    //         // =====================================================
-    //         // 1. LOCK PRODUK
-    //         // =====================================================
-    //         $productUpdates = [];
-    //         $productIds = collect($this->cart)->pluck('id');
-    //         $products = Product::whereIn('id', $productIds)->lockForUpdate()->get()->keyBy('id');
-
-    //         foreach ($this->cart as $item) {
-    //             if (!isset($products[$item['id']]) || $products[$item['id']]->stock < $item['quantity']) {
-    //                 throw new \Exception("Stock tidak cukup: " . ($products[$item['id']]->name ?? 'Unknown'));
-    //             }
-    //         }
-
-    //         // =====================================================
-    //         // 2. VALIDASI MEJA
-    //         // =====================================================
-    //         if ($this->order_type === 'DINE_IN' && empty($this->desk_number)) {
-    //             throw new \Exception("Nomor meja wajib diisi.");
-    //         }
-
-    //         // =====================================================
-    //         // 3. HITUNG TOTAL REAL DARI CART
-    //         // =====================================================
-    //         $total = '0';
-    //         foreach ($this->cart as $item) {
-    //             $subtotal = bcmul(decimal($item['price']), (string)$item['quantity'], 2);
-    //             $total = bcadd($total, $subtotal, 2);
-    //         }
-
-    //         $tax = decimal($this->tax);
-    //         $total = bcadd($total, $tax, 2);
-
-    //         if (bccomp($total, '0', 2) <= 0) {
-    //             throw new \Exception("Total tidak valid");
-    //         }
-
-    //         // =====================================================
-    //         // 4. LOGIC PAYMENT MODE
-    //         // =====================================================
-    //         $customerMoney = null;
-    //         $change = null;
-    //         $paymentStatus = 'UNPAID';
-    //         $paidAt = null;
-
-    //         if ($this->payment_mode === 'PAY_NOW') {
-    //             $customerMoney = decimal($this->customerMoney);
-
-    //             if (bccomp($customerMoney, $total, 2) === -1) {
-    //                 $shortage = bcsub($total, $customerMoney, 2);
-    //                 DB::rollBack();
-    //                 $this->dispatch('insufficientPayment', $shortage);
-    //                 return;
-    //             }
-
-    //             $change = bcsub($customerMoney, $total, 2);
-    //             $paymentStatus = 'PAID';
-    //             $paidAt = now();
-    //         }
-
-    //         // =====================================================
-    //         // 5. AMBIL / BUAT ORDER
-    //         // =====================================================
-    //         if ($this->selectedUnpaidOrderId) {
-    //             // UPDATE ORDER LAMA
-    //             $order = ModelsOrder::lockForUpdate()->findOrFail($this->selectedUnpaidOrderId);
-
-    //             if ($order->payment_status === 'PAID') {
-    //                 throw new \Exception("Order ini sudah dibayar.");
-    //             }
-
-    //             // Hapus detail lama
-    //             TransactionDetail::where('order_id', $order->id)->delete();
-
-    //             // Update header
-    //             $order->update([
-    //                 'order_type' => $this->order_type,
-    //                 'desk_number' => $this->order_type === 'DINE_IN' ? $this->desk_number : null,
-    //                 'note' => $this->note,
-    //                 'tax' => $tax,
-    //                 'grandtotal' => $total,
-    //                 'payment_status' => $paymentStatus,
-    //                 'payment_mode' => $this->payment_mode,
-    //                 'payment_method' => $this->payment_method,
-    //                 'customer_money' => $customerMoney,
-    //                 'change' => $change,
-    //                 'paid_at' => $paidAt,
-    //             ]);
-
-    //         } else {
-    //             // CREATE ORDER BARU
-    //             $order = ModelsOrder::create([
-    //                 'user_id' => Auth::id(),
-    //                 'order_number' => $this->generateOrderNumber(),
-    //                 'order_type' => $this->order_type,
-    //                 'desk_number' => $this->order_type === 'DINE_IN' ? $this->desk_number : null,
-    //                 'note' => $this->note,
-    //                 'tax' => $tax,
-    //                 'grandtotal' => $total,
-    //                 'payment_status' => $paymentStatus,
-    //                 'payment_mode' => $this->payment_mode,
-    //                 'payment_method' => $this->payment_method,
-    //                 'customer_money' => $customerMoney,
-    //                 'change' => $change,
-    //                 'paid_at' => $paidAt,
-    //             ]);
-    //         }
-
-    //         // =====================================================
-    //         // 6. INSERT DETAILS + POTONG STOK
-    //         // =====================================================
-    //         $details = [];
-
-    //         foreach ($this->cart as $item) {
-    //             $price = decimal($item['price']);
-    //             $qty   = (string) $item['quantity'];
-    //             $subtotal = bcmul($price, $qty, 2);
-
-    //             $details[] = [
-    //                 'order_id' => $order->id,
-    //                 'product_id' => $item['id'],
-    //                 'quantity' => $qty,
-    //                 'price' => $price,
-    //                 'subtotal' => $subtotal,
-    //                 'created_at' => now(),
-    //                 'updated_at' => now(),
-    //             ];
-
-    //             $productUpdates[$item['id']] = $qty;
-    //         }
-
-    //         TransactionDetail::insert($details);
-
-    //         foreach ($productUpdates as $productId => $qty) {
-    //             Product::where('id', $productId)->update([
-    //                 'stock' => DB::raw("stock - $qty"),
-    //                 'sold_count' => DB::raw("sold_count + $qty"),
-    //             ]);
-    //         }
-
-    //         DB::commit();
-
-    //         // =====================================================
-    //         // 7. UI RESET
-    //         // =====================================================
-    //         $this->selectedUnpaidOrderId = null;
-    //         $this->resetCart();
-    //         $this->dispatch('refreshProductStock');
-    //         $this->loadUnpaidOrders();
-
-    //         if ($paymentStatus === 'PAID') {
-    //             $this->dispatch('successPayment');
-    //             $this->dispatch('printReceipt', $order->id);
-    //         } else {
-    //             $this->dispatch('successSaveOrder');
-    //         }
-
-    //     } catch (\Exception $e) {
-    //         DB::rollBack();
-    //         Log::error($e->getMessage());
-    //         $this->dispatch('errorPayment', $e->getMessage());
-    //     }
-    // }
-
-
-    // 3
+    // Proses order (baru atau edit unpaid)
     public function processOrder()
     {
         $userKey = 'order-process:user-' . Auth::id();
@@ -789,6 +467,7 @@ class Order extends Component
                                 'quantity' => $newQty,
                                 'price' => $price,
                                 'subtotal' => $subtotal,
+                                'product_note' => $item['product_note'] ?? null,
                             ]);
                     } else {
                         // INSERT
@@ -798,6 +477,7 @@ class Order extends Component
                             'quantity' => $newQty,
                             'price' => $price,
                             'subtotal' => $subtotal,
+                            'product_note' => $item['product_note'] ?? null,
                         ]);
                     }
 
@@ -1049,9 +729,6 @@ class Order extends Component
         }
     }
 
-
-    
-
     // Reset keranjang
     public function resetCart()
     {
@@ -1108,6 +785,7 @@ class Order extends Component
     }
 
 
+    // Render komponen
     public function render()
     {
         return view('livewire.dashboard.order');
