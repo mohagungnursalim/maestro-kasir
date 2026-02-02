@@ -237,7 +237,7 @@
 
                             @foreach ($cart as $index => $item)
 
-                            <div class="border rounded-md bg-white px-3 py-2 text-sm">
+                            <div wire:key="cart-item-{{ $item['id'] }}-{{ $index }}" class="border rounded-md bg-white px-3 py-2 text-sm">
 
                                 <div class="flex items-center gap-2">
 
@@ -265,7 +265,7 @@
 
 
                                     <!-- Qty Control -->
-                                    <div x-data="{ quantity: {{ $item['quantity'] }} }" class="flex items-center gap-1">
+                                    <div x-data="{ quantity: @js($item['quantity']) }" class="flex items-center gap-1">
 
                                         {{-- Button (-) --}}
                                         <button type="button"
@@ -523,39 +523,73 @@
 
                                 {{-- ==================== UANG PELANGGAN ==================== --}}
                                 @if($payment_mode === 'PAY_NOW')
-                                <div x-data="{
-                                            display: '',
-                                            raw: @entangle('customerMoney').live,
-                                            _timer: null,
+                                <div
+                                    class="mt-3"
+                                    x-data="{
+                                        display: '',
+                                        raw: @entangle('customerMoney').live,
 
-                                            format(n) { return n ? new Intl.NumberFormat('id-ID').format(n) : ''; },
+                                        format(v) {
+                                            return v ? new Intl.NumberFormat('id-ID').format(v) : '';
+                                        },
 
-                                            init() {
-                                                // Reset kalau mode ganti ke PAY_LATER
-                                                this.$watch('$wire.payment_mode', (val) => {
-                                                    if (val === 'PAY_LATER') {
-                                                        this.display = '';
-                                                        this.raw = 0;
-                                                    }
-                                                });
-                                            },
-
-                                            onInput(e) {
-                                                let v = e.target.value.replace(/[^0-9]/g, '');
+                                        init() {
+                                            // sync dari backend
+                                            this.$watch('raw', v => {
                                                 this.display = this.format(v);
+                                            });
 
-                                                clearTimeout(this._timer);
-                                                this._timer = setTimeout(() => {
-                                                    this.raw = v === '' ? 0 : parseInt(v);
-                                                }, 400);
-                                            }
-                                        }">
-                                    <label class="block mb-2 text-sm font-medium">Uang Pelanggan</label>
-                                    <input type="text" x-on:input="onInput($event)" x-bind:value="display"
+                                            // WATCH PAYMENT METHOD → LANGSUNG REAKSI
+                                            this.$watch('$wire.payment_method', (val) => {
+                                                if (val !== 'CASH') {
+                                                    // non cash → auto set & lock
+                                                    this.raw = @js($total);
+                                                    this.display = this.format(this.raw);
+                                                } else {
+                                                    // cash → buka input
+                                                    this.raw = null;
+                                                    this.display = '';
+                                                }
+                                            });
+                                        },
+
+                                        onInput(e) {
+                                            let v = e.target.value.replace(/[^0-9]/g, '');
+                                            this.display = this.format(v);
+                                            this.raw = v === '' ? null : parseInt(v);
+                                        }
+                                    }">
+                                    <label class="block mb-2 text-sm font-medium">
+                                        Uang Pelanggan
+                                    </label>
+
+                                    {{-- INPUT (CASH) --}}
+                                    <input
+                                        type="text"
+                                        x-show="$wire.payment_method === 'CASH'"
+                                        x-on:input="onInput($event)"
+                                        x-bind:value="display"
+                                        inputmode="numeric"
                                         class="block w-full p-2 border rounded-lg text-sm bg-gray-50"
-                                        placeholder="Masukkan uang...">
+                                        placeholder="Masukkan uang pelanggan"
+                                    >
+
+                                    {{-- DISPLAY (NON CASH) --}}
+                                    <div
+                                        x-show="$wire.payment_method !== 'CASH'"
+                                        class="block w-full p-2 border rounded-lg text-sm bg-gray-100 text-gray-700 font-semibold"
+                                    >
+                                        Rp{{ number_format($total, 0, ',', '.') }}
+                                    </div>
+
+                                    <p class="text-xs text-gray-500 mt-1">
+                                        <span x-show="$wire.payment_method === 'CASH'">Input manual untuk tunai</span>
+                                        <span x-show="$wire.payment_method !== 'CASH'">Otomatis sesuai total</span>
+                                    </p>
                                 </div>
                                 @endif
+
+
 
 
                                 @endif

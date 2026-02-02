@@ -183,7 +183,18 @@ class Order extends Component
     public function updatedPaymentMethod($value)
     {
         $this->payment_method = $value;
+
+        if ($value === 'CASH') {
+            // Cash: user input manual
+            $this->customerMoney = null;
+            $this->change = 0;
+        } else {
+            // Non-cash: auto pas total
+            $this->customerMoney = $this->total;
+            $this->change = 0;
+        }
     }
+
 
     // Perbarui mode pembayaran
     public function updatedPaymentMode($value)
