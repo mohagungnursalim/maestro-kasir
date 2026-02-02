@@ -123,7 +123,7 @@ class Order extends Component
                 'price' => $product->price,
                 'quantity' => 1,
                 'subtotal' => $product->price,
-                'product_note' => $this->tempProductNote ?: null,
+                'product_note' => $this->tempProductNote,
             ];
             $this->cartNotEmpty = true;
             $this->calculateTotal();
@@ -151,7 +151,7 @@ class Order extends Component
                 'price' => $product->price,
                 'quantity' => 1,
                 'subtotal' => $product->price, // Tambahkan subtotal di awal
-                'product_note' => null,
+                'product_note' => $product->product_note,
             ];
             $this->cartNotEmpty = true; // Set true
             $this->calculateTotal();
@@ -693,6 +693,7 @@ class Order extends Component
                     'quantity' => $qty,
                     'price' => $price,
                     'subtotal' => $subtotal,
+                    'product_note' => $item['product_note'] ?? null,
                 ]);
 
                 Product::where('id', $item['id'])->update([
