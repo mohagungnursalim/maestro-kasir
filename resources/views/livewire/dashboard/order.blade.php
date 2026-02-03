@@ -237,7 +237,7 @@
 
                             @foreach ($cart as $index => $item)
 
-                            <div wire:key="cart-item-{{ $item['id'] }}-{{ $index }}" class="border rounded-md bg-white px-3 py-2 text-sm">
+                            <div wire:key="cart-item-{{ $item['id'] }}-{{ $index }}" class="border rounded-md bg-white px-2 py-1 text-xs">
 
                                 <div class="flex items-center gap-2">
 
@@ -251,7 +251,7 @@
                                                 </div>
 
                                                 <!-- Product Note -->
-                                                <div class="text-[12px] text-gray-500 leading-tight mt-[2px] break-words whitespace-normal cursor-pointer hover:text-gray-700"
+                                                <div class="text-[11px] text-gray-500 leading-tight mt-0 break-words whitespace-normal cursor-pointer hover:text-gray-700"
                                                     @click="$dispatch('open-edit-note', {
                                                         index: {{ $index }},
                                                         note: @js($item['product_note'] ?? '')
@@ -269,7 +269,7 @@
 
                                         {{-- Button (-) --}}
                                         <button type="button"
-                                            class="w-6 h-6 flex items-center justify-center border rounded bg-gray-100 hover:bg-gray-200"
+                                            class="w-5 h-5 flex items-center justify-center border rounded bg-gray-100 hover:bg-gray-200 text-xs"
                                             x-on:click="
                                                 if (quantity > 1) {
                                                     quantity--;
@@ -281,15 +281,14 @@
                                             ">
                                             −
                                         </button>
-
                                         <input type="number" min="1"
-                                            class="w-14 h-7 text-center text-xs font-semibold border border-gray-300 rounded text-gray-900 bg-white focus:outline-none focus:ring-1 focus:ring-blue-500"
+                                            class="w-12 h-6 text-center text-xs font-semibold border border-gray-300 rounded text-gray-900 bg-white focus:outline-none focus:ring-1 focus:ring-blue-500"
                                             x-model.number="quantity"
                                             x-on:input.debounce.400ms="$wire.updateQuantity({{ $index }}, quantity)">
 
                                         {{-- Button (+) --}}
                                         <button type="button"
-                                            class="w-6 h-6 flex items-center justify-center border rounded bg-gray-100 hover:bg-gray-200"
+                                            class="w-5 h-5 flex items-center justify-center border rounded bg-gray-100 hover:bg-gray-200 text-xs"
                                             x-on:click="
                                                 quantity++;
                                                 clearTimeout(window.qtyTimeout);
@@ -303,18 +302,18 @@
                                     </div>
 
                                     <!-- Subtotal -->
-                                    <div class="w-24 text-right font-semibold text-gray-900 text-xs">
+                                    <div class="w-20 text-right font-semibold text-gray-900 text-xs">
                                         Rp{{ number_format($item['price'] * $item['quantity'], 0, ',', '.') }}
 
                                         <button wire:click="removeFromCart({{ $index }})" wire:loading.remove
                                             wire:target="removeFromCart({{ $index }})"
                                             onclick="event.stopPropagation(); playSelectSound()"
-                                            class="text-xs ml-4 mr-2 text-red-600 hover:underline">
-                                            <i class="fas fa-trash fa-lg"></i>
+                                            class="text-xs ml-2 mr-1 text-red-600 hover:text-red-800">
+                                            <i class="fas fa-trash"></i>
                                         </button>
                                         <!-- Hapus -->
                                         <span wire:loading wire:target="removeFromCart({{ $index }})"
-                                            class="text-xs ml-4 mr-2 text-gray-400 animate-pulse">
+                                            class="text-xs ml-2 mr-1 text-gray-400 animate-pulse">
                                             <i class="fas fa-spinner fa-spin"></i>
                                         </span>
 
@@ -443,8 +442,6 @@
                     <!-- Total dan Pembayaran -->
                     <div class="w-full lg:w-1/3 mt-6 lg:mt-0">
                         <div class="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
-                            <p class="text-red-500 text-sm">*Harap pastikan data pesanan benar sebelum disimpan /
-                                dibayar</p>
 
                             <div class="space-y-4 mt-4">
 
@@ -648,33 +645,20 @@
                     @if(count($unpaidOrders) === 0)
 
                     @else
-                    <div class="rounded-lg border border-orange-200 bg-orange-50 p-4 shadow-sm">
-                        <h3 class="font-bold text-orange-700 mb-3">🕒 Belum Dibayar</h3>
+                    <div class="rounded-md border border-red-200 bg-red-50 p-2 shadow-sm text-xs">
+                        <h3 class="font-bold text-red-700 mb-2 text-xs">🕒 Belum Dibayar</h3>
 
-
-                        <div class="space-y-2 max-h-[400px] overflow-y-auto">
+                        <div class="space-y-1 max-h-[250px] overflow-y-auto custom-scrollbar">
                             @foreach($unpaidOrders as $order)
                             <button wire:click="selectUnpaidOrder({{ $order->id }})"
-                                class="w-full text-left p-3 rounded border bg-white hover:bg-orange-100 transition">
-
-                                <div class="flex justify-between">
-                                    <div>
-                                        <div class="font-semibold text-sm">
-                                            Meja: {{ $order->desk_number ?? '-' }}
-                                        </div>
-                                        <div class="text-xs text-gray-500">
-                                            {{ $order->order_number }}
-                                        </div>
-                                    </div>
-
-                                    <div class="text-right">
-                                        <div class="text-sm font-bold text-orange-600">
-                                            Rp{{ number_format($order->grandtotal,0,',','.') }}
-                                        </div>
-                                        <div class="text-xs text-gray-400">
-                                            {{ $order->created_at->diffForHumans() }}
-                                        </div>
-                                    </div>
+                                class="w-full text-left p-2 rounded border bg-white hover:bg-orange-100 transition flex items-center gap-2 text-xs">
+                                <div class="flex-1 min-w-0">
+                                    <div class="font-semibold text-[11px] truncate">Meja: {{ $order->desk_number ?? '-' }}</div>
+                                    <div class="text-[10px] text-gray-500 truncate">{{ $order->order_number }}</div>
+                                </div>
+                                <div class="text-right">
+                                    <div class="text-[11px] font-bold text-orange-600">Rp{{ number_format($order->grandtotal,0,',','.') }}</div>
+                                    <div class="text-[10px] text-gray-400">{{ $order->created_at->locale('id')->diffForHumans() }}</div>
                                 </div>
                             </button>
                             @endforeach
