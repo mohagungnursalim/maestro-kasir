@@ -619,21 +619,25 @@
                                     class="bg-green-600 @if(empty($cart)) opacity-50 @endif text-white px-4 py-2 rounded-lg w-full">
 
                                     @if($selectedUnpaidOrderId)
-                                    {{-- Sedang buka order UNPAID --}}
-                                    @if($payment_mode === 'PAY_NOW')
-                                    Bayar Pesanan
+                                        {{-- Sedang buka order UNPAID --}}
+                                        @if($payment_mode === 'PAY_NOW')
+                                        Proses
+                                        @else
+                                        Update Pesanan
+                                        @endif
                                     @else
-                                    Update Pesanan
-                                    @endif
-                                    @else
-                                    {{-- Order baru --}}
-                                    @if($payment_mode === 'PAY_NOW')
-                                    Bayar Sekarang
-                                    @else
-                                    Simpan Pesanan
-                                    @endif
+                                        {{-- Order baru --}}
+                                        @if($payment_mode === 'PAY_NOW')
+                                        Proses
+                                        @else
+                                        Simpan Pesanan
+                                        @endif
                                     @endif
 
+                                </button>
+                                <button wire:click="resetCart" @if(empty($cart)) disabled @endif
+                                    class="ml-2 bg-red-600 @if(empty($cart)) opacity-50 @endif text-white px-4 py-2 rounded-lg w-full">
+                                Clear
                                 </button>
                             </div>
 
