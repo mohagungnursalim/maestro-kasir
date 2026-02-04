@@ -468,7 +468,7 @@
                                 {{-- ==================== NOMOR MEJA ==================== --}}
                                 @if ($order_type === 'DINE_IN')
                                 <div>
-                                    <label class="block mb-2 text-sm font-medium text-gray-900">Nomor Meja</label>
+                                    <label class="block mb-2 text-sm font-medium text-gray-900">Meja/Nama</label>
                                     <input type="text" wire:model.live.lazy="desk_number"
                                         class="block w-full p-2 border rounded-lg text-sm bg-gray-50"
                                         placeholder="Contoh: A1, 12, VIP-3">
@@ -653,7 +653,7 @@
                             <button wire:click="selectUnpaidOrder({{ $order->id }})"
                                 class="w-full text-left p-2 rounded border bg-white hover:bg-orange-100 transition flex items-center gap-2 text-xs">
                                 <div class="flex-1 min-w-0">
-                                    <div class="font-semibold text-[11px] truncate">Meja: {{ $order->desk_number ?? '-' }}</div>
+                                    <div class="font-semibold text-[11px] truncate"> {{ $order->desk_number ?? '?' }}</div>
                                     <div class="text-[10px] text-gray-500 truncate">{{ $order->order_number }}</div>
                                 </div>
                                 <div class="text-right">
