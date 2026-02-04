@@ -453,8 +453,8 @@ class Order extends Component
                 }
 
                 // VALIDASI MEJA
-                if ($this->order_type === 'DINE_IN' && empty($this->desk_number)) {
-                $this->dispatch('errorOrderType');
+                if (empty($this->desk_number)) {
+                    $this->dispatch('errorOrderType');
                     return;
                 }
 
@@ -633,8 +633,8 @@ class Order extends Component
 
 
             // VALIDASI MEJA
-            if ($this->order_type === 'DINE_IN' && empty($this->desk_number)) {
-               $this->dispatch('errorOrderType');
+            if (empty($this->desk_number)) {
+                $this->dispatch('errorOrderType');
                 return;
             }
 
