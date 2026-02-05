@@ -162,7 +162,7 @@
 
                 {{-- Modal Add Catatan per item --}}
                 @if($showNoteModal)
-               <div x-cloak class="fixed inset-0 z-50 flex items-center justify-center">
+                <div x-cloak class="fixed inset-0 z-50 flex items-center justify-center">
                     <!-- Backdrop -->
                     <div
                         class="absolute inset-0 bg-black/50 backdrop-blur-sm"
@@ -215,7 +215,6 @@
                         </div>
                     </div>
                 </div>
-
                 @endif
 
 
@@ -243,7 +242,10 @@
 
                                     {{-- Item --}}
                                     <div class="flex-1 min-w-0">
-                                        <div class="flex justify-between items-start gap-2">
+                                        <div class="flex justify-between cursor-pointer items-start gap-2" @click="$dispatch('open-edit-note', {
+                                                        index: {{ $index }},
+                                                        note: @js($item['product_note'] ?? '')
+                                                    })">
                                             <div class="min-w-0">
                                                 <!-- Nama Produk -->
                                                 <div class="font-bold text-gray-900">
@@ -251,11 +253,7 @@
                                                 </div>
 
                                                 <!-- Product Note -->
-                                                <div class="text-[11px] text-gray-500 leading-tight mt-0 break-words whitespace-normal cursor-pointer hover:text-gray-700"
-                                                    @click="$dispatch('open-edit-note', {
-                                                        index: {{ $index }},
-                                                        note: @js($item['product_note'] ?? '')
-                                                    })">
+                                                <div class="text-[11px] text-gray-500 leading-tight mt-0 break-words whitespace-normal cursor-pointer hover:text-gray-700">
                                                     {{ $item['product_note'] ?: 'Tambah catatan…' }}
                                                 </div>
                                             </div>
