@@ -1,7 +1,7 @@
 <div class="py-12">
     @can('Lihat')
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <section class="bg-yellow-50 py-8 antialiased md:py-16">
+        <section class="bg-gray-50 py-8 antialiased md:py-16">
             <div class="mx-auto max-w-screen-lg px-4">
                 <!-- Pencarian Produk -->
                 <div>
@@ -25,7 +25,7 @@
 
                             <!-- Button Normal -->
                             <button type="submit" wire:loading.remove wire:target="searchProduct"
-                                class="text-gray-900 absolute end-2.5 bottom-2.5 bg-yellow-300 hover:bg-yellow-400 focus:ring-4 focus:outline-none focus:ring-yellow-200 font-medium rounded-lg text-sm px-4 py-2 flex items-center gap-2">
+                                class="text-gray-900 absolute end-2.5 bottom-2.5 bg-yellow-300 hover:bg-yellow-400 focus:ring-4 focus:outline-none focus:ring-blue-200 font-medium rounded-lg text-sm px-4 py-2 flex items-center gap-2">
                                 Cari
                             </button>
 
@@ -402,7 +402,7 @@
                        
 
 
-                           {{-- Modal Cetak Tagihan/Bill --}}
+                            {{-- Modal Cetak Tagihan/Bill --}}
                             <div x-data="{ show: false }" x-on:open-print-modal.window="show = true" x-show="show" x-cloak
                                 class="fixed inset-0 z-50 flex items-center justify-center">
                                 <!-- Backdrop -->
@@ -445,58 +445,58 @@
                                 </div>
                             </div>
 
-                             {{-- Modal edit Catatan per item --}}
-                        <div x-data="{
-                                    show: false,
-                                    index: null,
-                                    note: ''
-                                }" x-on:open-edit-note.window="
-                                    show = true;
-                                    index = $event.detail.index;
-                                    note = $event.detail.note;
-                                " x-show="show" x-cloak class="fixed inset-0 z-50 flex items-center justify-center">
-                            <!-- Backdrop -->
-                            <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" @click="show = false"></div>
+                            {{-- Modal edit Catatan per item --}}
+                            <div x-data="{
+                                        show: false,
+                                        index: null,
+                                        note: ''
+                                    }" x-on:open-edit-note.window="
+                                        show = true;
+                                        index = $event.detail.index;
+                                        note = $event.detail.note;
+                                    " x-show="show" x-cloak class="fixed inset-0 z-50 flex items-center justify-center">
+                                <!-- Backdrop -->
+                                <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" @click="show = false"></div>
 
-                            <!-- Modal Box -->
-                            <div x-show="show" x-transition
-                                class="relative bg-white w-full max-w-md rounded-xl shadow-2xl p-6">
+                                <!-- Modal Box -->
+                                <div x-show="show" x-transition
+                                    class="relative bg-white w-full max-w-md rounded-xl shadow-2xl p-6">
 
-                                <!-- Icon Note -->
-                                <div class="flex justify-center mb-4">
-                                    <div class="w-12 h-12 flex items-center justify-center rounded-full bg-gray-100 text-gray-600">
-                                        <i class="fas fa-sticky-note fa-lg"></i>
+                                    <!-- Icon Note -->
+                                    <div class="flex justify-center mb-4">
+                                        <div class="w-12 h-12 flex items-center justify-center rounded-full bg-gray-100 text-gray-600">
+                                            <i class="fas fa-sticky-note fa-lg"></i>
+                                        </div>
+                                    </div>
+
+                                    <!-- Title -->
+                                    <h2 class="text-lg font-bold text-center text-gray-800 mb-2">
+                                        Edit Catatan Item
+                                    </h2>
+
+                                    <!-- Desc -->
+                                    <p class="text-center text-gray-500 text-sm mb-4">
+                                        Isi jika ada permintaan khusus (opsional).
+                                    </p>
+
+                                    <textarea x-model="note" rows="3"
+                                        class="w-full border rounded-lg p-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                        placeholder="Contoh: tanpa gula, extra pedas, dll...">
+                                    </textarea>
+
+                                    <!-- Actions -->
+                                    <div class="flex justify-center gap-3 mt-6">
+                                        <button @click="show = false"
+                                            class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition">
+                                            Batal
+                                        </button>
+
+                                        <button @click="$wire.updateItemNote(index, note); show = false;" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition">
+                                            Simpan
+                                        </button>
                                     </div>
                                 </div>
-
-                                <!-- Title -->
-                                <h2 class="text-lg font-bold text-center text-gray-800 mb-2">
-                                    Edit Catatan Item
-                                </h2>
-
-                                <!-- Desc -->
-                                <p class="text-center text-gray-500 text-sm mb-4">
-                                    Isi jika ada permintaan khusus (opsional).
-                                </p>
-
-                                <textarea x-model="note" rows="3"
-                                     class="w-full border rounded-lg p-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                    placeholder="Contoh: tanpa gula, extra pedas, dll...">
-                                </textarea>
-
-                                <!-- Actions -->
-                                <div class="flex justify-center gap-3 mt-6">
-                                    <button @click="show = false"
-                                        class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition">
-                                        Batal
-                                    </button>
-
-                                    <button @click="$wire.updateItemNote(index, note); show = false;" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition">
-                                        Simpan
-                                    </button>
-                                </div>
                             </div>
-                        </div>
 
                     </div>
 
@@ -711,7 +711,7 @@
 
                     @else
                     <div class="rounded-md border border-red-200 bg-red-50 p-2 shadow-sm text-xs">
-                        <h3 class="font-bold text-red-700 mb-2 text-xs">🕒 Belum Dibayar</h3>
+                        <h3 class="font-extrabold text-red-700 mb-2 text-xs">🕒 Belum Dibayar</h3>
 
                         <div class="space-y-1 max-h-[250px] overflow-y-auto custom-scrollbar">
                             @foreach($unpaidOrders as $order)
@@ -722,7 +722,7 @@
                                     <div class="text-[10px] text-gray-500 truncate">{{ $order->order_number }}</div>
                                 </div>
                                 <div class="text-right">
-                                    <div class="text-[11px] font-bold text-orange-600">Rp{{ number_format($order->grandtotal,0,',','.') }}</div>
+                                    <div class="text-[11px] font-extrabold text-orange-600">Rp{{ number_format($order->grandtotal,0,',','.') }}</div>
                                     <div class="text-[10px] text-gray-400">{{ $order->created_at->locale('id')->diffForHumans() }}</div>
                                 </div>
                             </button>
