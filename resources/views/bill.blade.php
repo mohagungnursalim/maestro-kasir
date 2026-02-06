@@ -113,6 +113,10 @@
         <p>Kasir: {{ $billData['kasir'] }}</p>
         <p>Kode Order: {{ $billData['order_number'] }}</p>
 
+        @if(isset($billData['__multi']))
+            <p>Split: {{ $billData['__multi']['split'] }} / {{ $billData['__multi']['count'] }}</p>
+        @endif
+
         <div class="line"></div>
 
         <table>

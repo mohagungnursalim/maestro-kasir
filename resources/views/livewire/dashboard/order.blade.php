@@ -223,217 +223,225 @@
                 <h2 class="text-xl font-semibold text-gray-900 sm:text-2xl mt-6">Pesanan</h2>
                 <div class="mt-6 sm:mt-8 md:gap-6 lg:flex lg:items-start">
 
-                    <!-- Daftar Item Pesanan -->
-                    <div class="w-full lg:w-2/3 max-h-[60vh] overflow-y-auto custom-scrollbar">
+                   <!-- ================== KIRI: DAFTAR ITEM + ACTION ================== -->
+                    <div class="w-full lg:w-2/3 flex flex-col h-[70vh]">
 
-                        <div class="space-y-2">
+                        <!-- ================== SCROLL AREA (ITEM SAJA) ================== -->
+                        <div class="flex-1 overflow-y-auto custom-scrollbar pr-1">
+                            <div class="space-y-2">
 
-                            @if (empty($cart))
-                            <div class="text-center mt-9 text-sm text-gray-500">
-                                Pesanan Kosong <i class="far fa-list-alt"></i>
-                            </div>
-                            @else
+                                @if (empty($cart))
+                                    <div class="text-center mt-10 text-sm text-gray-500">
+                                        Pesanan Kosong <i class="far fa-list-alt"></i>
+                                    </div>
+                                @else
 
-                            @foreach ($cart as $index => $item)
+                                    @foreach ($cart as $index => $item)
 
-                            <div wire:key="cart-item-{{ $item['id'] }}-{{ $index }}" class="border rounded-md bg-white px-2 py-1 text-xs">
+                                    <div wire:key="cart-item-{{ $item['id'] }}-{{ $index }}"class="bg-white border border-gray-100 rounded-lg px-4 py-3 text-sm shadow-sm hover:shadow-md transition-all duration-150">
+                                        <div class="flex items-start gap-3">
+                                            <!-- INFO ITEM -->
+                                            <div class="flex-1 min-w-0">
+                                                <div class="flex justify-between items-start gap-2">
 
-                                <div class="flex items-center gap-2">
+                                                    <div class="min-w-0 cursor-pointer"
+                                                        @click="$dispatch('open-edit-note', {
+                                                            index: {{ $index }},
+                                                            note: @js($item['product_note'] ?? '')
+                                                        })">
 
-                                    {{-- Item --}}
-                                    <div class="flex-1 min-w-0">
-                                        <div class="flex justify-between cursor-pointer items-start gap-2" @click="$dispatch('open-edit-note', {
-                                                        index: {{ $index }},
-                                                        note: @js($item['product_note'] ?? '')
-                                                    })">
-                                            <div class="min-w-0">
-                                                <!-- Nama Produk -->
-                                                <div class="font-bold text-gray-900">
-                                                    {{ $item['name'] }}
+                                                                <div class="font-semibold text-sm text-gray-900 truncate">
+                                                            {{ $item['name'] }}
+                                                        </div>
+
+                                                                <div class="text-[11px] text-gray-500 leading-tight line-clamp-1 hover:text-gray-700">{{ $item['product_note'] ?: 'Tambah catatan…' }}</div>
+                                                    </div>
+
+                                                    <!-- DELETE -->
+                                                    <button
+                                                        wire:click="removeFromCart({{ $index }})"
+                                                        onclick="event.stopPropagation(); playSelectSound()">
+                                                        <i class="fas fa-trash text-red-500 hover:text-red-700"></i>
+                                                    </button>
                                                 </div>
 
-                                                <!-- Product Note -->
-                                                <div class="text-[11px] text-gray-500 leading-tight mt-0 break-words whitespace-normal cursor-pointer hover:text-gray-700">
-                                                    {{ $item['product_note'] ?: 'Tambah catatan…' }}
+                                                <!-- QTY + PRICE -->
+                                                <div class="mt-2 flex items-center justify-between">
+
+                                                    <!-- QTY -->
+                                                    <div x-data="{ quantity: @js($item['quantity']) }"
+                                                        class="flex items-center gap-1">
+
+                                                        <button
+                                                            class="w-5 h-6 border rounded hover:bg-gray-100"
+                                                            @click="
+                                                                if (quantity > 1) {
+                                                                    quantity--;
+                                                                    $wire.updateQuantity({{ $index }}, quantity);
+                                                                }
+                                                            ">
+                                                            −
+                                                        </button>
+
+                                                        <input
+                                                            type="number"
+                                                            min="1"
+                                                            x-model.number="quantity"x
+                                                            @input.debounce.300ms="$wire.updateQuantity({{ $index }}, quantity)"
+                                                            class="w-12 h-6 border rounded text-center font-semibold text-xs">
+
+                                                        <button
+                                                            class="w-5 h-6 border rounded hover:bg-gray-100"
+                                                            @click="
+                                                                quantity++;
+                                                                $wire.updateQuantity({{ $index }}, quantity);
+                                                            ">
+                                                            +
+                                                        </button>
+                                                    </div>
+
+                                                    <!-- SUBTOTAL -->
+                                                    <div class="text-right">
+                                                        <div class="text-[10px] text-gray-400">Subtotal</div>
+                                                        <div class="font-bold text-gray-900">
+                                                            Rp{{ number_format($item['price'] * $item['quantity'], 0, ',', '.') }}
+                                                        </div>
+                                                    </div>
+                                                    <!-- SPLIT -->
+                                                    @if($splitEnabled)
+                                                    <div class="w-24">
+                                                        <label class="block text-[10px] text-gray-400 mb-0.5">Split</label>
+                                                        <select
+                                                            wire:model.live="cart.{{ $index }}.assigned_to"
+                                                            class="w-full border rounded px-2 py-1 text-xs">
+                                                            @for($i = 1; $i <= ($splitCount ?? 2); $i++)
+                                                                <option value="{{ $i }}">Payer {{ $i }}</option>
+                                                            @endfor
+                                                        </select>
+                                                    </div>
+                                                    @endif
                                                 </div>
                                             </div>
+
+                                            
 
                                         </div>
                                     </div>
 
+                                    @endforeach
+                                @endif
 
-                                    <!-- Qty Control -->
-                                    <div x-data="{ quantity: @js($item['quantity']) }" class="flex items-center gap-1">
+                            </div>
+                        </div>
 
-                                        {{-- Button (-) --}}
-                                        <button type="button"
-                                            class="w-5 h-5 flex items-center justify-center border rounded bg-gray-100 hover:bg-gray-200 text-xs"
-                                            x-on:click="
-                                                if (quantity > 1) {
-                                                    quantity--;
-                                                    clearTimeout(window.qtyTimeout);
-                                                    window.qtyTimeout = setTimeout(() => {
-                                                        $wire.updateQuantity({{ $index }}, quantity);
-                                                    }, 500);
-                                                }
-                                            ">
-                                            −
-                                        </button>
-                                        <input type="number" min="1"
-                                            class="w-12 h-6 text-center text-xs font-semibold border border-gray-300 rounded text-gray-900 bg-white focus:outline-none focus:ring-1 focus:ring-blue-500"
-                                            x-model.number="quantity"
-                                            x-on:input.debounce.400ms="$wire.updateQuantity({{ $index }}, quantity)">
+                        <!-- ================== ACTION BAR (TIDAK SCROLL) ================== -->
+                        @if (!empty($cart))
+                        <div class="">
 
-                                        {{-- Button (+) --}}
-                                        <button type="button"
-                                            class="w-5 h-5 flex items-center justify-center border rounded bg-gray-100 hover:bg-gray-200 text-xs"
-                                            x-on:click="
-                                                quantity++;
-                                                clearTimeout(window.qtyTimeout);
-                                                window.qtyTimeout = setTimeout(() => {
-                                                    $wire.updateQuantity({{ $index }}, quantity);
-                                                }, 500);
-                                            ">
-                                            +
+                            <div class="bg-yellow border border-gray-100 rounded-lg p-3 shadow-sm">
+                                <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+
+                                    <div class="flex items-center gap-3">
+                                        <button
+                                            x-data
+                                            @click="$dispatch('open-print-modal')"
+                                            class="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-gray-800 to-gray-900 text-white rounded-lg hover:from-gray-900 hover:to-black shadow-md transform hover:-translate-y-0.5 transition">
+                                            <i class="fas fa-print"></i>
+                                            <span class="font-semibold">Cetak Bill</span>
                                         </button>
 
+                                        <div class="hidden md:inline-block text-sm text-gray-600 ml-3">{{ count($cart) }} item • Rp{{ number_format($subtotal,0,',','.') }}</div>
                                     </div>
 
-                                    <!-- Subtotal -->
-                                    <div class="w-20 text-right font-semibold text-gray-900 text-xs">
-                                        Rp{{ number_format($item['price'] * $item['quantity'], 0, ',', '.') }}
+                                    <div class="flex items-center gap-3 flex-wrap">
+                                        <label class="inline-flex items-center cursor-pointer">
+                                            <input type="checkbox" wire:model.live="splitEnabled" class="sr-only peer">
+                                            <div class="relative w-9 h-5 bg-gray-200 rounded-full
+                                                after:content-[''] after:absolute after:top-[2px] after:left-[2px]
+                                                after:w-4 after:h-4 after:bg-white after:rounded-full after:transition
+                                                peer-checked:bg-blue-600 peer-checked:after:translate-x-4">
+                                            </div>
+                                            <span class="ml-3 text-sm font-medium">Split Bill?</span>
+                                        </label>
 
-                                        <button wire:click="removeFromCart({{ $index }})" wire:loading.remove
-                                            wire:target="removeFromCart({{ $index }})"
-                                            onclick="event.stopPropagation(); playSelectSound()"
-                                            class="text-xs ml-2 mr-1 text-red-600 hover:text-red-800">
-                                            <i class="fas fa-trash"></i>
-                                        </button>
-                                        <!-- Hapus -->
-                                        <span wire:loading wire:target="removeFromCart({{ $index }})"
-                                            class="text-xs ml-2 mr-1 text-gray-400 animate-pulse">
-                                            <i class="fas fa-spinner fa-spin"></i>
-                                        </span>
+                                       <div class="flex items-center gap-3 flex-wrap">
+                                         @if($splitEnabled)
+                                            <input
+                                                type="number"
+                                                min="1"
+                                                max="10"
+                                                wire:model.lazy="splitCount"
+                                                class="w-20 border rounded px-2 py-1 text-sm" />
 
+                                            <button
+                                                wire:click.prevent="prepareSplit"
+                                                class="px-3 inline-flex items-center  bg-gradient-to-r from-gray-800 to-gray-900 text-white rounded-lg hover:from-gray-900 hover:to-black shadow-md transform hover:-translate-y-0.5 transition">
+                                                Preview
+                                            </button>
+                                        @endif
+                                       </div>
                                     </div>
 
                                 </div>
 
+                                @if($preparedSplitCount > 0)
+                                <div class="flex flex-wrap justify-center gap-2 mt-3">
+                                    @for($s = 1; $s <= $preparedSplitCount; $s++)
+                                        <a href="{{ route('order.bill') }}?multi=1&split={{ $s }}" target="_blank" class="text-xs px-3 py-1 bg-blue-600 text-white rounded-md text-sm shadow-sm hover:shadow-md transition whitespace-nowrap">
+                                            <i class="fas fa-print fa-xs"></i>
+                                            Payer {{ $s }}
+                                        </a>
+                                    @endfor
+                                </div>
+                                @endif
                             </div>
-
-                            @endforeach
-                            @endif
-
-                        </div>
-
-                        <!-- Tombol Cetak -->
-                        @if (!empty($cart))
-                        <div class="flex justify-center mt-4">
-                            <button x-data @click="$dispatch('open-print-modal')"
-                                class="px-4 py-2 bg-gray-800 text-white rounded-lg hover:bg-gray-900 transition">
-                                Cetak Tagihan
-                            </button>
 
                         </div>
                         @endif
 
-                        {{-- Modal Cetak Tagihan/Bill --}}
-                        <div x-data="{ show: false }" x-on:open-print-modal.window="show = true" x-show="show" x-cloak
-                            class="fixed inset-0 z-50 flex items-center justify-center">
-                            <!-- Backdrop -->
-                            <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" @click="show = false"></div>
 
-                            <!-- Modal Box -->
-                            <div x-show="show" x-transition
-                                class="relative bg-white w-full max-w-md rounded-xl shadow-2xl p-6">
+                           {{-- Modal Cetak Tagihan/Bill --}}
+                            <div x-data="{ show: false }" x-on:open-print-modal.window="show = true" x-show="show" x-cloak
+                                class="fixed inset-0 z-50 flex items-center justify-center">
+                                <!-- Backdrop -->
+                                <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" @click="show = false"></div>
 
-                                <!-- Icon -->
-                                <div class="flex justify-center mb-4">
-                                    <div
-                                        class="w-12 h-12 flex items-center justify-center rounded-full bg-yellow-100 text-yellow-600">
-                                        <i class="fas fa-question fa-2x"></i>
+                                <!-- Modal Box -->
+                                <div x-show="show" x-transition
+                                    class="relative bg-white w-full max-w-md rounded-xl shadow-2xl p-6">
+
+                                    <!-- Icon -->
+                                    <div class="flex justify-center mb-4">
+                                        <div
+                                            class="w-12 h-12 flex items-center justify-center rounded-full bg-yellow-100 text-yellow-600">
+                                            <i class="fas fa-question fa-2x"></i>
+                                        </div>
+                                    </div>
+
+                                    <!-- Title -->
+                                    <h2 class="text-lg font-bold text-center text-gray-800 mb-2">
+                                        Konfirmasi Cetak
+                                    </h2>
+
+                                    <!-- Desc -->
+                                    <p class="text-center text-gray-600 mb-6">
+                                        Ingin cetak tagihan baru?
+                                    </p>
+
+                                    <!-- Actions -->
+                                    <div class="flex justify-center gap-3">
+                                        <button @click="show = false"
+                                            class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition">
+                                            Batal
+                                        </button>
+
+                                        <button wire:click="billPayment" wire:loading.attr="disabled" @click="show = false"
+                                            class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition">
+                                            Cetak
+                                        </button>
                                     </div>
                                 </div>
-
-                                <!-- Title -->
-                                <h2 class="text-lg font-bold text-center text-gray-800 mb-2">
-                                    Konfirmasi Cetak
-                                </h2>
-
-                                <!-- Desc -->
-                                <p class="text-center text-gray-600 mb-6">
-                                    Ingin cetak tagihan baru?
-                                </p>
-
-                                <!-- Actions -->
-                                <div class="flex justify-center gap-3">
-                                    <button @click="show = false"
-                                        class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition">
-                                        Batal
-                                    </button>
-
-                                    <button wire:click="billPayment" wire:loading.attr="disabled" @click="show = false"
-                                        class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition">
-                                        Cetak
-                                    </button>
-                                </div>
                             </div>
-                        </div>
-
-
-                        {{-- Modal edit Catatan per item --}}
-                        <div x-data="{
-                                    show: false,
-                                    index: null,
-                                    note: ''
-                                }" x-on:open-edit-note.window="
-                                    show = true;
-                                    index = $event.detail.index;
-                                    note = $event.detail.note;
-                                " x-show="show" x-cloak class="fixed inset-0 z-50 flex items-center justify-center">
-                            <!-- Backdrop -->
-                            <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" @click="show = false"></div>
-
-                            <!-- Modal Box -->
-                            <div x-show="show" x-transition
-                                class="relative bg-white w-full max-w-md rounded-xl shadow-2xl p-6">
-
-                                <!-- Icon Note -->
-                                <div class="flex justify-center mb-4">
-                                    <div class="w-12 h-12 flex items-center justify-center rounded-full bg-gray-100 text-gray-600">
-                                        <i class="fas fa-sticky-note fa-lg"></i>
-                                    </div>
-                                </div>
-
-                                <!-- Title -->
-                                <h2 class="text-lg font-bold text-center text-gray-800 mb-2">
-                                    Edit Catatan Item
-                                </h2>
-
-                                <!-- Desc -->
-                                <p class="text-center text-gray-500 text-sm mb-4">
-                                    Isi jika ada permintaan khusus (opsional).
-                                </p>
-
-                                <textarea x-model="note" rows="3"
-                                     class="w-full border rounded-lg p-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                    placeholder="Contoh: tanpa gula, extra pedas, dll...">
-                                </textarea>
-
-                                <!-- Actions -->
-                                <div class="flex justify-center gap-3 mt-6">
-                                    <button @click="show = false"
-                                        class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition">
-                                        Batal
-                                    </button>
-
-                                    <button @click="$wire.updateItemNote(index, note); show = false;" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition">
-                                        Simpan
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-
 
                     </div>
 

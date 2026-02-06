@@ -46,6 +46,10 @@ class Order extends Component
     public $subtotal = 0; // Subtotal belanja
     public $total = 0; // Total belanja
     public $change = 0; // Kembalian
+    // Split bill support
+    public $splitCount = 2;
+    public $preparedSplitCount = 0;
+    public $splitEnabled = false;
 
     public $ttl = 31536000; // Cache selama 1 tahun
 
@@ -124,6 +128,7 @@ class Order extends Component
                 'quantity' => 1,
                 'subtotal' => $product->price,
                 'product_note' => $this->tempProductNote,
+                'assigned_to' => 1,
             ];
             $this->cartNotEmpty = true;
             $this->calculateTotal();
@@ -152,6 +157,7 @@ class Order extends Component
                 'quantity' => 1,
                 'subtotal' => $product->price, // Tambahkan subtotal di awal
                 'product_note' => $product->product_note,
+                'assigned_to' => 1,
             ];
             $this->cartNotEmpty = true; // Set true
             $this->calculateTotal();
@@ -169,13 +175,42 @@ class Order extends Component
     // Auto-update cartNotEmpty saat cart diubah
     public function updatedCart($value, $key)
     {
-        list($index, $field) = explode('.', $key);
-    
+        $parts = explode('.', $key);
+        // get last two segments: index and field (works for "0.qty" or "cart.0.qty")
+        $field = array_pop($parts);
+        $index = array_pop($parts);
+
         if ($field === 'quantity' && isset($this->cart[$index])) {
             $this->updateQuantity($index, $value);
         }
-    
+
+        // If assigned_to changed, invalidate prepared split preview
+        if ($field === 'assigned_to') {
+            Cache::forget('bill-preview-multi:' . Auth::id());
+            $this->preparedSplitCount = 0;
+        }
+
         $this->cartNotEmpty = !empty($this->cart);
+    }
+
+    // When split count changes, clear any prepared previews
+    public function updatedSplitCount($value)
+    {
+        $n = (int) $value;
+        if ($n < 1) $n = 1;
+        if ($n > 20) $n = 20;
+        $this->splitCount = $n;
+        $this->preparedSplitCount = 0;
+        Cache::forget('bill-preview-multi:' . Auth::id());
+    }
+
+    // When split toggle is changed, clear prepared previews
+    public function updatedSplitEnabled($value)
+    {
+        if (!$value) {
+            Cache::forget('bill-preview-multi:' . Auth::id());
+            $this->preparedSplitCount = 0;
+        }
     }
     
 
@@ -323,10 +358,63 @@ class Order extends Component
         // Simpan sementara di cache (5 menit)
         cache()->put('bill-preview:' . Auth::id(), $billData, now()->addMinutes(5));
 
-        // Dispatch JS untuk buka tab baru
+        // Dispatch JS untuk buka tab baru (single full bill)
         $this->dispatch('showBillPrintPopup', route('order.bill'));
-        
     }
+
+    // Prepare split previews (store multi-split in cache)
+    public function prepareSplit()
+    {
+        if (empty($this->cart)) {
+            $this->dispatch('nullPaymentSelected');
+            return;
+        }
+
+        $count = max(1, (int) $this->splitCount);
+        $multi = [];
+
+        for ($i = 1; $i <= $count; $i++) {
+            $multi[$i] = [
+                'tanggal' => now()->format('d-m-Y H:i'),
+                'kasir' => Auth::user()->name ?? 'Owner',
+                'order_number' => $this->generateOrderNumber() . "-S$i",
+                'items' => [],
+                'subtotal' => 0,
+                'tax' => 0,
+                'total' => 0,
+            ];
+        }
+
+        foreach ($this->cart as $item) {
+            $group = isset($item['assigned_to']) ? (int) $item['assigned_to'] : 1;
+            if ($group < 1 || $group > $count) $group = 1;
+
+            $total = $item['price'] * $item['quantity'];
+
+            $multi[$group]['items'][] = [
+                'name' => $item['name'],
+                'qty' => $item['quantity'],
+                'price' => $item['price'],
+                'total' => $total,
+            ];
+
+            $multi[$group]['subtotal'] += $total;
+        }
+
+        // compute tax/total per split
+        foreach ($multi as $i => $md) {
+            $tax = 0;
+            if ($this->is_tax) {
+                $tax = ($md['subtotal'] * $this->tax_percentage) / 100;
+            }
+            $multi[$i]['tax'] = $tax;
+            $multi[$i]['total'] = $md['subtotal'] + $tax;
+        }
+
+        cache()->put('bill-preview-multi:' . Auth::id(), $multi, now()->addMinutes(5));
+        $this->preparedSplitCount = $count;
+    }
+
 
     // Generate nomor order unik
     public static function generateOrderNumber(): string
@@ -364,6 +452,7 @@ class Order extends Component
                 'price' => $item->price,
                 'quantity' => $item->quantity,
                 'product_note' => $item->product_note,
+                'assigned_to' => 1,
             ];
         }
 
@@ -757,6 +846,9 @@ class Order extends Component
         $this->payment_mode = 'PAY_NOW';
 
         $this->cartNotEmpty = false;
+        $this->splitEnabled = false;
+        $this->preparedSplitCount = false;
+        $this->splitCount = 2;
     }
 
     // Refresh Cache transaksi
