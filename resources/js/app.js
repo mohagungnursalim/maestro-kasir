@@ -66,7 +66,7 @@ document.addEventListener('livewire:navigated', () => {
         
             Swal.fire({
                 title: "Oops!",
-                text: `Nomor meja wajib diisi,jika makan/minum ditempat!`,
+                text: `Meja/Nama wajib diisi,jika makan/minum ditempat!`,
                 icon: "warning",
                 confirmButtonText: "Oke!",
                 confirmButtonColor: "#3085d6"

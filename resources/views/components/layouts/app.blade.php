@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="id" class="bg-yellow-50">
+<html lang="id" class="bg-gray-50">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -29,7 +29,7 @@
     @livewireStyles()
 </head>
 
-<nav class="fixed top-0 z-50 w-full bg-yellow-100 border-b border-gray-200">
+<nav class="fixed top-0 z-50 w-full bg-yellow-300 border-b border-gray-200">
     <div class="px-3 py-3 lg:px-5 lg:pl-3">
         <div class="flex items-center justify-between">
             {{-- Logo Section --}}
@@ -63,8 +63,8 @@
 {{-- Sidebar Section --}}
 <x-sidebar />
 
-<div class="p-4 bg-yellow-50 ">
-    <div class="p-4 border-2 border-gray-200 border rounded-lg mt-14 bg-yellow-50">
+<div class="p-4 bg-gray-50 ">
+    <div class="p-4 border-2 border-gray-200 border rounded-lg mt-14 bg-gray-50">
         <!-- Page Content -->
         <main>
             {{ $slot }}
