@@ -279,10 +279,13 @@
                                 @if($preparedSplitCount > 0)
                                 <div class="flex flex-wrap justify-center gap-2 mt-3">
                                     @for($s = 1; $s <= $preparedSplitCount; $s++)
-                                        <a href="{{ route('order.bill') }}?multi=1&split={{ $s }}" target="_blank" class="text-xs px-3 py-1 bg-blue-600 text-white rounded-md text-sm shadow-sm hover:shadow-md transition whitespace-nowrap">
+                                        <button 
+                                            type="button"
+                                            onclick="window.dispatchEvent(new CustomEvent('showBillPrintPopup', { detail: '{{ route('order.bill') }}?multi=1&split={{ $s }}' }))"
+                                            class="text-xs px-3 py-1 bg-blue-600 text-white rounded-md text-sm shadow-sm hover:shadow-md transition whitespace-nowrap">
                                             <i class="fas fa-print fa-xs"></i>
                                             Payer {{ $s }}
-                                        </a>
+                                        </button>
                                     @endfor
                                 </div>
                                 @endif
@@ -751,6 +754,8 @@
 
     </script>
 
+
+    {{-- Open Bill --}}
     <script>
         window.addEventListener('showBillPrintPopup', event => {
             const url = event.detail;
