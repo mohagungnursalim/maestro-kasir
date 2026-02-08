@@ -261,7 +261,7 @@
                                             <input
                                                 type="number"
                                                 min="1"
-                                                max="10"
+                                                max="20"
                                                 wire:model.lazy="splitCount"
                                                 class="w-20 border rounded px-2 py-1 text-sm" />
 
