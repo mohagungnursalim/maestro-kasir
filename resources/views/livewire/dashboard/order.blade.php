@@ -29,6 +29,7 @@
                                 Cari
                             </button>
 
+                            
                             <!-- Button Loading -->
                             <button type="button" disabled wire:loading wire:target="searchProduct"
                                 class="text-gray-900 absolute end-2.5 bottom-2.5 bg-yellow-300 opacity-70 font-medium rounded-lg text-sm px-4 py-2 flex items-center gap-2">
@@ -199,18 +200,55 @@
                         <!-- Actions -->
                         <div class="flex justify-center gap-3 mt-6">
                             <button
-                                wire:click="$set('showNoteModal', false)"
-                                class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition"
-                            >
-                                Batal
+                                type="button"
+                                @click="$wire.closeNoteModal()"
+                                wire:loading.attr="disabled"
+                                class="relative inline-flex items-center justify-center
+                                    w-24 h-10
+                                    bg-gray-200 text-gray-700 rounded-lg
+                                    hover:bg-gray-300 transition
+                                    disabled:opacity-60 disabled:cursor-not-allowed">
+
+                                {{-- Normal --}}
+                                <span class="absolute inset-0 flex items-center justify-center"
+                                    wire:loading.remove
+                                    wire:target="closeNoteModal">
+                                    Batal
+                                </span>
+
+                                {{-- Loading --}}
+                                <span class="absolute inset-0 flex mt-3 items-center justify-center"
+                                    wire:loading
+                                    wire:target="closeNoteModal">
+                                    <i class="fas fa-spinner fa-spin block leading-none"></i>
+                                </span>
                             </button>
 
                             <button
+                                type="button"
                                 wire:click="confirmAddToCart"
+                                wire:target="confirmAddToCart"
+                                wire:loading.attr="disabled"
                                 onclick="playSelectSound()"
-                                class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition"
-                            >
-                                Tambahkan
+                                class="relative inline-flex items-center justify-center
+                                    w-32 h-10
+                                    bg-green-600 text-white rounded-lg
+                                    hover:bg-green-700 transition
+                                    disabled:opacity-60 disabled:cursor-not-allowed">
+
+                                {{-- Normal --}}
+                                <span class="absolute inset-0 flex items-center justify-center"
+                                    wire:loading.remove
+                                    wire:target="confirmAddToCart">
+                                    Tambahkan
+                                </span>
+
+                                {{-- Loading --}}
+                                <span class="absolute inset-0 flex mt-3 items-center justify-center"
+                                    wire:loading
+                                    wire:target="confirmAddToCart">
+                                    <i class="fas fa-spinner fa-spin block leading-none"></i>
+                                </span>
                             </button>
                         </div>
                     </div>
@@ -246,14 +284,38 @@
                                     </div>
 
                                     <div class="flex items-center gap-3 flex-wrap">
-                                        <label class="inline-flex items-center cursor-pointer">
-                                            <input type="checkbox" wire:model.live="splitEnabled" class="sr-only peer">
-                                            <div class="relative w-9 h-5 bg-gray-200 rounded-full
+                                        <label class="inline-flex items-center gap-2 cursor-pointer select-none">
+                                            {{-- Loading kecil --}}
+                                          <span class="w-4 h-4 flex mb-3 items-center justify-center"
+                                              wire:loading
+                                              wire:target="splitEnabled">
+                                              <i class="fas fa-spinner fa-spin text-xs text-gray-500"></i>
+                                          </span>
+
+                                          <span class="w-4 h-4 flex mb-3 items-center justify-center"
+                                              wire:loading
+                                              wire:target="splitCount">
+                                              <i class="fas fa-spinner fa-spin text-xs text-gray-500"></i>
+                                          </span>
+                                            <input
+                                                type="checkbox"
+                                                wire:model.live="splitEnabled"
+                                                wire:target="splitEnabled"
+                                                wire:loading.attr="disabled"
+                                                class="sr-only peer">
+
+                                            <div class="relative w-9 h-5 rounded-full bg-gray-200 transition
+                                                peer-checked:bg-blue-600
+                                                peer-disabled:opacity-50 peer-disabled:cursor-not-allowed
                                                 after:content-[''] after:absolute after:top-[2px] after:left-[2px]
                                                 after:w-4 after:h-4 after:bg-white after:rounded-full after:transition
-                                                peer-checked:bg-blue-600 peer-checked:after:translate-x-4">
+                                                peer-checked:after:translate-x-4">
                                             </div>
-                                            <span class="ml-3 text-sm font-medium">Split Bill?</span>
+
+                                            <span class="text-sm font-medium text-gray-700">
+                                                Split Bill?
+                                            </span>
+
                                         </label>
 
                                        <div class="flex items-center gap-3 flex-wrap">
@@ -265,13 +327,30 @@
                                                 wire:model.lazy="splitCount"
                                                 class="w-20 border rounded px-2 py-1 text-sm" />
 
-                                            <button
-                                                wire:click.prevent="prepareSplit"
-                                                class="px-3 inline-flex items-center  bg-gradient-to-r from-gray-800 to-gray-900 text-white rounded-lg hover:from-gray-900 hover:to-black shadow-md transform hover:-translate-y-0.5 transition">
-                                                Preview
+                                            <button type="button" wire:click.prevent="prepareSplit" wire:target="prepareSplit" wire:loading.attr="disabled" class="relative inline-flex items-center justify-center
+                                                    w-28 h-9 px-3
+                                                    bg-gradient-to-r from-gray-800 to-gray-900 text-white rounded-lg
+                                                    hover:from-gray-900 hover:to-black shadow-md
+                                                    transform hover:-translate-y-0.5 transition
+                                                    disabled:opacity-60 disabled:cursor-not-allowed">
+
+                                                {{-- Normal --}}
+                                                <span class="absolute inset-0 flex items-center justify-center"
+                                                    wire:loading.remove
+                                                    wire:target="prepareSplit">
+                                                    Preview
+                                                </span>
+
+                                                {{-- Loading --}}
+                                                <span class="absolute inset-0 flex items-center justify-center mt-3 leading-none"
+                                                    wire:loading
+                                                    wire:target="prepareSplit">
+                                                    <i class="fas fa-spinner fa-spin leading-none"></i>
+                                                </span>
                                             </button>
+
                                         @endif
-                                       </div>
+                                       </div>   
                                     </div>
 
                                 </div>
@@ -327,9 +406,28 @@
 
                                                     <!-- DELETE -->
                                                     <button
+                                                        type="button"
                                                         wire:click="removeFromCart({{ $index }})"
-                                                        onclick="event.stopPropagation(); playSelectSound()">
-                                                        <i class="fas fa-trash text-red-500 hover:text-red-700"></i>
+                                                        wire:target="removeFromCart({{ $index }})"
+                                                        wire:loading.attr="disabled"
+                                                        onclick="event.stopPropagation(); playSelectSound()"
+                                                        class="relative inline-flex items-center justify-center
+                                                            w-6 h-6
+                                                            disabled:opacity-50 disabled:cursor-not-allowed">
+
+                                                        {{-- Normal --}}
+                                                        <span class="absolute inset-0 flex items-center justify-center"
+                                                            wire:loading.remove
+                                                            wire:target="removeFromCart({{ $index }})">
+                                                            <i class="fas fa-trash text-red-500 hover:text-red-700"></i>
+                                                        </span>
+
+                                                        {{-- Loading --}}
+                                                        <span class="absolute inset-0 flex items-center justify-center"
+                                                            wire:loading
+                                                            wire:target="removeFromCart({{ $index }})">
+                                                            <i class="fas fa-spinner fa-spin text-red-500"></i>
+                                                        </span>
                                                     </button>
                                                 </div>
 
@@ -340,6 +438,11 @@
                                                     <div x-data="{ quantity: @js($item['quantity']) }"
                                                         class="flex items-center gap-1">
 
+                                                        <span class="absolute inset-0 flex items-center justify-center"
+                                                            wire:loading
+                                                            wire:target="updateQuantity">
+                                                            <i class="fas fa-spinner fa-spin text-red-500"></i>
+                                                        </span>
                                                         <button
                                                             class="w-5 h-6 border rounded hover:bg-gray-100"
                                                             @click="
@@ -440,9 +543,31 @@
                                             Batal
                                         </button>
 
-                                        <button wire:click="billPayment" wire:loading.attr="disabled" @click="show = false"
-                                            class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition">
-                                            Cetak
+                                        <button
+                                            type="button"
+                                            wire:click="billPayment"
+                                            wire:target="billPayment"
+                                            wire:loading.attr="disabled"
+                                            @click="show = false"
+                                            class="relative inline-flex items-center justify-center
+                                                w-28 h-10
+                                                bg-green-600 text-white rounded-lg
+                                                hover:bg-green-700 transition
+                                                disabled:opacity-60 disabled:cursor-not-allowed">
+
+                                            {{-- Normal --}}
+                                            <span class="absolute inset-0 flex items-center justify-center"
+                                                wire:loading.remove
+                                                wire:target="billPayment">
+                                                Cetak
+                                            </span>
+
+                                            {{-- Loading --}}
+                                            <span class="absolute inset-0 flex mt-3 items-center justify-center"
+                                                wire:loading
+                                                wire:target="billPayment">
+                                                <i class="fas fa-spinner fa-spin block leading-none"></i>
+                                            </span>
                                         </button>
                                     </div>
                                 </div>
@@ -679,29 +804,70 @@
 
                             {{-- ==================== TOMBOL ==================== --}}
                             <div class="flex justify-center mt-6">
-                                <button wire:click="processOrder" @if(empty($cart)) disabled @endif
-                                    class="bg-green-600 @if(empty($cart)) opacity-50 @endif text-white px-4 py-2 rounded-lg w-full">
+                                <button
+                                    type="button"
+                                    wire:click="processOrder"
+                                    wire:target="processOrder"
+                                    wire:loading.attr="disabled"
+                                    @if(empty($cart)) disabled @endif
+                                    class="relative w-full h-12
+                                        bg-green-600 text-white px-4 py-2 rounded-lg
+                                        hover:bg-green-700 transition
+                                        disabled:opacity-50 disabled:cursor-not-allowed">
 
-                                    @if($selectedUnpaidOrderId)
-                                        {{-- Sedang buka order UNPAID --}}
-                                        @if($payment_mode === 'PAY_NOW')
-                                        Proses
-                                        @else
-                                        Update Pesanan
-                                        @endif
-                                    @else
-                                        {{-- Order baru --}}
-                                        @if($payment_mode === 'PAY_NOW')
-                                        Proses
-                                        @else
-                                        Simpan Pesanan
-                                        @endif
-                                    @endif
+                                    {{-- Normal --}}
+                                    <span class="absolute inset-0 flex items-center justify-center text-center"
+                                        wire:loading.remove
+                                        wire:target="processOrder">
 
+                                        @if($selectedUnpaidOrderId)
+                                            @if($payment_mode === 'PAY_NOW')
+                                                Proses
+                                            @else
+                                                Update Pesanan
+                                            @endif
+                                        @else
+                                            @if($payment_mode === 'PAY_NOW')
+                                                Proses
+                                            @else
+                                                Simpan Pesanan
+                                            @endif
+                                        @endif
+
+                                    </span>
+
+                                    {{-- Loading --}}
+                                    <span class="absolute inset-0 flex mt-4 items-center justify-center"
+                                        wire:loading
+                                        wire:target="processOrder">
+                                        <i class="fas fa-spinner fa-spin block leading-none"></i>
+                                    </span>
                                 </button>
-                                <button wire:click="resetCart" @if(empty($cart)) disabled @endif
-                                    class="ml-2 bg-red-600 @if(empty($cart)) opacity-50 @endif text-white px-4 py-2 rounded-lg w-full">
-                                Clear
+                                
+                                <button
+                                    type="button"
+                                    wire:click="resetCart"
+                                    wire:target="resetCart"
+                                    wire:loading.attr="disabled"
+                                    @if(empty($cart)) disabled @endif
+                                    class="relative w-full h-12 ml-2
+                                        bg-red-600 text-white px-4 py-2 rounded-lg
+                                        hover:bg-red-700 transition
+                                        disabled:opacity-50 disabled:cursor-not-allowed">
+
+                                    {{-- Normal --}}
+                                    <span class="absolute inset-0 flex items-center justify-center"
+                                        wire:loading.remove
+                                        wire:target="resetCart">
+                                        Clear
+                                    </span>
+
+                                    {{-- Loading --}}
+                                    <span class="absolute inset-0 flex mt-4 items-center justify-center"
+                                        wire:loading
+                                        wire:target="resetCart">
+                                        <i class="fas fa-spinner fa-spin block leading-none"></i>
+                                    </span>
                                 </button>
                             </div>
 

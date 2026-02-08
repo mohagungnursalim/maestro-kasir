@@ -109,6 +109,14 @@ class Order extends Component
         $this->showNoteModal = true;
     }
 
+    // Tutup modal penambahan catatan produk
+    public function closeNoteModal()
+    {
+        $this->showNoteModal = false;
+        $this->noteProductId = null;
+        $this->tempProductNote = '';
+    }
+
     // Konfirmasi penambahan produk ke keranjang dengan catatan
     public function confirmAddToCart()
     {
