@@ -435,20 +435,24 @@
                                                 <div class="mt-2 flex items-center justify-between">
 
                                                     <!-- QTY -->
-                                                    <div x-data="{ quantity: @js($item['quantity']) }"
+                                                    <div 
+                                                        x-data="{
+                                                            quantity: @js($item['quantity']),
+                                                            timer: null,
+                                                            sync() {
+                                                                clearTimeout(this.timer)
+                                                                this.timer = setTimeout(() => {
+                                                                    $wire.updateQuantity({{ $index }}, this.quantity)
+                                                                }, 300)
+                                                            }
+                                                        }"
                                                         class="flex items-center gap-1">
-
-                                                        <span class="absolute inset-0 flex items-center justify-center"
-                                                            wire:loading
-                                                            wire:target="updateQuantity">
-                                                            <i class="fas fa-spinner fa-spin text-red-500"></i>
-                                                        </span>
                                                         <button
                                                             class="w-5 h-6 border rounded hover:bg-gray-100"
                                                             @click="
                                                                 if (quantity > 1) {
-                                                                    quantity--;
-                                                                    $wire.updateQuantity({{ $index }}, quantity);
+                                                                    quantity--
+                                                                    sync()
                                                                 }
                                                             ">
                                                             −
@@ -457,15 +461,15 @@
                                                         <input
                                                             type="number"
                                                             min="1"
-                                                            x-model.number="quantity"x
-                                                            @input.debounce.300ms="$wire.updateQuantity({{ $index }}, quantity)"
+                                                            x-model.number="quantity"
+                                                            @input="sync()"
                                                             class="w-12 h-6 border rounded text-center font-semibold text-xs">
 
                                                         <button
                                                             class="w-5 h-6 border rounded hover:bg-gray-100"
                                                             @click="
-                                                                quantity++;
-                                                                $wire.updateQuantity({{ $index }}, quantity);
+                                                                quantity++
+                                                                sync()
                                                             ">
                                                             +
                                                         </button>
@@ -859,7 +863,7 @@
                                     <span class="absolute inset-0 flex items-center justify-center"
                                         wire:loading.remove
                                         wire:target="resetCart">
-                                        Clear
+                                        Reset
                                     </span>
 
                                     {{-- Loading --}}
