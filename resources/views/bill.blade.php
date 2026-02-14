@@ -1,177 +1,247 @@
 <!DOCTYPE html>
 <html lang="id">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Bill Pembayaran</title>
     <style>
+        @page {
+            size: 58mm auto;
+            margin: 0;
+        }
+
         body {
             font-family: 'Courier New', monospace;
             font-size: 10px;
             width: 58mm;
-            /* Ukuran standar struk */
             margin: 0 auto;
             padding: 0;
+            color: #000;
         }
 
         .bill {
-            padding: 5px;
+            padding: 6px 5px 10px;
+        }
+
+        .header {
             text-align: center;
         }
 
-        .bill h2 {
-            margin: 0;
-            font-size: 13px;
+        .logo {
+            max-height: 36px;
+            margin: 0 auto 4px;
+            display: block;
         }
 
-        .bill p {
-            margin: 2px 0;
+        .store-name {
+            font-size: 12px;
+            font-weight: bold;
+            letter-spacing: .3px;
+        }
+
+        .store-address {
+            font-size: 9px;
+        }
+
+        .meta {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 4px;
+        }
+
+        .meta td {
+            padding: 1px 0;
+            vertical-align: top;
+        }
+
+        .meta .label {
+            width: 42%;
+        }
+
+        .meta .colon {
+            width: 5%;
         }
 
         .line {
-            border-top: 1px dashed black;
-            margin: 5px 0;
+            border-top: 1px dashed #000;
+            margin: 6px 0;
         }
 
-        .logo {
-            max-height: 40px;
-            margin: 0 auto 5px;
-        }
-
-        table {
+        .items {
             width: 100%;
-            font-size: 10px;
-            text-align: left;
             border-collapse: collapse;
         }
 
-        td {
+        .items td {
             padding: 2px 0;
+            vertical-align: top;
+        }
+
+        .item-name {
+            font-size: 10px;
+        }
+
+        .item-sub {
+            font-size: 9px;
+        }
+
+        .price {
+            text-align: right;
+            white-space: nowrap;
+        }
+
+        .summary {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 4px;
+        }
+
+        .summary td {
+            padding: 2px 0;
+        }
+
+        .summary .label {
+            text-align: left;
+        }
+
+        .summary .value {
+            text-align: right;
+            white-space: nowrap;
         }
 
         .total {
             font-weight: bold;
+            border-top: 1px dashed #000;
+            padding-top: 4px;
         }
 
-        .right {
-            text-align: right;
-            padding-right: 5px;
+        .footer {
+            text-align: center;
+            margin-top: 6px;
+            font-size: 9px;
         }
 
         .powered-by {
-            margin-top: 1.5rem;
+            margin-top: 12px;
             text-align: center;
-            font-size: 0.875rem;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-size: 8px;
             color: #777;
-        }
-
-        .powered-by p {
-            margin: 0;
+            font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
         }
 
         .powered-by a {
             color: #444;
             text-decoration: none;
-            font-weight: 600;
             border-bottom: 1px dashed #aaa;
-            transition: all 0.2s ease-in-out;
         }
-
-        .powered-by a:hover {
-            color: #000;
-            border-bottom: 1px solid #444;
-            text-shadow: 0 0 1px rgba(0, 0, 0, 0.1);
-        }
-
     </style>
 </head>
 
 <body onload="startPrint();">
-    <script>
-        function startPrint() {
-            window.print();
-        }
-        window.onafterprint = function () {
-            setTimeout(() => {
-                window.close();
-            }, 500);
-        };
+<script>
+    function startPrint() {
+        window.print();
+    }
+    window.onafterprint = function () {
+        setTimeout(() => window.close(), 500);
+    };
+</script>
 
-    </script>
+<div class="bill">
 
-    <div class="bill">
+    <div class="header">
         @if ($settings->store_logo)
-        <img src="{{ asset($settings->store_logo) }}" alt="{{ $settings->store_name }}" class="logo">
+            <img src="{{ asset($settings->store_logo) }}" alt="{{ $settings->store_name }}" class="logo">
         @endif
+        <div class="store-name">{{ $settings->store_name }}</div>
+        <div class="store-address">{{ $settings->store_address }}</div>
+    </div>
 
-        <h2>{{ $settings->store_name }}</h2>
-        <p>{{ $settings->store_address }}</p>
-        <p>Telp: {{ $settings->store_phone }}</p>
-        <p>Tanggal: {{ $billData['tanggal'] }}</p>
-        <p>Kasir: {{ $billData['kasir'] }}</p>
-        <p>Kode Order: {{ $billData['order_number'] }}</p>
+    <table class="meta">
+        <tr>
+            <td class="label">Telp</td>
+            <td class="colon">:</td>
+            <td>{{ $settings->store_phone }}</td>
+        </tr>
+        <tr>
+            <td class="label">Tanggal/Jam</td>
+            <td class="colon">:</td>
+            <td>{{ $billData['tanggal'] }}</td>
+        </tr>
+        <tr>
+            <td class="label">Kasir</td>
+            <td class="colon">:</td>
+            <td>{{ $billData['kasir'] }}</td>
+        </tr>
+        <tr>
+            <td class="label">Order</td>
+            <td class="colon">:</td>
+            <td>{{ $billData['order_number'] }}</td>
+        </tr>
 
         @if(isset($billData['__multi']))
-            <p>Split: {{ $billData['__multi']['split'] }} / {{ $billData['__multi']['count'] }}</p>
+        <tr>
+            <td class="label">Split</td>
+            <td class="colon">:</td>
+            <td>{{ $billData['__multi']['split'] }} / {{ $billData['__multi']['count'] }}</td>
+        </tr>
+        @endif
+    </table>
+
+    <div class="line"></div>
+
+    <table class="items">
+        @foreach ($billData['items'] as $item)
+        <tr>
+            <td colspan="2" class="item-name">
+                {{ $item['name'] }}
+                <div class="item-sub">
+                    {{ $item['qty'] }} x Rp{{ number_format($item['price'], 0, ',', '.') }}
+                </div>
+            </td>
+            <td class="price">
+                Rp{{ number_format($item['price'] * $item['qty'], 0, ',', '.') }}
+            </td>
+        </tr>
+        @endforeach
+    </table>
+
+    <div class="line"></div>
+
+    <table class="summary">
+        <tr>
+            <td class="label">Subtotal</td>
+            <td class="value">Rp{{ number_format($billData['subtotal'], 0, ',', '.') }}</td>
+        </tr>
+
+        @php
+            $taxPercentage = $billData['subtotal'] > 0
+                ? ($billData['tax'] / $billData['subtotal']) * 100
+                : 0;
+        @endphp
+
+        @if ($taxPercentage)
+        <tr>
+            <td class="label">Pajak PB1 ({{ number_format($taxPercentage, 0) }}%)</td>
+            <td class="value">Rp{{ number_format($billData['tax'], 0, ',', '.') }}</td>
+        </tr>
         @endif
 
-        <div class="line"></div>
+        <tr class="total">
+            <td class="label">TOTAL</td>
+            <td class="value">Rp{{ number_format($billData['total'], 0, ',', '.') }}</td>
+        </tr>
+    </table>
 
-        <table>
-            <tbody>
-                @foreach ($billData['items'] as $item)
-                <tr>
-                    <td colspan="2">
-                        {{ $item['name'] }}<br>
-                        <small class="text-gray-500">{{ $item['qty'] }}x Rp{{ number_format($item['price'], 2, ',', '.') }}</small>
-                    </td>
-                    <td class="text-right">
-                        Rp{{ number_format($item['price'] * $item['qty'], 2, ',', '.') }}
-                    </td>
-                </tr>                
-                
-                @endforeach
-            </tbody>
-        </table>
-
-        <div class="line"></div>
-
-        <table>
-            <tr>
-                <td>Subtotal</td>
-                <td class="right">{{ number_format($billData['subtotal'], 2, ',', '.') }}</td>
-            </tr>
-
-            @php
-                // Pajak dihitung dari subtotal
-                $taxPercentage = $billData['subtotal'] > 0
-                    ? ($billData['tax'] / $billData['subtotal']) * 100
-                    : 0;
-            @endphp
-
-            @if ($taxPercentage)
-                <tr>
-                    <td>Pajak PB1 ({{ number_format($taxPercentage, 0) }}%)</td>
-                    <td class="right">{{ number_format($billData['tax'], 2, ',', '.') }}</td>
-                </tr>
-            @endif
-
-            <tr class="total">
-                <td>Total Bayar</td>
-                <td class="right">{{ number_format($billData['total'], 2, ',', '.') }}</td>
-            </tr>
-        </table>
-
-
-        <div class="line"></div>
-
+    <div class="footer">
+       {{ $settings->store_footer }}
     </div>
-    <div class="powered-by">
-        <p>Powered by <a href="" target="_blank">Maestro-Kasir</a></p>
-    </div>
+
+</div>
+
+<div class="powered-by">
+    Powered by <a href="#" target="_blank">Maestro-Kasir</a>
+</div>
 
 </body>
-
 </html>
