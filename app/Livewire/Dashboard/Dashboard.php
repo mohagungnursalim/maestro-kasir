@@ -28,11 +28,11 @@ class Dashboard extends Component
         $dates = $this->getDateRange($this->filterType);
     
         // Query orders (untuk total count)
-        $queryOrders = Order::whereBetween('created_at', [$dates['start'], $dates['end']]);
+        $queryOrders = Order::whereBetween('created_at', [$dates['start'], $dates['end']])->where('payment_status', 'PAID');
     
         // Query transactions (untuk sales & quantity)
         $queryTransactions = TransactionDetail::join('orders', 'transaction_details.order_id', '=', 'orders.id')
-            ->whereBetween('transaction_details.created_at', [$dates['start'], $dates['end']]);
+            ->whereBetween('transaction_details.created_at', [$dates['start'], $dates['end']])->where('orders.payment_status', 'PAID');
     
         if (!Auth::user()->hasRole('admin|owner')) {
             $queryOrders->where('user_id', Auth::id());

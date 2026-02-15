@@ -42,7 +42,9 @@ class ProductSalesChart extends Component
         // Mengambil data penjualan produk dari TransactionDetail
         $query = TransactionDetail::selectRaw('products.name, SUM(transaction_details.quantity) as total_sold')
             ->join('products', 'transaction_details.product_id', '=', 'products.id')
-            ->whereBetween('transaction_details.created_at', [$startDate, $endDate]);
+            ->whereBetween('transaction_details.created_at', [$startDate, $endDate])->whereHas('order', function ($q) {
+                $q->where('payment_status', 'PAID');
+            });
 
         // Jika bukan admin/owner, filter berdasarkan kasir yang login
         if (!Auth::user()->hasRole('admin|owner')) {
