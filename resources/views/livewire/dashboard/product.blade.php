@@ -90,6 +90,7 @@
                                 <th scope="col" class="px-6 py-3 text-center">Supplier</th>
                                 @endif
                                 <th scope="col" class="px-6 py-3 text-center">Harga</th>
+                                <th scope="col" class="px-6 py-3 text-center">Diskon</th>
                                 <th scope="col" class="px-6 py-3 text-center">Stok</th>
                                 <th scope="col" class="px-6 py-3 text-center">Satuan</th>
                                 <th scope="col" class="px-6 py-3 text-center">Aksi</th>
@@ -157,7 +158,18 @@
                                     <td class="px-6 py-4 text-center">{{ $product->supplier_name }}</td>
                                     @endif
                                     <td class="px-6 py-4 text-center">
-                                        Rp{{ number_format($product->price, 2, ',', '.') }}</td>
+                                        Rp{{ number_format($product->price, 0, ',', '.') }}</td>
+                                    <td class="px-6 py-4 text-center">
+                                        @if(!empty($product->is_active_discount))
+                                            <div class="flex flex-col items-center">
+                                                <span class="text-xs text-gray-500 line-through">Rp{{ number_format($product->price, 0, ',', '.') }}</span>
+                                                <span class="text-sm font-semibold text-red-600">Rp{{ number_format($product->final_price, 0, ',', '.') }}</span>
+                                                <span class="text-xs text-gray-600">@if($product->discount_type === 'percent'){{ $product->discount_value }}% @else Rp{{ number_format($product->discount_value, 0, ',', '.') }}@endif</span>
+                                            </div>
+                                        @else
+                                            <span class="text-sm text-gray-500">-</span>
+                                        @endif
+                                    </td>
                                     <td class="px-6 py-4 text-center">{{ $product->stock }}</td>
                                     <td class="px-6 py-4 text-center">{{ $product->unit }}</td>
                                     <td class="px-6 py-4">
@@ -289,6 +301,49 @@
                             class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full"
                             placeholder="Masukan Stok">
                         @error('stock') <span class="text-red-500 text-xs">{{ $message }} @enderror
+                    </div>
+
+                    <div>
+                        <label class="block mb-2 text-sm font-medium text-gray-900">Diskon</label>
+                        <div class="flex items-center gap-3 flex-wrap">
+                            <label class="inline-flex items-center gap-2 cursor-pointer select-none">
+                           
+                                <input
+                                    type="checkbox"
+                                    wire:model="is_discounted"
+                                    wire:target="is_discounted"
+                                    wire:loading.attr="disabled"
+                                    @if($is_discounted) checked @endif
+                                    class="sr-only peer">
+
+                                <div class="relative w-9 h-5 rounded-full bg-gray-200 transition
+                                    peer-checked:bg-blue-600
+                                    peer-disabled:opacity-50 peer-disabled:cursor-not-allowed
+                                    after:content-[''] after:absolute after:top-[2px] after:left-[2px]
+                                    after:w-4 after:h-4 after:bg-white after:rounded-full after:transition
+                                    peer-checked:after:translate-x-4">
+                                </div>
+
+                                <span class="text-sm font-medium text-gray-700">Aktifkan</span>
+                            </label>
+                        </div>
+                        <div class="mt-2">
+                            <select wire:model="discount_type" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full">
+                                <option value="">Tipe Diskon</option>
+                                <option value="fixed">Potongan (Rupiah)</option>
+                                <option value="percent">Persentase (%)</option>
+                            </select>
+                            @error('discount_type') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
+                        </div>
+                        <div class="mt-2">
+                            <input wire:model='discount_value' type="number" step="0.01" placeholder="Nilai Diskon"
+                                class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full" />
+                            @error('discount_value') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
+                        </div>
+                        <div class="mt-2 grid grid-cols-2 gap-2">
+                            <input wire:model='discount_start' type="datetime-local" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full" />
+                            <input wire:model='discount_end' type="datetime-local" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full" />
+                        </div>
                     </div>
 
                     @if ($settings->is_supplier)    
@@ -471,6 +526,49 @@
                         @error('stockUpdate') <span class="text-red-500 text-xs">{{ $message }} @enderror
                     </div>
 
+                    <div>
+                        <label class="block mb-2 text-sm font-medium text-gray-900">Diskon</label>
+                        <div class="flex items-center gap-3 flex-wrap">
+                            <label class="inline-flex items-center gap-2 cursor-pointer select-none">
+                                
+                                <input
+                                    type="checkbox"
+                                    wire:model="isDiscountedUpdate"
+                                    wire:target="isDiscountedUpdate"
+                                    wire:loading.attr="disabled"
+                                    @if($isDiscountedUpdate) checked @endif
+                                    class="sr-only peer">
+
+                                <div class="relative w-9 h-5 rounded-full bg-gray-200 transition
+                                    peer-checked:bg-blue-600
+                                    peer-disabled:opacity-50 peer-disabled:cursor-not-allowed
+                                    after:content-[''] after:absolute after:top-[2px] after:left-[2px]
+                                    after:w-4 after:h-4 after:bg-white after:rounded-full after:transition
+                                    peer-checked:after:translate-x-4">
+                                </div>
+
+                                <span class="text-sm font-medium text-gray-700">Aktifkan</span>
+                            </label>
+                        </div>
+                        <div class="mt-2">
+                            <select wire:model="discountTypeUpdate" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full">
+                                <option value="">Tipe Diskon</option>
+                                <option value="fixed">Potongan (Rupiah)</option>
+                                <option value="percent">Persentase (%)</option>
+                            </select>
+                            @error('discountTypeUpdate') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
+                        </div>
+                        <div class="mt-2">
+                            <input wire:model='discountValueUpdate' type="number" step="0.01" placeholder="Nilai Diskon"
+                                class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full" />
+                            @error('discountValueUpdate') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
+                        </div>
+                        <div class="mt-2 grid grid-cols-2 gap-2">
+                            <input wire:model='discountStartUpdate' type="datetime-local" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full" />
+                            <input wire:model='discountEndUpdate' type="datetime-local" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full" />
+                        </div>
+                    </div>
+
                     @if ($settings->is_supplier)      
                     <div x-data="supplierSelectUpdate()"
                         x-init='updateSupplier(@json(["id" => $supplier_idUpdate ?? null, "name" => $supplierName ?? ""]))'
@@ -622,7 +720,12 @@
                                 <p class="text-xs text-gray-600">SKU: {{ $stockDetail }}</p>
                                 <p class="text-xs text-gray-600">Supplier: {{ $supplierName }}</p>
                                 <p class="text-xs text-gray-600">Harga: Rp
-                                    {{ number_format($priceDetail, 0, ',', '.') }}</p>
+                                    {{ number_format($priceOriginalDetail ?? $priceDetail, 0, ',', '.') }}</p>
+                                @if(!empty($isDiscountedDetail))
+                                    <p class="text-xs text-gray-600">Diskon: <span class="font-semibold text-red-600">@if($discountTypeDetail === 'percent'){{ $discountValueDetail }}% @else Rp{{ number_format($discountValueDetail, 0, ',', '.') }}@endif</span></p>
+                                    <p class="text-xs text-gray-600">Harga Setelah Diskon: <span class="font-semibold text-red-600">Rp{{ number_format($priceDetail, 0, ',', '.') }}</span></p>
+                                    <p class="text-xs text-gray-600">Periode: {{ $discountStartDetail ?? '-' }} - {{ $discountEndDetail ?? '-' }}</p>
+                                @endif
                                 <p class="text-xs text-gray-600">Stok: {{ $stockDetail }}</p>
                                 <p class="text-xs text-gray-600">Satuan: {{ $unitDetail }}</p>
                             </div>
