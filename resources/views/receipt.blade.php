@@ -30,7 +30,7 @@
         }
 
         .meta td { padding: 1px 0; vertical-align: top; }
-        .meta .label { width: 42%; }
+        .meta .label { width: 35%; }
         .meta .colon { width: 5%; }
 
         .line { border-top: 1px dashed #000; margin: 6px 0; }
