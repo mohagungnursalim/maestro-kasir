@@ -7,6 +7,7 @@ use App\Models\Product;
 use App\Models\TransactionDetail;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 use Livewire\Component;
 
 class Dashboard extends Component
@@ -26,25 +27,46 @@ class Dashboard extends Component
     public function updateStats()
     {
         $dates = $this->getDateRange($this->filterType);
-    
-        // Query orders (untuk total count)
-        $queryOrders = Order::whereBetween('created_at', [$dates['start'], $dates['end']]);
-    
-        // Query transactions (untuk sales & quantity)
-        $queryTransactions = TransactionDetail::join('orders', 'transaction_details.order_id', '=', 'orders.id')
-            ->whereBetween('transaction_details.created_at', [$dates['start'], $dates['end']]);
-    
-        if (!Auth::user()->hasRole('admin|owner')) {
-            $queryOrders->where('user_id', Auth::id());
-            $queryTransactions->where('orders.user_id', Auth::id());
-        }
-    
-        $this->totalOrders = $queryOrders->count();
-    
-        // sum total penjualan "tanpa" diskon & pajak
-        $this->totalActualSales = $queryTransactions->sum('transaction_details.subtotal');
-    
-        $this->totalProductsSold = $queryTransactions->sum('transaction_details.quantity');
+
+        $userId  = Auth::id();
+        $isAdmin = Auth::user()->hasRole('admin|owner');
+
+        // Key cache unik per filter + range + role/user
+        $cacheKey = sprintf(
+            'dashboard_stats:%s:%s:%s:%s',
+            $this->filterType,
+            $dates['start']->format('YmdHis'),
+            $dates['end']->format('YmdHis'),
+            $isAdmin ? 'admin' : 'user_'.$userId
+        );
+
+        $stats = Cache::remember($cacheKey, now()->addMinutes(5), function () use ($dates, $isAdmin, $userId) {
+
+            // Query orders (untuk total count)
+            $queryOrders = Order::whereBetween('created_at', [$dates['start'], $dates['end']])
+                ->where('payment_status', 'PAID');
+
+            // Query transactions (untuk sales & quantity)
+            $queryTransactions = TransactionDetail::join('orders', 'transaction_details.order_id', '=', 'orders.id')
+                ->whereBetween('transaction_details.created_at', [$dates['start'], $dates['end']])
+                ->where('orders.payment_status', 'PAID');
+
+            if (!Auth::user()->hasRole('admin|owner')) {
+                $queryOrders->where('user_id', Auth::id());
+                $queryTransactions->where('orders.user_id', Auth::id());
+            }
+
+            return [
+                'totalOrders'        => (int) $queryOrders->count(),
+                'totalActualSales'  => (float) $queryTransactions->sum('transaction_details.subtotal'),
+                'totalProductsSold' => (int) $queryTransactions->sum('transaction_details.quantity'),
+            ];
+        });
+
+        // assign ke state Livewire
+        $this->totalOrders        = $stats['totalOrders'];
+        $this->totalActualSales  = $stats['totalActualSales'];
+        $this->totalProductsSold = $stats['totalProductsSold'];
     }
     
     

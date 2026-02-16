@@ -55,7 +55,7 @@
         }
 
         .meta .label {
-            width: 42%;
+            width: 35%;
         }
 
         .meta .colon {
