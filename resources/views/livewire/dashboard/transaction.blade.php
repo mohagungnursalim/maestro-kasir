@@ -109,7 +109,9 @@
                                 <th class="px-4 py-3 text-right">Harga</th>
                                 <th class="px-4 py-3 text-right">Subtotal</th>
                                 <th class="px-4 py-3 text-center">Metode</th>
-                                <th class="px-4 py-3 text-right">Pajak</th>
+                                @if ($settings->is_tax == true)
+                                <th class="px-4 py-3 text-right">Pajak (PB1)</th>
+                                @endif
                                 <th class="px-4 py-3 text-right">Uang</th>
                                 <th class="px-4 py-3 text-right">Kembali</th>
                                 <th class="px-4 py-3 text-right">Total</th>
@@ -118,16 +120,66 @@
                         </thead>
 
                         <tbody>
-                        {{-- LOADING --}}
+                       {{-- LOADING --}}
                         @if (!$loaded)
-                            @for ($i = 0; $i < 3; $i++)
+                            @for ($i = 0; $i < 5; $i++)
+                                {{-- HEADER ORDER SKELETON --}}
                                 <tr class="bg-gray-200 animate-pulse">
-                                    @for ($c = 0; $c < 11; $c++)
-                                        <td class="px-4 py-4">
-                                            <div class="h-4 bg-gray-300 rounded"></div>
+                                    <td class="px-4 py-3">
+                                        <div class="flex flex-col gap-2">
+                                            <div class="h-4 w-24 bg-gray-300 rounded"></div>
+                                            <div class="h-4 w-20 bg-gray-300 rounded"></div>
+                                        </div>
+                                    </td>
+
+                                    <td colspan="4"></td>
+
+                                    <td class="px-4 py-3 text-center">
+                                        <div class="h-4 w-16 bg-gray-300 rounded mx-auto"></div>
+                                    </td>
+
+                                    @if ($settings->is_tax == true)
+                                        <td class="px-4 py-3 text-right">
+                                            <div class="h-4 w-20 bg-gray-300 rounded ml-auto"></div>
                                         </td>
-                                    @endfor
+                                    @endif
+
+                                    <td class="px-4 py-3 text-right">
+                                        <div class="h-4 w-20 bg-gray-300 rounded ml-auto"></div>
+                                    </td>
+
+                                    <td class="px-4 py-3 text-right">
+                                        <div class="h-4 w-20 bg-gray-300 rounded ml-auto"></div>
+                                    </td>
+
+                                    <td class="px-4 py-3 text-right">
+                                        <div class="h-4 w-24 bg-gray-300 rounded ml-auto"></div>
+                                    </td>
+
+                                    <td class="px-4 py-3 text-center">
+                                        <div class="h-4 w-20 bg-gray-300 rounded mx-auto"></div>
+                                    </td>
                                 </tr>
+
+                                {{-- DETAIL PRODUK SKELETON (2 baris pura-pura) --}}
+                                @for ($d = 0; $d < 2; $d++)
+                                    <tr class="bg-white border-b animate-pulse">
+                                        <td></td>
+                                        <td class="px-4 py-2">
+                                            <div class="h-4 w-32 bg-gray-200 rounded"></div>
+                                        </td>
+                                        <td class="px-4 py-2 text-center">
+                                            <div class="h-4 w-6 bg-gray-200 rounded mx-auto"></div>
+                                        </td>
+                                        <td class="px-4 py-2 text-right">
+                                            <div class="h-4 w-20 bg-gray-200 rounded ml-auto"></div>
+                                        </td>
+                                        <td class="px-4 py-2 text-right">
+                                            <div class="h-4 w-24 bg-gray-200 rounded ml-auto"></div>
+                                        </td>
+                                        <td colspan="6"></td>
+                                    </tr>
+                                @endfor
                             @endfor
 
                         {{-- DATA --}}
@@ -157,12 +209,14 @@
 
                                     <td class="px-4 py-3 text-center">{{ strtoupper($order->payment_method) }}</td>
 
-                                    <td class="px-4 py-3 text-right">
+                                    @if ($settings->is_tax == true)
+                                        <td class="px-4 py-3 text-right">
                                         @if ($taxPercentage)
                                             <span class="text-xs text-gray-600">({{ $taxPercentage }}%)</span>
                                         @endif
                                         Rp{{ number_format($order->tax, 0, ',', '.') }}
                                     </td>
+                                    @endif
 
                                     <td class="px-4 py-3 text-right">
                                         Rp{{ number_format($order->customer_money, 0, ',', '.') }}
