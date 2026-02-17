@@ -98,46 +98,69 @@
                         </thead>
                         <tbody>
                             @if (!$loaded)
-                            {{-- Tampilkan skeleton saat data belum dimuat --}}
-                            @for ($i = 0; $i < 8; $i++) <tr class="bg-white border-b">
-                                <td class="px-6 py-4 text-center">
-                                    <div class="w-10 h-10 bg-gray-300 rounded-full animate-pulse">
-                                    </div>
-                                </td>
-                                <td class="px-6 py-4 text-center">
-                                    <div class="h-4 bg-gray-300 rounded animate-pulse"></div>
-                                </td>
-                                @if ($settings->is_supplier) 
-                                <td class="px-6 py-4 text-center">
-                                    <div class="h-4 bg-gray-300 rounded animate-pulse"></div>
-                                </td>
-                                @endif
-                                <td class="px-6 py-4 text-center">
-                                    <div class="h-4 bg-gray-300 rounded animate-pulse"></div>
-                                </td>
-                                <td class="px-6 py-4 text-center">
-                                    <div class="h-4 bg-gray-300 rounded animate-pulse"></div>
-                                </td>
-                                <td class="px-6 py-4 text-center">
-                                    <div class="h-4 bg-gray-300 rounded animate-pulse"></div>
-                                </td>
-                                <td class="px-6 py-4 text-center">
-                                    <div class="h-4 w-10 bg-gray-300 rounded animate-pulse"></div>
-                                </td>
-                                <td class="px-6 py-4">
-                                    @can('Ubah')
-                                    <div class="h-4 mb-2 w-10 bg-gray-300 rounded animate-pulse"></div>
-                                    @endcan
-                                    @can('Hapus')
-                                    <div class="h-4 mb-2 w-10 bg-gray-300 rounded animate-pulse"></div>
-                                    @endcan
-                                    @can('Lihat')
-                                    <div class="h-4 w-10 bg-gray-300 rounded animate-pulse"></div>
-                                    @endcan
-                                </td>
+                                @for ($i = 0; $i < 8; $i++)
+                                <tr class="bg-white border-b">
+                                    {{-- Gambar --}}
+                                    <td class="px-6 py-4 text-center">
+                                        <div class="mx-auto w-10 h-10 bg-gray-200 rounded-full animate-pulse"></div>
+                                    </td>
+
+                                    {{-- Nama --}}
+                                    <td class="px-6 py-4">
+                                        <div class="h-3.5 w-3/4 mx-auto bg-gray-200 rounded animate-pulse mb-2"></div>
+                                        <div class="h-3 w-1/2 mx-auto bg-gray-100 rounded animate-pulse"></div>
+                                    </td>
+
+                                    {{-- SKU --}}
+                                    <td class="px-6 py-4 text-center">
+                                        <div class="h-3.5 w-16 mx-auto bg-gray-200 rounded animate-pulse"></div>
+                                    </td>
+
+                                    {{-- Supplier (opsional) --}}
+                                    @if ($settings->is_supplier)
+                                    <td class="px-6 py-4 text-center">
+                                        <div class="h-3.5 w-20 mx-auto bg-gray-200 rounded animate-pulse"></div>
+                                    </td>
+                                    @endif
+
+                                    {{-- Harga --}}
+                                    <td class="px-6 py-4 text-center">
+                                        <div class="h-3.5 w-20 mx-auto bg-gray-200 rounded animate-pulse"></div>
+                                    </td>
+
+                                    {{-- Diskon --}}
+                                    <td class="px-6 py-4 text-center">
+                                        <div class="h-3 w-24 mx-auto bg-gray-100 rounded animate-pulse mb-1"></div>
+                                        <div class="h-3.5 w-20 mx-auto bg-gray-200 rounded animate-pulse"></div>
+                                    </td>
+
+                                    {{-- Stok --}}
+                                    <td class="px-6 py-4 text-center">
+                                        <div class="h-3.5 w-10 mx-auto bg-gray-200 rounded animate-pulse"></div>
+                                    </td>
+
+                                    {{-- Satuan --}}
+                                    <td class="px-6 py-4 text-center">
+                                        <div class="h-3.5 w-10 mx-auto bg-gray-200 rounded animate-pulse"></div>
+                                    </td>
+
+                                    {{-- Aksi --}}
+                                    <td class="px-6 py-4 text-center space-y-2">
+                                        @can('Ubah')
+                                        <div class="h-6 w-16 mx-auto bg-green-200/50 rounded animate-pulse"></div>
+                                        @endcan
+
+                                        @can('Hapus')
+                                        <div class="h-6 w-16 mx-auto bg-red-200/50 rounded animate-pulse"></div>
+                                        @endcan
+
+                                        @can('Lihat')
+                                        <div class="h-6 w-16 mx-auto bg-blue-200/50 rounded animate-pulse"></div>
+                                        @endcan
+                                    </td>
                                 </tr>
                                 @endfor
-                                @else
+                            @else
                                 {{-- Tampilkan data asli setelah dimuat --}}
                                 @forelse ($products as $product)
                                 <tr class="bg-white border-b hover:bg-gray-300 text-gray-900">
