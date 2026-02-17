@@ -115,7 +115,7 @@
                                 <th class="px-4 py-3 text-right">Uang</th>
                                 <th class="px-4 py-3 text-right">Kembali</th>
                                 <th class="px-4 py-3 text-right">Total</th>
-                                <th class="px-4 py-3 text-center">Tanggal</th>
+                                <th class="px-4 py-3 text-center">Tanggal/Jam</th>
                             </tr>
                         </thead>
 
