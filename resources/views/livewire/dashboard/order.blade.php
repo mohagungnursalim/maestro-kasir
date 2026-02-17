@@ -40,9 +40,52 @@
                     </form>
                 </div>
 
+               
+                {{-- SKELETON: tampil saat searchProduct loading --}}
+                <div wire:loading wire:target="searchProduct" class="container mx-auto mt-4 px-4 sm:px-8">
+                    <div class="overflow-x-auto">
+                        <div class="flex gap-4 w-max mx-auto scroll-smooth snap-x snap-mandatory">
+                            @for ($i = 0; $i < 8; $i++)
+                                <div class="w-[45vw] sm:w-[22vw] md:w-[18vw] lg:w-[15vw] xl:w-[12vw] min-w-[160px] flex-shrink-0 snap-start">
+                                    <div class="bg-white rounded-lg shadow-sm overflow-hidden animate-pulse flex flex-col">
+                                        <div class="flex gap-2 p-2 border rounded-lg bg-white">
+
+                                            {{-- Image skeleton --}}
+                                            <div class="relative w-14 h-14 overflow-hidden bg-gray-200 rounded"></div>
+
+                                            {{-- Details skeleton --}}
+                                            <div class="flex-1 flex flex-col min-w-0">
+                                                {{-- Product name (2 lines) --}}
+                                                <div class="space-y-1">
+                                                    <div class="h-3 w-5/6 bg-gray-200 rounded"></div>
+                                                    <div class="h-3 w-4/6"></div>
+                                                </div>
+
+                                                <div class="mt-auto space-y-2">
+                                                    {{-- Price & stock --}}
+                                                    <div class="flex justify-between items-center">
+                                                        <div class="h-3 w-16 bg-gray-200 rounded"></div>
+                                                        <div class="ml-3 h-4 w-8 bg-gray-200 rounded-full"></div>
+                                                    </div>
+
+                                                    {{-- Button --}}
+                                                    <div class="w-full">
+                                                        <div class="relative bg-gray-200 rounded py-2 px-1"></div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                        </div>
+                                    </div>
+                                </div>
+                            @endfor
+                        </div>
+                    </div>
+                </div>
+
                 {{-- Product List --}}
                 @if ($products)
-                <div class="container mx-auto mt-4 px-4 sm:px-8">
+                <div wire:loading.remove wire:target="searchProduct" class="container mx-auto mt-4 px-4 sm:px-8">
                     <div class="overflow-x-auto">
                         <div class="flex gap-4 w-max mx-auto scroll-smooth snap-x snap-mandatory">
                             @forelse ($products as $product)
