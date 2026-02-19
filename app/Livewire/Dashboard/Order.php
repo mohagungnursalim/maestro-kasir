@@ -857,7 +857,10 @@ class Order extends Component
         $this->splitEnabled = false;
         $this->preparedSplitCount = false;
         $this->splitCount = 2;
+
+        $this->selectedUnpaidOrderId = null;
     }
+    
 
     // Refresh Cache transaksi
     public function refreshCacheTransactionDetail()
