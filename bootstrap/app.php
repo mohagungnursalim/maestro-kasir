@@ -1,6 +1,5 @@
 <?php
 
-use App\Http\Middleware\TrustProxies;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -12,19 +11,18 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
-        // Daftarkan middleware di sini bro!
+
+        // Alias middleware kamu
         $middleware->alias([
             'role' => \Spatie\Permission\Middleware\RoleMiddleware::class,
             'permission' => \Spatie\Permission\Middleware\PermissionMiddleware::class,
             'role_or_permission' => \Spatie\Permission\Middleware\RoleOrPermissionMiddleware::class,
         ]);
 
-        $middleware->append(TrustProxies::class);
+        // 🔥 Ini kunci biar HTTPS kebaca walau lewat Cloudflare Tunnel
+        $middleware->trustProxies(at: '*');
     })
-    
     ->withExceptions(function (Exceptions $exceptions) {
         //
-    })->create();
-
-   
-    
+    })
+    ->create();
