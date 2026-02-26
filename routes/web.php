@@ -101,10 +101,10 @@ Route::get('/dashboard/roles-permission', RolePermissionManagement::class)
 Route::view('profile', 'profile')
     ->middleware(['auth'])
     ->name('profile');
-
+    
+    // Simple Hello World route
+    Route::get('/benchmark', function () {
+        return view('hello');
+    })->name('hello');
 require __DIR__ . '/auth.php';
 
-// Simple Hello World route
-Route::get('/benchmark', function () {
-    return view('hello');
-})->name('hello');
