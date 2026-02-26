@@ -103,3 +103,8 @@ Route::view('profile', 'profile')
     ->name('profile');
 
 require __DIR__ . '/auth.php';
+
+// Simple Hello World route
+Route::get('/benchmark', function () {
+    return view('hello');
+})->name('hello');
