@@ -100,7 +100,7 @@ Route::get('/dashboard/roles-permission', RolePermissionManagement::class)
 
 Route::view('profile', 'profile')
     ->middleware(['auth'])
-    ->name('profile');
+    ->name('profile.public');
     
     // Simple Hello World route
     Route::get('/benchmark', function () {
