@@ -206,12 +206,9 @@
 
                 {{-- Modal Add Catatan per item --}}
                 @if($showNoteModal)
-                <div x-cloak class="fixed inset-0 z-50 flex items-center justify-center">
+                <div x-cloak x-data="{}" @keydown.window.escape.prevent class="fixed inset-0 z-50 flex items-center justify-center">
                     <!-- Backdrop -->
-                    <div
-                        class="absolute inset-0 bg-black/50 backdrop-blur-sm"
-                        @click="$wire.set('showNoteModal', false)"
-                    ></div>
+                    <div class="absolute inset-0 bg-black/50 backdrop-blur-sm"></div>
 
                     <!-- Modal Box -->
                     <div x-transition class="relative bg-white w-full max-w-md rounded-xl shadow-2xl p-6">
@@ -556,10 +553,10 @@
 
 
                             {{-- Modal Cetak Tagihan/Bill --}}
-                            <div x-data="{ show: false }" x-on:open-print-modal.window="show = true" x-show="show" x-cloak
+                            <div x-data="{ show: false }" x-on:open-print-modal.window="show = true" x-show="show" x-cloak @keydown.window.escape.prevent
                                 class="fixed inset-0 z-50 flex items-center justify-center">
-                                <!-- Backdrop -->
-                                <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" @click="show = false"></div>
+                                <!-- Backdrop (click ignored; use Batal button to close) -->
+                                <div class="absolute inset-0 bg-black/50 backdrop-blur-sm"></div>
 
                                 <!-- Modal Box -->
                                 <div x-show="show" x-transition
@@ -629,9 +626,9 @@
                                         show = true;
                                         index = $event.detail.index;
                                         note = $event.detail.note;
-                                    " x-show="show" x-cloak class="fixed inset-0 z-50 flex items-center justify-center">
-                                <!-- Backdrop -->
-                                <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" @click="show = false"></div>
+                                    " x-show="show" x-cloak @keydown.window.escape.prevent class="fixed inset-0 z-50 flex items-center justify-center">
+                                <!-- Backdrop (click ignored; use Batal button to close) -->
+                                <div class="absolute inset-0 bg-black/50 backdrop-blur-sm"></div>
 
                                 <!-- Modal Box -->
                                 <div x-show="show" x-transition
