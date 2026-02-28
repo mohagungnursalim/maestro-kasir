@@ -37,7 +37,8 @@ class Product extends Component
     // List Products
     public $products, $totalProducts;
 
-    public $ttl = 31536000; // Cache selama 1 tahun
+    // Cache TTL
+    public $ttl;
     
     
 
@@ -59,9 +60,10 @@ class Product extends Component
         // Ambil total produk dari cache atau database
         $this->totalProducts = Cache::remember('totalProducts', $this->ttl, function () {
             return DB::table('products')->count();
-        });
-    
+            });
+            
         $this->products = collect(); // Inisialisasi produk sebagai koleksi kosong
+        $this->ttl = now()->addHours(1); // Cache selama 1 jam
     }
    
     public function unitSelected($unit)

@@ -26,7 +26,8 @@ class Supplier extends Component
     public $limit = 8; 
     public $loaded = false;
 
-    public $ttl = 31536000;
+    // Cache TTL
+    public $ttl;
 
     protected $listeners = [
         'supplierUpdated' => 'loadInitialSuppliers',
@@ -42,6 +43,7 @@ class Supplier extends Component
         });
          
         $this->suppliers = collect();
+        $this->ttl = now()->addHours(1); // Cache selama 1 jam
     }
 
     public function updatingSearch()
