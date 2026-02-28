@@ -51,7 +51,7 @@ class Order extends Component
     public $preparedSplitCount = 0;
     public $splitEnabled = false;
 
-    public $ttl = 31536000; // Cache selama 1 tahun
+    public $ttl; // Cache TTL (diinisialisasi di mount)
 
     protected $listeners = [
         'refreshProductStock' => 'searchProduct',
@@ -65,6 +65,7 @@ class Order extends Component
         $this->loadUnpaidOrders();
         $this->is_tax = StoreSetting::value('is_tax') ?? false; // Ambil setting pajak dari tabel store_settings
         $this->tax_percentage = StoreSetting::value('tax') ?? 0; // Ambil persentase pajak dari tabel store_settings
+        $this->ttl = now()->addHours(1); // Cache selama 1 jam
     }
 
     // Load unpaid orders

@@ -31,12 +31,14 @@ class Transaction extends Component
         public $search = '';
         public $limit = 8; 
         public $loaded = false;
+
+        public $ttl;
     
         public function mount()
         {
-            $ttl = 31536000;
+            $this->ttl = now()->addHours(1);   // 1 jam
     
-            $this->totalTransactions = Cache::remember('totalTransactions', $ttl, function () {
+            $this->totalTransactions = Cache::remember('totalTransactions', $this->ttl, function () {
                 return TransactionDetail::count();
             });
              
@@ -58,7 +60,7 @@ class Transaction extends Component
         // Load Initial Transactions
         public function loadInitialTransactions()
         {
-            $ttl = 31536000; // Cache selama 1 tahun
+            $ttl = $this->ttl;
             $this->loaded = true;
         
             $user = Auth::user();
