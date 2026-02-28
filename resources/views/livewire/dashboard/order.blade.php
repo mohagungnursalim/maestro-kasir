@@ -702,7 +702,7 @@
                     
                                 <div>
                                     <label class="block mb-2 text-sm font-medium text-gray-900">Meja/Nama</label>
-                                    <input type="text" wire:model.live.lazy="desk_number"
+                                    <input type="text" wire:model.live.debounce.350ms="desk_number"
                                         class="block w-full p-2 border rounded-lg text-sm bg-gray-50"
                                         placeholder="Contoh: A1, 12, VIP-3">
                                 </div>
