@@ -53,7 +53,7 @@
 
 
     <!-- Table -->
-    <div class="overflow-hidden rounded-lg border border-gray-200 shadow-sm">
+    <div wire:poll.5s class="overflow-hidden rounded-lg border border-gray-200 shadow-sm">
         <table class="w-full text-left bg-white">
             <thead class="bg-gray-100 text-gray-700">
                 <tr>

@@ -24,6 +24,8 @@ class Transaction extends Component
         // Date Export
         public $startDate;
         public $endDate;
+        // Validity: date range within 1 year
+        public $isDateRangeWithinYear = true;
 
 
         // Search
@@ -43,6 +45,34 @@ class Transaction extends Component
             });
              
             $this->transactions = collect();
+            $this->updateDateRangeValidity();
+        }
+
+        public function updatedStartDate()
+        {
+            $this->updateDateRangeValidity();
+        }
+
+        public function updatedEndDate()
+        {
+            $this->updateDateRangeValidity();
+        }
+
+        protected function updateDateRangeValidity()
+        {
+            if (!$this->startDate || !$this->endDate) {
+                $this->isDateRangeWithinYear = true;
+                return;
+            }
+
+            try {
+                $start = Carbon::parse($this->startDate);
+                $end = Carbon::parse($this->endDate);
+                // Allow up to 365 days (approximately one year)
+                $this->isDateRangeWithinYear = $start->diffInDays($end) <= 365;
+            } catch (\Exception $e) {
+                $this->isDateRangeWithinYear = false;
+            }
         }
     
         // Update Search
@@ -139,6 +169,11 @@ class Transaction extends Component
                 'startDate' => 'required|date',
                 'endDate' => 'required|date|after_or_equal:startDate',
             ]);
+
+            if (!$this->isDateRangeWithinYear) {
+                $this->addError('dateRange', 'Rentang tanggal tidak boleh lebih dari 1 tahun.');
+                return;
+            }
             
             $startDate = Carbon::parse($this->startDate)->startOfDay(); // 00:00:00
             $endDate = Carbon::parse($this->endDate)->endOfDay(); //23:59:59
@@ -154,6 +189,11 @@ class Transaction extends Component
                 'startDate' => 'required|date',
                 'endDate' => 'required|date|after_or_equal:startDate',
             ]);
+
+            if (!$this->isDateRangeWithinYear) {
+                $this->addError('dateRange', 'Rentang tanggal tidak boleh lebih dari 1 tahun.');
+                return;
+            }
         
             $startDate = Carbon::parse($this->startDate)->startOfDay(); // 00:00:00
             $endDate = Carbon::parse($this->endDate)->endOfDay(); // 23:59:59
@@ -192,7 +232,14 @@ class Transaction extends Component
     
             GenerateTransactionReport::dispatch($startDate, $endDate, $type);
 
-            $this->dispatch('notify');
+                if (!$this->isDateRangeWithinYear) {
+                    $this->addError('dateRange', 'Rentang tanggal tidak boleh lebih dari 1 tahun.');
+                    return;
+                }
+
+                GenerateTransactionReport::dispatch($startDate, $endDate, $type);
+
+                $this->dispatch('notify');
 
         }
 
