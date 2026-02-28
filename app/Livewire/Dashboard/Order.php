@@ -243,6 +243,10 @@ class Order extends Component
     // Perbarui mode pembayaran
     public function updatedPaymentMode($value)
     {
+        // setiap kali mode pembayaran berubah, kembalikan metode bayar ke 'CASH'
+        $this->payment_method = 'CASH';
+
+        // Jika pilih bayar nanti, pastikan uang pelanggan = 0 (tidak dibayarkan saat ini)
         if ($value === 'PAY_LATER') {
             $this->customerMoney = 0;
         }
