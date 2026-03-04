@@ -22,7 +22,7 @@ class Order extends Component
     public $products = []; // Daftar produk
     public $limitProducts = 8; // Batas produk yang ditampilkan
     public $order_type = 'DINE_IN';
-    public $desk_number = null;
+    public $desk_number = '';
     public $note = null;
     public $payment_mode = 'PAY_NOW'; // PAY_NOW | PAY_LATER
 
@@ -472,7 +472,7 @@ class Order extends Component
         // Load metadata
         $this->selectedUnpaidOrderId = $order->id;
         $this->order_type = $order->order_type;
-        $this->desk_number = $order->desk_number;
+        $this->desk_number = $order->desk_number ?? '';
         $this->note = $order->note;
         $this->payment_mode = 'PAY_NOW';
         $this->calculateTotal();
@@ -639,7 +639,7 @@ class Order extends Component
                 // =========== LOGIC BAYAR / SIMPAN ==========
                 $orderBaseUpdate = [
                     'order_type' => $this->order_type,
-                    'desk_number' => $this->order_type === 'DINE_IN' ? $this->desk_number : null,
+                    'desk_number' => $this->desk_number,
                     'note' => $this->note,
                     'payment_method' => $this->payment_method,
                     'tax' => $tax,
@@ -781,7 +781,7 @@ class Order extends Component
                 'user_id' => Auth::id(),
                 'order_number' => $this->generateOrderNumber(),
                 'order_type' => $this->order_type,
-                'desk_number' => $this->order_type === 'DINE_IN' ? $this->desk_number : null,
+                'desk_number' => $this->desk_number,
                 'note' => $this->note,
                 'payment_method' => $this->payment_method,
                 'tax' => $tax,
@@ -854,7 +854,7 @@ class Order extends Component
         $this->change = 0;
 
         $this->order_type = 'DINE_IN';
-        $this->desk_number = null;
+        $this->desk_number = '';
         $this->note = null;
         $this->payment_mode = 'PAY_NOW';
 
