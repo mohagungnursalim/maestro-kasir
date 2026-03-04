@@ -475,6 +475,8 @@ class Order extends Component
         $this->desk_number = $order->desk_number ?? '';
         $this->note = $order->note;
         $this->payment_mode = 'PAY_NOW';
+        // ensure payment method synced to a default of CASH when loading/resetting
+        $this->payment_method = $order->payment_method ?? 'CASH';
         $this->calculateTotal();
 
         // Notifikasi ke UI saat load ke cart
@@ -857,6 +859,8 @@ class Order extends Component
         $this->desk_number = '';
         $this->note = null;
         $this->payment_mode = 'PAY_NOW';
+        // reset payment method on both backend and frontend to CASH
+        $this->payment_method = 'CASH';
 
         $this->cartNotEmpty = false;
         $this->splitEnabled = false;
