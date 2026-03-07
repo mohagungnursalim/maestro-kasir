@@ -58,7 +58,15 @@ new #[Layout('layouts.guest')] class extends Component
 
         <!-- Turnstile Captcha -->
         <div class="mt-4 text-center">
-            <x-turnstile wire:model="form.captcha" />
+            <x-turnstile 
+                wire:model="form.captcha"
+                data-theme="dark"
+                data-size="normal"
+                data-appearance="always"
+                data-callback="onSuccess"
+                data-error-callback="onError"
+                data-expired-callback="onExpired"
+            />
             <x-input-error :messages="$errors->get('form.captcha')" class="mt-2" />
         </div>
 
