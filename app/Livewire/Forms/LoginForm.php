@@ -9,7 +9,6 @@ use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Validate;
 use Livewire\Form;
-use RyanChandler\LaravelCloudflareTurnstile\Rules\Turnstile;
 
 class LoginForm extends Form
 {
@@ -22,7 +21,7 @@ class LoginForm extends Form
     #[Validate('boolean')]
     public bool $remember = false;
 
-    #[Validate(['required', new Turnstile()])]
+    #[Validate('required|turnstile')]
     public string $captcha = '';
 
     /**
