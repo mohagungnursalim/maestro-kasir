@@ -9,6 +9,7 @@ use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Validate;
 use Livewire\Form;
+use RyanChandler\LaravelCloudflareTurnstile\Rules\Turnstile;
 
 class LoginForm extends Form
 {
@@ -21,7 +22,6 @@ class LoginForm extends Form
     #[Validate('boolean')]
     public bool $remember = false;
 
-    #[Validate('required|turnstile')]
     public string $captcha = '';
 
     /**
@@ -32,6 +32,12 @@ class LoginForm extends Form
     public function authenticate(): void
     {
         $this->ensureIsNotRateLimited();
+
+        // Validate Turnstile
+        $validated = validator(
+            ['cf-turnstile-response' => $this->captcha],
+            ['cf-turnstile-response' => ['required', new Turnstile()]]
+        )->validate();
 
         if (! Auth::attempt($this->only(['email', 'password']), $this->remember)) {
             RateLimiter::hit($this->throttleKey());
