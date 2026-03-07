@@ -27,6 +27,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert2/11.16.1/sweetalert2.all.js" integrity="sha512-gG9iGmJWEX+MifPgfm3hFV15M3DdHjyPKYBBd62u/J1E1kGGrdczt3HmQJ66vgM0ytcF9r7cTlq7SbtJLEUWZw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     @livewireScripts()
     @livewireStyles()
+    <x-turnstile.scripts />
 </head>
 
 <nav class="fixed top-0 z-50 w-full bg-yellow-300 border-b border-gray-200">
