@@ -109,6 +109,9 @@
                                 <th class="px-4 py-3 text-right">Harga</th>
                                 <th class="px-4 py-3 text-right">Subtotal</th>
                                 <th class="px-4 py-3 text-center">Metode</th>
+                                <th class="px-4 py-3 text-right">Sub. Murni</th>
+                                <th class="px-4 py-3 text-right">Diskon</th>
+                                <th class="px-4 py-3 text-right">S.Tlah Diskon</th>
                                 @if ($settings->is_tax == true)
                                 <th class="px-4 py-3 text-right">Pajak (PB1)</th>
                                 @endif
@@ -136,6 +139,18 @@
 
                                     <td class="px-4 py-3 text-center">
                                         <div class="h-4 w-16 bg-gray-300 rounded mx-auto"></div>
+                                    </td>
+
+                                    <td class="px-4 py-3 text-right">
+                                        <div class="h-4 w-20 bg-gray-300 rounded ml-auto"></div>
+                                    </td>
+
+                                    <td class="px-4 py-3 text-right">
+                                        <div class="h-4 w-20 bg-gray-300 rounded ml-auto"></div>
+                                    </td>
+
+                                    <td class="px-4 py-3 text-right">
+                                        <div class="h-4 w-20 bg-gray-300 rounded ml-auto"></div>
                                     </td>
 
                                     @if ($settings->is_tax == true)
@@ -177,7 +192,8 @@
                                         <td class="px-4 py-2 text-right">
                                             <div class="h-4 w-24 bg-gray-200 rounded ml-auto"></div>
                                         </td>
-                                        <td colspan="6"></td>
+                                        {{-- 7 base columns after subtotal, plus the 2 new ones (Sub. Murni, S.tlah diskon) = 9. If tax is true, it becomes 10, but since blade is tricky with colspan + conditional, we make it empty tds or use dynamic colspan. --}}
+                                        <td colspan="{{ $settings->is_tax ? 10 : 9 }}"></td>
                                     </tr>
                                 @endfor
                             @endfor
@@ -188,6 +204,8 @@
 
                                 @php
                                     $order = $orderTransactions[0];
+                                    $subtotalOrder = $order->grand_total - $order->tax + $order->discount;
+                                    $discountPercentage = $subtotalOrder > 0 ? round(($order->discount / $subtotalOrder) * 100) : 0;
                                     $base = $order->grand_total - $order->tax;
                                     $taxPercentage = $base > 0 ? round(($order->tax / $base) * 100) : 0;
                                 @endphp
@@ -208,6 +226,21 @@
                                     <td colspan="4"></td>
 
                                     <td class="px-4 py-3 text-center">{{ strtoupper($order->payment_method) }}</td>
+
+                                    <td class="px-4 py-3 text-right">
+                                        Rp{{ number_format($subtotalOrder, 0, ',', '.') }}
+                                    </td>
+
+                                    <td class="px-4 py-3 text-right">
+                                        @if ($discountPercentage)
+                                            <span class="text-xs text-gray-600">({{ $discountPercentage }}%)</span>
+                                        @endif
+                                        Rp{{ number_format($order->discount, 0, ',', '.') }}
+                                    </td>
+
+                                    <td class="px-4 py-3 text-right">
+                                        Rp{{ number_format($subtotalOrder - $order->discount, 0, ',', '.') }}
+                                    </td>
 
                                     @if ($settings->is_tax == true)
                                         <td class="px-4 py-3 text-right">
@@ -245,13 +278,13 @@
                                         <td class="px-4 py-2 text-right">
                                             Rp{{ number_format($trx->price * $trx->quantity, 0, ',', '.') }}
                                         </td>
-                                        <td colspan="6"></td>
+                                        <td colspan="{{ $settings->is_tax ? 10 : 9 }}"></td>
                                     </tr>
                                 @endforeach
 
                             @empty
                                 <tr>
-                                    <td colspan="11" class="text-center py-10 text-gray-400 italic">
+                                    <td colspan="{{ $settings->is_tax ? 14 : 13 }}" class="text-center py-10 text-gray-400 italic">
                                         Tidak ada data transaksi
                                     </td>
                                 </tr>

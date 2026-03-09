@@ -15,6 +15,7 @@ class TransactionExport implements FromCollection, WithHeadings, WithMapping, Wi
 {
     protected $startDate;
     protected $endDate;
+    private $lastOrderId = null;
 
     public function __construct($startDate, $endDate)
     {
@@ -42,8 +43,8 @@ class TransactionExport implements FromCollection, WithHeadings, WithMapping, Wi
             'Harga Satuan',
             'Subtotal Produk',
             'Metode Pembayaran',
-            'Pajak',
             'Diskon',
+            'Pajak',
             'Total Bayar',
             'Uang Pelanggan',
             'Kembalian',
@@ -69,6 +70,8 @@ class TransactionExport implements FromCollection, WithHeadings, WithMapping, Wi
     public function map($transaction): array
     {
         $order = $transaction->order;
+        $isFirst = $this->lastOrderId !== $order->id;
+        $this->lastOrderId = $order->id;
 
         return [
             $order->order_number ?? '-',
@@ -79,11 +82,11 @@ class TransactionExport implements FromCollection, WithHeadings, WithMapping, Wi
             $transaction->product->price ?? 0,
             $transaction->quantity * ($transaction->product->price ?? 0),
             $order->payment_method ?? '-',
-            $order->tax ?? 0,
-            $order->discount ?? 0,
-            $order->grandtotal ?? 0,
-            $order->customer_money ?? 0,
-            $order->change ?? 0,
+            $isFirst ? ($order->discount ?? 0) : 0,
+            $isFirst ? ($order->tax ?? 0) : 0,
+            $isFirst ? ($order->grandtotal ?? 0) : 0,
+            $isFirst ? ($order->customer_money ?? 0) : 0,
+            $isFirst ? ($order->change ?? 0) : 0,
         ];
     }
 
