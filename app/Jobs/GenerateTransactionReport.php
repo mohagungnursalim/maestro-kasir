@@ -22,15 +22,17 @@ class GenerateTransactionReport implements ShouldQueue
     protected $startDate;
     protected $endDate;
     protected $type;
+    protected $userName;
 
     /**
      * Create a new job instance.
      */
-    public function __construct($startDate, $endDate, $type)
+    public function __construct($startDate, $endDate, $type, $userName = 'Sistem')
     {
         $this->startDate = $startDate;
         $this->endDate = $endDate;
         $this->type = $type; // 'pdf' atau 'excel'
+        $this->userName = $userName;
     }
 
     /**
@@ -55,6 +57,7 @@ class GenerateTransactionReport implements ShouldQueue
                 'transactions' => $transactions,
                 'startDate' => $startDate,
                 'endDate' => $endDate,
+                'userName' => $this->userName,
             ]);
             
             $filePath = "reports/transactions_{$date}.pdf";

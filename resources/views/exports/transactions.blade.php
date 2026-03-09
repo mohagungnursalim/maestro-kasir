@@ -5,36 +5,96 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Laporan Transaksi</title>
     <style>
+        @page {
+            margin: 40px 30px;
+        }
         body { 
             font-family: Arial, sans-serif; 
             font-size: 10px;
-            margin: 20px;
+            margin: 0px;
+            color: #333;
         }
+        
+        /* Report Header Styles */
+        .report-header {
+            text-align: center;
+            border-bottom: 2px solid #2c3e50;
+            padding-bottom: 15px;
+            margin-bottom: 20px;
+        }
+        .report-header h2 {
+            margin: 0;
+            font-size: 24px;
+            color: #2c3e50;
+            text-transform: uppercase;
+            font-weight: bold;
+        }
+        .report-header p {
+            margin: 5px 0 0 0;
+            font-size: 11px;
+            color: #555;
+        }
+        .report-header h1 {
+            margin: 15px 0 0 0;
+            font-size: 18px;
+            letter-spacing: 1px;
+            color: #333;
+        }
+        
+        /* Report Meta Styles */
+        .report-meta {
+            width: 100%;
+            margin-bottom: 20px;
+        }
+        .report-meta td {
+            border: none;
+            padding: 3px;
+            font-size: 11px;
+            vertical-align: top;
+        }
+        .report-meta .label {
+            font-weight: bold;
+            width: 90px;
+        }
+        .text-right {
+            text-align: right;
+        }
+
+        /* Table Styles */
         table { 
             width: 100%; 
             border-collapse: collapse; 
             margin-top: 10px;
+            page-break-inside: avoid;
+        }
+        thead {
+            display: table-header-group;
+        }
+        tr {
+            page-break-inside: avoid;
         }
         th, td { 
-            border: 1px solid black; 
-            padding: 4px;
+            border: 1px solid #7f8c8d; 
+            padding: 5px 4px;
             text-align: left;
         }
         th { 
-            background-color: #f2f2f2; 
+            background-color: #ecf0f1; 
             font-size: 10px;
+            font-weight: bold;
+            color: #2c3e50;
         }
         .bold { font-weight: bold; }
         .center { text-align: center; }
-        th:nth-child(1) { width: 15%; }
-        th:nth-child(2) { width: 20%; }
-        th:nth-child(3) { width: 10%; }
-        th:nth-child(4) { width: 8%; }
-        th:nth-child(5) { width: 8%; }
-        th:nth-child(6) { width: 12%; }
-        th:nth-child(7) { width: 10%; }
-        th:nth-child(8) { width: 7%; }
-        th:nth-child(9) { width: 10%; }
+        
+        /* Adjust column width */
+        th:nth-child(1) { width: 18%; }
+        th:nth-child(2) { width: 24%; }
+        th:nth-child(3) { width: 7%; }
+        th:nth-child(4) { width: 15%; }
+        th:nth-child(5) { width: 10%; }
+        th:nth-child(6) { width: 13%; }
+        th:nth-child(7) { width: 13%; }
 
         .text-small-gray {
             font-size: 8px;
@@ -43,17 +103,46 @@
     </style>
 </head>
 <body>
-    <h1>Laporan Transaksi</h1>
     @php
         \Carbon\Carbon::setLocale('id');
     @endphp
-    <h2>{{ $settings->store_name }}</h2>
-    <p>{{ $settings->store_address }}</p>
 
-    <p>Periode: {{ \Carbon\Carbon::parse($startDate)->translatedFormat('l, d F Y') }} - {{ \Carbon\Carbon::parse($endDate)->translatedFormat('l, d F Y') }}</p>
-    <p>Total Transaksi: {{ $transactions->count() }}</p>
+    <div class="report-header">
+        <h2>{{ $settings->store_name }}</h2>
+        <p>{{ $settings->store_address }}</p>
+        <h1>Laporan Transaksi</h1>
+    </div>
 
-    <table>
+    <table class="report-meta">
+        <tr>
+            <td class="label">Periode</td>
+            <td style="width: 10px;">:</td>
+            <td>{{ \Carbon\Carbon::parse($startDate)->translatedFormat('d F Y') }} - {{ \Carbon\Carbon::parse($endDate)->translatedFormat('d F Y') }}</td>
+            
+            <td class="label text-right">Tanggal Cetak</td>
+            <td style="width: 10px;">:</td>
+            <td class="text-right" style="width: 130px;">{{ \Carbon\Carbon::now()->translatedFormat('d F Y  H:i') }}</td>
+        </tr>
+        <tr>
+            <td class="label">Total Transaksi</td>
+            <td>:</td>
+            <td>{{ $transactions->count() }} Transaksi</td>
+            
+            <td class="label text-right">Dicetak Oleh</td>
+            <td>:</td>
+            <td class="text-right">{{ $userName ?? 'Sistem' }}</td>
+        </tr>
+    </table>
+
+    @php
+        $grandTotalOmset = 0; // Total murni penjualan produk (tanpa Pajak & diskon)
+        $grandTotalDiskon = 0;
+        $grandTotalPajak = 0;
+        $grandTotalNett = 0;
+    @endphp
+
+    @foreach ($transactions as $order_id => $details)
+    <table style="margin-bottom: 15px;">
         <thead>
             <tr>
                 <th>Order/Kasir</th>
@@ -66,14 +155,6 @@
             </tr>
         </thead>
         <tbody>
-            @php
-                $grandTotalOmset = 0; // Total murni penjualan produk (tanpa Pajak & diskon)
-                $grandTotalDiskon = 0;
-                $grandTotalPajak = 0;
-                $grandTotalNett = 0;
-            @endphp
-
-            @foreach ($transactions as $order_id => $details)
                 @php
                     $first = $details->first();
 
@@ -195,9 +276,9 @@
                         @endif
                     </td>
                 </tr>
-            @endforeach
-        </tbody>
-    </table>
+            </tbody>
+        </table>
+    @endforeach
 
     <div style="margin-top: 20px; text-align: right; font-weight: bold; font-size: 16px;">
         <p style="margin: 0; padding-top: 4px;">Total Omset (Murni Produk): Rp{{ number_format($grandTotalOmset, 0, ',', '.') }}</p>
