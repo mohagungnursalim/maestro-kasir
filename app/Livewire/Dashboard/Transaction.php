@@ -230,17 +230,16 @@ class Transaction extends Component
 
             $startDate = Carbon::parse($this->startDate)->startOfDay(); // 00:00:00
             $endDate = Carbon::parse($this->endDate)->endOfDay(); //23:59:59
+            $userName = auth()->user()->name ?? 'Sistem';
     
-            GenerateTransactionReport::dispatch($startDate, $endDate, $type);
+            GenerateTransactionReport::dispatch($startDate, $endDate, $type, $userName);
 
-                if (!$this->isDateRangeWithinYear) {
-                    $this->addError('dateRange', 'Rentang tanggal tidak boleh lebih dari 1 tahun.');
-                    return;
-                }
+            if (!$this->isDateRangeWithinYear) {
+                $this->addError('dateRange', 'Rentang tanggal tidak boleh lebih dari 1 tahun.');
+                return;
+            }
 
-                GenerateTransactionReport::dispatch($startDate, $endDate, $type);
-
-                $this->dispatch('notify');
+            $this->dispatch('notify');
 
         }
 
