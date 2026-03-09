@@ -40,6 +40,8 @@ class Order extends Component
     public $tax = 0;   // Pajak dalam Rupiah
     public $tax_percentage; // Pajak dalam persen
     
+    public $familyDiscount = false; // Diskon 20% family
+    
     
     public $cart = []; // Keranjang belanja
     public $cartNotEmpty = false; // Status keranjang belanja
@@ -306,15 +308,24 @@ class Order extends Component
     {
         $subtotal = collect($this->cart)->sum(fn($item) => $item['price'] * $item['quantity']);
 
+        // Hitung diskon family 20% jika diaktifkan
+        $discount = 0;
+        if ($this->familyDiscount) {
+            $discount = ($subtotal * 20) / 100;
+        }
+
+        // Subtotal setelah diskon
+        $subtotalAfterDiscount = $subtotal - $discount;
+
         // Pajak hanya dihitung jika is_tax true
         $tax = 0;
         if ($this->is_tax) {
-            $tax = ($subtotal * $this->tax_percentage) / 100;
+            $tax = ($subtotalAfterDiscount * $this->tax_percentage) / 100;
         }
 
         $this->subtotal = $subtotal;
         $this->tax = $tax;
-        $this->total = $subtotal + $tax;
+        $this->total = $subtotalAfterDiscount + $tax;
         $this->change = max($this->customerMoney - $this->total, 0);
     }
 
@@ -333,6 +344,12 @@ class Order extends Component
         }
     }
 
+    // Update total saat diskon family diubah
+    public function updatedFamilyDiscount($value)
+    {
+        $this->calculateTotal();
+    }
+
     // Proses Bill
     public function billPayment()
     {
@@ -343,12 +360,20 @@ class Order extends Component
 
         $orderNumber = $this->generateOrderNumber();
 
+        // Hitung diskon
+        $subtotalBefore = 0;
+        foreach ($this->cart as $item) {
+            $subtotalBefore += $item['price'] * $item['quantity'];
+        }
+        $discountAmount = $this->familyDiscount ? ($subtotalBefore * 20) / 100 : 0;
+
         $billData = [
             'tanggal' => now()->format('d-m-Y H:i'),
             'kasir' => Auth::user()->name ?? 'Owner',
             'order_number' => $orderNumber,
             'items' => [],
             'subtotal' => 0,
+            'discount' => $discountAmount,
             'tax' => $this->tax,
             'total' => $this->total,
         ];
@@ -393,6 +418,7 @@ class Order extends Component
                 'order_number' => $this->generateOrderNumber() . "-S$i",
                 'items' => [],
                 'subtotal' => 0,
+                'discount' => 0,
                 'tax' => 0,
                 'total' => 0,
             ];
@@ -414,14 +440,22 @@ class Order extends Component
             $multi[$group]['subtotal'] += $total;
         }
 
-        // compute tax/total per split
+        // compute discount/tax/total per split
         foreach ($multi as $i => $md) {
+            $discount = 0;
+            if ($this->familyDiscount) {
+                $discount = ($md['subtotal'] * 20) / 100;
+            }
+            
             $tax = 0;
             if ($this->is_tax) {
-                $tax = ($md['subtotal'] * $this->tax_percentage) / 100;
+                $subtotalAfterDiscount = $md['subtotal'] - $discount;
+                $tax = ($subtotalAfterDiscount * $this->tax_percentage) / 100;
             }
+            
+            $multi[$i]['discount'] = $discount;
             $multi[$i]['tax'] = $tax;
-            $multi[$i]['total'] = $md['subtotal'] + $tax;
+            $multi[$i]['total'] = ($md['subtotal'] - $discount) + $tax;
         }
 
         cache()->put('bill-preview-multi:' . Auth::id(), $multi, now()->addMinutes(5));
@@ -624,11 +658,20 @@ class Order extends Component
                 
                  // ========== HITUNG ULANG TOTAL ==========
                 
-                $total = '0';
+                $subtotalAmount = '0';
                 foreach ($newCart as $item) {
                     $subtotal = bcmul(decimal($item['price']), (string)$item['quantity'], 2);
-                    $total = bcadd($total, $subtotal, 2);
+                    $subtotalAmount = bcadd($subtotalAmount, $subtotal, 2);
                 }
+
+                // Hitung diskon family 20%
+                $discount = '0';
+                if ($this->familyDiscount) {
+                    $discount = bcdiv(bcmul($subtotalAmount, '20', 2), '100', 2);
+                }
+
+                // Total setelah diskon
+                $total = bcsub($subtotalAmount, $discount, 2);
 
                 $tax = decimal($this->tax);
                 $total = bcadd($total, $tax, 2);
@@ -644,6 +687,7 @@ class Order extends Component
                     'desk_number' => $this->desk_number,
                     'note' => $this->note,
                     'payment_method' => $this->payment_method,
+                    'discount' => $discount,
                     'tax' => $tax,
                     'grandtotal' => $total,
                 ];
@@ -743,11 +787,20 @@ class Order extends Component
             }
 
             // HITUNG TOTAL
-            $total = '0';
+            $subtotalAmount = '0';
             foreach ($this->cart as $item) {
                 $subtotal = bcmul(decimal($item['price']), (string)$item['quantity'], 2);
-                $total = bcadd($total, $subtotal, 2);
+                $subtotalAmount = bcadd($subtotalAmount, $subtotal, 2);
             }
+
+            // Hitung diskon family 20%
+            $discount = '0';
+            if ($this->familyDiscount) {
+                $discount = bcdiv(bcmul($subtotalAmount, '20', 2), '100', 2);
+            }
+
+            // Total setelah diskon
+            $total = bcsub($subtotalAmount, $discount, 2);
 
             $tax = decimal($this->tax);
             $total = bcadd($total, $tax, 2);
@@ -786,6 +839,7 @@ class Order extends Component
                 'desk_number' => $this->desk_number,
                 'note' => $this->note,
                 'payment_method' => $this->payment_method,
+                'discount' => $discount,
                 'tax' => $tax,
                 'customer_money' => $customerMoney,
                 'change' => $change,
@@ -866,6 +920,7 @@ class Order extends Component
         $this->splitEnabled = false;
         $this->preparedSplitCount = false;
         $this->splitCount = 2;
+        $this->familyDiscount = false; // Reset diskon family
 
         $this->selectedUnpaidOrderId = null;
     }

@@ -118,6 +118,7 @@ class Transaction extends Component
                         'transaction_details.*',
                         'orders.order_number as order_number',
                         'orders.payment_method as payment_method',
+                        'orders.discount as discount',
                         'orders.tax as tax',
                         'orders.customer_money as customer_money',
                         'orders.change as change',

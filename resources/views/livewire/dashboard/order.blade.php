@@ -735,6 +735,24 @@
                                     </div>
                                 </div>
 
+                                {{-- ==================== DISKON FAMILY ==================== --}}
+                                @if($payment_mode === 'PAY_NOW')
+                                    @if (!empty($cart))
+                                    <div class="flex items-center gap-2 p-3 bg-gradient-to-r from-purple-50 to-pink-50 rounded-lg border border-purple-200">
+                                        <input 
+                                            type="checkbox" 
+                                            wire:model.live="familyDiscount"
+                                            id="family_discount"
+                                            class="w-5 h-5 cursor-pointer rounded border-purple-300 text-purple-600 focus:ring-purple-500"
+                                        >
+                                        <label for="family_discount" class="cursor-pointer flex-1">
+                                            <span class="text-sm font-semibold text-purple-700">Diskon Family 20%</span>
+                                            <span class="block text-xs text-purple-600">Hemat hingga Rp{{ number_format(($subtotal * 20) / 100,0,',','.') }}</span>
+                                        </label>
+                                    </div>
+                                    @endif
+                                @endif
+
                                 {{-- ==================== METODE BAYAR ==================== --}}
                                 @if($payment_mode === 'PAY_NOW')
                                 <div>
@@ -824,11 +842,19 @@
 
                                 @endif
 
+                           
+
                                 {{-- ==================== RINGKASAN ==================== --}}
                                 <dl class="flex justify-between">
                                     <dt>Sub Total</dt>
                                     <dd class="text-gray-900 font-bold">Rp{{ number_format($subtotal,0,',','.') }}</dd>
                                 </dl>
+                                @if ($familyDiscount && !empty($cart))
+                                <dl class="flex justify-between">
+                                    <dt class="text-purple-600 font-semibold">Diskon Family (20%)</dt>
+                                    <dd class="text-purple-600 font-bold">-Rp{{ number_format(($subtotal * 20) / 100,0,',','.') }}</dd>
+                                </dl>
+                                @endif
                                 @if ($settings->is_tax == true)
                                 <dl class="flex justify-between">
                                     <dt>Pajak</dt>

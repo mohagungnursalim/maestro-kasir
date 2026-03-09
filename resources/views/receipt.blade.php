@@ -115,11 +115,13 @@
 
     @php
         $subtotal = $order->transactionDetails->sum(fn ($d) => $d->price * $d->quantity);
-        $hargaAwal = $order->grandtotal + $order->discount - $order->tax;
-        $hargaSetelahDiskon = $hargaAwal - $order->discount;
-
-        $taxPercentage = $hargaSetelahDiskon > 0 ? ($order->tax / $hargaSetelahDiskon) * 100 : 0;
-        $discountPercentage = $hargaAwal > 0 ? ($order->discount / $hargaAwal) * 100 : 0;
+        
+        $taxPercentage = ($subtotal - $order->discount) > 0 
+            ? ($order->tax / ($subtotal - $order->discount)) * 100 
+            : 0;
+        $discountPercentage = $subtotal > 0 
+            ? ($order->discount / $subtotal) * 100 
+            : 0;
     @endphp
 
     <table class="items">
@@ -166,13 +168,22 @@
         </tr>
 
         <tr>
-            <td class="label">Uang</td>
+            <td class="label">
+                @if ($order->payment_method == "QRIS")
+                QRIS
+                @else
+                Tunai
+                @endif
+            </td>
             <td class="value">Rp{{ number_format($order->customer_money, 0, ',', '.') }}</td>
         </tr>
+       @if ($order->payment_method == "CASH")
         <tr>
             <td class="label">Kembali</td>
             <td class="value">Rp{{ number_format($order->change, 0, ',', '.') }}</td>
         </tr>
+       @endif
+
     </table>
 
     <div class="footer">

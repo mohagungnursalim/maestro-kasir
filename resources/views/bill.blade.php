@@ -215,12 +215,22 @@
         </tr>
 
         @php
-            $taxPercentage = $billData['subtotal'] > 0
-                ? ($billData['tax'] / $billData['subtotal']) * 100
+            $discountPercentage = $billData['subtotal'] > 0
+                ? ($billData['discount'] / $billData['subtotal']) * 100
+                : 0;
+            $taxPercentage = ($billData['subtotal'] - $billData['discount']) > 0
+                ? ($billData['tax'] / ($billData['subtotal'] - $billData['discount'])) * 100
                 : 0;
         @endphp
 
-        @if ($taxPercentage)
+        @if ($discountPercentage > 0)
+        <tr>
+            <td class="label">Diskon ({{ number_format($discountPercentage, 0) }}%)</td>
+            <td class="value">-Rp{{ number_format($billData['discount'], 0, ',', '.') }}</td>
+        </tr>
+        @endif
+
+        @if ($taxPercentage > 0)
         <tr>
             <td class="label">Pajak PB1 ({{ number_format($taxPercentage, 0) }}%)</td>
             <td class="value">Rp{{ number_format($billData['tax'], 0, ',', '.') }}</td>
