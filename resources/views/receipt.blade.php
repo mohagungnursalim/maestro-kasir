@@ -303,11 +303,11 @@
 
     <div class="footer">
         {{ $settings->store_footer }}
-        <div class="powered-by">
-            Powered by <a href="#" target="_blank">Maestro-Kasir</a>
-        </div>
+        
     </div>
-
+    <div class="powered-by">
+        Powered by <a href="#" target="_blank">Maestro-Kasir</a>
+    </div>
 </div>
 
 
