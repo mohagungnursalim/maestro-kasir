@@ -168,6 +168,8 @@
 
         tx += "--------------------------------\n";
         tx += centerText(document.querySelector('.footer').innerText) + "\n";
+        tx += "\n\n"; // Beri jarak 2 spasi kosong (enter)
+        tx += centerText("Powered by Maestro-Kasir") + "\n";
         tx += "\n\n";
 
         return tx;
