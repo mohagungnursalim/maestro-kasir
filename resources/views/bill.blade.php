@@ -8,7 +8,8 @@
         body {
             font-family: 'Courier New', monospace;
             font-size: 10px;
-            width: 58mm;
+            width: 100%; /* Fluid */
+            max-width: 58mm; /* Pembatasan maksimal */
             margin: 0 auto;
             padding: 0;
             color: #000;
@@ -16,17 +17,20 @@
 
         @media print {
             @page {
-                size: 58mm auto;
+                size: portrait; /* Jangan limit 'auto' yang bikin Android Spooler ngelag mikir page-break */
                 margin: 0;
             }
             html, body {
-                width: 58mm !important;
+                width: 100% !important; 
+                max-width: 100% !important;
                 margin: 0 !important;
                 padding: 0 !important;
+                background-color: transparent !important;
             }
             .bill {
                 width: 100% !important;
-                box-sizing: border-box !important;
+                margin: 0 !important;
+                padding: 0 !important;
             }
         }
 

@@ -8,7 +8,8 @@
         body {
             font-family: 'Courier New', monospace;
             font-size: 10px;
-            width: 58mm;
+            width: 100%; /* Ubah menjadi persentase agar fluid menyesuaikan layar/viewport sebelum print */
+            max-width: 58mm; /* Batasi maksimal agar di layar biasa (misal PC) ga melebar */
             margin: 0 auto;
             padding: 0;
             color: #000;
@@ -16,17 +17,20 @@
 
         @media print {
             @page {
-                size: 58mm auto;
+                size: portrait; /* Paksa Print Spooler mendeteksi Portrait tanpa ngelock millimeter ketat */
                 margin: 0;
             }
             html, body {
-                width: 58mm !important;
+                width: 100% !important; /* Gunakan 100% ketimbang mm */
+                max-width: 100% !important;
                 margin: 0 !important;
                 padding: 0 !important;
+                background-color: transparent !important;
             }
             .receipt {
                 width: 100% !important;
-                box-sizing: border-box !important;
+                margin: 0 !important;
+                padding: 0 !important;
             }
         }
 
