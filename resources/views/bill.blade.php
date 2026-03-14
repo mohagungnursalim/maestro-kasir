@@ -5,11 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Bill Pembayaran</title>
     <style>
-        @page {
-            size: 58mm auto;
-            margin: 0;
-        }
-
         body {
             font-family: 'Courier New', monospace;
             font-size: 10px;
@@ -17,6 +12,22 @@
             margin: 0 auto;
             padding: 0;
             color: #000;
+        }
+
+        @media print {
+            @page {
+                size: 58mm auto;
+                margin: 0;
+            }
+            html, body {
+                width: 58mm !important;
+                margin: 0 !important;
+                padding: 0 !important;
+            }
+            .bill {
+                width: 100% !important;
+                box-sizing: border-box !important;
+            }
         }
 
         .bill {
