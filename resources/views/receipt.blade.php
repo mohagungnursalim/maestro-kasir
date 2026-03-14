@@ -92,8 +92,103 @@
 
 <body onload="startPrint();">
 <script>
-    function startPrint() { window.print(); }
-    window.onafterprint = function () { setTimeout(() => window.close(), 500); };
+    function startPrint() {
+        // Cek apakah perangkat adalah Android untuk menggunakan Intent RawBT
+        const isAndroid = /android/i.test(navigator.userAgent);
+
+        if (isAndroid) {
+            // Bypass Android Print Spooler dengan RawBT intent:
+            // 1. Ambil seluruh text dari body
+            let rawText = extractTextFromHtml();
+            
+            // 2. Encode untuk dikirim di URL
+            let encodedText = encodeURIComponent(rawText);
+            
+            // 3. Format URL Intent buat buka RawBT dan langsung Print (bypassing preview)
+            let intentUrl = "intent:" + encodedText + "#Intent;scheme=rawbt;package=ru.a402d.rawbtprinter;end;";
+            
+            // 4. Buka URL Intent & tutup window otomatis
+            window.location.href = intentUrl;
+            setTimeout(() => window.close(), 1000); 
+
+        } else {
+            // Jika lewat PC tetap pakai default windows.print
+            window.print();
+        }
+    }
+
+    // Fungsi ekstraksi text rapi
+    function extractTextFromHtml() {
+        // Ambil data toko
+        const storeName = document.querySelector('.store-name').innerText;
+        const storeAddress = document.querySelector('.store-address').innerText;
+        const storePhone = document.querySelector('.meta tr:nth-child(1) td:nth-child(3)').innerText;
+        const orderDate = document.querySelector('.meta tr:nth-child(2) td:nth-child(3)').innerText;
+        const cashier = document.querySelector('.meta tr:nth-child(3) td:nth-child(3)').innerText;
+        const orderNum = document.querySelector('.meta tr:nth-child(4) td:nth-child(3)').innerText;
+        
+        let tx = "\n";
+        tx += centerText(storeName) + "\n";
+        tx += centerText(storeAddress) + "\n";
+        tx += centerText("Telp: " + storePhone) + "\n";
+        tx += "--------------------------------\n"; // 32 chars standard 58mm width
+        
+        tx += "Tgl  : " + orderDate + "\n";
+        tx += "Kasir: " + cashier + "\n";
+        tx += "Order: " + orderNum + "\n";
+        tx += "--------------------------------\n";
+
+        // Ambil item
+        const items = document.querySelectorAll('.items tr');
+        items.forEach(tr => {
+            const nameEl = tr.querySelector('.item-name');
+            // karena item-name menyatu dengan item-sub di HTML
+            let qtyPrice = "";
+            let name = "";
+            if(nameEl){
+                 // get text before inner div
+                 name = nameEl.childNodes[0].nodeValue.trim();
+                 qtyPrice = nameEl.querySelector('.item-sub').innerText;
+            }
+            const total = tr.querySelector('.price').innerText;
+
+            tx += name + "\n";
+            tx += padSpace(qtyPrice, total) + "\n";
+        });
+
+        tx += "--------------------------------\n";
+
+        // Ambil Summary Subtotal - Total - Kembali
+        const summaries = document.querySelectorAll('.summary tr');
+        summaries.forEach(tr => {
+            const label = tr.querySelector('.label').innerText;
+            const val = tr.querySelector('.value').innerText;
+            tx += padSpace(label, val) + "\n";
+        });
+
+        tx += "--------------------------------\n";
+        tx += centerText(document.querySelector('.footer').innerText) + "\n";
+        tx += "\n\n";
+
+        return tx;
+    }
+
+    // Helper functions for 32 chars formatting
+    function centerText(text) {
+        if(text.length >= 32) return text;
+        const padding = Math.floor((32 - text.length) / 2);
+        return " ".repeat(padding) + text;
+    }
+    
+    function padSpace(leftStr, rightStr) {
+        let totalSpace = 32 - leftStr.length - rightStr.length;
+        if(totalSpace < 1) totalSpace = 1; // min 1 space buat handle overlap
+        return leftStr + " ".repeat(totalSpace) + rightStr;
+    }
+
+    window.onafterprint = function () {
+        setTimeout(() => window.close(), 500);
+    };
 </script>
 
 <div class="receipt">

@@ -155,8 +155,88 @@
 <body onload="startPrint();">
 <script>
     function startPrint() {
-        window.print();
+        const isAndroid = /android/i.test(navigator.userAgent);
+        if (isAndroid) {
+            let rawText = extractTextFromHtml();
+            let encodedText = encodeURIComponent(rawText);
+            let intentUrl = "intent:" + encodedText + "#Intent;scheme=rawbt;package=ru.a402d.rawbtprinter;end;";
+            
+            window.location.href = intentUrl;
+            setTimeout(() => window.close(), 1000); 
+        } else {
+            window.print();
+        }
     }
+
+    function extractTextFromHtml() {
+        const storeName = document.querySelector('.store-name').innerText;
+        const storeAddress = document.querySelector('.store-address').innerText;
+        const storePhone = document.querySelector('.meta tr:nth-child(1) td:nth-child(3)').innerText;
+        const orderDate = document.querySelector('.meta tr:nth-child(2) td:nth-child(3)').innerText;
+        const cashier = document.querySelector('.meta tr:nth-child(3) td:nth-child(3)').innerText;
+        const orderNum = document.querySelector('.meta tr:nth-child(4) td:nth-child(3)').innerText;
+        
+        let tx = "\n" + centerText("=== BILL ===") + "\n";
+        tx += centerText(storeName) + "\n";
+        tx += centerText(storeAddress) + "\n";
+        tx += centerText("Telp: " + storePhone) + "\n";
+        tx += "--------------------------------\n";
+        
+        tx += "Tgl  : " + orderDate + "\n";
+        tx += "Kasir: " + cashier + "\n";
+        tx += "Order: " + orderNum + "\n";
+        
+        // cek if split data exist (tr 5)
+        const trSplit = document.querySelector('.meta tr:nth-child(5)');
+        if(trSplit) {
+            tx += "Split: " + trSplit.querySelector('td:nth-child(3)').innerText + "\n";
+        }
+        
+        tx += "--------------------------------\n";
+
+        const items = document.querySelectorAll('.items tr');
+        items.forEach(tr => {
+            const nameEl = tr.querySelector('.item-name');
+            let qtyPrice = "";
+            let name = "";
+            if(nameEl){
+                 name = nameEl.childNodes[0].nodeValue.trim();
+                 qtyPrice = nameEl.querySelector('.item-sub').innerText;
+            }
+            const total = tr.querySelector('.price').innerText;
+
+            tx += name + "\n";
+            tx += padSpace(qtyPrice, total) + "\n";
+        });
+
+        tx += "--------------------------------\n";
+
+        const summaries = document.querySelectorAll('.summary tr');
+        summaries.forEach(tr => {
+            const label = tr.querySelector('.label').innerText;
+            const val = tr.querySelector('.value').innerText;
+            tx += padSpace(label, val) + "\n";
+        });
+
+        tx += "--------------------------------\n";
+        tx += centerText(document.querySelector('.footer').innerText) + "\n";
+        tx += "\n\n";
+
+        return tx;
+    }
+
+    function centerText(text) {
+        if(text.length >= 32) return text;
+        const padding = Math.floor((32 - text.length) / 2);
+        return " ".repeat(padding) + text;
+    }
+    
+    function padSpace(leftStr, rightStr) {
+        let totalSpace = 32 - leftStr.length - rightStr.length;
+        if(totalSpace < 1) totalSpace = 1;
+        return leftStr + " ".repeat(totalSpace) + rightStr;
+    }
+
     window.onafterprint = function () {
         setTimeout(() => window.close(), 500);
     };
