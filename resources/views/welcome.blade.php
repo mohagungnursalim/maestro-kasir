@@ -6,8 +6,8 @@
 
     {{-- SEO Meta Tags --}}
     <title>{{ $settings->store_name ?? 'Kedai Mie-Mie' }} - Mie Kering Khas Makassar | Cita Rasa Legendaris di Palu</title>
-    <meta name="description" content="Kedai Mie-Mie menghadirkan sajian Mie Kering Mie Awa khas Makassar legendaris di Kota Palu,Cita rasa autentik warisan turun-temurun.">
-    <meta name="keywords" content="mie awa, mie kering, mie makassar, kedai mie palu, mie spesial, mie yamin, kuliner palu, mie legendaris, warisan kuliner makassar, kedai mie-mie">
+    <meta name="description" content="Kedai Mie-Mie menghadirkan sajian Mie Kering khas Makassar yang legendaris kini hadir di Kota Palu. Didukung langsung oleh Warung Mie Awa Makassar dengan cita rasa autentik.">
+    <meta name="keywords" content="mie kering, mie kering makassar, mie awa, kedai mie palu, kuliner palu, mie legendaris, warisan kuliner makassar, kedai mie-mie, mie kering palu">
     <meta name="author" content="{{ $settings->store_name ?? 'Kedai Mie-Mie' }}">
     <meta name="robots" content="index, follow">
     <link rel="canonical" href="{{ url('/') }}">
@@ -15,16 +15,16 @@
     {{-- Open Graph / Facebook --}}
     <meta property="og:type" content="website">
     <meta property="og:url" content="{{ url('/') }}">
-    <meta property="og:title" content="{{ $settings->store_name ?? 'Kedai Mie-Mie' }} - Mie Kering Mie Awa Khas Makassar Legendaris">
-    <meta property="og:description" content="Sajian istimewa Mie Kering Mie Mie Awa khas Makassar dengan cita rasa autentik warisan turun-temurun, kini hadir di Kota Palu. Mie spesial, yamin, dan mercon level tingkat!">
+    <meta property="og:title" content="{{ $settings->store_name ?? 'Kedai Mie-Mie' }} - Mie Kering Legendaris Khas Makassar">
+    <meta property="og:description" content="Nikmati kelezatan Mie Kering khas Makassar yang didukung langsung oleh Warung Mie Awa Makassar. Segera hadir di Kota Palu dengan cita rasa autentik warisan turun-temurun!">
     <meta property="og:image" content="{{ asset('images/mie-awa.jpg') }}">
     <meta property="og:locale" content="id_ID">
     <meta property="og:site_name" content="{{ $settings->store_name ?? 'Kedai Mie-Mie' }}">
 
     {{-- Twitter Card --}}
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="{{ $settings->store_name ?? 'Kedai Mie-Mie' }} - Mie Kering Mie Awa Khas Makassar">
-    <meta name="twitter:description" content="Sajian istimewa Mie Kering Mie Awa khas Makassar dengan cita rasa autentik warisan turun-temurun, kini hadir di Kota Palu.">
+    <meta name="twitter:title" content="{{ $settings->store_name ?? 'Kedai Mie-Mie' }} - Mie Kering Legendaris Khas Makassar">
+    <meta name="twitter:description" content="Nikmati kelezatan Mie Kering khas Makassar, didukung langsung oleh Warung Mie Awa Makassar. Segera hadir di Kota Palu!">
     <meta name="twitter:image" content="{{ asset('images/mie-awa.jpg') }}">
 
     {{-- Favicon --}}
@@ -580,7 +580,7 @@
                             Perjalanan panjang Mie Awa telah menjadi bagian tak terpisahkan dari denyut nadi kuliner kota Makassar. Dari gerobak sederhana di kawasan Pecinan hingga menjadi ikon legendaris lintas generasi.
                         </p>
                         <p class="text-base sm:text-lg text-orange-50/90 mb-10 leading-relaxed font-light max-w-3xl mx-auto">
-                            Terinspirasi dari kelezatan melegenda tersebut, kami kini berupaya menghadirkan sajian mie spesial untuk menyapa para pencinta kuliner di <strong class="text-white font-bold border-b-2 border-orange-300/50 pb-0.5">Kota Palu</strong> melalui Kedai Mie-Mie.
+                            Terinspirasi dari kelezatan melegenda tersebut, kami kini berupaya menghadirkan sajian mie kering untuk menyapa para pencinta kuliner di <strong class="text-white font-bold border-b-2 border-orange-300/50 pb-0.5">Kota Palu</strong> melalui Kedai Mie-Mie.
                         </p>
 
                         <div class="flex flex-col sm:flex-row gap-4 justify-center">
