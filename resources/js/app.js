@@ -12,7 +12,7 @@ document.addEventListener('livewire:navigated', () => {
             document.exitFullscreen();
         }
     });
-    
+
     // Pastikan hanya menginisialisasi audio sekali
     if (!window.selectSound) {
         window.selectSound = new Audio("/audio/click-sound.mp3");
@@ -58,12 +58,12 @@ document.addEventListener('livewire:navigated', () => {
 
         Livewire.on('errorOrderType', (shortage) => {
             playErrorSound();
-        
+
             const formattedShortage = parseFloat(shortage).toLocaleString('id-ID', {
                 minimumFractionDigits: 2,
                 maximumFractionDigits: 2
             });
-        
+
             Swal.fire({
                 title: "Oops!",
                 text: `Meja/Nama wajib diisi,jika makan/minum ditempat!`,
@@ -87,7 +87,7 @@ document.addEventListener('livewire:navigated', () => {
             });
         });
 
-         Livewire.on('orderUnpaid', () => {
+        Livewire.on('orderUnpaid', () => {
             playSelectSound();
             Swal.fire({
                 toast: true,
@@ -99,7 +99,7 @@ document.addEventListener('livewire:navigated', () => {
                 timerProgressBar: true
             });
         });
-        
+
         Livewire.on('successPayment', () => {
             playSuccessSound();
             Swal.fire({
@@ -128,12 +128,12 @@ document.addEventListener('livewire:navigated', () => {
 
         Livewire.on('insufficientPayment', (shortage) => {
             playErrorSound();
-        
+
             const formattedShortage = parseFloat(shortage).toLocaleString('id-ID', {
                 minimumFractionDigits: 2,
                 maximumFractionDigits: 2
             });
-        
+
             Swal.fire({
                 title: "Pembayaran Kurang!",
                 text: `Uang pelanggan kurang Rp${formattedShortage}!`,
@@ -142,8 +142,8 @@ document.addEventListener('livewire:navigated', () => {
                 confirmButtonColor: "#3085d6"
             });
         });
-        
-        
+
+
 
         Livewire.on('insufficientStock', (insufficientProducts) => {
             if (!Array.isArray(insufficientProducts) || insufficientProducts.length === 0) return;
@@ -158,7 +158,7 @@ document.addEventListener('livewire:navigated', () => {
         });
     }
 
-   
+
     // Buat fungsi dan assign ke window
     window.toggleTaxInput = function () {
         const isChecked = document.getElementById('isTaxCheckbox')?.checked;
@@ -183,7 +183,7 @@ document.addEventListener('livewire:navigated', () => {
         });
     });
 
-    
-    
-    
+
+
+
 });

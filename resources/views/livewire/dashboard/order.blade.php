@@ -979,12 +979,28 @@
     <script>
         Livewire.on('printReceipt', orderId => {
             let receiptUrl = `/dashboard/order-receipt/${orderId}`;
-            let printWindow = window.open(receiptUrl, '_blank', 'width=640,height=600');
+            const isAndroid = /android/i.test(navigator.userAgent);
 
-            if (printWindow) {
-                printWindow.focus();
+            if (isAndroid) {
+                // Jalankan di background (iframe) tanpa popup untuk Android
+                let iframe = document.createElement('iframe');
+                iframe.style.display = 'none';
+                iframe.src = receiptUrl;
+                document.body.appendChild(iframe);
+
+                // Bersihkan iframe setelah beberapa saat agak tidak menumpuk di DOM
+                setTimeout(() => {
+                    document.body.removeChild(iframe);
+                }, 5000);
             } else {
-                alert("Popup blocked! Please allow popups for this site.");
+                // Di desktop tetap pakai popup (dengan window print bawaan browser)
+                let printWindow = window.open(receiptUrl, '_blank', 'width=640,height=600');
+
+                if (printWindow) {
+                    printWindow.focus();
+                } else {
+                    alert("Popup blocked! Please allow popups for this site.");
+                }
             }
         });
 
@@ -995,7 +1011,20 @@
     <script>
         window.addEventListener('showBillPrintPopup', event => {
             const url = event.detail;
-            window.open(url, '_blank', 'width=640,height=600');
+            const isAndroid = /android/i.test(navigator.userAgent);
+
+            if (isAndroid) {
+                let iframe = document.createElement('iframe');
+                iframe.style.display = 'none';
+                iframe.src = url;
+                document.body.appendChild(iframe);
+
+                setTimeout(() => {
+                    document.body.removeChild(iframe);
+                }, 5000);
+            } else {
+                window.open(url, '_blank', 'width=640,height=600');
+            }
         });
 
     </script>

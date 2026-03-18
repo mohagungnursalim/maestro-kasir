@@ -107,9 +107,8 @@
             // 3. Format URL Intent buat buka RawBT dan langsung Print (bypassing preview)
             let intentUrl = "intent:" + encodedText + "#Intent;scheme=rawbt;package=ru.a402d.rawbtprinter;end;";
             
-            // 4. Buka URL Intent & tutup window otomatis
-            window.location.href = intentUrl;
-            setTimeout(() => window.close(), 1000); 
+            // 4. Buka URL Intent (gunakan window.top agar tak diblokir di dalam hidden iframe)
+            window.top.location.href = intentUrl;
 
         } else {
             // Jika lewat PC tetap pakai default windows.print
@@ -133,9 +132,9 @@
         tx += centerText("Telp: " + storePhone) + "\n";
         tx += "--------------------------------\n"; // 32 chars standard 58mm width
         
-        tx += "Tgl  : " + orderDate + "\n";
-        tx += "Kasir: " + cashier + "\n";
-        tx += "Order: " + orderNum + "\n";
+        tx += "Tgl  : " + orderDate.trim() + "\n";
+        tx += "Kasir: " + cashier.trim() + "\n";
+        tx += "Order: " + orderNum.trim() + "\n";
         tx += "--------------------------------\n";
 
         // Ambil item
@@ -148,9 +147,9 @@
             if(nameEl){
                  // get text before inner div
                  name = nameEl.childNodes[0].nodeValue.trim();
-                 qtyPrice = nameEl.querySelector('.item-sub').innerText;
+                 qtyPrice = nameEl.querySelector('.item-sub').innerText.trim();
             }
-            const total = tr.querySelector('.price').innerText;
+            const total = tr.querySelector('.price').innerText.trim();
 
             tx += name + "\n";
             tx += padSpace(qtyPrice, total) + "\n";
@@ -161,22 +160,22 @@
         // Ambil Summary Subtotal - Total - Kembali
         const summaries = document.querySelectorAll('.summary tr');
         summaries.forEach(tr => {
-            const label = tr.querySelector('.label').innerText;
-            const val = tr.querySelector('.value').innerText;
+            const label = tr.querySelector('.label').innerText.trim();
+            const val = tr.querySelector('.value').innerText.trim();
             tx += padSpace(label, val) + "\n";
         });
 
         tx += "--------------------------------\n";
-        tx += centerText(document.querySelector('.footer').innerText) + "\n";
-        tx += "\n\n"; // Beri jarak 2 spasi kosong (enter)
-        tx += centerText("Powered by Maestro-Kasir") + "\n";
-        tx += "\n\n";
+        tx += centerText(document.querySelector('.footer').innerText.trim()) + "\n";
+        tx += "\n";
+        tx += centerText("Powered by Maestro-Kasir") + "\n\n";
 
         return tx;
     }
 
     // Helper functions for 32 chars formatting
     function centerText(text) {
+        text = text.trim();
         if(text.length >= 32) return text;
         const padding = Math.floor((32 - text.length) / 2);
         return " ".repeat(padding) + text;
