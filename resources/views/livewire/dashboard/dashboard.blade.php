@@ -16,7 +16,7 @@
             </div>
         
             <!-- Statistik -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 @role('admin|owner') xl:grid-cols-5 @endrole gap-6">
                 <!-- Total Order -->
                 <div class="p-4 bg-white shadow rounded-lg">
                     <h3 class="text-lg font-semibold text-gray-700">Total Order</h3>
@@ -34,6 +34,22 @@
                     <h3 class="text-lg font-semibold text-gray-700">Produk Terjual</h3>
                     <p class="text-2xl font-bold text-purple-600">{{ number_format($totalProductsSold, 0, ',', '.') }}</p>
                 </div>
+
+                @role('admin|owner')
+                <!-- Total Dilihat (Page Views) -->
+                <div class="p-4 bg-white shadow rounded-lg">
+                    <h3 class="text-lg font-semibold text-gray-700">Total Dilihat</h3>
+                    <p class="text-2xl font-bold text-teal-600">{{ number_format($totalPageViews ?? 0, 0, ',', '.') }}</p>
+                    <p class="text-xs text-gray-400 mt-1">Total kunjungan halaman</p>
+                </div>
+
+                <!-- Pengunjung Unik (Unique IP) -->
+                <div class="p-4 bg-white shadow rounded-lg">
+                    <h3 class="text-lg font-semibold text-gray-700">Pengunjung Unik</h3>
+                    <p class="text-2xl font-bold text-indigo-600">{{ number_format($totalUniqueVisitors ?? 0, 0, ',', '.') }}</p>
+                    <p class="text-xs text-gray-400 mt-1">Berdasarkan IP unik</p>
+                </div>
+                @endrole
             </div>
         </div>
     

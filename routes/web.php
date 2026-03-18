@@ -20,7 +20,7 @@ use Illuminate\Support\Facades\Storage;
 
 Route::get('/', function () {
     return view('welcome');
-});
+})->middleware('track.visitor');
 
 Route::get('/dashboard', Dashboard::class)
     ->middleware(['auth'])
