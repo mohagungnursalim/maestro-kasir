@@ -73,7 +73,6 @@
                     <span class="flex-1 ms-3 whitespace-nowrap">Rekap Transaksi</span>
                 </a>
                 
-                @hasrole('admin|owner')
                 <a 
                     @if (Request::is('dashboard/expenses'))
                         class="flex items-center p-2 rounded-lg bg-yellow-300 text-dark"
@@ -86,6 +85,7 @@
                     <span class="flex-1 ms-3 whitespace-nowrap">Arus Kas</span>
                 </a>
         
+                @hasrole('admin|owner')
                 <a 
                     @if (Request::is('dashboard/reports'))
                         class="flex items-center p-2 rounded-lg bg-yellow-300 text-dark"

@@ -149,18 +149,26 @@
             expenseId: null,
             expense_date: '{{ date('Y-m-d') }}',
             type: 'out',
-            category: 'Operasional',
+            category: 'Bahan Baku',
             amount: '',
             description: '',
             errors: {},
             
             init() {
+                this.$watch('type', value => {
+                    if (value === 'in') {
+                        this.category = 'Top Up';
+                    } else if (value === 'out' && this.category === 'Top Up') {
+                        this.category = 'Bahan Baku';
+                    }
+                });
+
                 window.addEventListener('open-add-expense', () => {
                     this.isEdit = false;
                     this.expenseId = null;
                     this.expense_date = '{{ date('Y-m-d') }}';
                     this.type = 'out';
-                    this.category = 'Operasional';
+                    this.category = 'Bahan Baku';
                     this.amount = '';
                     this.description = '';
                     this.errors = {};
@@ -239,10 +247,19 @@
                         <div class="col-span-2 sm:col-span-1">
                             <label class="block mb-2 text-sm font-semibold text-gray-900">Kategori</label>
                             <select x-model="category" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5">
-                                <option value="Bahan Baku">Bahan Baku (Sayur, Daging, dll)</option>
-                                <option value="Operasional">Operasional (Listrik, Air)</option>
-                                <option value="Gaji">Gaji / Lembur</option>
-                                <option value="Lainnya">Lain-lain</option>
+                                <template x-if="type === 'in'">
+                                    <optgroup label="Pemasukan">
+                                        <option value="Top Up">Top Up (Kas Masuk)</option>
+                                    </optgroup>
+                                </template>
+                                <template x-if="type === 'out'">
+                                    <optgroup label="Pengeluaran">
+                                        <option value="Bahan Baku">Bahan Baku (Sayur, Daging, dll)</option>
+                                        <option value="Operasional">Operasional (Listrik, Air)</option>
+                                        <option value="Gaji">Gaji / Lembur</option>
+                                        <option value="Lainnya">Lain-lain</option>
+                                    </optgroup>
+                                </template>
                             </select>
                         </div>
 
