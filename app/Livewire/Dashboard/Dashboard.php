@@ -48,17 +48,19 @@ class Dashboard extends Component
         // Semua stats (termasuk visitor jika admin) dalam 1 cache block
         $stats = Cache::remember($cacheKey, now()->addMinutes(5), function () use ($dates, $isAdmin, $userId) {
 
-            // Query 1: Total orders (single count)
+            // Query 1: Total orders (single count) & Total Pendapatan Bersih (Grandtotal = dengan diskon & pajak)
             $queryOrders = Order::whereBetween('created_at', [$dates['start'], $dates['end']])
                 ->where('payment_status', 'PAID');
 
             if (!$isAdmin) {
                 $queryOrders->where('user_id', $userId);
             }
+            
+            $ordersAggregates = (clone $queryOrders)->selectRaw('COUNT(id) as total_orders, COALESCE(SUM(grandtotal), 0) as total_sales')->first();
 
-            // Query 2: Sales & quantity digabung jadi 1 query dengan selectRaw
+            // Query 2: Quantity produk terjual
             $queryTransactions = TransactionDetail::join('orders', 'transaction_details.order_id', '=', 'orders.id')
-                ->whereBetween('transaction_details.created_at', [$dates['start'], $dates['end']])
+                ->whereBetween('orders.created_at', [$dates['start'], $dates['end']])
                 ->where('orders.payment_status', 'PAID');
 
             if (!$isAdmin) {
@@ -66,12 +68,12 @@ class Dashboard extends Component
             }
 
             $salesAggregates = $queryTransactions
-                ->selectRaw('COALESCE(SUM(transaction_details.subtotal), 0) as total_sales, COALESCE(SUM(transaction_details.quantity), 0) as total_qty')
+                ->selectRaw('COALESCE(SUM(transaction_details.quantity), 0) as total_qty')
                 ->first();
 
             $result = [
-                'totalOrders'       => (int) $queryOrders->count(),
-                'totalActualSales'  => (float) ($salesAggregates->total_sales ?? 0),
+                'totalOrders'       => (int) ($ordersAggregates->total_orders ?? 0),
+                'totalActualSales'  => (float) ($ordersAggregates->total_sales ?? 0),
                 'totalProductsSold' => (int) ($salesAggregates->total_qty ?? 0),
             ];
 

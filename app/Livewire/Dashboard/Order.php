@@ -40,7 +40,8 @@ class Order extends Component
     public $tax = 0;   // Pajak dalam Rupiah
     public $tax_percentage; // Pajak dalam persen
     
-    public $familyDiscount = false; // Diskon 20% family
+    public $familyDiscount = false; // Diskon 100% family
+    public $friendDiscount = false; // Diskon 20% teman
     
     
     public $cart = []; // Keranjang belanja
@@ -308,9 +309,11 @@ class Order extends Component
     {
         $subtotal = collect($this->cart)->sum(fn($item) => $item['price'] * $item['quantity']);
 
-        // Hitung diskon family 20% jika diaktifkan
+        // Hitung diskon family 100% atau teman 20% jika diaktifkan
         $discount = 0;
         if ($this->familyDiscount) {
+            $discount = $subtotal;
+        } elseif ($this->friendDiscount) {
             $discount = ($subtotal * 20) / 100;
         }
 
@@ -326,7 +329,14 @@ class Order extends Component
         $this->subtotal = $subtotal;
         $this->tax = $tax;
         $this->total = $subtotalAfterDiscount + $tax;
-        $this->change = max($this->customerMoney - $this->total, 0);
+        
+        if ($this->total == 0) {
+            $this->customerMoney = 0;
+        } elseif ($this->total > 0 && $this->customerMoney === 0 && $this->payment_method === 'CASH') {
+            $this->customerMoney = null;
+        }
+
+        $this->change = max((float)$this->customerMoney - $this->total, 0);
     }
 
 
@@ -347,6 +357,14 @@ class Order extends Component
     // Update total saat diskon family diubah
     public function updatedFamilyDiscount($value)
     {
+        if ($value) $this->friendDiscount = false;
+        $this->calculateTotal();
+    }
+
+    // Update total saat diskon teman diubah
+    public function updatedFriendDiscount($value)
+    {
+        if ($value) $this->familyDiscount = false;
         $this->calculateTotal();
     }
 
@@ -365,7 +383,12 @@ class Order extends Component
         foreach ($this->cart as $item) {
             $subtotalBefore += $item['price'] * $item['quantity'];
         }
-        $discountAmount = $this->familyDiscount ? ($subtotalBefore * 20) / 100 : 0;
+        $discountAmount = 0;
+        if ($this->familyDiscount) {
+            $discountAmount = $subtotalBefore;
+        } elseif ($this->friendDiscount) {
+            $discountAmount = ($subtotalBefore * 20) / 100;
+        }
 
         $billData = [
             'tanggal' => now()->format('d-m-Y H:i'),
@@ -444,6 +467,8 @@ class Order extends Component
         foreach ($multi as $i => $md) {
             $discount = 0;
             if ($this->familyDiscount) {
+                $discount = $md['subtotal'];
+            } elseif ($this->friendDiscount) {
                 $discount = ($md['subtotal'] * 20) / 100;
             }
             
@@ -664,10 +689,12 @@ class Order extends Component
                     $subtotalAmount = bcadd($subtotalAmount, $subtotal, 2);
                 }
 
-                // Hitung diskon family 20%
+                // Hitung diskon
                 $discount = '0';
                 if ($this->familyDiscount) {
-                    $discount = bcdiv(bcmul($subtotalAmount, '20', 2), '100', 2);
+                    $discount = $subtotalAmount; // 100%
+                } elseif ($this->friendDiscount) {
+                    $discount = bcdiv(bcmul($subtotalAmount, '20', 2), '100', 2); // 20%
                 }
 
                 // Total setelah diskon
@@ -676,7 +703,7 @@ class Order extends Component
                 $tax = decimal($this->tax);
                 $total = bcadd($total, $tax, 2);
 
-                if (bccomp($total, '0', 2) <= 0) {
+                if (bccomp($total, '0', 2) === -1 && !$this->familyDiscount) {
                     throw new \Exception("Total tidak valid");
                 }
 
@@ -793,10 +820,12 @@ class Order extends Component
                 $subtotalAmount = bcadd($subtotalAmount, $subtotal, 2);
             }
 
-            // Hitung diskon family 20%
+            // Hitung diskon
             $discount = '0';
             if ($this->familyDiscount) {
-                $discount = bcdiv(bcmul($subtotalAmount, '20', 2), '100', 2);
+                $discount = $subtotalAmount; // 100%
+            } elseif ($this->friendDiscount) {
+                $discount = bcdiv(bcmul($subtotalAmount, '20', 2), '100', 2); // 20%
             }
 
             // Total setelah diskon
@@ -805,7 +834,7 @@ class Order extends Component
             $tax = decimal($this->tax);
             $total = bcadd($total, $tax, 2);
 
-            if (bccomp($total, '0', 2) <= 0) {
+            if (bccomp($total, '0', 2) === -1 && !$this->familyDiscount) {
                 throw new \Exception("Total tidak valid");
             }
 
@@ -921,6 +950,7 @@ class Order extends Component
         $this->preparedSplitCount = false;
         $this->splitCount = 2;
         $this->familyDiscount = false; // Reset diskon family
+        $this->friendDiscount = false; // Reset diskon teman
 
         $this->selectedUnpaidOrderId = null;
     }

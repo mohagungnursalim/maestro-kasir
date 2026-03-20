@@ -23,10 +23,10 @@
                     <p class="text-2xl font-bold text-green-600">{{ number_format($totalOrders, 0, ',', '.') }}</p>
                 </div>
         
-                <!-- Subtotal -->
+                <!-- Pendapatan Bersih -->
                 <div class="p-4 bg-white shadow rounded-lg">
-                    <h3 class="text-lg font-semibold text-gray-700">Subtotal</h3>
-                    <p class="text-2xl font-bold text-blue-600">Rp{{ number_format($totalActualSales, 2, ',', '.') }}</p>
+                    <h3 class="text-lg font-semibold text-gray-700">Pendapatan Bersih</h3>
+                    <p class="text-2xl font-bold text-blue-600">Rp{{ number_format($totalActualSales, 0, ',', '.') }}</p>
                 </div>
         
                 <!-- Total Produk Terjual -->

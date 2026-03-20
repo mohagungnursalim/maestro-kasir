@@ -670,6 +670,71 @@
                                 </div>
                             </div>
 
+                            {{-- Modal Diskon --}}
+                            <div x-data="{ show: false }" x-on:open-discount-modal.window="show = true" x-show="show" x-cloak @keydown.window.escape.prevent
+                                class="fixed inset-0 z-50 flex items-center justify-center">
+                                <!-- Backdrop -->
+                                <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" @click="show = false"></div>
+
+                                <!-- Modal Box -->
+                                <div x-show="show" x-transition
+                                    class="relative bg-white w-full max-w-md rounded-xl shadow-2xl p-6">
+                                    
+                                    <!-- Icon -->
+                                    <div class="flex justify-center mb-4">
+                                        <div class="w-12 h-12 flex items-center justify-center rounded-full bg-purple-100 text-purple-600">
+                                            <i class="fas fa-tags fa-lg"></i>
+                                        </div>
+                                    </div>
+
+                                    <!-- Title -->
+                                    <h2 class="text-lg font-bold text-center text-gray-800 mb-2">
+                                        Pilih Diskon
+                                    </h2>
+
+                                    <!-- Desc -->
+                                    <p class="text-center text-gray-500 text-sm mb-4">
+                                        Pilih jenis diskon tambahan yang berlaku.
+                                    </p>
+
+                                    <!-- Content -->
+                                    <div class="flex flex-col gap-2 mt-4">
+                                        <div class="flex items-center gap-2 p-3 rounded-lg border border-purple-200 transition-all hover:shadow-md">
+                                            <input 
+                                                type="checkbox" 
+                                                wire:model.live="familyDiscount"
+                                                id="modal_family_discount"
+                                                class="w-5 h-5 cursor-pointer rounded border-purple-300 text-purple-600 focus:ring-purple-500"
+                                            >
+                                            <label for="modal_family_discount" class="cursor-pointer flex-1">
+                                                <span class="text-sm font-semibold text-purple-700">Diskon Family 100%</span>
+                                                <span class="block text-xs text-purple-600">Terima kasih keluarga!</span>
+                                            </label>
+                                        </div>
+                                        <div class="flex items-center gap-2 p-3 rounded-lg border border-blue-200 transition-all hover:shadow-md">
+                                            <input 
+                                                type="checkbox" 
+                                                wire:model.live="friendDiscount"
+                                                id="modal_friend_discount"
+                                                class="w-5 h-5 cursor-pointer rounded border-blue-300 text-blue-600 focus:ring-blue-500"
+                                            >
+                                            <label for="modal_friend_discount" class="cursor-pointer flex-1">
+                                                <span class="text-sm font-semibold text-blue-700">Diskon Teman 20%</span>
+                                                <span class="block text-xs text-blue-600">Potongan harga eksklusif teman</span>
+                                            </label>
+                                        </div>
+                                    </div>
+
+                                    <!-- Actions -->
+                                    <div class="flex justify-center gap-3 mt-6">
+                                        <button @click="show = false"
+                                            class="w-full px-4 py-2 bg-gray-900 text-white font-semibold rounded-lg hover:bg-gray-800 transition">
+                                            Tutup
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
                     </div>
 
                     <!-- Total dan Pembayaran -->
@@ -735,20 +800,29 @@
                                     </div>
                                 </div>
 
-                                {{-- ==================== DISKON FAMILY ==================== --}}
+                                {{-- ==================== DISKON ==================== --}}
                                 @if($payment_mode === 'PAY_NOW')
                                     @if (!empty($cart))
-                                    <div class="flex items-center gap-2 p-3 bg-gradient-to-r from-purple-50 to-pink-50 rounded-lg border border-purple-200">
-                                        <input 
-                                            type="checkbox" 
-                                            wire:model.live="familyDiscount"
-                                            id="family_discount"
-                                            class="w-5 h-5 cursor-pointer rounded border-purple-300 text-purple-600 focus:ring-purple-500"
-                                        >
-                                        <label for="family_discount" class="cursor-pointer flex-1">
-                                            <span class="text-sm font-semibold text-purple-700">Diskon Family 20%</span>
-                                            <span class="block text-xs text-purple-600">Hemat hingga Rp{{ number_format(($subtotal * 20) / 100,0,',','.') }}</span>
-                                        </label>
+                                    <div>
+                                        <label class="block mb-2 text-sm font-medium text-gray-900">Diskon Kustom</label>
+                                        <button type="button" 
+                                            x-data 
+                                            @click="$dispatch('open-discount-modal')"
+                                            class="w-full py-2 px-3 rounded-lg text-sm font-semibold border transition bg-white text-gray-700 border-gray-300 hover:bg-gray-100 flex items-center justify-between shadow-sm">
+                                            <span class="flex items-center gap-2">
+                                                <i class="fas fa-tags text-purple-600"></i>
+                                                Pilih Diskon
+                                            </span>
+                                            <div>
+                                            @if($familyDiscount)
+                                                <span class="bg-purple-100 text-purple-800 text-xs font-semibold px-2 py-0.5 rounded-full border border-purple-200">Family 100%</span>
+                                            @elseif($friendDiscount)
+                                                <span class="bg-blue-100 text-blue-800 text-xs font-semibold px-2 py-0.5 rounded-full border border-blue-200">Teman 20%</span>
+                                            @else
+                                                <span class="text-gray-400 text-xs">-</span>
+                                            @endif
+                                            </div>
+                                        </button>
                                     </div>
                                     @endif
                                 @endif
@@ -817,8 +891,9 @@
                                         x-show="$wire.payment_method === 'CASH'"
                                         x-on:input="onInput($event)"
                                         x-bind:value="display"
+                                        x-bind:disabled="$wire.total === 0"
                                         inputmode="numeric"
-                                        class="block w-full p-2 border rounded-lg text-sm bg-gray-50"
+                                        class="block w-full p-2 border rounded-lg text-sm bg-gray-50 disabled:bg-gray-100 disabled:cursor-not-allowed"
                                         placeholder="Masukkan uang pelanggan"
                                     >
 
@@ -851,8 +926,14 @@
                                 </dl>
                                 @if ($familyDiscount && !empty($cart))
                                 <dl class="flex justify-between">
-                                    <dt class="text-purple-600 font-semibold">Diskon Family (20%)</dt>
-                                    <dd class="text-purple-600 font-bold">-Rp{{ number_format(($subtotal * 20) / 100,0,',','.') }}</dd>
+                                    <dt class="text-purple-600 font-semibold">Diskon Family (100%)</dt>
+                                    <dd class="text-purple-600 font-bold">-Rp{{ number_format($subtotal,0,',','.') }}</dd>
+                                </dl>
+                                @endif
+                                @if ($friendDiscount && !empty($cart))
+                                <dl class="flex justify-between">
+                                    <dt class="text-blue-600 font-semibold">Diskon Teman (20%)</dt>
+                                    <dd class="text-blue-600 font-bold">-Rp{{ number_format(($subtotal * 20) / 100,0,',','.') }}</dd>
                                 </dl>
                                 @endif
                                 @if ($settings->is_tax == true)

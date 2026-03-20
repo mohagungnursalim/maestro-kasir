@@ -32,18 +32,17 @@ class MonthlyTurnoverChart extends Component
 
         $results = Cache::remember($cacheKey, now()->addMinutes(5), function () use ($year, $isAdmin, $userId) {
 
-            // sum omzet murni per bulan "dengan" diskon & pajak
-            $query = DB::table('transaction_details')
-                ->join('orders', 'transaction_details.order_id', '=', 'orders.id')
-                ->selectRaw('MONTH(orders.created_at) as month, SUM(transaction_details.subtotal) as total')
-                ->whereYear('orders.created_at', $year)
-                ->where('orders.payment_status', 'PAID');
+            // sum pendapatan bersih per bulan (dengan diskon & pajak) menggunakan orders.grandtotal
+            $query = DB::table('orders')
+                ->selectRaw('MONTH(created_at) as month, SUM(grandtotal) as total')
+                ->whereYear('created_at', $year)
+                ->where('payment_status', 'PAID');
 
             if (!Auth::user()->hasRole('admin|owner')) {
-                $query->where('orders.user_id', Auth::id());
+                $query->where('user_id', Auth::id());
             }
 
-            return $query->groupByRaw('MONTH(orders.created_at)')
+            return $query->groupByRaw('MONTH(created_at)')
                 ->orderBy('month')
                 ->get();
         });

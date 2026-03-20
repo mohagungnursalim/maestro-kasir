@@ -271,8 +271,16 @@
 
         @if ($discountPercentage)
         <tr>
-            <td class="label">Diskon ({{ number_format($discountPercentage, 0) }}%)</td>
-            <td class="value">Rp{{ number_format($order->discount, 0, ',', '.') }}</td>
+            <td class="label">
+                @if (round($discountPercentage) == 100)
+                    Diskon Family (100%)
+                @elseif (round($discountPercentage) == 20)
+                    Diskon Teman (20%)
+                @else
+                    Diskon ({{ number_format($discountPercentage, 0) }}%)
+                @endif
+            </td>
+            <td class="value">-Rp{{ number_format($order->discount, 0, ',', '.') }}</td>
         </tr>
         @endif
 
