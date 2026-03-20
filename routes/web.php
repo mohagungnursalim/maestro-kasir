@@ -13,6 +13,7 @@ use App\Livewire\Dashboard\Supplier;
 use App\Livewire\Dashboard\Transaction;
 use App\Livewire\Dashboard\UnitManagement;
 use App\Livewire\Dashboard\UserManagement;
+use App\Livewire\Dashboard\ExpenseManagement;
 use App\Livewire\DownloadReport;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -41,6 +42,10 @@ Route::get('/dashboard/orders', Order::class)
 Route::get('/dashboard/transactions' , Transaction::class)
     ->middleware(['auth'])
     ->name('transactions');
+
+Route::get('/dashboard/expenses', ExpenseManagement::class)
+    ->middleware(['auth'])
+    ->name('expenses');
 
 Route::get('/dashboard/products', Product::class)
     ->middleware(['auth'])

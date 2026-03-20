@@ -16,7 +16,7 @@
             </div>
         
             <!-- Statistik -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 @role('admin|owner') xl:grid-cols-5 @endrole gap-6">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 @role('admin|owner') xl:grid-cols-6 @endrole gap-6">
                 <!-- Total Order -->
                 <div class="p-4 bg-white shadow rounded-lg">
                     <h3 class="text-lg font-semibold text-gray-700">Total Order</h3>
@@ -27,6 +27,14 @@
                 <div class="p-4 bg-white shadow rounded-lg">
                     <h3 class="text-lg font-semibold text-gray-700">Pendapatan Bersih</h3>
                     <p class="text-2xl font-bold text-blue-600">Rp{{ number_format($totalActualSales, 0, ',', '.') }}</p>
+                    <p class="text-xs text-gray-400 mt-1">Omzet + Laci Masuk - Keluar</p>
+                </div>
+
+                <!-- Pengeluaran Kas -->
+                <div class="p-4 bg-red-50 shadow rounded-lg border border-red-200">
+                    <h3 class="text-lg font-semibold text-red-700">Kas Keluar</h3>
+                    <p class="text-2xl font-bold text-red-600">Rp{{ number_format($totalExpenses, 0, ',', '.') }}</p>
+                    <p class="text-xs text-red-400 mt-1">Pengeluaran & Belanja</p>
                 </div>
         
                 <!-- Total Produk Terjual -->

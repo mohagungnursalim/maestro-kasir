@@ -49,17 +49,17 @@
         <li>
             <button 
                 type="button" 
-                class="flex items-center w-full p-2 text-base text-gray-900 transition duration-75 rounded-lg group {{ Request::is('dashboard/transactions') || Request::is('dashboard/reports') ? 'bg-gray-200' : 'hover:bg-gray-200' }}" 
+                class="flex items-center w-full p-2 text-base text-gray-900 transition duration-75 rounded-lg group {{ Request::is('dashboard/transactions') || Request::is('dashboard/reports') || Request::is('dashboard/expenses') ? 'bg-gray-200' : 'hover:bg-gray-200' }}" 
                 aria-controls="dropdown-transactions"
                 data-collapse-toggle="dropdown-transactions"
-                aria-expanded="{{ Request::is('dashboard/transactions') || Request::is('dashboard/reports') ? 'true' : 'false' }}">
+                aria-expanded="{{ Request::is('dashboard/transactions') || Request::is('dashboard/reports') || Request::is('dashboard/expenses') ? 'true' : 'false' }}">
                 <i class="bi bi-wallet2"></i>
                 <span class="flex-1 ms-3 text-left rtl:text-right whitespace-nowrap">Transaksi</span>
                 <i class="bi bi-caret-down-fill"></i>
             </button>
             <ul 
                 id="dropdown-transactions"
-                class="{{ Request::is('dashboard/transactions') || Request::is('dashboard/reports') ? '' : 'hidden' }} py-2 space-y-2">
+                class="{{ Request::is('dashboard/transactions') || Request::is('dashboard/reports') || Request::is('dashboard/expenses') ? '' : 'hidden' }} py-2 space-y-2">
                 
                 <a 
                     @if (Request::is('dashboard/transactions'))
@@ -72,8 +72,20 @@
                     <i class="bi bi-arrow-return-right"></i>
                     <span class="flex-1 ms-3 whitespace-nowrap">Rekap Transaksi</span>
                 </a>
-        
+                
                 @hasrole('admin|owner')
+                <a 
+                    @if (Request::is('dashboard/expenses'))
+                        class="flex items-center p-2 rounded-lg bg-yellow-300 text-dark"
+                    @else
+                        wire:navigate href="/dashboard/expenses" 
+                        class="flex items-center p-2 rounded-lg hover:bg-gray-200"
+                    @endif
+                >
+                    <i class="bi bi-arrow-return-right"></i>
+                    <span class="flex-1 ms-3 whitespace-nowrap">Arus Kas</span>
+                </a>
+        
                 <a 
                     @if (Request::is('dashboard/reports'))
                         class="flex items-center p-2 rounded-lg bg-yellow-300 text-dark"

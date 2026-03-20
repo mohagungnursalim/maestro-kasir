@@ -15,6 +15,8 @@ class Dashboard extends Component
     public $totalOrders;
     public $totalActualSales;
     public $totalProductsSold;
+    public $totalExpenses;
+    public $totalTopUps;
 
     // Visitor stats
     public $totalPageViews;
@@ -71,9 +73,25 @@ class Dashboard extends Component
                 ->selectRaw('COALESCE(SUM(transaction_details.quantity), 0) as total_qty')
                 ->first();
 
+            // Query 3: Pengeluaran & Top Up Kas
+            $queryExpenses = \App\Models\Expense::whereBetween('expense_date', [$dates['start']->format('Y-m-d'), $dates['end']->format('Y-m-d')]);
+            if (!$isAdmin) {
+                $queryExpenses->where('user_id', $userId);
+            }
+            $expensesAggregates = $queryExpenses->selectRaw("
+                COALESCE(SUM(CASE WHEN type = 'out' THEN amount ELSE 0 END), 0) as total_out,
+                COALESCE(SUM(CASE WHEN type = 'in' THEN amount ELSE 0 END), 0) as total_in
+            ")->first();
+
+            $total_out = (float) ($expensesAggregates->total_out ?? 0);
+            $total_in = (float) ($expensesAggregates->total_in ?? 0);
+            $sales_omzet = (float) ($ordersAggregates->total_sales ?? 0);
+
             $result = [
                 'totalOrders'       => (int) ($ordersAggregates->total_orders ?? 0),
-                'totalActualSales'  => (float) ($ordersAggregates->total_sales ?? 0),
+                'totalActualSales'  => $sales_omzet + $total_in - $total_out, // Laba Bersih = Omzet + TopUp - Pengeluaran
+                'totalExpenses'     => $total_out,
+                'totalTopUps'       => $total_in,
                 'totalProductsSold' => (int) ($salesAggregates->total_qty ?? 0),
             ];
 
@@ -93,6 +111,8 @@ class Dashboard extends Component
         // Assign ke state Livewire
         $this->totalOrders       = $stats['totalOrders'];
         $this->totalActualSales  = $stats['totalActualSales'];
+        $this->totalExpenses     = $stats['totalExpenses'];
+        $this->totalTopUps       = $stats['totalTopUps'];
         $this->totalProductsSold = $stats['totalProductsSold'];
 
         if ($isAdmin) {
