@@ -103,7 +103,7 @@
                                         {{ $expense->user->name ?? '-' }}
                                     </td>
                                     <td class="px-6 py-4 flex gap-2">
-                                        <button @click="$dispatch('open-edit-expense', { expense: {{ json_encode($expense) }} })"
+                                        <button @click="$dispatch('open-edit-expense', @js($expense))"
                                             class="bg-blue-100 hover:bg-blue-200 text-blue-800 text-xs font-semibold px-2 md:px-2.5 py-1 rounded inline-flex items-center justify-center">
                                             <i class="fas fa-edit"></i></button>
                                         <button wire:click="deleteConfirmation({{ $expense->id }})"
@@ -143,18 +143,39 @@
     </div>
 
     {{-- Modal Create & Edit (Powered by AlpineJS for Zero-Network-Delay UI) --}}
-    <div id="expenseModal" tabindex="-1" aria-hidden="true" 
-        x-data="{
+    <div wire:ignore>
+        <div id="expenseModal" tabindex="-1" aria-hidden="true" 
+            x-data="{
             isEdit: false,
             expenseId: null,
             expense_date: '{{ date('Y-m-d') }}',
             type: 'out',
             category: 'Bahan Baku',
             amount: '',
+            formattedAmount: '',
             description: '',
             errors: {},
+            modalInstance: null,
             
+            formatRupiah(value) {
+                if(!value) return '';
+                let valStr = value.toString().replace(/[^0-9]/g, '');
+                return valStr.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+            },
+
+            handleAmountInput(e) {
+                let rawValue = e.target.value.replace(/[^0-9]/g, '');
+                this.amount = rawValue;
+                this.formattedAmount = this.formatRupiah(rawValue);
+            },
+
+            closeModal() {
+                 if(this.modalInstance) this.modalInstance.hide();
+            },
+
             init() {
+                this.modalInstance = new Modal(document.getElementById('expenseModal'));
+
                 this.$watch('type', value => {
                     if (value === 'in') {
                         this.category = 'Top Up';
@@ -170,26 +191,37 @@
                     this.type = 'out';
                     this.category = 'Bahan Baku';
                     this.amount = '';
+                    this.formattedAmount = '';
                     this.description = '';
                     this.errors = {};
-                    const modal = new Modal(document.getElementById('expenseModal'));
-                    modal.show();
+                    this.modalInstance.show();
                 });
 
                 window.addEventListener('open-edit-expense', (event) => {
-                    const data = event.detail.expense;
+                    const data = event.detail;
                     this.isEdit = true;
                     this.expenseId = data.id;
                     this.expense_date = data.expense_date;
                     this.type = data.type;
                     this.category = data.category;
                     this.amount = data.amount;
+                    this.formattedAmount = this.formatRupiah(Math.floor(data.amount)); 
                     this.description = data.description;
                     this.errors = {};
-                    const modal = new Modal(document.getElementById('expenseModal'));
-                    modal.show();
+                    this.modalInstance.show();
+                });
+
+                Livewire.on('addedSuccess', () => {
+                    this.closeModal();
+                    Swal.fire({ toast: true, position: 'top-end', showConfirmButton: false, timer: 3000, icon: 'success', title: 'Catatan Kas ditambahkan!' });
+                });
+
+                Livewire.on('updatedSuccess', () => {
+                    this.closeModal();
+                    Swal.fire({ toast: true, position: 'top-end', showConfirmButton: false, timer: 3000, icon: 'success', title: 'Catatan Kas diperbarui!' });
                 });
             },
+
 
             async save() {
                 this.errors = {};
@@ -215,13 +247,12 @@
                 }
             }
         }"
-        class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-modal md:h-full"
-        wire:ignore.self>
+        class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-modal md:h-full">
         <div class="relative p-4 w-full max-w-lg h-full md:h-auto">
             <div class="relative p-4 bg-white rounded-lg shadow border border-gray-100 sm:p-5">
                 <div class="flex justify-between items-center pb-4 mb-4 rounded-t border-b sm:mb-5">
                     <h3 class="text-lg font-bold text-gray-900" x-text="isEdit ? 'Edit Catatan Kas' : 'Catat Arus Kas'"></h3>
-                    <button type="button" @click="const m = new Modal(document.getElementById('expenseModal')); m.hide();" class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 ml-auto inline-flex items-center">
+                    <button type="button" @click="closeModal()" class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 ml-auto inline-flex items-center">
                         <svg aria-hidden="true" class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>
                         <span class="sr-only">Close modal</span>
                     </button>
@@ -264,8 +295,13 @@
                         </div>
 
                         <div class="col-span-2 sm:col-span-1">
-                            <label class="block mb-2 text-sm font-semibold text-gray-900">Nominal (Rp)</label>
-                            <input x-model="amount" type="number" min="0" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5" placeholder="Contoh: 50000">
+                            <label class="block mb-2 text-sm font-semibold text-gray-900">Nominal</label>
+                            <div class="flex">
+                                <span class="inline-flex items-center px-3 text-sm text-gray-900 bg-gray-200 border border-r-0 border-gray-300 rounded-l-lg">
+                                    Rp
+                                </span>
+                                <input x-model="formattedAmount" @input="handleAmountInput" type="text" class="rounded-none rounded-r-lg bg-gray-50 border border-gray-300 text-gray-900 text-sm focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5" placeholder="50.000">
+                            </div>
                             <span x-show="errors.amount" x-text="errors.amount" class="text-red-500 text-xs"></span>
                         </div>
 
@@ -276,8 +312,8 @@
                         </div>
                     </div>
 
-                    <div class="flex items-center justify-end border-t pt-4 mt-2">
-                        <button type="button" @click="const m = new Modal(document.getElementById('expenseModal')); m.hide();" class="text-gray-500 bg-white hover:bg-gray-100 focus:ring-4 focus:outline-none focus:ring-primary-300 rounded-lg border border-gray-200 text-sm font-medium px-5 py-2.5 hover:text-gray-900 focus:z-10 mr-2">
+                    <div class="flex items-center justify-center border-t pt-4 mt-2">
+                        <button type="button" @click="closeModal()" class="text-gray-500 bg-white hover:bg-gray-100 focus:ring-4 focus:outline-none focus:ring-primary-300 rounded-lg border border-gray-200 text-sm font-medium px-5 py-2.5 hover:text-gray-900 focus:z-10 mr-2">
                             Batal
                         </button>
                         <button type="submit" class="text-white bg-indigo-600 hover:bg-indigo-700 focus:ring-4 focus:outline-none focus:ring-indigo-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center">
@@ -288,24 +324,12 @@
                 </form>
             </div>
         </div>
+        </div>
     </div>
-
 
     {{-- Scripts --}}
     <script>
         document.addEventListener('livewire:navigated', () => {
-
-            Livewire.on('addedSuccess', () => {
-                const modal = new Modal(document.getElementById('expenseModal'));
-                modal.hide();
-                Swal.fire({ toast: true, position: "top-end", showConfirmButton: false, timer: 3000, icon: "success", title: "Catatan Kas ditambahkan!" });
-            });
-
-            Livewire.on('updatedSuccess', () => {
-                const modal = new Modal(document.getElementById('expenseModal'));
-                modal.hide();
-                Swal.fire({ toast: true, position: "top-end", showConfirmButton: false, timer: 3000, icon: "success", title: "Catatan Kas diperbarui!" });
-            });
 
             Livewire.on('showDeleteConfirmation', () => {
                 Swal.fire({

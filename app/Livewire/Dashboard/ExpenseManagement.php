@@ -21,17 +21,16 @@ class ExpenseManagement extends Component
     public $isEdit = false;
 
     // List
-    public $expenses, $totalExpenses, $totalNominalOut, $totalNominalIn;
+    public $loaded = false;
 
     // Search & Filter
     #[Url]
     public $search = '';
     public $filterMonth = ''; // Format 'YYYY-MM'
     public $limit = 10;
-    public $loaded = false;
 
     protected $listeners = [
-        'expenseUpdated' => 'loadInitialExpenses',
+        'expenseUpdated' => '$refresh',
         'deleteConfirmed' => 'delete',
         'resetForm' => 'resetForm',
     ];
@@ -40,8 +39,6 @@ class ExpenseManagement extends Component
     {
         $this->filterMonth = date('Y-m');
         $this->expense_date = date('Y-m-d');
-        $this->expenses = collect();
-        $this->loadInitialExpenses();
     }
 
     public function updatingSearch()
@@ -49,49 +46,15 @@ class ExpenseManagement extends Component
         $this->limit = 10;
     }
 
-    public function updatedSearch()
-    {
-        $this->loadInitialExpenses();
-    }
-
-    public function updatedFilterMonth()
-    {
-        $this->loadInitialExpenses();
-    }
-
     public function loadInitialExpenses()
     {
+        // Fungsi ini cuma sebagai "saklar" dari wire:init untuk mulai memuat data
         $this->loaded = true;
-        
-        $query = Expense::with('user')
-            ->where(function ($query) {
-                $query->where('description', 'like', '%' . $this->search . '%')
-                      ->orWhere('category', 'like', '%' . $this->search . '%');
-            });
-            
-        if (!empty($this->filterMonth)) {
-            $year = substr($this->filterMonth, 0, 4);
-            $month = substr($this->filterMonth, 5, 2);
-            $query->whereYear('expense_date', $year)->whereMonth('expense_date', $month);
-        }
-
-        if (!Auth::user()->hasRole('admin|owner')) {
-             $query->where('user_id', Auth::id());
-        }
-
-        $this->totalExpenses = $query->count();
-        $this->totalNominalOut = (clone $query)->where('type', 'out')->sum('amount');
-        $this->totalNominalIn = (clone $query)->where('type', 'in')->sum('amount');
-
-        $this->expenses = $query->latest('expense_date')->latest('id')
-            ->take($this->limit)
-            ->get();
     }
     
     public function loadMore()
     {
         $this->limit += 10;
-        $this->loadInitialExpenses();
     }
 
     public function rules() 
@@ -159,6 +122,39 @@ class ExpenseManagement extends Component
 
     public function render()
     {
-        return view('livewire.dashboard.expense-management');
+        if (!$this->loaded) {
+            return view('livewire.dashboard.expense-management', [
+                'expenses' => collect(),
+                'totalExpenses' => 0,
+                'totalNominalOut' => 0,
+                'totalNominalIn' => 0,
+            ]);
+        }
+
+        $query = Expense::with('user')
+            ->where(function ($q) {
+                $q->where('description', 'like', '%' . $this->search . '%')
+                  ->orWhere('category', 'like', '%' . $this->search . '%');
+            });
+            
+        if (!empty($this->filterMonth)) {
+            $year = substr($this->filterMonth, 0, 4);
+            $month = substr($this->filterMonth, 5, 2);
+            $query->whereYear('expense_date', $year)->whereMonth('expense_date', $month);
+        }
+
+        if (!Auth::user()->hasRole('admin|owner')) {
+             $query->where('user_id', Auth::id());
+        }
+
+        $totalExpenses = (clone $query)->count();
+        $totalNominalOut = (clone $query)->where('type', 'out')->sum('amount');
+        $totalNominalIn = (clone $query)->where('type', 'in')->sum('amount');
+
+        $expenses = $query->latest('expense_date')->latest('id')
+            ->take($this->limit)
+            ->get();
+
+        return view('livewire.dashboard.expense-management', compact('expenses', 'totalExpenses', 'totalNominalOut', 'totalNominalIn'));
     }
 }
