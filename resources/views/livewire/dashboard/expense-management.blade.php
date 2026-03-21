@@ -153,18 +153,23 @@
                     </table>
                 </div>
 
-                {{-- Tombol Load More --}}
-                @if($loaded && $expenses->count() >= $limit && $totalExpenses > $limit)
-                <div class="mt-4 mb-4 flex justify-center">
-                    <button wire:click="loadMore"
-                        class="bg-gray-600 text-white px-6 py-2 rounded-full shadow hover:bg-gray-500 focus:outline-none"
-                        wire:loading.remove wire:target="loadMore">
-                        Tampilkan Lebih
-                    </button>
-
-                    <button class="bg-gray-600 text-white px-6 py-2 rounded-full shadow cursor-not-allowed" type="button" disabled wire:loading wire:target="loadMore">
+                {{-- Infinite Scroll Loading (Auto Load More) --}}
+                @if($loaded && $expenses->count() < $totalExpenses)
+                <div x-data="{
+                        init() {
+                            let observer = new IntersectionObserver((entries) => {
+                                if (entries[0].isIntersecting) {
+                                    $wire.loadMore();
+                                }
+                            }, { rootMargin: '150px' });
+                            observer.observe(this.$el);
+                        }
+                    }" 
+                    class="mt-4 mb-4 flex justify-center items-center text-gray-500 h-10 w-full transition-all">
+                    
+                    <div wire:loading wire:target="loadMore" class="flex items-center gap-2">
                         Memuat <i class="fas fa-spinner fa-spin ms-2"></i>
-                    </button>
+                    </div>
                 </div>
                 @endif
             </div>
