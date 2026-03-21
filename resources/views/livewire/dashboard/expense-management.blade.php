@@ -6,12 +6,22 @@
                 {{-- Dashboard Stats --}}
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 p-4">
                     <div class="p-4 bg-red-50 shadow rounded-lg border border-red-200">
-                        <h3 class="text-sm font-semibold text-red-700">Total Kas Keluar (Pengeluaran)</h3>
-                        <p class="text-2xl font-bold text-red-600">Rp{{ number_format($totalNominalOut ?? 0, 0, ',', '.') }}</p>
+                        @if(!$loaded)
+                            <div class="h-4 bg-red-200 rounded-full w-48 mb-3 animate-pulse"></div>
+                            <div class="h-8 bg-red-200 rounded-full w-32 animate-pulse"></div>
+                        @else
+                            <h3 class="text-sm font-semibold text-red-700 mb-1">Total Kas Keluar (Pengeluaran)</h3>
+                            <p class="text-2xl font-bold text-red-600">Rp{{ number_format($totalNominalOut ?? 0, 0, ',', '.') }}</p>
+                        @endif
                     </div>
                     <div class="p-4 bg-green-50 shadow rounded-lg border border-green-200">
-                        <h3 class="text-sm font-semibold text-green-700">Total Kas Masuk (Top-Up)</h3>
-                        <p class="text-2xl font-bold text-green-600">Rp{{ number_format($totalNominalIn ?? 0, 0, ',', '.') }}</p>
+                        @if(!$loaded)
+                            <div class="h-4 bg-green-200 rounded-full w-48 mb-3 animate-pulse"></div>
+                            <div class="h-8 bg-green-200 rounded-full w-32 animate-pulse"></div>
+                        @else
+                            <h3 class="text-sm font-semibold text-green-700 mb-1">Total Kas Masuk (Top-Up)</h3>
+                            <p class="text-2xl font-bold text-green-600">Rp{{ number_format($totalNominalIn ?? 0, 0, ',', '.') }}</p>
+                        @endif
                     </div>
                 </div>
 
@@ -70,10 +80,29 @@
                         </thead>
                         <tbody>
                             @if (!$loaded)
-                                @for ($i = 0; $i < 5; $i++) 
-                                <tr class="bg-white border-b">
-                                    <td colspan="7" class="px-6 py-4">
-                                        <div class="h-4 bg-gray-200 rounded animate-pulse"></div>
+                                @for ($i = 0; $i < 10; $i++) 
+                                <tr class="bg-white border-b animate-pulse">
+                                    <td class="px-6 py-4">
+                                        <div class="h-4 bg-gray-200 rounded-full w-20"></div>
+                                    </td>
+                                    <td class="px-6 py-4">
+                                        <div class="h-4 bg-gray-200 rounded-full w-14"></div>
+                                    </td>
+                                    <td class="px-6 py-4">
+                                        <div class="h-4 bg-gray-200 rounded-full w-24"></div>
+                                    </td>
+                                    <td class="px-6 py-4">
+                                        <div class="h-4 bg-gray-200 rounded-full w-32"></div>
+                                    </td>
+                                    <td class="px-6 py-4">
+                                        <div class="h-4 bg-gray-200 rounded-full w-24"></div>
+                                    </td>
+                                    <td class="px-6 py-4">
+                                        <div class="h-4 bg-gray-200 rounded-full w-16"></div>
+                                    </td>
+                                    <td class="px-6 py-4 flex gap-2">
+                                        <div class="h-6 bg-gray-200 rounded w-8"></div>
+                                        <div class="h-6 bg-gray-200 rounded w-8"></div>
                                     </td>
                                 </tr>
                                 @endfor
