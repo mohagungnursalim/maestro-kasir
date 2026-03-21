@@ -23,10 +23,17 @@ class Dashboard extends Component
     public $totalUniqueVisitors;
 
     public $filterType = 'today'; // Default Hari Ini
+    public $loaded = false;
 
     public function mount()
     {
+        // Tunggu wire:init untuk mulai loading
+    }
+
+    public function loadInitialStats()
+    {
         $this->updateStats();
+        $this->loaded = true;
     }
 
     // Mengambil data statistik berdasarkan filter yang dipilih

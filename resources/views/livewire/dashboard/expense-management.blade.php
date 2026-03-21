@@ -157,12 +157,12 @@
                 @if($loaded && $expenses->count() >= $limit && $totalExpenses > $limit)
                 <div class="mt-4 mb-4 flex justify-center">
                     <button wire:click="loadMore"
-                        class="bg-indigo-600 text-white px-6 py-2 rounded-full shadow hover:bg-indigo-500 focus:outline-none"
+                        class="bg-gray-600 text-white px-6 py-2 rounded-full shadow hover:bg-gray-500 focus:outline-none"
                         wire:loading.remove wire:target="loadMore">
-                        Tampilkan Lebih Lengkap
+                        Tampilkan Lebih
                     </button>
 
-                    <button class="bg-indigo-600 text-white px-6 py-2 rounded-full shadow cursor-not-allowed" type="button" disabled wire:loading wire:target="loadMore">
+                    <button class="bg-gray-600 text-white px-6 py-2 rounded-full shadow cursor-not-allowed" type="button" disabled wire:loading wire:target="loadMore">
                         Memuat <i class="fas fa-spinner fa-spin ms-2"></i>
                     </button>
                 </div>
