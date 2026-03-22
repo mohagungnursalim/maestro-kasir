@@ -934,16 +934,9 @@ class Order extends Component
     // Refresh Cache transaksi
     public function refreshCacheTransactionDetail()
     {
-        // Ambil daftar semua cache key transaksi
-        $cacheKeys = Cache::get('transaction_cache_keys', []);
-
-        // Hapus cache transaksi terkait
-        foreach ($cacheKeys as $cacheKey) {
-            Cache::forget($cacheKey);
-        }
-
-        // Hapus cache total transaksi jika diperlukan
-        Cache::forget('totalTransactions');
+        // Cukup naikkan versi cache transaksi 1 tingkat (O(1) speed)
+        $newVersion = Cache::get('transaction_cache_version', 1) + 1;
+        Cache::put('transaction_cache_version', $newVersion, now()->addDays(7));
     }
     
 
