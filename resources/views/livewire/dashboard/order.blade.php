@@ -45,7 +45,13 @@
                 <div wire:loading wire:target="searchProduct" class="container mx-auto mt-4 px-4 sm:px-8">
                     <div class="overflow-x-auto">
                         <div class="flex gap-4 w-max mx-auto scroll-smooth snap-x snap-mandatory">
-                            @for ($i = 0; $i < 8; $i++)
+                            @php
+                                $skeletonCount = (!empty($products) && count($products) > 0) 
+                                    ? min(count($products), 8) 
+                                    : min(\App\Models\Product::count(), 8);
+                            @endphp
+                            @for ($i = 0; $i < $skeletonCount; $i++)
+                            
                                 <div class="w-[45vw] sm:w-[22vw] md:w-[18vw] lg:w-[15vw] xl:w-[12vw] min-w-[160px] flex-shrink-0 snap-start">
                                     <div class="bg-white rounded-lg shadow-sm overflow-hidden animate-pulse flex flex-col">
                                         <div class="flex gap-2 p-2 border rounded-lg bg-white">
@@ -192,7 +198,6 @@
                 @endif
 
 
-                {{-- Modal Add Catatan per item --}}
                 {{-- Modal Add Catatan per item --}}
                 <div x-cloak x-data="{ show: false, productId: null, note: '' }" 
                     x-on:open-add-note.window="show = true; productId = $event.detail.id; note = '';"
