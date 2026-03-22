@@ -57,13 +57,15 @@ class Product extends Component
 
     public function mount() 
     {  
+        $this->ttl = 3600; // Cache selama 1 jam (format integer aman)
+        $version = Cache::get('product_cache_version', 1);
+
         // Ambil total produk dari cache atau database
-        $this->totalProducts = Cache::remember('totalProducts', $this->ttl, function () {
+        $this->totalProducts = Cache::remember("totalProducts_v{$version}", $this->ttl, function () {
             return DB::table('products')->count();
-            });
+        });
             
         $this->products = collect(); // Inisialisasi produk sebagai koleksi kosong
-        $this->ttl = now()->addHours(1); // Cache selama 1 jam
     }
    
     public function unitSelected($unit)
@@ -484,47 +486,25 @@ class Product extends Component
 
     protected function refreshCache()
     {
-        Cache::put('totalProducts', DB::table('products')->count(), $this->ttl);
-
-        $allKeys = Cache::get('product_cache_keys', []);
-
-        foreach ($allKeys as $key) {
-            Cache::forget($key);
-        }
-
-        Cache::forget('product_cache_keys');
+        Cache::increment('product_cache_version');
     }
 
     protected function getProductsCacheKey()
     {
-        $hour = Carbon::now()->format('YmdH');
-        return "products:{$this->search}:{$this->limit}:{$hour}";
+        $version = Cache::get('product_cache_version', 1);
+        $searchHash = md5($this->search);
+        return "products_list_v{$version}_{$searchHash}_{$this->limit}";
     }
 
     protected function cacheProducts($products)
     {
         $key = $this->getProductsCacheKey();
         Cache::put($key, $products, $this->ttl);
-
-        // Simpan key-nya supaya bisa dihapus semuanya kalau perlu
-        $allKeys = Cache::get('product_cache_keys', []);
-        if (!in_array($key, $allKeys)) {
-            $allKeys[] = $key;
-            Cache::put('product_cache_keys', $allKeys, $this->ttl);
-        }
     }
 
     protected function removeCache()
     {
-        // Hapus total produk
-        Cache::forget('totalProducts');
-
-        // Hapus semua cache produk
-        $allKeys = Cache::get('product_cache_keys', []);
-        foreach ($allKeys as $key) {
-            Cache::forget($key);
-        }
-        Cache::forget('product_cache_keys');
+        Cache::increment('product_cache_version');
     }
 
     protected function getProductsQuery()

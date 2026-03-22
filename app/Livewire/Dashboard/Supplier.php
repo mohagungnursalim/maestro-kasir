@@ -38,12 +38,14 @@ class Supplier extends Component
 
     public function mount()
     {
-        $this->totalSuppliers = Cache::remember('totalSuppliers', $this->ttl, function () {
+        $this->ttl = 3600; // Cache selama 1 jam (3600 detik - format integer)
+        
+        $version = Cache::get('supplier_cache_version', 1);
+        $this->totalSuppliers = Cache::remember("totalSuppliers_v{$version}", $this->ttl, function () {
             return ModelsSupplier::count();
         });
          
         $this->suppliers = collect();
-        $this->ttl = now()->addHours(1); // Cache selama 1 jam
     }
 
     public function updatingSearch()
@@ -60,7 +62,9 @@ class Supplier extends Component
     {
         $this->loaded = true;
     
-        $cacheKey = "suppliers_{$this->search}_{$this->limit}";
+        $version = Cache::get('supplier_cache_version', 1);
+        $searchHash = md5($this->search);
+        $cacheKey = "suppliers_v{$version}_{$searchHash}_{$this->limit}";
 
         $this->suppliers = Cache::remember($cacheKey, $this->ttl, function () {
             return ModelsSupplier::where(function ($query) {
@@ -77,14 +81,6 @@ class Supplier extends Component
                 ->take($this->limit)
                 ->get();
         });
-
-        // Tambahkan cache key ke list tracking
-        $existingKeys = Cache::get($this->cacheKeysKey, []);
-        if (!in_array($cacheKey, $existingKeys)) {
-            $existingKeys[] = $cacheKey;
-            Cache::put($this->cacheKeysKey, $existingKeys, $this->ttl);
-        }
-
     }
     
 
@@ -233,28 +229,15 @@ class Supplier extends Component
     // Fungsi untuk memperbarui cache supplier
     protected function refreshCache()
     {
-        Cache::put('totalSuppliers', ModelsSupplier::count(), $this->ttl);
-
-        $keys = Cache::get($this->cacheKeysKey, []);
-        foreach ($keys as $key) {
-            Cache::forget($key);
-        }
-
-        Cache::forget($this->cacheKeysKey);
+        $newVersion = Cache::get('supplier_cache_version', 1) + 1;
+        Cache::put('supplier_cache_version', $newVersion, now()->addDays(7));
     }
 
-    
     // Fungsi untuk menghapus cache supplier yang dihapus
     protected function removeCache()
     {
-        // Hapus semua key cache supplier
-        $keys = Cache::get($this->cacheKeysKey, []);
-        foreach ($keys as $key) {
-            Cache::forget($key);
-        }
-
-        Cache::forget('totalSuppliers');
-        Cache::forget($this->cacheKeysKey);
+        $newVersion = Cache::get('supplier_cache_version', 1) + 1;
+        Cache::put('supplier_cache_version', $newVersion, now()->addDays(7));
     }
 
     public function render()

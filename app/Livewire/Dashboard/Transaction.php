@@ -38,9 +38,10 @@ class Transaction extends Component
     
         public function mount()
         {
-            $this->ttl = now()->addHours(1);   // 1 jam
+            $this->ttl = 3600;   // 1 jam (3600 detik integer format)
     
-            $this->totalTransactions = Cache::remember('totalTransactions', $this->ttl, function () {
+            $version = Cache::get('transaction_cache_version', 1);
+            $this->totalTransactions = Cache::remember("totalTransactions_v{$version}", $this->ttl, function () {
                 return TransactionDetail::count();
             });
              
@@ -97,17 +98,13 @@ class Transaction extends Component
             $userId = $user->id;
             $isAdminOrOwner = $user->hasRole('admin|owner');
         
-            // Cache key unik berdasarkan search, limit, dan user ID (kalau bukan admin/owner)
+            // Cache key unik berdasarkan versioning, search hash, limit, dan user ID (kalau bukan admin/owner)
+            $version = Cache::get('transaction_cache_version', 1);
+            $searchHash = md5($this->search);
+            
             $cacheKey = $isAdminOrOwner 
-                ? "transactions_{$this->search}_{$this->limit}" 
-                : "transactions_user_{$userId}_{$this->search}_{$this->limit}";
-        
-            // Simpan daftar cache key untuk refresh nanti
-            $cacheKeys = Cache::get('transaction_cache_keys', []);
-            if (!in_array($cacheKey, $cacheKeys)) {
-                $cacheKeys[] = $cacheKey;
-                Cache::put('transaction_cache_keys', $cacheKeys, $ttl);
-            }
+                ? "transactions_v{$version}_{$searchHash}_{$this->limit}" 
+                : "transactions_user_v{$version}_{$userId}_{$searchHash}_{$this->limit}";
         
             $transactions = Cache::remember($cacheKey, $ttl, function () use ($userId, $isAdminOrOwner) {
                 return DB::table('transaction_details')
