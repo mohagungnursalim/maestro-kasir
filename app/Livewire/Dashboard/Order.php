@@ -29,8 +29,6 @@ class Order extends Component
     public $unpaidOrders = [];
     public $selectedUnpaidOrderId = null;
 
-    public $showNoteModal = false;
-    public $noteProductId = null;
     public $tempProductNote = '';
 
     public $payment_method = 'CASH'; // Metode pembayaran default
@@ -105,31 +103,13 @@ class Order extends Component
         });
     }
 
-    // Buka modal penambahan catatan produk
-    public function openAddToCartModal($productId)
+    // Tambahkan produk ke keranjang dengan catatan
+    public function addToCartWithNote($productId, $note)
     {
-        $this->noteProductId = $productId;
-        $this->tempProductNote = '';
-        $this->showNoteModal = true;
-    }
-
-    // Tutup modal penambahan catatan produk
-    public function closeNoteModal()
-    {
-        $this->showNoteModal = false;
-        $this->noteProductId = null;
-        $this->tempProductNote = '';
-    }
-
-    // Konfirmasi penambahan produk ke keranjang dengan catatan
-    public function confirmAddToCart()
-    {
-        if (!$this->noteProductId) return;
-
-        $product = collect($this->products)->firstWhere('id', $this->noteProductId);
+        $product = collect($this->products)->firstWhere('id', $productId);
 
         if (!$product){
-            $product = Product::findOrFail($this->noteProductId);
+            $product = Product::findOrFail($productId);
         }
 
         if ($product) {
@@ -139,17 +119,12 @@ class Order extends Component
                 'price' => $product->price,
                 'quantity' => 1,
                 'subtotal' => $product->price,
-                'product_note' => $this->tempProductNote,
+                'product_note' => $note,
                 'assigned_to' => 1,
             ];
             $this->cartNotEmpty = true;
             $this->calculateTotal();
         }
-
-        // reset modal
-        $this->showNoteModal = false;
-        $this->noteProductId = null;
-        $this->tempProductNote = '';
     }
 
     // Tambahkan produk ke keranjang
