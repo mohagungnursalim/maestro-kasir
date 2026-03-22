@@ -29,8 +29,6 @@ class Order extends Component
     public $unpaidOrders = [];
     public $selectedUnpaidOrderId = null;
 
-    public $showNoteModal = false;
-    public $noteProductId = null;
     public $tempProductNote = '';
 
     public $payment_method = 'CASH'; // Metode pembayaran default
@@ -68,7 +66,7 @@ class Order extends Component
         $this->loadUnpaidOrders();
         $this->is_tax = StoreSetting::value('is_tax') ?? false; // Ambil setting pajak dari tabel store_settings
         $this->tax_percentage = StoreSetting::value('tax') ?? 0; // Ambil persentase pajak dari tabel store_settings
-        $this->ttl = now()->addHours(1); // Cache selama 1 jam
+        $this->ttl = 3600; // Cache selama 1 jam (3600 detik - format integer aman untuk Livewire)
     }
 
     // Load unpaid orders
@@ -83,14 +81,14 @@ class Order extends Component
     // Cari produk dengan caching
     public function searchProduct()
     {
-        $cacheKey = "products_{$this->search}_{$this->limitProducts}";
-
-        // Simpan semua cache key yang pernah digunakan
-        $usedKeys = Cache::get('product_cache_keys', []);
-        if (!in_array($cacheKey, $usedKeys)) {
-            $usedKeys[] = $cacheKey;
-            Cache::put('product_cache_keys', $usedKeys, $this->ttl);
-        }
+        // 1. Ambil versi cache global (Menghindari Race Condition O(1))
+        $version = Cache::get('product_cache_version', 1);
+        
+        // 2. Hash keyword pencarian (Mencegah nama file cache kepanjangan / karakter terlarang)
+        $searchHash = md5($this->search);
+        
+        // 3. Gabungkan menjadi 1 unique key berbasis versi
+        $cacheKey = "products_v{$version}_{$searchHash}_{$this->limitProducts}";
 
         $this->products = Cache::remember($cacheKey, $this->ttl, function () {
             return Product::where(function ($query) {
@@ -105,31 +103,13 @@ class Order extends Component
         });
     }
 
-    // Buka modal penambahan catatan produk
-    public function openAddToCartModal($productId)
+    // Tambahkan produk ke keranjang dengan catatan
+    public function addToCartWithNote($productId, $note)
     {
-        $this->noteProductId = $productId;
-        $this->tempProductNote = '';
-        $this->showNoteModal = true;
-    }
-
-    // Tutup modal penambahan catatan produk
-    public function closeNoteModal()
-    {
-        $this->showNoteModal = false;
-        $this->noteProductId = null;
-        $this->tempProductNote = '';
-    }
-
-    // Konfirmasi penambahan produk ke keranjang dengan catatan
-    public function confirmAddToCart()
-    {
-        if (!$this->noteProductId) return;
-
-        $product = collect($this->products)->firstWhere('id', $this->noteProductId);
+        $product = collect($this->products)->firstWhere('id', $productId);
 
         if (!$product){
-            $product = Product::findOrFail($this->noteProductId);
+            $product = Product::findOrFail($productId);
         }
 
         if ($product) {
@@ -139,17 +119,12 @@ class Order extends Component
                 'price' => $product->price,
                 'quantity' => 1,
                 'subtotal' => $product->price,
-                'product_note' => $this->tempProductNote,
+                'product_note' => $note,
                 'assigned_to' => 1,
             ];
             $this->cartNotEmpty = true;
             $this->calculateTotal();
         }
-
-        // reset modal
-        $this->showNoteModal = false;
-        $this->noteProductId = null;
-        $this->tempProductNote = '';
     }
 
     // Tambahkan produk ke keranjang
@@ -975,18 +950,12 @@ class Order extends Component
     // Refresh Cache stok produk
     protected function refreshCacheStock()
     {
-        // Ambil daftar semua cache key produk
-        $cacheKeys = Cache::get('product_cache_keys', []);
+        // Cukup naikkan versi cache 1 tingkat (sangat cepat, O(1))
+        // tanpa perlu melakukan looping lambat menggunakan Cache::forget($key) ratusan kali
+        $newVersion = Cache::get('product_cache_version', 1) + 1;
+        Cache::put('product_cache_version', $newVersion, now()->addDays(7));
 
-        foreach ($cacheKeys as $key) {
-            // Hapus cache untuk setiap produk yang ada di cache
-            Cache::forget($key);
-        }
-
-        // Hapus cache yang menyimpan daftar semua cache key produk
-        Cache::forget('product_cache_keys');
-
-        // Muat ulang cache untuk current state pencarian
+        // Muat ulang cache untuk current state pencarian (akan menggunakan versi baru secara otomatis)
         $this->searchProduct();
 
         // Pastikan UI terupdate

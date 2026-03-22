@@ -45,7 +45,13 @@
                 <div wire:loading wire:target="searchProduct" class="container mx-auto mt-4 px-4 sm:px-8">
                     <div class="overflow-x-auto">
                         <div class="flex gap-4 w-max mx-auto scroll-smooth snap-x snap-mandatory">
-                            @for ($i = 0; $i < 8; $i++)
+                            @php
+                                $skeletonCount = (!empty($products) && count($products) > 0) 
+                                    ? min(count($products), 8) 
+                                    : min(\App\Models\Product::count(), 8);
+                            @endphp
+                            @for ($i = 0; $i < $skeletonCount; $i++)
+                            
                                 <div class="w-[45vw] sm:w-[22vw] md:w-[18vw] lg:w-[15vw] xl:w-[12vw] min-w-[160px] flex-shrink-0 snap-start">
                                     <div class="bg-white rounded-lg shadow-sm overflow-hidden animate-pulse flex flex-col">
                                         <div class="flex gap-2 p-2 border rounded-lg bg-white">
@@ -138,31 +144,19 @@
                                                 <div class="w-full">
                                                     @if (!$isInCart)
                                                     <button type="button"
-                                                        wire:click="openAddToCartModal({{ $product->id }})"
-                                                        wire:target="openAddToCartModal({{ $product->id }})"
-                                                        wire:loading.attr="disabled" onclick="playSelectSound()"
+                                                        x-data
+                                                        @click="$dispatch('open-add-note', { id: {{ $product->id }} })"
+                                                        onclick="playSelectSound()"
                                                         @if($product->stock < 1) disabled @endif class="relative w-full bg-gray-900 text-white py-2 px-1 rounded text-xs
                                                                 hover:bg-gray-800 transition
                                                                 disabled:bg-gray-300 disabled:cursor-not-allowed
                                                                 h-1">
 
-                                                            {{-- Normal --}}
                                                             <span
-                                                                class="absolute inset-0 flex items-center justify-center gap-2"
-                                                                wire:loading.remove
-                                                                wire:target="openAddToCartModal({{ $product->id }})">
+                                                                class="absolute inset-0 flex items-center justify-center gap-2">
 
                                                                 <i class="fas fa-plus"></i>
                                                                 <span>Tambah</span>
-                                                            </span>
-
-                                                            {{-- Loading --}}
-                                                            <span
-                                                                class="absolute inset-0 flex items-center justify-center mt-0.5 leading-none"
-                                                                wire:loading
-                                                                wire:target="openAddToCartModal({{ $product->id }})">
-
-                                                                <i class="fas fa-spinner fa-spin leading-none"></i>
                                                             </span>
                                                     </button>
                                                     @else
@@ -205,13 +199,17 @@
 
 
                 {{-- Modal Add Catatan per item --}}
-                @if($showNoteModal)
-                <div x-cloak x-data="{}" @keydown.window.escape.prevent class="fixed inset-0 z-50 flex items-center justify-center">
+                <div x-cloak x-data="{ show: false, productId: null, note: '' }" 
+                    x-on:open-add-note.window="show = true; productId = $event.detail.id; note = '';"
+                    x-show="show"
+                    @keydown.window.escape.prevent="show = false"
+                    class="fixed inset-0 z-50 flex items-center justify-center">
+                    
                     <!-- Backdrop -->
-                    <div class="absolute inset-0 bg-black/50 backdrop-blur-sm"></div>
+                    <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" @click="show = false"></div>
 
                     <!-- Modal Box -->
-                    <div x-transition class="relative bg-white w-full max-w-md rounded-xl shadow-2xl p-6">
+                    <div x-show="show" x-transition class="relative bg-white w-full max-w-md rounded-xl shadow-2xl p-6">
                         <!-- Icon Note -->
                         <div class="flex justify-center mb-4">
                             <div class="w-12 h-12 flex items-center justify-center rounded-full bg-gray-100 text-gray-600">
@@ -231,7 +229,7 @@
 
                         <!-- Textarea -->
                         <textarea
-                            wire:model.defer="tempProductNote"
+                            x-model="note"
                             rows="3"
                             class="w-full border rounded-lg p-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                             placeholder="Contoh: tanpa gula, extra pedas, dll..."
@@ -241,59 +239,21 @@
                         <div class="flex justify-center gap-3 mt-6">
                             <button
                                 type="button"
-                                @click="$wire.closeNoteModal()"
-                                wire:loading.attr="disabled"
-                                class="relative inline-flex items-center justify-center
-                                    w-24 h-10
-                                    bg-gray-200 text-gray-700 rounded-lg
-                                    hover:bg-gray-300 transition
-                                    disabled:opacity-60 disabled:cursor-not-allowed">
-
-                                {{-- Normal --}}
-                                <span class="absolute inset-0 flex items-center justify-center"
-                                    wire:loading.remove
-                                    wire:target="closeNoteModal">
-                                    Batal
-                                </span>
-
-                                {{-- Loading --}}
-                                <span class="absolute inset-0 flex mt-3 items-center justify-center"
-                                    wire:loading
-                                    wire:target="closeNoteModal">
-                                    <i class="fas fa-spinner fa-spin block leading-none"></i>
-                                </span>
+                                @click="show = false"
+                                class="relative inline-flex items-center justify-center w-24 h-10 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition">
+                                Batal
                             </button>
 
                             <button
                                 type="button"
-                                wire:click="confirmAddToCart"
-                                wire:target="confirmAddToCart"
-                                wire:loading.attr="disabled"
+                                @click="$wire.addToCartWithNote(productId, note); show = false;"
                                 onclick="playSelectSound()"
-                                class="relative inline-flex items-center justify-center
-                                    w-32 h-10
-                                    bg-green-600 text-white rounded-lg
-                                    hover:bg-green-700 transition
-                                    disabled:opacity-60 disabled:cursor-not-allowed">
-
-                                {{-- Normal --}}
-                                <span class="absolute inset-0 flex items-center justify-center"
-                                    wire:loading.remove
-                                    wire:target="confirmAddToCart">
-                                    Tambahkan
-                                </span>
-
-                                {{-- Loading --}}
-                                <span class="absolute inset-0 flex mt-3 items-center justify-center"
-                                    wire:loading
-                                    wire:target="confirmAddToCart">
-                                    <i class="fas fa-spinner fa-spin block leading-none"></i>
-                                </span>
+                                class="relative inline-flex items-center justify-center w-32 h-10 bg-green-600 text-white rounded-lg hover:bg-green-700 transition">
+                                Tambahkan
                             </button>
                         </div>
                     </div>
                 </div>
-                @endif
 
 
 
@@ -303,10 +263,13 @@
 
                    <!-- ================== KIRI: DAFTAR ITEM + ACTION ================== -->
                     <div class="w-full lg:w-2/3 flex flex-col h-[70vh]">
+                        
+                        <!-- REAL CONTENT (Hides when loading) -->
+                        <div wire:loading.remove wire:target="addToCart, addToCartWithNote" class="flex flex-col h-full w-full">
 
                          <!-- ================== ACTION BAR (TIDAK SCROLL) ================== -->
                         @if (!empty($cart))
-                        <div class="sticky top-0 z-10">
+                        <div class="sticky top-0 z-10 mb-2">
 
                             <div class="bg-yellow border border-gray-100 rounded-lg p-3 shadow-sm">
                                 <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
@@ -411,10 +374,11 @@
                             </div>
 
                         </div>
+
                         @endif
 
                         <!-- ================== SCROLL AREA (ITEM SAJA) ================== -->
-                        <div class="flex-1 overflow-y-auto custom-scrollbar pr-1">
+                        <div class="flex-1 overflow-y-auto custom-scrollbar pr-1 pb-2">
                             <div class="space-y-2">
 
                                 @if (empty($cart))
@@ -546,6 +510,54 @@
                                     @endforeach
                                 @endif
 
+                            </div>
+                        </div>
+
+                        </div> <!-- End of REAL CONTENT -->
+
+                        <!-- ================== SKELETON CART (SWAP) ================== -->
+                        <div wire:loading wire:target="addToCart, addToCartWithNote" class="flex flex-col h-full w-full animate-pulse" style="display: none;">
+                            <!-- Action Bar Skeleton -->
+                            @if (!empty($cart))
+                            <div class="bg-white border border-gray-100 rounded-lg p-3 shadow-sm mb-3">
+                                <div class="flex justify-between items-center">
+                                    <div class="h-9 w-28 bg-gray-200/80 rounded-lg"></div>
+                                    <div class="hidden md:block h-4 w-32 bg-gray-200/80 rounded-md"></div>
+                                    <div class="h-6 w-24 bg-gray-200/80 rounded-full"></div>
+                                </div>
+                            </div>
+                            @endif
+
+                            <!-- Items Skeleton -->
+                            <div class="flex-1 space-y-2 overflow-hidden">
+                                @for($i = 0; $i < (!empty($cart) ? min(count($cart), 4) : 1); $i++)
+                                <div class="bg-white border border-gray-100 rounded-lg px-4 py-3 shadow-sm">
+                                    <div class="flex justify-between items-start gap-3">
+                                        <div class="flex-1">
+                                            <div class="h-4 bg-gray-200/80 rounded w-3/4 mb-1.5"></div>
+                                            <div class="h-3 bg-gray-100 rounded w-1/2"></div>
+                                        </div>
+                                        <div class="w-6 h-6 bg-gray-200/80 rounded opacity-60"></div>
+                                    </div>
+                                    <div class="mt-4 flex justify-between items-end">
+                                        <div class="flex items-center gap-1 opacity-80">
+                                            <div class="w-6 h-6 bg-gray-200/80 rounded"></div>
+                                            <div class="w-12 h-6 bg-gray-200/80 rounded"></div>
+                                            <div class="w-6 h-6 bg-gray-200/80 rounded"></div>
+                                        </div>
+                                        <div class="flex flex-col items-end gap-1">
+                                            <div class="h-2.5 w-10 bg-gray-200/60 rounded"></div>
+                                            <div class="h-4 w-20 bg-gray-200/80 rounded"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                                @endfor
+                                
+                                <div class="pt-4 flex justify-center w-full">
+                                     <span class="inline-flex items-center gap-2 text-[11px] font-semibold text-gray-500 bg-gray-100 px-4 py-1.5 rounded-full shadow-sm">
+                                        <i class="fas fa-circle-notch fa-spin text-blue-500"></i> Memperbarui Keranjang...
+                                     </span>
+                                </div>
                             </div>
                         </div>
 
