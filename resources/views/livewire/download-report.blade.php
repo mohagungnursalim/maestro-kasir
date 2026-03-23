@@ -53,7 +53,7 @@
 
 
     <!-- Table -->
-    <div wire:poll.5s class="overflow-hidden rounded-lg border border-gray-200 shadow-sm">
+    <div wire:init="loadInitialReports" wire:poll.5s class="overflow-hidden rounded-lg border border-gray-200 shadow-sm">
         <table class="w-full text-left bg-white">
             <thead class="bg-gray-100 text-gray-700">
                 <tr>
@@ -64,8 +64,32 @@
                 </tr>
             </thead>
             <tbody class="divide-y divide-gray-200">
-                @forelse($reports as $report)
-                    <tr class="hover:bg-gray-50 transition">
+                @if (!$loaded)
+                    @php
+                        // Tampilkan skeleton sesuai jumlah laporan, maksimal sesuai limit list per halaman
+                        $skeletonCount = $totalReports > 0 ? min($totalReports, $perPage) : 1;
+                    @endphp
+                    @for ($i = 0; $i < $skeletonCount; $i++)
+                        <tr class="animate-pulse bg-white hover:bg-gray-50 transition border-b">
+                            <td class="px-6 py-4 flex items-center space-x-3 text-gray-700">
+                                <div class="h-6 w-6 bg-gray-300 rounded"></div>
+                                <div class="h-4 bg-gray-200 rounded w-48 truncate max-w-[250px]"></div>
+                            </td>
+                            <td class="px-6 py-4 text-center">
+                                <div class="h-4 bg-gray-200 rounded w-16 mx-auto"></div>
+                            </td>
+                            <td class="px-6 py-4 text-center">
+                                <div class="h-4 bg-gray-200 rounded w-24 mx-auto"></div>
+                            </td>
+                            <td class="px-6 py-4 flex justify-center space-x-2">
+                                <div class="h-6 bg-gray-300 rounded w-20"></div>
+                                <div class="h-6 bg-gray-300 rounded w-16"></div>
+                            </td>
+                        </tr>
+                    @endfor
+                @else
+                    @forelse($reports as $report)
+                        <tr class="hover:bg-gray-50 transition">
                         <td class="px-6 py-4 flex items-center space-x-3 text-gray-700">
                             @if ($report['extension'] === 'xlsx' || $report['extension'] === 'xls')
                                 <i class="bi bi-file-earmark-excel text-green-500 text-xl"></i>
@@ -97,6 +121,7 @@
                         <td colspan="4" class="px-6 py-4 text-center text-gray-500">🚫 Tidak ada laporan tersedia.</td>
                     </tr>
                 @endforelse
+                @endif
             </tbody>
         </table>
     </div>
