@@ -22,6 +22,13 @@ class DownloadReport extends Component
     public $perPage = 5; // Jumlah file per halaman
     public $currentPage = 1; //
 
+    public $loaded = false;
+
+    public function loadInitialReports()
+    {
+        $this->loaded = true;
+    }
+
 
     // Update Search
     public function updatingSearch()
@@ -124,6 +131,20 @@ class DownloadReport extends Component
 
     public function render()
     {
+        if (!$this->loaded) {
+            $files = collect(Storage::allFiles('reports'));
+            if (!empty($this->searchDate)) {
+                $dateFormatted = Carbon::parse($this->searchDate)->format('d-m-Y');
+                $files = $files->filter(fn($file) => str_contains($file, $dateFormatted));
+            }
+            $totalReports = $files->count();
+
+            return view('livewire.download-report', [
+                'reports' => new LengthAwarePaginator([], $totalReports, $this->perPage, $this->currentPage),
+                'totalReports' => $totalReports
+            ]);
+        }
+
         $reports = $this->getReports();
 
         // Buat paginasi manual dengan `LengthAwarePaginator`
@@ -137,7 +158,8 @@ class DownloadReport extends Component
         );
 
         return view('livewire.download-report', [
-            'reports' => $paginatedReports
+            'reports' => $paginatedReports,
+            'totalReports' => $reports->count()
         ]);
     }
 }
