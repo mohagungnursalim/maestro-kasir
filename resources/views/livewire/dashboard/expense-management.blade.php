@@ -80,7 +80,12 @@
                         </thead>
                         <tbody>
                             @if (!$loaded)
-                                @for ($i = 0; $i < 10; $i++) 
+                                @php
+                                    // Tampilkan skeleton sesuai jumlah data, maksimal 10 (sesuai limit)
+                                    // Jika data kosong, tampilkan minimal 1 skeleton
+                                    $skeletonCount = $totalExpenses > 0 ? min($totalExpenses, 10) : 1;
+                                @endphp
+                                @for ($i = 0; $i < $skeletonCount; $i++) 
                                 <tr class="bg-white border-b animate-pulse">
                                     <td class="px-6 py-4">
                                         <div class="h-4 bg-gray-200 rounded-full w-20"></div>
