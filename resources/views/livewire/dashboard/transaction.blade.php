@@ -125,7 +125,12 @@
                         <tbody>
                        {{-- LOADING --}}
                         @if (!$loaded)
-                            @for ($i = 0; $i < 5; $i++)
+                            @php
+                                // Tampilkan skeleton sesuai jumlah data, maksimal 8 (sesuai limit)
+                                // Jika data kosong, tampilkan minimal 1 skeleton
+                                $skeletonCount = $totalTransactions > 0 ? min($totalTransactions, 8) : 1;
+                            @endphp
+                            @for ($i = 0; $i < $skeletonCount; $i++)
                                 {{-- HEADER ORDER SKELETON --}}
                                 <tr class="bg-gray-200 animate-pulse">
                                     <td class="px-4 py-3">
