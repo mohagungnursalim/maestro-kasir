@@ -122,21 +122,8 @@ class ExpenseManagement extends Component
 
     public function render()
     {
-        if (!$this->loaded) {
-            return view('livewire.dashboard.expense-management', [
-                'expenses' => collect(),
-                'totalExpenses' => 0,
-                'totalNominalOut' => 0,
-                'totalNominalIn' => 0,
-            ]);
-        }
-
-        $query = Expense::with('user')
-            ->where(function ($q) {
-                $q->where('description', 'like', '%' . $this->search . '%')
-                  ->orWhere('category', 'like', '%' . $this->search . '%');
-            });
-            
+        $query = Expense::query();
+        
         if (!empty($this->filterMonth)) {
             $year = substr($this->filterMonth, 0, 4);
             $month = substr($this->filterMonth, 5, 2);
@@ -146,6 +133,21 @@ class ExpenseManagement extends Component
         if (!Auth::user()->hasRole('admin|owner')) {
              $query->where('user_id', Auth::id());
         }
+
+        if (!$this->loaded) {
+            return view('livewire.dashboard.expense-management', [
+                'expenses' => collect(),
+                'totalExpenses' => (clone $query)->count(),
+                'totalNominalOut' => 0,
+                'totalNominalIn' => 0,
+            ]);
+        }
+
+        $query->with('user')
+            ->where(function ($q) {
+                $q->where('description', 'like', '%' . $this->search . '%')
+                  ->orWhere('category', 'like', '%' . $this->search . '%');
+            });
 
         $totalExpenses = (clone $query)->count();
         $totalNominalOut = (clone $query)->where('type', 'out')->sum('amount');
