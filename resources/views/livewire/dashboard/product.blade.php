@@ -98,7 +98,12 @@
                         </thead>
                         <tbody>
                             @if (!$loaded)
-                                @for ($i = 0; $i < 8; $i++)
+                                @php
+                                    // Tampilkan skeleton sesuai jumlah produk, maksimal sesuai dengan $limit
+                                    // Jika data kosong, tampilkan minimal 1 skeleton
+                                    $skeletonCount = $totalProducts > 0 ? min($totalProducts, $limit) : 1;
+                                @endphp
+                                @for ($i = 0; $i < $skeletonCount; $i++)
                                 <tr class="bg-white border-b">
                                     {{-- Gambar --}}
                                     <td class="px-6 py-4 text-center">
