@@ -61,7 +61,10 @@
                         <tbody>
                             @if (!$loaded)
                             {{-- Tampilkan skeleton saat data belum dimuat --}}
-                            @for ($i = 0; $i < 8; $i++) <tr class="bg-white border-b">
+                            @php
+                                $skeletonCount = $totalUnits > 0 ? min($totalUnits, $limit) : 1;
+                            @endphp
+                            @for ($i = 0; $i < $skeletonCount; $i++) <tr class="bg-white border-b">
                                 <td class="px-6 py-4">
                                     <div class="h-4 bg-gray-300 rounded animate-pulse"></div>
                                 </td>
