@@ -531,8 +531,8 @@
                                 <div class="flex justify-between items-center">
                                     {{-- Dua tombol skeleton (Cetak Dapur + Cetak Bill) --}}
                                     <div class="flex items-center gap-2">
-                                        <div class="h-9 w-28 bg-gray-200/80 rounded-lg"></div>
-                                        <div class="h-9 w-28 bg-gray-200/80 rounded-lg"></div>
+                                        <div class="h-8 w-28 bg-gray-200/80 rounded-lg"></div>
+                                        <div class="h-8 w-28 bg-gray-200/80 rounded-lg"></div>
                                     </div>
                                     <div class="h-6 w-24 bg-gray-200/80 rounded-full"></div>
                                     <div class="h-6 w-24 bg-gray-200/80 rounded-full"></div>

@@ -13,7 +13,8 @@ use Livewire\Component;
 class Dashboard extends Component
 {
     public $totalOrders;
-    public $totalActualSales;
+    public $totalOmzet;      // Pendapatan murni dari penjualan
+    public $totalNetCash;   // Saldo kas bersih = Omzet + Top Up - Pengeluaran
     public $totalProductsSold;
     public $totalExpenses;
     public $totalTopUps;
@@ -90,13 +91,14 @@ class Dashboard extends Component
                 COALESCE(SUM(CASE WHEN type = 'in' THEN amount ELSE 0 END), 0) as total_in
             ")->first();
 
-            $total_out = (float) ($expensesAggregates->total_out ?? 0);
-            $total_in = (float) ($expensesAggregates->total_in ?? 0);
+            $total_out   = (float) ($expensesAggregates->total_out ?? 0);
+            $total_in    = (float) ($expensesAggregates->total_in ?? 0);
             $sales_omzet = (float) ($ordersAggregates->total_sales ?? 0);
 
             $result = [
                 'totalOrders'       => (int) ($ordersAggregates->total_orders ?? 0),
-                'totalActualSales'  => $sales_omzet + $total_in - $total_out, // Laba Bersih = Omzet + TopUp - Pengeluaran
+                'totalOmzet'        => $sales_omzet,                              // Pendapatan murni penjualan
+                'totalNetCash'      => $sales_omzet + $total_in - $total_out,     // Saldo kas bersih
                 'totalExpenses'     => $total_out,
                 'totalTopUps'       => $total_in,
                 'totalProductsSold' => (int) ($salesAggregates->total_qty ?? 0),
@@ -117,7 +119,8 @@ class Dashboard extends Component
 
         // Assign ke state Livewire
         $this->totalOrders       = $stats['totalOrders'];
-        $this->totalActualSales  = $stats['totalActualSales'];
+        $this->totalOmzet        = $stats['totalOmzet'];
+        $this->totalNetCash      = $stats['totalNetCash'];
         $this->totalExpenses     = $stats['totalExpenses'];
         $this->totalTopUps       = $stats['totalTopUps'];
         $this->totalProductsSold = $stats['totalProductsSold'];
