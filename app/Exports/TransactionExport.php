@@ -27,7 +27,8 @@ class TransactionExport implements FromCollection, WithHeadings, WithMapping, Wi
     {
         return TransactionDetail::with(['product', 'order.user'])
             ->whereHas('order', function ($query) {
-                $query->whereBetween('created_at', [$this->startDate, $this->endDate]);
+                $query->whereBetween('created_at', [$this->startDate, $this->endDate])
+                      ->where('payment_status', 'PAID');
             })
             ->get();
     }

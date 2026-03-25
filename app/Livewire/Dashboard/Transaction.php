@@ -41,8 +41,8 @@ class Transaction extends Component
             $this->ttl = 3600;   // 1 jam (3600 detik integer format)
     
             $version = Cache::get('transaction_cache_version', 1);
-            $this->totalTransactions = Cache::remember("totalTransactions_v{$version}", $this->ttl, function () {
-                return TransactionDetail::count();
+            $this->totalTransactions = Cache::remember("totalTransactions_paid_v{$version}", $this->ttl, function () {
+                return TransactionDetail::whereHas('order', fn ($q) => $q->where('payment_status', 'PAID'))->count();
             });
              
             $this->transactions = collect();
@@ -124,6 +124,7 @@ class Transaction extends Component
                         'users.name as user_name',
                         'products.name as product_name'
                     )
+                    ->where('orders.payment_status', 'PAID')
                     ->when(!$isAdminOrOwner, function ($query) use ($userId) {
                         $query->where('orders.user_id', $userId);
                     })
@@ -200,7 +201,8 @@ class Transaction extends Component
             
             $transactions = TransactionDetail::with(['product', 'order.user'])
                 ->whereHas('order', function ($query) use ($startDate, $endDate) {
-                    $query->whereBetween('created_at', [$startDate, $endDate]);
+                    $query->whereBetween('created_at', [$startDate, $endDate])
+                          ->where('payment_status', 'PAID');
                 })
                 ->orderBy('order_id', 'desc')
                 ->get()
