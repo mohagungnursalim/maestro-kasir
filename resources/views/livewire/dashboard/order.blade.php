@@ -269,29 +269,29 @@
 
                          <!-- ================== ACTION BAR (TIDAK SCROLL) ================== -->
                         @if (!empty($cart))
-                        <div class="sticky top-0 z-10 mb-2">
+                        <div class="z-10 mb-2">
 
                             <div class="bg-yellow border border-gray-100 rounded-lg p-3 shadow-sm">
                                 <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
 
-                                    <div class="flex items-center gap-3">
+                                    <div class="flex items-center gap-2">
                                         <button
                                             x-data
                                             @click="$dispatch('open-kitchen-modal')"
-                                            class="inline-flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 shadow-md transform hover:-translate-y-0.5 transition">
-                                            <i class="fas fa-utensils"></i>
+                                            class="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm bg-green-600 text-white rounded-lg hover:bg-green-700 shadow-sm transform hover:-translate-y-0.5 transition">
+                                            <i class="fas fa-utensils text-xs"></i>
                                             <span class="font-semibold">Print Dapur</span>
                                         </button>
 
-                                       <button
+                                        <button
                                             x-data
                                             @click="$dispatch('open-print-modal')"
-                                            class="inline-flex items-center gap-2 px-4 py-2 bg-gray-800 text-white rounded-lg hover:bg-gray-900 shadow-md transform hover:-translate-y-0.5 transition">
-                                            <i class="fas fa-print"></i>
+                                            class="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm bg-gray-800 text-white rounded-lg hover:bg-gray-900 shadow-sm transform hover:-translate-y-0.5 transition">
+                                            <i class="fas fa-print text-xs"></i>
                                             <span class="font-semibold">Print Bill</span>
                                         </button>
 
-                                        <div class="hidden md:inline-block text-sm text-gray-600 ml-3">{{ count($cart) }} item • Rp{{ number_format($subtotal,0,',','.') }}</div>
+                                        <div class="hidden md:inline-block text-sm text-gray-600 ml-2">{{ count($cart) }} item • Rp{{ number_format($subtotal,0,',','.') }}</div>
                                     </div>
 
                                     <div class="flex items-center gap-3 flex-wrap">
