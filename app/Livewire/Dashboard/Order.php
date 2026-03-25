@@ -66,7 +66,7 @@ class Order extends Component
         $this->loadUnpaidOrders();
         $this->is_tax = StoreSetting::value('is_tax') ?? false; // Ambil setting pajak dari tabel store_settings
         $this->tax_percentage = StoreSetting::value('tax') ?? 0; // Ambil persentase pajak dari tabel store_settings
-        $this->ttl = 3600; // Cache selama 1 jam (3600 detik - format integer aman untuk Livewire)
+        $this->ttl = 300; // Cache selama 5 menit (300 detik - format integer aman untuk Livewire)
     }
 
     // Load unpaid orders

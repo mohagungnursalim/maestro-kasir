@@ -57,7 +57,7 @@ class Product extends Component
 
     public function mount() 
     {  
-        $this->ttl = 3600; // Cache selama 1 jam (format integer aman)
+        $this->ttl = 300; // Cache selama  5 menit (format integer aman)
         $version = Cache::get('product_cache_version', 1);
 
         // Ambil total produk dari cache atau database
