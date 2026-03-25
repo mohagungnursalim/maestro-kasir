@@ -14,6 +14,17 @@ class OrderController extends Controller
         return view('receipt', compact('order'));
     }
 
+    public function kitchen(Request $request)
+    {
+        $kitchenData = cache()->get('kitchen-preview:' . auth()->id());
+
+        if (!$kitchenData) {
+            abort(404, 'Data struk dapur tidak ditemukan');
+        }
+
+        return view('kitchen', compact('kitchenData'));
+    }
+
     public function bill(Request $request)
     {
         // Multi-split preview (from cache)

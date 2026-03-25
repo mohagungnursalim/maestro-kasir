@@ -35,6 +35,10 @@ Route::get('/dashboard/order-receipt/{orderId}', [OrderController::class, 'recei
     ->middleware(['auth'])
     ->name('order.receipt');
 
+Route::get('/dashboard/order-kitchen', [OrderController::class, 'kitchen'])
+    ->middleware(['auth'])
+    ->name('order.kitchen');
+
 Route::get('/dashboard/orders', Order::class)
     ->middleware(['auth'])
     ->name('orders');   

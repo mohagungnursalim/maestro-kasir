@@ -277,6 +277,14 @@
                                     <div class="flex items-center gap-3">
                                         <button
                                             x-data
+                                            @click="$dispatch('open-kitchen-modal')"
+                                            class="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-green-600 to-green-700 text-white rounded-lg hover:from-green-700 hover:to-green-800 shadow-md transform hover:-translate-y-0.5 transition">
+                                            <i class="fas fa-utensils"></i>
+                                            <span class="font-semibold">Cetak Dapur</span>
+                                        </button>
+
+                                        <button
+                                            x-data
                                             @click="$dispatch('open-print-modal')"
                                             class="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-gray-800 to-gray-900 text-white rounded-lg hover:from-gray-900 hover:to-black shadow-md transform hover:-translate-y-0.5 transition">
                                             <i class="fas fa-print"></i>
@@ -521,8 +529,12 @@
                             @if (!empty($cart))
                             <div class="bg-white border border-gray-100 rounded-lg p-3 shadow-sm mb-3">
                                 <div class="flex justify-between items-center">
-                                    <div class="h-9 w-28 bg-gray-200/80 rounded-lg"></div>
-                                    <div class="hidden md:block h-4 w-32 bg-gray-200/80 rounded-md"></div>
+                                    {{-- Dua tombol skeleton (Cetak Dapur + Cetak Bill) --}}
+                                    <div class="flex items-center gap-2">
+                                        <div class="h-9 w-28 bg-gray-200/80 rounded-lg"></div>
+                                        <div class="h-9 w-28 bg-gray-200/80 rounded-lg"></div>
+                                    </div>
+                                    <div class="h-6 w-24 bg-gray-200/80 rounded-full"></div>
                                     <div class="h-6 w-24 bg-gray-200/80 rounded-full"></div>
                                 </div>
                             </div>
@@ -555,7 +567,7 @@
                                 
                                 <div class="pt-4 flex justify-center w-full">
                                      <span class="inline-flex items-center gap-2 text-[11px] font-semibold text-gray-500 bg-gray-100 px-4 py-1.5 rounded-full shadow-sm">
-                                        <i class="fas fa-circle-notch fa-spin text-blue-500"></i> Memperbarui Keranjang...
+                                        <i class="fas fa-spinner fa-spin text-blue-500"></i> Memperbarui Keranjang...
                                      </span>
                                 </div>
                             </div>
@@ -622,6 +634,70 @@
                                             <span class="absolute inset-0 flex mt-3 items-center justify-center"
                                                 wire:loading
                                                 wire:target="billPayment">
+                                                <i class="fas fa-spinner fa-spin block leading-none"></i>
+                                            </span>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {{-- Modal Cetak Struk Dapur --}}
+                            <div x-data="{ show: false }" x-on:open-kitchen-modal.window="show = true" x-show="show" x-cloak @keydown.window.escape.prevent
+                                class="fixed inset-0 z-50 flex items-center justify-center">
+                                <!-- Backdrop -->
+                                <div class="absolute inset-0 bg-black/50 backdrop-blur-sm"></div>
+
+                                <!-- Modal Box -->
+                                <div x-show="show" x-transition
+                                    class="relative bg-white w-full max-w-md rounded-xl shadow-2xl p-6">
+
+                                    <!-- Icon -->
+                                    <div class="flex justify-center mb-4">
+                                        <div class="w-12 h-12 flex items-center justify-center rounded-full bg-green-100 text-green-600">
+                                            <i class="fas fa-utensils fa-2x"></i>
+                                        </div>
+                                    </div>
+
+                                    <!-- Title -->
+                                    <h2 class="text-lg font-bold text-center text-gray-800 mb-2">
+                                        Cetak Struk Dapur
+                                    </h2>
+
+                                    <!-- Desc -->
+                                    <p class="text-center text-gray-600 mb-6">
+                                        Cetak daftar pesanan untuk dapur.
+                                    </p>
+
+                                    <!-- Actions -->
+                                    <div class="flex justify-center gap-3">
+                                        <button @click="show = false"
+                                            class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition">
+                                            Batal
+                                        </button>
+
+                                        <button
+                                            type="button"
+                                            wire:click="kitchenPrint"
+                                            wire:target="kitchenPrint"
+                                            wire:loading.attr="disabled"
+                                            @click="show = false"
+                                            class="relative inline-flex items-center justify-center
+                                                w-28 h-10
+                                                bg-green-600 text-white rounded-lg
+                                                hover:bg-green-700 transition
+                                                disabled:opacity-60 disabled:cursor-not-allowed">
+
+                                            {{-- Normal --}}
+                                            <span class="absolute inset-0 flex items-center justify-center"
+                                                wire:loading.remove
+                                                wire:target="kitchenPrint">
+                                                Cetak
+                                            </span>
+
+                                            {{-- Loading --}}
+                                            <span class="absolute inset-0 flex mt-3 items-center justify-center"
+                                                wire:loading
+                                                wire:target="kitchenPrint">
                                                 <i class="fas fa-spinner fa-spin block leading-none"></i>
                                             </span>
                                         </button>
@@ -1119,7 +1195,27 @@
                 window.open(url, '_blank', 'width=640,height=600');
             }
         });
+    </script>
 
+    {{-- Open Kitchen Print --}}
+    <script>
+        window.addEventListener('showKitchenPrintPopup', event => {
+            const url = event.detail;
+            const isAndroid = /android/i.test(navigator.userAgent);
+
+            if (isAndroid) {
+                let iframe = document.createElement('iframe');
+                iframe.style.display = 'none';
+                iframe.src = url;
+                document.body.appendChild(iframe);
+
+                setTimeout(() => {
+                    document.body.removeChild(iframe);
+                }, 5000);
+            } else {
+                window.open(url, '_blank', 'width=640,height=600');
+            }
+        });
     </script>
 
 </div>

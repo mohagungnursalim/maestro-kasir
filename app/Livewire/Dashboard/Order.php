@@ -398,6 +398,40 @@ class Order extends Component
         $this->dispatch('showBillPrintPopup', route('order.bill'));
     }
 
+    // Cetak Struk Dapur
+    public function kitchenPrint()
+    {
+        if (empty($this->cart)) {
+            $this->dispatch('nullPaymentSelected');
+            return;
+        }
+
+        $orderNumber = $this->generateOrderNumber();
+
+        $kitchenData = [
+            'tanggal'      => now()->format('d-m-Y H:i'),
+            'order_number' => $orderNumber,
+            'desk_number'  => $this->desk_number,
+            'order_type'   => $this->order_type,
+            'note'         => $this->note,
+            'items'        => [],
+        ];
+
+        foreach ($this->cart as $item) {
+            $kitchenData['items'][] = [
+                'name' => $item['name'],
+                'qty'  => $item['quantity'],
+                'note' => $item['product_note'] ?? null,
+            ];
+        }
+
+        // Simpan sementara di cache (5 menit)
+        cache()->put('kitchen-preview:' . Auth::id(), $kitchenData, now()->addMinutes(5));
+
+        // Buka popup struk dapur
+        $this->dispatch('showKitchenPrintPopup', route('order.kitchen'));
+    }
+
     // Prepare split previews (store multi-split in cache)
     public function prepareSplit()
     {
