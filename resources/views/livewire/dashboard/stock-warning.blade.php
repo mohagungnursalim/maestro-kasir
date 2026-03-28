@@ -1,9 +1,14 @@
 <div>
     <div class="bg-white shadow-md rounded-lg p-4">
-        <h3 class="text-lg font-semibold text-gray-700 mb-4">Stok Rendah</h3>
+        <div class="flex items-center justify-between mb-4">
+            <h3 class="text-lg font-semibold text-gray-700">Stok Rendah</h3>
+            <span class="text-xs text-gray-600 bg-gray-50 border border-gray-200 px-2 py-0.5 rounded-full">
+                ∞ Tanpa Stok dikecualikan
+            </span>
+        </div>
 
         @if (!$productExists)
-            <p class="text-gray-500 text-center py-4">Belum ada produk yang ditambahkan 😶‍🌫️</p>
+            <p class="text-gray-500 text-center py-4">Belum ada produk yang menggunakan stok 😶‍🌫️</p>
         @elseif (count($lowStockProducts) === 0)
             <p class="text-gray-500 text-center py-4">Semua stok aman 🎉</p>
         @else

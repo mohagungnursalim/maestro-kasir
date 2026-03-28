@@ -99,7 +99,7 @@ class Order extends Component
                 })
                 ->orderByDesc('sold_count')
                 ->take($this->limitProducts)
-                ->get();
+                ->get(['id', 'name', 'sku', 'price', 'stock', 'use_stock', 'image', 'description']);
         });
     }
 
@@ -116,6 +116,8 @@ class Order extends Component
             $this->cart[] = [
                 'id' => $product->id,
                 'name' => $product->name,
+                'sku' => $product->sku,
+                'image' => $product->image,
                 'price' => $product->price,
                 'quantity' => 1,
                 'subtotal' => $product->price,
@@ -140,6 +142,8 @@ class Order extends Component
             $this->cart[] = [
                 'id' => $product->id,
                 'name' => $product->name,
+                'sku' => $product->sku,
+                'image' => $product->image,
                 'price' => $product->price,
                 'quantity' => 1,
                 'subtotal' => $product->price, // Tambahkan subtotal di awal
@@ -529,7 +533,9 @@ class Order extends Component
         foreach ($order->transactionDetails as $item) {
             $this->cart[] = [
                 'id' => $item->product_id,
-                'name' => $item->product->name,
+                'name' => $item->product->name ?? 'Unknown',
+                'sku' => $item->product->sku ?? '',
+                'image' => $item->product->image ?? '',
                 'price' => $item->price,
                 'quantity' => $item->quantity,
                 'product_note' => $item->product_note,
@@ -608,11 +614,12 @@ class Order extends Component
                     $diff   = $newQty - $oldQty;
 
                     if ($diff > 0) {
-                        if (
-                            !isset($products[$productId]) ||
-                            $products[$productId]->stock < $diff
-                        ) {
-                            $insufficientProducts[] = $products[$productId]->name ?? 'Produk tidak diketahui';
+                        $prod = $products[$productId] ?? null;
+                        // Hanya cek stok jika produk menggunakan stok
+                        if ($prod && ($prod->use_stock ?? true)) {
+                            if ($prod->stock < $diff) {
+                                $insufficientProducts[] = $prod->name ?? 'Produk tidak diketahui';
+                            }
                         }
                     }
                 }
@@ -664,10 +671,15 @@ class Order extends Component
                         ]);
                     }
 
-                    // Update stok berdasarkan selisih
-                    if ($diff !== 0) {
+                    // Update stok berdasarkan selisih (hanya jika produk pakai stok)
+                    if ($diff !== 0 && ($products[$productId]->use_stock ?? true)) {
                         Product::where('id', $productId)->update([
                             'stock' => DB::raw("stock - ($diff)"),
+                            'sold_count' => DB::raw("sold_count + ($diff)"),
+                        ]);
+                    } elseif ($diff !== 0) {
+                        // Produk tanpa stok: hanya update sold_count
+                        Product::where('id', $productId)->update([
                             'sold_count' => DB::raw("sold_count + ($diff)"),
                         ]);
                     }
@@ -678,12 +690,19 @@ class Order extends Component
                 
                 foreach ($oldDetails as $productId => $oldItem) {
                     if (!$newCart->has($productId)) {
+                        $prod = $products[$productId] ?? null;
 
-                        // balikin stok
-                        Product::where('id', $productId)->update([
-                            'stock' => DB::raw("stock + {$oldItem->quantity}"),
-                            'sold_count' => DB::raw("sold_count - {$oldItem->quantity}"),
-                        ]);
+                        // balikin stok hanya jika produk pakai stok
+                        if ($prod && ($prod->use_stock ?? true)) {
+                            Product::where('id', $productId)->update([
+                                'stock' => DB::raw("stock + {$oldItem->quantity}"),
+                                'sold_count' => DB::raw("sold_count - {$oldItem->quantity}"),
+                            ]);
+                        } else {
+                            Product::where('id', $productId)->update([
+                                'sold_count' => DB::raw("sold_count - {$oldItem->quantity}"),
+                            ]);
+                        }
 
                         $oldItem->delete();
                     }
@@ -801,11 +820,12 @@ class Order extends Component
             $insufficientProducts = [];
 
             foreach ($this->cart as $item) {
-                if (
-                    !isset($products[$item['id']]) ||
-                    $products[$item['id']]->stock < $item['quantity']
-                ) {
-                    $insufficientProducts[] = $products[$item['id']]->name ?? 'Produk tidak diketahui';
+                $prod = $products[$item['id']] ?? null;
+                // Hanya cek stok jika produk menggunakan stok
+                if ($prod && ($prod->use_stock ?? true)) {
+                    if ($prod->stock < $item['quantity']) {
+                        $insufficientProducts[] = $prod->name ?? 'Produk tidak diketahui';
+                    }
                 }
             }
 
@@ -903,10 +923,19 @@ class Order extends Component
                     'product_note' => $item['product_note'] ?? null,
                 ]);
 
-                Product::where('id', $item['id'])->update([
-                    'stock' => DB::raw("stock - $qty"),
-                    'sold_count' => DB::raw("sold_count + $qty"),
-                ]);
+                $prod = $products[$item['id']] ?? null;
+                if ($prod && ($prod->use_stock ?? true)) {
+                    // Produk menggunakan stok: potong stok & tambah sold_count
+                    Product::where('id', $item['id'])->update([
+                        'stock' => DB::raw("stock - $qty"),
+                        'sold_count' => DB::raw("sold_count + $qty"),
+                    ]);
+                } else {
+                    // Produk tanpa stok: hanya tambah sold_count
+                    Product::where('id', $item['id'])->update([
+                        'sold_count' => DB::raw("sold_count + $qty"),
+                    ]);
+                }
             }
 
             DB::commit();

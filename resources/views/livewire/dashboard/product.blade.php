@@ -198,7 +198,13 @@
                                             <span class="text-sm text-gray-500">-</span>
                                         @endif
                                     </td>
-                                    <td class="px-6 py-4 text-center">{{ $product->stock }}</td>
+                                    <td class="px-6 py-4 text-center">
+                                        @if($product->use_stock ?? true)
+                                            {{ $product->stock }}
+                                        @else
+                                            <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-700">∞ Tanpa Stok</span>
+                                        @endif
+                                    </td>
                                     <td class="px-6 py-4 text-center">{{ $product->unit }}</td>
                                     <td class="px-6 py-4">
 
@@ -323,6 +329,30 @@
                             class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full"
                             placeholder="Masukan Stok">
                         @error('stock') <span class="text-red-500 text-xs">{{ $message }} @enderror
+                    </div>
+
+                    {{-- Toggle Gunakan Stok --}}
+                    <div>
+                        <label class="block mb-2 text-sm font-medium text-gray-900">Gunakan Stok</label>
+                        <div class="flex items-center gap-3">
+                            <label class="inline-flex items-center gap-2 cursor-pointer select-none">
+                                <input
+                                    type="checkbox"
+                                    wire:model="use_stock"
+                                    @if($use_stock) checked @endif
+                                    class="sr-only peer">
+                                <div class="relative w-9 h-5 rounded-full bg-gray-200 transition
+                                    peer-checked:bg-purple-600
+                                    after:content-[''] after:absolute after:top-[2px] after:left-[2px]
+                                    after:w-4 after:h-4 after:bg-white after:rounded-full after:transition
+                                    peer-checked:after:translate-x-4">
+                                </div>
+                                <span class="text-sm font-medium text-gray-700">
+                                    {{ $use_stock ? 'Ya (stok dipantau)' : 'Tidak (stok tidak dibatasi)' }}
+                                </span>
+                            </label>
+                        </div>
+                        <p class="text-xs text-gray-400 mt-1">Jika dinonaktifkan, produk tidak akan dibatasi oleh stok saat order.</p>
                     </div>
 
                     <div>
@@ -548,6 +578,30 @@
                         @error('stockUpdate') <span class="text-red-500 text-xs">{{ $message }} @enderror
                     </div>
 
+                    {{-- Toggle Gunakan Stok (Edit) --}}
+                    <div>
+                        <label class="block mb-2 text-sm font-medium text-gray-900">Gunakan Stok</label>
+                        <div class="flex items-center gap-3">
+                            <label class="inline-flex items-center gap-2 cursor-pointer select-none">
+                                <input
+                                    type="checkbox"
+                                    wire:model="useStockUpdate"
+                                    @if($useStockUpdate) checked @endif
+                                    class="sr-only peer">
+                                <div class="relative w-9 h-5 rounded-full bg-gray-200 transition
+                                    peer-checked:bg-purple-600
+                                    after:content-[''] after:absolute after:top-[2px] after:left-[2px]
+                                    after:w-4 after:h-4 after:bg-white after:rounded-full after:transition
+                                    peer-checked:after:translate-x-4">
+                                </div>
+                                <span class="text-sm font-medium text-gray-700">
+                                    {{ $useStockUpdate ? 'Ya (stok dipantau)' : 'Tidak (stok tidak dibatasi)' }}
+                                </span>
+                            </label>
+                        </div>
+                        <p class="text-xs text-gray-400 mt-1">Jika dinonaktifkan, produk tidak akan dibatasi oleh stok saat order.</p>
+                    </div>
+
                     <div>
                         <label class="block mb-2 text-sm font-medium text-gray-900">Diskon</label>
                         <div class="flex items-center gap-3 flex-wrap">
@@ -748,7 +802,13 @@
                                     <p class="text-xs text-gray-600">Harga Setelah Diskon: <span class="font-semibold text-red-600">Rp{{ number_format($priceDetail, 0, ',', '.') }}</span></p>
                                     <p class="text-xs text-gray-600">Periode: {{ $discountStartDetail ?? '-' }} - {{ $discountEndDetail ?? '-' }}</p>
                                 @endif
-                                <p class="text-xs text-gray-600">Stok: {{ $stockDetail }}</p>
+                                <p class="text-xs text-gray-600">Stok:
+                                    @if($useStockDetail)
+                                        {{ $stockDetail }}
+                                    @else
+                                        <span class="font-semibold text-gray-600">∞ Tanpa Stok</span>
+                                    @endif
+                                </p>
                                 <p class="text-xs text-gray-600">Satuan: {{ $unitDetail }}</p>
                             </div>
                             <div class="mt-4">
