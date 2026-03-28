@@ -21,15 +21,18 @@ class Product extends Component
     // Store Product
     public $name, $sku, $image, $price, $description, $stock, $unit, $supplier_id;
     public $is_discounted, $discount_type, $discount_value, $discount_start, $discount_end;
+    public $use_stock = true; // Apakah produk ini menggunakan stok
 
     // Update Product
     public $productId, $nameUpdate, $skuUpdate, $currentImage, $imageUpdate, $priceUpdate, $descriptionUpdate, $stockUpdate, $unitUpdate, $supplier_idUpdate, $supplierName;
     public $isDiscountedUpdate, $discountTypeUpdate, $discountValueUpdate, $discountStartUpdate, $discountEndUpdate;
+    public $useStockUpdate = true; // Apakah produk ini menggunakan stok (update)
 
     // Detail
     public $nameDetail, $skuDetail, $imageDetail, $priceDetail, $descriptionDetail, $stockDetail, $unitDetail, $created_at, $updated_at;
     public $priceOriginalDetail;
     public $isDiscountedDetail, $discountTypeDetail, $discountValueDetail, $discountStartDetail, $discountEndDetail;
+    public $useStockDetail = true;
 
     // Select Product
     public $selectedProduct;
@@ -137,6 +140,7 @@ class Product extends Component
                 'products.discount_end',
                 'products.description',
                 'products.stock',
+                'products.use_stock',
                 'products.unit',
                 'products.image',
                 'products.created_at',
@@ -167,13 +171,15 @@ class Product extends Component
     #[On('resetForm')] 
     public function resetForm()
     {
-        $this->reset(['name', 'sku', 'image', 'price', 'description', 'stock', 'unit', 'is_discounted', 'discount_type', 'discount_value', 'discount_start', 'discount_end']);
+        $this->reset(['name', 'sku', 'image', 'price', 'description', 'stock', 'unit', 'use_stock', 'is_discounted', 'discount_type', 'discount_value', 'discount_start', 'discount_end']);
+        $this->use_stock = true; // default ON
     }
 
     #[On('resetFormEdit')] 
     public function resetFormEdit()
     {
-        $this->reset(['nameUpdate','skuUpdate','imageUpdate','priceUpdate', 'descriptionUpdate', 'stockUpdate', 'unitUpdate', 'isDiscountedUpdate', 'discountTypeUpdate', 'discountValueUpdate', 'discountStartUpdate', 'discountEndUpdate']);
+        $this->reset(['nameUpdate','skuUpdate','imageUpdate','priceUpdate', 'descriptionUpdate', 'stockUpdate', 'unitUpdate', 'useStockUpdate', 'isDiscountedUpdate', 'discountTypeUpdate', 'discountValueUpdate', 'discountStartUpdate', 'discountEndUpdate']);
+        $this->useStockUpdate = true; // default ON
     }
 
     public function store()
@@ -186,6 +192,7 @@ class Product extends Component
             'description' => 'nullable|string',
             'stock' => 'required|numeric|min:0',
             'unit' => 'required|string|max:20',
+            'use_stock' => 'boolean',
             'supplier_id' => 'nullable|exists:suppliers,id',
             'is_discounted' => 'nullable|boolean',
             'discount_type' => 'nullable|string|in:fixed,percent',
@@ -225,6 +232,7 @@ class Product extends Component
             'price' => $this->price,
             'description' => $this->description,
             'stock' => $this->stock,
+            'use_stock' => $this->use_stock ? true : false,
             'unit' => $this->unit,
             'supplier_id' => $this->supplier_id ?? null,
             'is_discounted' => $this->is_discounted ? true : false,
@@ -257,6 +265,7 @@ class Product extends Component
                 'products.discount_end',
                 'products.description',
                 'products.stock',
+                'products.use_stock',
                 'products.unit',
                 'products.image',
                 'products.supplier_id',
@@ -305,6 +314,7 @@ class Product extends Component
         $this->nameUpdate = $product->name;
         $this->skuUpdate = $product->sku;
         $this->priceUpdate = $product->price;
+        $this->useStockUpdate = isset($product->use_stock) ? (bool) $product->use_stock : true;
         // Prefer the computed active-discount state so the toggle reflects expiry
         $this->isDiscountedUpdate = !empty($product->is_active_discount)
             ? true
@@ -333,6 +343,7 @@ class Product extends Component
             'skuUpdate' => 'required|string|max:30',
             'imageUpdate' => 'nullable|image|max:5120',
             'priceUpdate' => 'required|numeric|min:0',
+            'useStockUpdate' => 'boolean',
             'isDiscountedUpdate' => 'nullable|boolean',
             'discountTypeUpdate' => 'nullable|string|in:fixed,percent',
             'discountValueUpdate' => 'nullable|numeric|min:0',
@@ -352,6 +363,7 @@ class Product extends Component
             'name' => $this->nameUpdate,
             'sku' => $this->skuUpdate,
             'price' => $this->priceUpdate,
+            'use_stock' => $this->useStockUpdate ? true : false,
             'is_discounted' => $this->isDiscountedUpdate ? true : false,
             'discount_type' => $this->discountTypeUpdate ?? null,
             'discount_value' => $this->discountValueUpdate ?? null,
@@ -405,6 +417,7 @@ class Product extends Component
                 'products.discount_end',
                 'products.description',
                 'products.stock',
+                'products.use_stock',
                 'products.unit',
                 'products.image',
                 'products.created_at',
@@ -431,6 +444,7 @@ class Product extends Component
         $this->discountEndDetail = $product->discount_end;
         $this->descriptionDetail = $product->description;
         $this->stockDetail = $product->stock;
+        $this->useStockDetail = isset($product->use_stock) ? (bool) $product->use_stock : true;
         $this->unitDetail = $product->unit;
         $this->created_at = $product->created_at;
         $this->updated_at = $product->updated_at;
@@ -523,6 +537,7 @@ class Product extends Component
                 'products.discount_end',
                 'products.description',
                 'products.stock',
+                'products.use_stock',
                 'products.unit',
                 'products.image',
                 'products.created_at',

@@ -3,6 +3,7 @@
 namespace App\Livewire\Dashboard;
 
 use App\Models\Product;
+use Illuminate\Support\Facades\Cache;
 use Livewire\Component;
 
 class StockWarning extends Component
@@ -19,18 +20,31 @@ class StockWarning extends Component
     // Memuat produk dengan stok rendah
     public function loadLowStockProducts()
     {
-        // Cek apakah ada produk di database
-        $this->productExists = Product::exists(); // cek apakah ada data produk
-    
-        // Jika ada produk, ambil produk dengan stok kurang dari 10
-        if ($this->productExists) {
-            $this->lowStockProducts = Product::where('stock', '<', 10)
-                ->orderBy('stock', 'asc')
-                ->take(5)
-                ->get();
-        } else {
-            $this->lowStockProducts = collect(); // kosongkan dengan collection kosong
-        }
+        // Gunakan product_cache_version agar otomatis stale saat ada perubahan produk
+        $version  = Cache::get('product_cache_version', 1);
+        $cacheKey = "stock_warning_v{$version}";
+
+        $data = Cache::remember($cacheKey, now()->addMinutes(5), function () {
+            // Hanya produk yang menggunakan stok (use_stock = true)
+            $exists = Product::where('use_stock', true)->exists();
+
+            $low = collect();
+            if ($exists) {
+                $low = Product::where('use_stock', true)
+                    ->where('stock', '<', 10)
+                    ->orderBy('stock', 'asc')
+                    ->take(5)
+                    ->get(['id', 'name', 'stock']);
+            }
+
+            return [
+                'productExists'    => $exists,
+                'lowStockProducts' => $low,
+            ];
+        });
+
+        $this->productExists    = $data['productExists'];
+        $this->lowStockProducts = $data['lowStockProducts'];
     }
     
 

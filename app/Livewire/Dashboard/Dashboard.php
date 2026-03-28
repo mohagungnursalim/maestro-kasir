@@ -46,13 +46,17 @@ class Dashboard extends Component
         $userId  = Auth::id();
         $isAdmin = Auth::user()->hasRole('admin|owner');
 
-        // Key cache unik per filter + range + role/user
+        // Sertakan product_cache_version agar cache stale otomatis saat ada update produk (misal: toggle use_stock)
+        $productVersion = Cache::get('product_cache_version', 1);
+
+        // Key cache unik per filter + range + role/user + versi produk
         $cacheKey = sprintf(
-            'dashboard_stats:%s:%s:%s:%s',
+            'dashboard_stats:%s:%s:%s:%s:pv%s',
             $this->filterType,
             $dates['start']->format('YmdHis'),
             $dates['end']->format('YmdHis'),
-            $isAdmin ? 'admin' : 'user_' . $userId
+            $isAdmin ? 'admin' : 'user_' . $userId,
+            $productVersion
         );
 
         // Semua stats (termasuk visitor jika admin) dalam 1 cache block

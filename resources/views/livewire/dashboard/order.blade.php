@@ -102,7 +102,7 @@
                                 class="w-[45vw] sm:w-[22vw] md:w-[18vw] lg:w-[15vw] xl:w-[12vw] min-w-[160px] flex-shrink-0 snap-start">
                                 <div
                                     class="bg-white rounded-lg shadow-sm overflow-hidden transition-all duration-300 hover:shadow-lg 
-                                    {{ $isInCart ? 'opacity-75' : '' }} {{ $product->stock < 1 ? 'opacity-75' : '' }} flex flex-col">
+                                    {{ $isInCart ? 'opacity-75' : '' }} {{ ($product->use_stock ?? true) && $product->stock < 1 ? 'opacity-75' : '' }} flex flex-col">
 
                                     <div class="flex gap-2 p-2 border rounded-lg hover:shadow-sm transition bg-white">
 
@@ -131,6 +131,17 @@
                                                         Rp{{ number_format($product->price, 0, ',', '.') }}
                                                     </span>
 
+                                                @php
+                                                    $useStock = $product->use_stock ?? true;
+                                                    $isOutOfStock = $useStock && $product->stock < 1;
+                                                @endphp
+
+                                                {{-- Badge Stok / Tidak Terbatas --}}
+                                                @if(!$useStock)
+                                                    <span class="inline-flex items-center text-xs px-1 py-0.5 rounded bg-purple-100 text-purple-700">
+                                                        ∞
+                                                    </span>
+                                                @else
                                                     <span class="@if($product->stock < 1) bg-red-100 text-red-800 
                                                     @elseif($product->stock < 10) bg-yellow-100 text-yellow-800 
                                                     @else bg-blue-100 text-blue-800 
@@ -138,6 +149,7 @@
                                                     inline-flex items-center text-xs px-1 py-0.5 rounded">
                                                         {{ $product->stock > 0 ? $product->stock : 'Habis' }}
                                                     </span>
+                                                @endif
                                                 </div>
 
                                                 <!-- Add to Cart Button -->
@@ -145,9 +157,9 @@
                                                     @if (!$isInCart)
                                                     <button type="button"
                                                         x-data
-                                                        @click="$dispatch('open-add-note', { id: {{ $product->id }} })"
+                                                        @click="$dispatch('open-add-note', { id: {{ $product->id }}, name: @js($product->name), sku: @js($product->sku), image: @js($product->image) })"
                                                         onclick="playSelectSound()"
-                                                        @if($product->stock < 1) disabled @endif class="relative w-full bg-gray-900 text-white py-2 px-1 rounded text-xs
+                                                        @if($isOutOfStock) disabled @endif class="relative w-full bg-gray-900 text-white py-2 px-1 rounded text-xs
                                                                 hover:bg-gray-800 transition
                                                                 disabled:bg-gray-300 disabled:cursor-not-allowed
                                                                 h-1">
@@ -199,27 +211,34 @@
 
 
                 {{-- Modal Add Catatan per item --}}
-                <div x-cloak x-data="{ show: false, productId: null, note: '' }" 
-                    x-on:open-add-note.window="show = true; productId = $event.detail.id; note = '';"
+                <div x-cloak x-data="{ show: false, productId: null, note: '', productName: '', productSku: '', productImage: '' }" 
+                    x-on:open-add-note.window="show = true; productId = $event.detail.id; note = ''; productName = $event.detail.name; productSku = $event.detail.sku; productImage = $event.detail.image;"
                     x-show="show"
-                    @keydown.window.escape.prevent="show = false"
+                    @keydown.window.escape.prevent
                     class="fixed inset-0 z-50 flex items-center justify-center">
                     
-                    <!-- Backdrop -->
-                    <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" @click="show = false"></div>
+                    <!-- Backdrop (click ignored; use Batal button to close) -->
+                    <div class="absolute inset-0 bg-black/50 backdrop-blur-sm"></div>
 
                     <!-- Modal Box -->
                     <div x-show="show" x-transition class="relative bg-white w-full max-w-md rounded-xl shadow-2xl p-6">
-                        <!-- Icon Note -->
+                        <!-- Icon Note / Image -->
                         <div class="flex justify-center mb-4">
-                            <div class="w-12 h-12 flex items-center justify-center rounded-full bg-gray-100 text-gray-600">
-                                <i class="fas fa-sticky-note fa-lg"></i>
-                            </div>
+                            <template x-if="productImage">
+                                <div class="w-16 h-16 overflow-hidden bg-gray-100 rounded-xl shadow-sm border border-gray-200">
+                                    <img :src="`{{ asset('storage') }}/${productImage}`" class="w-full h-full object-cover object-center" alt="Product Image" onerror="this.src='{{ asset('images/placeholder.png') }}'">
+                                </div>
+                            </template>
+                            <template x-if="!productImage">
+                                <div class="w-16 h-16 flex items-center justify-center rounded-xl bg-gray-100 text-gray-600 shadow-sm border border-gray-200">
+                                    <i class="fas fa-sticky-note fa-2x"></i>
+                                </div>
+                            </template>
                         </div>
 
                         <!-- Title -->
                         <h2 class="text-lg font-bold text-center text-gray-800 mb-2">
-                            Tambah Catatan Item
+                            Tambah Catatan "<span x-text="productName"></span>"
                         </h2>
 
                         <!-- Desc -->
@@ -232,7 +251,7 @@
                             x-model="note"
                             rows="3"
                             class="w-full border rounded-lg p-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                            placeholder="Contoh: tanpa gula, extra pedas, dll..."
+                            :placeholder="productSku === 'MAKANAN' ? 'Contoh: pisah kuah, tambah kecap, tidak pedas dll...' : (productSku === 'MINUMAN' ? 'Contoh: less sugar, no ice, sedikit es dll...' : 'Contoh: permintaan custom dll...')"
                         ></textarea>
 
                         <!-- Actions -->
@@ -406,7 +425,10 @@
                                                     <div class="min-w-0 cursor-pointer"
                                                         @click="$dispatch('open-edit-note', {
                                                             index: {{ $index }},
-                                                            note: @js($item['product_note'] ?? '')
+                                                            note: @js($item['product_note'] ?? ''),
+                                                            name: @js($item['name']),
+                                                            sku: @js($item['sku'] ?? ''),
+                                                            image: @js($item['image'] ?? '')
                                                         })">
 
                                                                 <div class="font-semibold text-sm text-gray-900 truncate">
@@ -709,11 +731,17 @@
                             <div x-data="{
                                         show: false,
                                         index: null,
-                                        note: ''
+                                        note: '',
+                                        productName: '',
+                                        productSku: '',
+                                        productImage: ''
                                     }" x-on:open-edit-note.window="
                                         show = true;
                                         index = $event.detail.index;
                                         note = $event.detail.note;
+                                        productName = $event.detail.name;
+                                        productSku = $event.detail.sku;
+                                        productImage = $event.detail.image;
                                     " x-show="show" x-cloak @keydown.window.escape.prevent class="fixed inset-0 z-50 flex items-center justify-center">
                                 <!-- Backdrop (click ignored; use Batal button to close) -->
                                 <div class="absolute inset-0 bg-black/50 backdrop-blur-sm"></div>
@@ -722,16 +750,23 @@
                                 <div x-show="show" x-transition
                                     class="relative bg-white w-full max-w-md rounded-xl shadow-2xl p-6">
 
-                                    <!-- Icon Note -->
+                                    <!-- Icon Note / Image -->
                                     <div class="flex justify-center mb-4">
-                                        <div class="w-12 h-12 flex items-center justify-center rounded-full bg-gray-100 text-gray-600">
-                                            <i class="fas fa-sticky-note fa-lg"></i>
-                                        </div>
+                                        <template x-if="productImage">
+                                            <div class="w-16 h-16 overflow-hidden bg-gray-100 rounded-xl shadow-sm border border-gray-200">
+                                                <img :src="`{{ asset('storage') }}/${productImage}`" class="w-full h-full object-cover object-center" alt="Product Image" onerror="this.src='{{ asset('images/placeholder.png') }}'">
+                                            </div>
+                                        </template>
+                                        <template x-if="!productImage">
+                                            <div class="w-16 h-16 flex items-center justify-center rounded-xl bg-gray-100 text-gray-600 shadow-sm border border-gray-200">
+                                                <i class="fas fa-sticky-note fa-2x"></i>
+                                            </div>
+                                        </template>
                                     </div>
 
                                     <!-- Title -->
                                     <h2 class="text-lg font-bold text-center text-gray-800 mb-2">
-                                        Edit Catatan Item
+                                        Edit Catatan "<span x-text="productName"></span>"
                                     </h2>
 
                                     <!-- Desc -->
@@ -741,8 +776,7 @@
 
                                     <textarea x-model="note" rows="3"
                                         class="w-full border rounded-lg p-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                        placeholder="Contoh: tanpa gula, extra pedas, dll...">
-                                    </textarea>
+                                        :placeholder="productSku === 'MAKANAN' ? 'Contoh: pisah kuah, tambah kecap, tidak pedas dll...' : (productSku === 'MINUMAN' ? 'Contoh: less sugar, no ice, sedikit es dll...' : 'Contoh: permintaan custom dll...')"></textarea>
 
                                     <!-- Actions -->
                                     <div class="flex justify-center gap-3 mt-6">
