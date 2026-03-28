@@ -209,11 +209,20 @@
             },
 
             closeModal() {
-                 if(this.modalInstance) this.modalInstance.hide();
+                if (this.modalInstance) this.modalInstance.hide();
+            },
+
+            cleanupBackdrop() {
+                // Paksa hapus backdrop & reset body jika Flowbite tidak cleanup sendiri
+                document.querySelectorAll('.modal-backdrop').forEach(el => el.remove());
+                document.body.classList.remove('overflow-hidden');
+                document.body.style.overflow = '';
             },
 
             init() {
-                this.modalInstance = new Modal(document.getElementById('expenseModal'));
+                this.modalInstance = new Modal(document.getElementById('expenseModal'), {
+                    onHide: () => this.cleanupBackdrop()
+                });
 
                 this.$watch('type', value => {
                     if (value === 'in') {
@@ -223,7 +232,8 @@
                     }
                 });
 
-                window.addEventListener('open-add-expense', () => {
+                // Simpan referensi handler agar bisa di-remove saat navigate away
+                this._onAddExpense = () => {
                     this.isEdit = false;
                     this.expenseId = null;
                     this.expense_date = '{{ date('Y-m-d') }}';
@@ -234,9 +244,9 @@
                     this.description = '';
                     this.errors = {};
                     this.modalInstance.show();
-                });
+                };
 
-                window.addEventListener('open-edit-expense', (event) => {
+                this._onEditExpense = (event) => {
                     const data = event.detail;
                     this.isEdit = true;
                     this.expenseId = data.id;
@@ -244,11 +254,25 @@
                     this.type = data.type;
                     this.category = data.category;
                     this.amount = data.amount;
-                    this.formattedAmount = this.formatRupiah(Math.floor(data.amount)); 
+                    this.formattedAmount = this.formatRupiah(Math.floor(data.amount));
                     this.description = data.description;
                     this.errors = {};
                     this.modalInstance.show();
-                });
+                };
+
+                window.addEventListener('open-add-expense', this._onAddExpense);
+                window.addEventListener('open-edit-expense', this._onEditExpense);
+
+                // Cleanup sebelum wire:navigate berpindah halaman
+                this._onNavigating = () => {
+                    if (this.modalInstance) {
+                        this.modalInstance.hide();
+                    }
+                    this.cleanupBackdrop();
+                    window.removeEventListener('open-add-expense', this._onAddExpense);
+                    window.removeEventListener('open-edit-expense', this._onEditExpense);
+                };
+                document.addEventListener('livewire:navigating', this._onNavigating);
 
                 Livewire.on('addedSuccess', () => {
                     this.closeModal();
