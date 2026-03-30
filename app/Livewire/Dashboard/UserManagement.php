@@ -10,8 +10,8 @@ use Illuminate\Support\Facades\Hash;
 
 class UserManagement extends Component
 {
-    public $name, $email, $password, $user_id, $role; // Untuk menyimpan data user
-    public $roles, $users; // Untuk menyimpan semua role
+    public $name, $email, $password, $user_id, $role, $branch_id; // Untuk menyimpan data user
+    public $roles, $users, $branches; // Untuk menyimpan data master
     public $isEditMode = false; // Untuk menandakan mode edit
 
     public function mount()
@@ -26,9 +26,11 @@ class UserManagement extends Component
             $this->roles = collect(); 
         }
 
+        $this->branches = \App\Models\Branch::all();
+
         $this->users = User::whereHas('roles', function($query) {
             $query->whereIn('name', ['admin', 'kasir']);
-        })->with('roles')->get();
+        })->with(['roles', 'branch'])->get();
     }
 
 
@@ -40,20 +42,23 @@ class UserManagement extends Component
             'email' => 'required|email|unique:users,email',
             'password' => 'nullable|min:6',
             'role' => 'required',
+            'branch_id' => 'nullable|exists:branches,id',
         ],[
             'name.required' => 'Nama wajib diisi.',
             'email.required' => 'Email wajib diisi.',
             'email.unique' => 'Email sudah terdaftar!',
             'email.email' => 'Format email harus sesuai misal: nama@gmail.com',
             'password.min' => 'Pendek minimal password 6 karakter',
-            'role.required' => 'Peran wajib diisi.'
+            'role.required' => 'Peran wajib diisi.',
+            'branch_id.required' => 'Pilih cabang untuk user ini.'
         ]);
 
         // Jika password diisi, hash password baru, kalau kosong gunakan email sebagai password default
         $user = User::create([
             'name' => $this->name,
             'email' => $this->email,
-            'password' => bcrypt($this->email),
+            'password' => bcrypt($this->password ?: $this->email),
+            'branch_id' => $this->branch_id ?: null,
         ]);
 
         $user->assignRole($this->role);
@@ -86,6 +91,7 @@ class UserManagement extends Component
         $this->name = $user->name;
         $this->email = $user->email;
         $this->role = $user->roles->first()->name ?? null;
+        $this->branch_id = $user->branch_id;
         $this->isEditMode = true;
     }
 
@@ -97,13 +103,15 @@ class UserManagement extends Component
             'email' => 'required|email|unique:users,email,' . $this->user_id,
             'password' => 'nullable|min:6',
             'role' => 'required',
+            'branch_id' => 'nullable|exists:branches,id',
         ], [
             'name.required' => 'Nama wajib diisi.',
             'email.required' => 'Email wajib diisi.',
             'email.unique' => 'Email sudah terdaftar!',
             'email.email' => 'Format email harus sesuai misal: nama@gmail.com',
             'password.min' => 'Pendek minimal password 6 karakter',
-            'role.required' => 'Peran wajib diisi.'
+            'role.required' => 'Peran wajib diisi.',
+            'branch_id.required' => 'Pilih cabang untuk user ini.'
         ]);
     
         $user = User::findOrFail($this->user_id);
@@ -115,6 +123,7 @@ class UserManagement extends Component
             'name' => $this->name,
             'email' => $this->email,
             'password' => $newPassword,
+            'branch_id' => $this->branch_id ?: null,
         ]);
     
         $user->syncRoles($this->role);
@@ -181,6 +190,7 @@ class UserManagement extends Component
         $this->email = '';
         $this->password = '';
         $this->role = '';
+        $this->branch_id = '';
     }
 
     public function render()

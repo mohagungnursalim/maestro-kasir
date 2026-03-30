@@ -1,6 +1,9 @@
 <div>
    {{-- Navbar Section --}}
    <div class="flex items-center">
+    <!-- Branch Switcher -->
+    <livewire:branch-switcher />
+
     <div class="flex items-center mr-5 ms-7">
         <div>
         <!-- Tombol Fullscreen -->

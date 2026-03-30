@@ -41,7 +41,8 @@ class Supplier extends Component
         $this->ttl = 3600; // Cache selama 1 jam (3600 detik - format integer)
         
         $version = Cache::get('supplier_cache_version', 1);
-        $this->totalSuppliers = Cache::remember("totalSuppliers_v{$version}", $this->ttl, function () {
+        $activeBranch = \Illuminate\Support\Facades\Session::get('active_branch_id', 'all');
+        $this->totalSuppliers = Cache::remember("totalSuppliers_br{$activeBranch}_v{$version}", $this->ttl, function () {
             return ModelsSupplier::count();
         });
          
@@ -64,7 +65,8 @@ class Supplier extends Component
     
         $version = Cache::get('supplier_cache_version', 1);
         $searchHash = md5($this->search);
-        $cacheKey = "suppliers_v{$version}_{$searchHash}_{$this->limit}";
+        $activeBranch = \Illuminate\Support\Facades\Session::get('active_branch_id', 'all');
+        $cacheKey = "suppliers_br{$activeBranch}_v{$version}_{$searchHash}_{$this->limit}";
 
         $this->suppliers = Cache::remember($cacheKey, $this->ttl, function () {
             return ModelsSupplier::where(function ($query) {

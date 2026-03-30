@@ -72,6 +72,16 @@ class ExpenseManagement extends Component
     {
         $validated = \Illuminate\Support\Facades\Validator::make($data, $this->rules())->validate();
 
+        $activeBranchId = \Illuminate\Support\Facades\Session::get('active_branch_id');
+        if ($activeBranchId) {
+            $branch = \App\Models\Branch::find($activeBranchId);
+            // Tolak Top Up (Pemasukan) jika cabang Non-Aktif
+            if ($branch && !$branch->is_active && $validated['type'] === 'in') {
+                $this->dispatch('errorPayment', 'Cabang berstatus Non-Aktif. Top Up (Pemasukan) tidak diizinkan.');
+                return;
+            }
+        }
+
         Expense::create([
             'user_id' => Auth::id(),
             'expense_date' => $validated['expense_date'],
@@ -89,6 +99,16 @@ class ExpenseManagement extends Component
     public function updateExpense($id, $data)
     {
         $validated = \Illuminate\Support\Facades\Validator::make($data, $this->rules())->validate();
+
+        $activeBranchId = \Illuminate\Support\Facades\Session::get('active_branch_id');
+        if ($activeBranchId) {
+            $branch = \App\Models\Branch::find($activeBranchId);
+            // Tolak Top Up (Pemasukan) jika cabang Non-Aktif
+            if ($branch && !$branch->is_active && $validated['type'] === 'in') {
+                $this->dispatch('errorPayment', 'Cabang berstatus Non-Aktif. Top Up (Pemasukan) tidak diizinkan.');
+                return;
+            }
+        }
 
         $expense = Expense::findOrFail($id);
         $expense->update([

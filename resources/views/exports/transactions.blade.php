@@ -105,11 +105,14 @@
 <body>
     @php
         \Carbon\Carbon::setLocale('id');
+        $firstOrder = collect($transactions)->first()?->first()?->order;
+        $branchName = $firstOrder?->branch?->name ?? 'Laporan Semua Cabang';
+        $branchAddress = $firstOrder?->branch?->address ?? '-';
     @endphp
 
     <div class="report-header">
-        <h2>{{ $settings->store_name }}</h2>
-        <p>{{ $settings->store_address }}</p>
+        <h2>{{ $branchName }}</h2>
+        <p>{{ $branchAddress }}</p>
         <h1>Laporan Transaksi</h1>
     </div>
 
@@ -182,6 +185,7 @@
                     <td class="bold">
                         Order: {{ $first->order->order_number ?? '-' }}<br>
                         Kasir: {{ $first->order->user->name ?? '-' }}<br>
+                        Cabang: {{ $first->order->branch->name ?? 'Semua Cabang' }}<br>
                         Tanggal: {{ $first->order->created_at->format('d-m-Y') }}
                     </td>
                     <td></td>

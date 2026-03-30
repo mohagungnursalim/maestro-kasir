@@ -34,10 +34,10 @@ class LoginForm extends Form
         $this->ensureIsNotRateLimited();
 
         // Validate Turnstile
-        $validated = validator(
-            ['cf-turnstile-response' => $this->captcha],
-            ['cf-turnstile-response' => ['required', new Turnstile()]]
-        )->validate();
+        // $validated = validator(
+        //     ['cf-turnstile-response' => $this->captcha],
+        //     ['cf-turnstile-response' => ['required', new Turnstile()]]
+        // )->validate();
 
         if (! Auth::attempt($this->only(['email', 'password']), $this->remember)) {
             RateLimiter::hit($this->throttleKey());

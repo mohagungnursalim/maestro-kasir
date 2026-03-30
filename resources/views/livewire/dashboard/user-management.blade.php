@@ -48,6 +48,20 @@
             @enderror
         </div>
 
+        <!-- Select Branch -->
+        <div class="flex flex-col">
+            <select id="branch_id" name="branch_id" wire:model="branch_id"
+                class="block w-full px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-md focus:border-blue-500 focus:ring-blue-500 focus:outline-none focus:ring focus:ring-opacity-40">
+                <option value="">Semua Cabang (Akses Penuh)</option>
+                @foreach($branches as $branch)
+                <option value="{{ $branch->id }}">{{ $branch->name }}</option>
+                @endforeach
+            </select>
+            @error('branch_id')
+            <span class="text-red-500 text-sm mt-1">{{ $message }}</span>
+            @enderror
+        </div>
+
         <!-- Tombol Action -->
         <div class="col-span-2 text-center mt-4">
             @if($isEditMode)
@@ -101,6 +115,7 @@
                 <th class="px-6 py-3">Nama</th>
                 <th class="px-6 py-3">Email</th>
                 <th class="px-6 py-3">Peran</th>
+                <th class="px-6 py-3">Cabang</th>
                 <th class="px-6 py-3">Aksi</th>
             </tr>
         </thead>
@@ -110,6 +125,7 @@
                 <td class="px-6 py-4">{{ $user->name }}</td>
                 <td class="px-6 py-4">{{ $user->email }}</td>
                 <td class="px-6 py-4">{{ $user->getRoleNames()->join(', ') }}</td>
+                <td class="px-6 py-4">{{ $user->branch ? $user->branch->name : 'Semua Cabang' }}</td>
                 <td class="px-6 py-4">
                     <button wire:click="edit({{ $user->id }})"
                         class="bg-blue-100 text-blue-800 text-xs font-medium me-2 px-2.5 py-0.5 rounded-sm">Ubah</button>

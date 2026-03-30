@@ -25,14 +25,14 @@ class Settings extends Component
     {
         $settings = StoreSetting::first();
 
-        $this->store_name = $settings->store_name ?? 'Default Name'; // Default jika tidak ada
-        $this->store_address = $settings->store_address ?? 'Default Address'; // Default jika tidak ada
-        $this->store_phone = $settings->store_phone ?? '085756000000'; // Default jika tidak ada
-        $this->store_logo = $settings->store_logo ?? 'Default Logo'; // Default logo jika tidak ada
-        $this->store_footer = $settings->store_footer ?? 'Default Footer'; // Default footer jika tidak ada
-        $this->is_tax = $settings->is_tax ?? false; // Default ke false jika tidak di set
-        $this->tax = $settings->tax ?? 0; // Default ke 0 jika tidak di set
-        $this->is_supplier = $settings->is_supplier ?? false; // Default ke false jika tidak di set
+        $this->store_name = $settings?->store_name ?? 'Default Name'; // Default jika tidak ada
+        $this->store_address = $settings?->store_address ?? 'Default Address'; // Default jika tidak ada
+        $this->store_phone = $settings?->store_phone ?? '085756000000'; // Default jika tidak ada
+        $this->store_logo = $settings?->store_logo ?? 'Default Logo'; // Default logo jika tidak ada
+        $this->store_footer = $settings?->store_footer ?? 'Default Footer'; // Default footer jika tidak ada
+        $this->is_tax = $settings?->is_tax ?? false; // Default ke false jika tidak di set
+        $this->tax = $settings?->tax ?? 0; // Default ke 0 jika tidak di set
+        $this->is_supplier = $settings?->is_supplier ?? false; // Default ke false jika tidak di set
     }
 
     public function updateSettings()

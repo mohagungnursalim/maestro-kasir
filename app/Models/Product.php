@@ -8,6 +8,8 @@ use Illuminate\Support\Facades\Cache;
 
 class Product extends Model
 {
+    use \App\Traits\BelongsToBranch;
+
     protected $guarded = ['id'];
     protected $table = 'products';
 

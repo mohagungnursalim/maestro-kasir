@@ -88,7 +88,8 @@ class Order extends Component
         $searchHash = md5($this->search);
         
         // 3. Gabungkan menjadi 1 unique key berbasis versi
-        $cacheKey = "products_v{$version}_{$searchHash}_{$this->limitProducts}";
+        $activeBranch = \Illuminate\Support\Facades\Session::get('active_branch_id', 'all');
+        $cacheKey = "products_br{$activeBranch}_v{$version}_{$searchHash}_{$this->limitProducts}";
 
         $this->products = Cache::remember($cacheKey, $this->ttl, function () {
             return Product::where(function ($query) {
@@ -570,6 +571,16 @@ class Order extends Component
 
         if (empty($this->cart) && !$this->selectedUnpaidOrderId) {
             return;
+        }
+
+        // Cek cabang aktif
+        $activeBranchId = \Illuminate\Support\Facades\Session::get('active_branch_id');
+        if ($activeBranchId) {
+            $branch = \App\Models\Branch::find($activeBranchId);
+            if ($branch && !$branch->is_active) {
+                $this->dispatch('errorPayment', 'Cabang ini sedang dalam status Non-Aktif (Read-Only). Transaksi diblokir.');
+                return;
+            }
         }
 
         DB::beginTransaction();

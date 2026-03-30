@@ -3,6 +3,14 @@
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <section class="bg-gray-50 py-8 antialiased md:py-16">
             <div class="mx-auto max-w-screen-lg px-4">
+                
+                @if(!$isBranchActive)
+                <div class="mb-6 bg-red-100 border-l-4 border-red-500 text-red-700 p-4" role="alert">
+                    <p class="font-bold">Cabang Ditutup (Read-Only)</p>
+                    <p>Cabang ini sedang dalam status Non-Aktif. Anda tidak dapat melakukan transaksi atau mengubah data. Hubungi pengelola untuk mengaktifkan kembali.</p>
+                </div>
+                @endif
+                
                 <!-- Pencarian Produk -->
                 <div>
                     <form wire:submit.prevent="searchProduct" class="max-w-md mx-auto">
@@ -1082,7 +1090,7 @@
                                     wire:click="processOrder"
                                     wire:target="processOrder"
                                     wire:loading.attr="disabled"
-                                    @if(empty($cart)) disabled @endif
+                                    @if(empty($cart) || !$isBranchActive) disabled @endif
                                     class="relative w-full h-12
                                         bg-green-600 text-white px-4 py-2 rounded-lg
                                         hover:bg-green-700 transition

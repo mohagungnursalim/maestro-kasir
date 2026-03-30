@@ -7,6 +7,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Order extends Model
 {
+    use \App\Traits\BelongsToBranch;
+
     protected $guarded = ['id'];
     protected $table = 'orders';
 
