@@ -12,15 +12,14 @@ use Livewire\Attributes\Url;
 
 class DownloadReport extends Component
 {
-    use WithPagination; // Gunakan fitur pagination Livewire
+    use WithPagination;
 
-    // Search
     #[Url()]
     public $searchDate = '';
 
     #[Url()]
-    public $perPage = 5; // Jumlah file per halaman
-    public $currentPage = 1; //
+    public $perPage = 5;
+    public $currentPage = 1;
 
     public $loaded = false;
 
@@ -29,52 +28,68 @@ class DownloadReport extends Component
         $this->loaded = true;
     }
 
-
-    // Update Search
     public function updatingSearch()
     {
         $this->resetPage();
     }
 
-    // Update Per Page
     public function updatingPerPage()
     {
         $this->resetPage();
     }
 
-    // Pagination
     public function goToPage($page)
     {
         $this->currentPage = max(1, min($page, $this->getReports()->count() / $this->perPage + 1));
     }
 
-    // Mengambil semua laporan dari storage
+    /**
+     * Tentukan folder laporan berdasarkan cabang aktif
+     */
+    private function getReportFolder(): string
+    {
+        $activeBranchId = session('active_branch_id');
+        if ($activeBranchId) {
+            return "reports/branch_{$activeBranchId}";
+        }
+        return 'reports/global';
+    }
+
+    /**
+     * Mengambil laporan HANYA dari folder cabang aktif
+     */
     private function getReports()
     {
-        $files = Storage::allFiles('reports');
+        $folder = $this->getReportFolder();
+        
+        // Cek apakah folder ada, jika tidak return collection kosong
+        if (!Storage::exists($folder)) {
+            return collect();
+        }
+
+        $files = Storage::allFiles($folder);
     
         $reports = collect($files)->map(function ($file) {
+            $basename = basename($file);
             return [
-                'name' => basename($file),
+                'name' => $basename,
                 'path' => $file,
                 'size' => $this->formatSize(Storage::size($file)),
                 'extension' => pathinfo($file, PATHINFO_EXTENSION),
-                'last_modified' => Storage::lastModified($file), // Pakai timestamp asli
+                'last_modified' => Storage::lastModified($file),
                 'last_download' => Carbon::createFromTimestamp(Storage::lastModified($file))->locale('id')->diffForHumans(),
-                'url' => route('download.report', ['filename' => basename($file)]),
+                'url' => route('download.report', ['filename' => $basename, 'folder' => basename(dirname($file))]),
             ];
         });
     
-        // **Sorting berdasarkan last_modified DESC (terbaru di atas)**
         $reports = $reports->sortByDesc('last_modified');
     
-        // 🔍 Filter berdasarkan tanggal dalam nama file
         if (!empty($this->searchDate)) {
             $dateFormatted = Carbon::parse($this->searchDate)->format('d-m-Y');
             $reports = $reports->filter(fn($report) => str_contains($report['name'], $dateFormatted));
         }
     
-        return $reports->values(); // Reset index array setelah sort
+        return $reports->values();
     }
     
 
@@ -96,8 +111,9 @@ class DownloadReport extends Component
             return;
         }
 
-        $filePath = 'reports/' . $this->selectedFile;
-        $filename = $this->selectedFile; // Simpan nama file sebelum direset
+        $folder = $this->getReportFolder();
+        $filePath = $folder . '/' . $this->selectedFile;
+        $filename = $this->selectedFile;
 
         if (Storage::exists($filePath)) {
             Storage::delete($filePath);
@@ -114,11 +130,10 @@ class DownloadReport extends Component
             ]);
         }
 
-        $this->selectedFile = null; // Reset setelah dikirim
+        $this->selectedFile = null;
         $this->resetPage();
     }
 
-    // Format ukuran file
     private function formatSize($bytes)
     {
         if ($bytes <= 0) return "0 B";
@@ -132,7 +147,8 @@ class DownloadReport extends Component
     public function render()
     {
         if (!$this->loaded) {
-            $files = collect(Storage::allFiles('reports'));
+            $folder = $this->getReportFolder();
+            $files = Storage::exists($folder) ? collect(Storage::allFiles($folder)) : collect();
             if (!empty($this->searchDate)) {
                 $dateFormatted = Carbon::parse($this->searchDate)->format('d-m-Y');
                 $files = $files->filter(fn($file) => str_contains($file, $dateFormatted));
@@ -147,8 +163,7 @@ class DownloadReport extends Component
 
         $reports = $this->getReports();
 
-        // Buat paginasi manual dengan `LengthAwarePaginator`
-        $currentPage = $this->currentPage; // Livewire butuh variabel currentPage
+        $currentPage = $this->currentPage;
         $paginatedReports = new LengthAwarePaginator(
             $reports->forPage($currentPage, $this->perPage),
             $reports->count(),

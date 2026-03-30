@@ -48,15 +48,17 @@ class Dashboard extends Component
 
         // Sertakan product_cache_version agar cache stale otomatis saat ada update produk (misal: toggle use_stock)
         $productVersion = Cache::get('product_cache_version', 1);
+        $activeBranch   = \Illuminate\Support\Facades\Session::get('active_branch_id', 'all');
 
-        // Key cache unik per filter + range + role/user + versi produk
+        // Key cache unik per filter + range + role/user + versi produk + branch active
         $cacheKey = sprintf(
-            'dashboard_stats:%s:%s:%s:%s:pv%s',
+            'dashboard_stats:%s:%s:%s:%s:pv%s:br%s',
             $this->filterType,
             $dates['start']->format('YmdHis'),
             $dates['end']->format('YmdHis'),
             $isAdmin ? 'admin' : 'user_' . $userId,
-            $productVersion
+            $productVersion,
+            $activeBranch
         );
 
         // Semua stats (termasuk visitor jika admin) dalam 1 cache block

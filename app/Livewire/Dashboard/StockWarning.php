@@ -22,7 +22,8 @@ class StockWarning extends Component
     {
         // Gunakan product_cache_version agar otomatis stale saat ada perubahan produk
         $version  = Cache::get('product_cache_version', 1);
-        $cacheKey = "stock_warning_v{$version}";
+        $activeBranch = \Illuminate\Support\Facades\Session::get('active_branch_id', 'all');
+        $cacheKey = "stock_warning_br{$activeBranch}_v{$version}";
 
         $data = Cache::remember($cacheKey, now()->addMinutes(5), function () {
             // Hanya produk yang menggunakan stok (use_stock = true)

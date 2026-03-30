@@ -3,6 +3,7 @@
 namespace App\Livewire\Dashboard;
 
 use App\Models\TransactionDetail;
+use App\Models\Branch;
 use Maatwebsite\Excel\Facades\Excel;
 use Barryvdh\DomPDF\Facade\Pdf;
 use App\Exports\TransactionExport;
@@ -13,6 +14,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 use Livewire\Attributes\Url;
 use Livewire\Component;
 
@@ -41,7 +43,9 @@ class Transaction extends Component
             $this->ttl = 3600;   // 1 jam (3600 detik integer format)
     
             $version = Cache::get('transaction_cache_version', 1);
-            $this->totalTransactions = Cache::remember("totalTransactions_paid_v{$version}", $this->ttl, function () {
+            $activeBranch = \Illuminate\Support\Facades\Session::get('active_branch_id', 'all');
+            
+            $this->totalTransactions = Cache::remember("totalTransactions_paid_br{$activeBranch}_v{$version}", $this->ttl, function () {
                 return TransactionDetail::whereHas('order', fn ($q) => $q->where('payment_status', 'PAID'))->count();
             });
              
@@ -101,10 +105,11 @@ class Transaction extends Component
             // Cache key unik berdasarkan versioning, search hash, limit, dan user ID (kalau bukan admin/owner)
             $version = Cache::get('transaction_cache_version', 1);
             $searchHash = md5($this->search);
+            $activeBranch = \Illuminate\Support\Facades\Session::get('active_branch_id', 'all');
             
             $cacheKey = $isAdminOrOwner 
-                ? "transactions_v{$version}_{$searchHash}_{$this->limit}" 
-                : "transactions_user_v{$version}_{$userId}_{$searchHash}_{$this->limit}";
+                ? "transactions_br{$activeBranch}_v{$version}_{$searchHash}_{$this->limit}" 
+                : "transactions_user_br{$activeBranch}_v{$version}_{$userId}_{$searchHash}_{$this->limit}";
         
             $transactions = Cache::remember($cacheKey, $ttl, function () use ($userId, $isAdminOrOwner) {
                 return DB::table('transaction_details')
@@ -125,6 +130,9 @@ class Transaction extends Component
                         'products.name as product_name'
                     )
                     ->where('orders.payment_status', 'PAID')
+                    ->when(session()->has('active_branch_id'), function ($query) {
+                        $query->where('orders.branch_id', session('active_branch_id'));
+                    })
                     ->when(!$isAdminOrOwner, function ($query) use ($userId) {
                         $query->where('orders.user_id', $userId);
                     })
@@ -176,9 +184,15 @@ class Transaction extends Component
             
             $startDate = Carbon::parse($this->startDate)->startOfDay(); // 00:00:00
             $endDate = Carbon::parse($this->endDate)->endOfDay(); //23:59:59
-            $date = now()->format('d-m-Y'); 
+            $date = now()->format('d-m-Y');
+            $branchSlug = 'global';
+            $activeBranchId = session('active_branch_id');
+            if ($activeBranchId) {
+                $branch = Branch::find($activeBranchId);
+                $branchSlug = $branch ? Str::slug($branch->name) : 'cabang';
+            }
         
-            return Excel::download(new TransactionExport($startDate,$endDate), "transactions_{$date}.xlsx");
+            return Excel::download(new TransactionExport($startDate,$endDate, $activeBranchId), "transaksi_{$branchSlug}_{$date}.xlsx");
         }
     
         // Export PDF
@@ -197,9 +211,15 @@ class Transaction extends Component
             $startDate = Carbon::parse($this->startDate)->startOfDay(); // 00:00:00
             $endDate = Carbon::parse($this->endDate)->endOfDay(); // 23:59:59
             $date = now()->format('d-m-Y');
+            $branchSlug = 'global';
+            $activeBranchId = session('active_branch_id');
+            if ($activeBranchId) {
+                $branch = Branch::find($activeBranchId);
+                $branchSlug = $branch ? Str::slug($branch->name) : 'cabang';
+            }
             $userName = auth()->user()->name;
             
-            $transactions = TransactionDetail::with(['product', 'order.user'])
+            $transactions = TransactionDetail::with(['product', 'order.user', 'order.branch'])
                 ->whereHas('order', function ($query) use ($startDate, $endDate) {
                     $query->whereBetween('created_at', [$startDate, $endDate])
                           ->where('payment_status', 'PAID');
@@ -216,7 +236,7 @@ class Transaction extends Component
                 'userName' => $userName,
             ]);
         
-            return response()->streamDownload(fn() => print($pdf->output()), "transactions_{$date}.pdf");            
+            return response()->streamDownload(fn() => print($pdf->output()), "transaksi_{$branchSlug}_{$date}.pdf");            
         }
          
         // Queue Report
@@ -231,7 +251,7 @@ class Transaction extends Component
             $endDate = Carbon::parse($this->endDate)->endOfDay(); //23:59:59
             $userName = auth()->user()->name ?? 'Sistem';
     
-            GenerateTransactionReport::dispatch($startDate, $endDate, $type, $userName);
+            GenerateTransactionReport::dispatch($startDate, $endDate, $type, $userName, session('active_branch_id'));
 
             if (!$this->isDateRangeWithinYear) {
                 $this->addError('dateRange', 'Rentang tanggal tidak boleh lebih dari 1 tahun.');

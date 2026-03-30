@@ -85,7 +85,7 @@
                     <span class="flex-1 ms-3 whitespace-nowrap">Arus Kas</span>
                 </a>
         
-                @hasrole('admin|owner')
+                @hasrole('admin|owner|kasir')
                 <a 
                     @if (Request::is('dashboard/reports'))
                         class="flex items-center p-2 rounded-lg bg-yellow-300 text-dark"
@@ -165,11 +165,11 @@
             </ul>
         </li>
 
+        @hasrole('admin|owner')
         <div class="text-center">
             <hr>
             <a class="text-center text-xs text-gray-500">Pengaturan</a>
         </div>
-        @hasrole('admin|owner')
         <li>
             <a 
                 class="flex items-center p-2 rounded-lg {{ Request::is('dashboard/store-settings') ? 'bg-yellow-300 text-dark' : 'hover:bg-gray-200' }}"
@@ -180,6 +180,19 @@
                 <span class="flex-1 ms-3 whitespace-nowrap">Pengaturan Toko</span>
             </a>
         </li>
+        
+        @if(auth()->user()->hasRole('owner') || (auth()->user()->hasRole('admin') && is_null(auth()->user()->branch_id)))
+        <li>
+            <a 
+                class="flex items-center p-2 rounded-lg {{ Request::is('dashboard/branches') ? 'bg-yellow-300 text-dark' : 'hover:bg-gray-200' }}"
+                @if (!Request::is('dashboard/branches'))
+                    wire:navigate href="/dashboard/branches"
+                @endif>
+                <i class="bi bi-diagram-3"></i>
+                <span class="flex-1 ms-3 whitespace-nowrap">Manajemen Cabang</span>
+            </a>
+        </li>
+        @endif
         
         <li>
             <a 

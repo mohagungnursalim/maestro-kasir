@@ -6,6 +6,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class Supplier extends Model
 {
+    use \App\Traits\BelongsToBranch;
+
     protected $guarded = ['id'];
     protected $table = 'suppliers';
 

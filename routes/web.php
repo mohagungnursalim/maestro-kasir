@@ -13,6 +13,7 @@ use App\Livewire\Dashboard\Supplier;
 use App\Livewire\Dashboard\Transaction;
 use App\Livewire\Dashboard\UnitManagement;
 use App\Livewire\Dashboard\UserManagement;
+use App\Livewire\Dashboard\BranchManagement;
 use App\Livewire\Dashboard\ExpenseManagement;
 use App\Livewire\DownloadReport;
 use Illuminate\Http\Request;
@@ -74,18 +75,29 @@ Route::get('/api/suppliers', [SupplierController::class, 'index'])
     ->name('api.suppliers');
 
 Route::get('/dashboard/reports', DownloadReport::class)
-    ->middleware(['auth','role:admin|owner'])
+    ->middleware(['auth','role:admin|owner|kasir'])
     ->name('reports');
 
-Route::get('/download-report/{filename}', function ($filename) {
-    $filePath = "reports/{$filename}";
+Route::get('/download-report/{filename}', function ($filename, \Illuminate\Http\Request $request) {
+    $folder = $request->query('folder');
+    
+    // Validasi: folder harus sesuai dengan branch aktif user
+    $activeBranchId = session('active_branch_id');
+    $expectedFolder = $activeBranchId ? "branch_{$activeBranchId}" : 'global';
+    
+    // Jika folder tidak diberikan atau tidak sesuai, gunakan folder branch aktif
+    if (!$folder || $folder !== $expectedFolder) {
+        $folder = $expectedFolder;
+    }
+
+    $filePath = "reports/{$folder}/{$filename}";
 
     if (Storage::exists($filePath)) {
         return Storage::download($filePath);
     }
 
     return abort(404, 'File not found.');
-})->middleware(['auth','role:admin|owner'])
+})->middleware(['auth','role:admin|owner|kasir'])
     ->name('download.report');
 
 Route::get('/dashboard/profile', Profile::class)
@@ -101,6 +113,11 @@ Route::post('/logout', function () {
 Route::get('/dashboard/users-management', UserManagement::class)
     ->middleware(['auth', 'role:admin|owner'])
     ->name('users.management');
+
+// Manajemen Cabang
+Route::get('/dashboard/branches', BranchManagement::class)
+    ->middleware(['auth', 'role:admin|owner'])
+    ->name('branches');
 
 Route::get('/dashboard/roles-permission', RolePermissionManagement::class)
     ->middleware(['auth','role:admin|owner'])

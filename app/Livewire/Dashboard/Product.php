@@ -62,10 +62,15 @@ class Product extends Component
     {  
         $this->ttl = 300; // Cache selama  5 menit (format integer aman)
         $version = Cache::get('product_cache_version', 1);
+        $activeBranch = \Illuminate\Support\Facades\Session::get('active_branch_id', 'all');
 
         // Ambil total produk dari cache atau database
-        $this->totalProducts = Cache::remember("totalProducts_v{$version}", $this->ttl, function () {
-            return DB::table('products')->count();
+        $this->totalProducts = Cache::remember("totalProducts_br{$activeBranch}_v{$version}", $this->ttl, function () {
+            return DB::table('products')
+                ->when(session()->has('active_branch_id'), function ($q) {
+                    $q->where('branch_id', session('active_branch_id'));
+                })
+                ->count();
         });
             
         $this->products = collect(); // Inisialisasi produk sebagai koleksi kosong
@@ -156,6 +161,9 @@ class Product extends Component
                       ->orWhere('products.description', 'like', '%' . $this->search . '%')
                       ->orWhere('suppliers.name', 'like', '%' . $this->search . '%'); // Pencarian nama supplier
                 });
+            })
+            ->when(session()->has('active_branch_id'), function ($q) {
+                $q->where('products.branch_id', session('active_branch_id'));
             })
             ->orderByDesc('products.sold_count')
             ->skip($offset)
@@ -507,7 +515,8 @@ class Product extends Component
     {
         $version = Cache::get('product_cache_version', 1);
         $searchHash = md5($this->search);
-        return "products_list_v{$version}_{$searchHash}_{$this->limit}";
+        $activeBranch = \Illuminate\Support\Facades\Session::get('active_branch_id', 'all');
+        return "products_list_br{$activeBranch}_v{$version}_{$searchHash}_{$this->limit}";
     }
 
     protected function cacheProducts($products)
@@ -544,7 +553,10 @@ class Product extends Component
                 'products.updated_at',
                 'products.supplier_id',
                 'suppliers.name as supplier_name'
-            );
+            )
+            ->when(session()->has('active_branch_id'), function ($q) {
+                $q->where('products.branch_id', session('active_branch_id'));
+            });
     }
 
     /**

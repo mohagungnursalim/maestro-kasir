@@ -43,12 +43,13 @@ class ProductSalesChart extends Component
         $userId  = Auth::id();
         $isAdmin = Auth::user()->hasRole('admin|owner');
 
-        // Key cache unik per range tanggal + role/user
+        $activeBranch = \Illuminate\Support\Facades\Session::get('active_branch_id', 'all');
         $cacheKey = sprintf(
-            'product_sales:%s:%s:%s',
+            'product_sales:%s:%s:%s:br%s',
             $startDate->format('YmdHis'),
             $endDate->format('YmdHis'),
-            $isAdmin ? 'admin' : 'user_'.$userId
+            $isAdmin ? 'admin' : 'user_'.$userId,
+            $activeBranch
         );
 
         return Cache::remember($cacheKey, now()->addMinutes(5), function () use ($startDate, $endDate) {

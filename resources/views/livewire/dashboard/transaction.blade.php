@@ -69,14 +69,15 @@
                         <div
                             class="flex flex-col items-stretch justify-end flex-shrink-0 w-full space-y-2 md:w-auto md:flex-row md:space-y-0 md:items-center md:space-x-3">
                             
-                            @hasrole('admin|owner')
+                            @can('Unduh')
                             <!-- Modal Cetak Laporan-->
                             <button data-modal-target="static-modal-queue" data-modal-toggle="static-modal-queue"
                                 class="block text-white bg-gray-700 hover:bg-gray-800 focus:ring-4 focus:outline-none focus:ring-gray-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center"
                                 type="button">
                                 Cetak Laporan
                             </button>
-                            @endrole
+                            @endcan
+                            
 
                             <!-- Tombol Refresh Page -->
                             <a href="{{ route('transactions') }}" onclick="showLoading()"

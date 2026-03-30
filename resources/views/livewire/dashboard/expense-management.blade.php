@@ -414,6 +414,14 @@
             Livewire.on('deletedSuccess', () => {
                 Swal.fire({ toast: true, position: "top-end", showConfirmButton: false, timer: 3000, icon: "success", title: "Catatan Kas dihapus!" });
             });
+
+            Livewire.on('errorPayment', (msg) => {
+                Swal.fire({
+                    title: 'Gagal',
+                    text: msg[0],
+                    icon: 'error',
+                });
+            });
         });
     </script>
 </div>
