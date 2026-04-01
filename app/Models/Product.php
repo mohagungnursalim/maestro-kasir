@@ -24,4 +24,10 @@ class Product extends Model
     {
         return $this->hasMany(TransactionDetail::class, 'product_id');
     }
+
+    // Relasi ke ProductIngredient (1 produk bisa punya banyak bahan baku)
+    public function ingredients(): HasMany
+    {
+        return $this->hasMany(ProductIngredient::class, 'product_id');
+    }
 }
