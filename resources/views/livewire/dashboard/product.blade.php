@@ -398,6 +398,88 @@
                         </div>
                     </div>
 
+                    {{-- HPP (Harga Pokok Penjualan) Section - Multi Ingredient --}}
+                    <div class="sm:col-span-2">
+                        <div class="border border-indigo-200 rounded-lg p-4 bg-indigo-50/50">
+                            <h4 class="text-sm font-semibold text-indigo-800 mb-1 flex items-center gap-2">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
+                                </svg>
+                                Kalkulator HPP (Harga Pokok Penjualan)
+                            </h4>
+                            <p class="text-xs text-gray-500 mb-3">Tambahkan semua bahan baku produk ini untuk menghitung total modal per porsi.</p>
+
+                            {{-- Ingredient Rows --}}
+                            <div class="space-y-3">
+                                @foreach($ingredients as $i => $ingredient)
+                                    @include('livewire.dashboard.partials.ingredient-row', [
+                                        'prefix' => 'ingredients',
+                                        'index' => $i,
+                                        'ingredient' => $ingredient,
+                                        'recalcMethod' => 'recalculateAllHpp',
+                                        'removeMethod' => 'removeIngredient',
+                                        'canRemove' => count($ingredients) > 1
+                                    ])
+                                @endforeach
+                            </div>
+
+                            {{-- Tombol Tambah Bahan --}}
+                            <button type="button" wire:click="addIngredient"
+                                class="mt-3 w-full py-2 px-3 border-2 border-dashed border-indigo-300 rounded-lg text-indigo-600 text-xs font-medium hover:bg-indigo-100 hover:border-indigo-400 transition-colors flex items-center justify-center gap-1">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                                </svg>
+                                Tambah Bahan Lainnya
+                            </button>
+
+                            {{-- Target Margin --}}
+                            <div class="mt-3">
+                                <label class="block mb-1 text-xs font-medium text-gray-700">Target Margin Keuntungan (%)</label>
+                                <input wire:model.lazy='target_margin_percent' wire:change="recalculateAllHpp" type="number" step="0.01" max="99.99"
+                                    class="bg-white border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2"
+                                    placeholder="30">
+                                @error('target_margin_percent') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
+                            </div>
+
+                            {{-- Hasil Kalkulasi HPP Total --}}
+                            @if($totalCostPerServing > 0)
+                            <div class="mt-4 p-3 bg-white rounded-lg border border-indigo-200">
+                                <h5 class="text-xs font-semibold text-indigo-700 mb-2">📊 Ringkasan HPP ({{ count(array_filter($ingredients, fn($i) => !empty($i['ingredient_name']))) }} bahan)</h5>
+                                <div class="grid grid-cols-2 gap-2">
+                                    <div class="text-center">
+                                        <p class="text-xs text-gray-500">Total Modal/Porsi</p>
+                                        <p class="text-sm font-bold text-red-600">Rp{{ number_format($totalCostPerServing, 0, ',', '.') }}</p>
+                                    </div>
+                                    @if($suggestedPrice > 0)
+                                    <div class="text-center">
+                                        <p class="text-xs text-gray-500">Harga Jual Min.</p>
+                                        <p class="text-sm font-bold text-green-600">Rp{{ number_format($suggestedPrice, 0, ',', '.') }}</p>
+                                    </div>
+                                    @endif
+                                </div>
+
+                                @if($price && $totalCostPerServing > 0)
+                                    @php
+                                        $profit = $price - $totalCostPerServing;
+                                        $profitPercent = $totalCostPerServing > 0 ? (($profit / $price) * 100) : 0;
+                                        $isLoss = $profit < 0;
+                                    @endphp
+                                    <div class="mt-2 pt-2 border-t border-gray-200">
+                                        <div class="flex justify-between items-center">
+                                            <span class="text-xs text-gray-500">Laba/porsi:</span>
+                                            <span class="text-sm font-bold {{ $isLoss ? 'text-red-600' : 'text-green-600' }}">
+                                                {{ $isLoss ? '⚠️ RUGI' : '✅ UNTUNG' }}
+                                                Rp{{ number_format(abs($profit), 0, ',', '.') }}
+                                                ({{ number_format(abs($profitPercent), 1, ',', '.') }}%)
+                                            </span>
+                                        </div>
+                                    </div>
+                                @endif
+                            </div>
+                            @endif
+                        </div>
+                    </div>
+
                     @if ($settings->is_supplier)    
                     <div x-data="supplierSelect()"
                         x-init="fetchSuppliers(); window.addEventListener('addedSuccess', () => resetSupplier())"
@@ -645,6 +727,89 @@
                         </div>
                     </div>
 
+                    {{-- HPP (Harga Pokok Penjualan) Section - Edit Multi Ingredient --}}
+                    <div class="sm:col-span-2">
+                        <div class="border border-indigo-200 rounded-lg p-4 bg-indigo-50/50">
+                            <h4 class="text-sm font-semibold text-indigo-800 mb-1 flex items-center gap-2">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
+                                </svg>
+                                Kalkulator HPP (Harga Pokok Penjualan)
+                            </h4>
+                            <p class="text-xs text-gray-500 mb-3">Tambahkan semua bahan baku produk ini untuk menghitung total modal per porsi.</p>
+
+                            {{-- Ingredient Rows --}}
+                            <div class="space-y-3">
+                                @foreach($ingredientsUpdate as $i => $ingredient)
+                                    @include('livewire.dashboard.partials.ingredient-row', [
+                                        'prefix' => 'ingredientsUpdate',
+                                        'index' => $i,
+                                        'ingredient' => $ingredient,
+                                        'recalcMethod' => 'recalculateAllHppUpdate',
+                                        'removeMethod' => 'removeIngredientUpdate',
+                                        'canRemove' => count($ingredientsUpdate) > 1
+                                    ])
+                                @endforeach
+                            </div>
+
+                            {{-- Tombol Tambah Bahan --}}
+                            <button type="button" wire:click="addIngredientUpdate"
+                                class="mt-3 w-full py-2 px-3 border-2 border-dashed border-indigo-300 rounded-lg text-indigo-600 text-xs font-medium hover:bg-indigo-100 hover:border-indigo-400 transition-colors flex items-center justify-center gap-1">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                                </svg>
+                                Tambah Bahan Lainnya
+                            </button>
+
+                            {{-- Target Margin --}}
+                            <div class="mt-3">
+                                <label class="block mb-1 text-xs font-medium text-gray-700">Target Margin Keuntungan (%)</label>
+                                <input wire:model.lazy='targetMarginPercentUpdate' wire:change="recalculateAllHppUpdate" type="number" step="0.01" max="99.99"
+                                    class="bg-white border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2"
+                                    placeholder="30">
+                                @error('targetMarginPercentUpdate') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
+                            </div>
+
+                            {{-- Hasil Kalkulasi HPP Total --}}
+                            @if($totalCostPerServingUpdate > 0)
+                            <div class="mt-4 p-3 bg-white rounded-lg border border-indigo-200">
+                                <h5 class="text-xs font-semibold text-indigo-700 mb-2">📊 Ringkasan HPP ({{ count(array_filter($ingredientsUpdate, fn($i) => !empty($i['ingredient_name']))) }} bahan)</h5>
+                                <div class="grid grid-cols-2 gap-2">
+                                    <div class="text-center">
+                                        <p class="text-xs text-gray-500">Total Modal/Porsi</p>
+                                        <p class="text-sm font-bold text-red-600">Rp{{ number_format($totalCostPerServingUpdate, 0, ',', '.') }}</p>
+                                    </div>
+                                    @if($suggestedPriceUpdate > 0)
+                                    <div class="text-center">
+                                        <p class="text-xs text-gray-500">Harga Jual Min.</p>
+                                        <p class="text-sm font-bold text-green-600">Rp{{ number_format($suggestedPriceUpdate, 0, ',', '.') }}</p>
+                                    </div>
+                                    @endif
+                                </div>
+
+                                @if($priceUpdate && $totalCostPerServingUpdate > 0)
+                                    @php
+                                        $profitUpdate = $priceUpdate - $totalCostPerServingUpdate;
+                                        $profitPercentUpdate = $totalCostPerServingUpdate > 0 ? (($profitUpdate / $priceUpdate) * 100) : 0;
+                                        $isLossUpdate = $profitUpdate < 0;
+                                    @endphp
+                                    <div class="mt-2 pt-2 border-t border-gray-200">
+                                        <div class="flex justify-between items-center">
+                                            <span class="text-xs text-gray-500">Laba/porsi:</span>
+                                            <span class="text-sm font-bold {{ $isLossUpdate ? 'text-red-600' : 'text-green-600' }}">
+                                                {{ $isLossUpdate ? '⚠️ RUGI' : '✅ UNTUNG' }}
+                                                Rp{{ number_format(abs($profitUpdate), 0, ',', '.') }}
+                                                ({{ number_format(abs($profitPercentUpdate), 1, ',', '.') }}%)
+                                            </span>
+                                        </div>
+                                    </div>
+                                @endif
+                            </div>
+                            @endif
+                        </div>
+                    </div>
+
+
                     @if ($settings->is_supplier)      
                     <div x-data="supplierSelectUpdate()"
                         x-init='updateSupplier(@json(["id" => $supplier_idUpdate ?? null, "name" => $supplierName ?? ""]))'
@@ -826,6 +991,75 @@
                                 {{ $descriptionDetail }}
                             </p>
                         </div>
+
+                        {{-- HPP Detail Section - Multi Ingredient --}}
+                        @if(count($ingredientsDetail) > 0)
+                        <div class="mt-4 border border-indigo-200 rounded-lg p-4 bg-indigo-50/50">
+                            <h4 class="text-sm font-semibold text-indigo-800 mb-3 flex items-center gap-2">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
+                                </svg>
+                                Analisis HPP ({{ count($ingredientsDetail) }} bahan)
+                            </h4>
+
+                            {{-- Daftar Bahan --}}
+                            <div class="space-y-2">
+                                @foreach($ingredientsDetail as $ing)
+                                <div class="bg-white rounded-lg p-2 border border-gray-200">
+                                    <div class="flex justify-between items-center">
+                                        <span class="text-xs font-semibold text-gray-700">{{ $ing['ingredient_name'] }}</span>
+                                        <span class="text-xs font-bold text-indigo-700">Rp{{ number_format($ing['cost_per_serving'] ?? 0, 0, ',', '.') }}/porsi</span>
+                                    </div>
+                                    <p class="text-xs text-gray-500 mt-1">
+                                        Beli: Rp{{ number_format($ing['cost_price'], 0, ',', '.') }} / {{ $ing['cost_quantity'] }} {{ $ing['cost_unit'] }}
+                                        → {{ $ing['serving_size'] }} {{ $ing['serving_unit'] }}/porsi
+                                    </p>
+                                </div>
+                                @endforeach
+                            </div>
+
+                            {{-- Summary --}}
+                            <div class="mt-3 space-y-2 text-xs text-gray-600">
+                                @if($totalCostPerServingDetail > 0)
+                                <div class="flex justify-between font-bold border-t border-gray-300 pt-2">
+                                    <span>Total Modal/Porsi (HPP):</span>
+                                    <span class="text-red-600">Rp{{ number_format($totalCostPerServingDetail, 0, ',', '.') }}</span>
+                                </div>
+                                @endif
+                                @if($targetMarginPercentDetail)
+                                <div class="flex justify-between">
+                                    <span>Target Margin:</span>
+                                    <span class="font-medium">{{ $targetMarginPercentDetail }}%</span>
+                                </div>
+                                @endif
+                                @if($suggestedPriceDetail > 0)
+                                <div class="flex justify-between">
+                                    <span>Harga Jual Disarankan:</span>
+                                    <span class="font-bold text-green-600">Rp{{ number_format($suggestedPriceDetail, 0, ',', '.') }}</span>
+                                </div>
+                                @endif
+                            </div>
+
+                            @if($totalCostPerServingDetail > 0 && ($priceOriginalDetail ?? $priceDetail))
+                                @php
+                                    $detailProfit = ($priceOriginalDetail ?? $priceDetail) - $totalCostPerServingDetail;
+                                    $detailProfitPercent = $totalCostPerServingDetail > 0 ? (($detailProfit / ($priceOriginalDetail ?? $priceDetail)) * 100) : 0;
+                                    $detailIsLoss = $detailProfit < 0;
+                                @endphp
+                                <div class="mt-3 p-2 rounded-lg {{ $detailIsLoss ? 'bg-red-100 border border-red-300' : 'bg-green-100 border border-green-300' }}">
+                                    <div class="flex justify-between items-center">
+                                        <span class="text-xs {{ $detailIsLoss ? 'text-red-700' : 'text-green-700' }}">
+                                            {{ $detailIsLoss ? '⚠️ Status: RUGI' : '✅ Status: UNTUNG' }}
+                                        </span>
+                                        <span class="text-sm font-bold {{ $detailIsLoss ? 'text-red-700' : 'text-green-700' }}">
+                                            Rp{{ number_format(abs($detailProfit), 0, ',', '.') }}/porsi
+                                            ({{ number_format(abs($detailProfitPercent), 1, ',', '.') }}%)
+                                        </span>
+                                    </div>
+                                </div>
+                            @endif
+                        </div>
+                        @endif
                     </div>
                     @endif
                 </div>
