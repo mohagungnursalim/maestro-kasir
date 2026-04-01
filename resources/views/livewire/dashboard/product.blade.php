@@ -435,7 +435,7 @@
                             {{-- Target Margin --}}
                             <div class="mt-3">
                                 <label class="block mb-1 text-xs font-medium text-gray-700">Target Margin Keuntungan (%)</label>
-                                <input wire:model.lazy='target_margin_percent' wire:change="recalculateAllHpp" type="number" step="0.01" max="99.99"
+                                <input wire:model.live='target_margin_percent' wire:change="recalculateAllHpp" type="number" step="0.01" max="99.99"
                                     class="bg-white border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2"
                                     placeholder="30">
                                 @error('target_margin_percent') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror

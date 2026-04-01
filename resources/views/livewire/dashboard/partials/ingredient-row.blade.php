@@ -30,7 +30,7 @@
         {{-- Harga Beli --}}
         <div>
             <label class="block mb-1 text-xs font-medium text-gray-700">Harga Beli</label>
-            <input wire:model.lazy='{{ $prefix }}.{{ $index }}.cost_price' wire:change="{{ $recalcMethod }}" type="number" step="0.01"
+            <input wire:model.live.debounce.500ms='{{ $prefix }}.{{ $index }}.cost_price' wire:change="{{ $recalcMethod }}" type="number" step="0.01"
                 class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2"
                 placeholder="150000">
         </div>
@@ -38,7 +38,7 @@
         {{-- Jumlah Beli --}}
         <div>
             <label class="block mb-1 text-xs font-medium text-gray-700">Jumlah Beli</label>
-            <input wire:model.lazy='{{ $prefix }}.{{ $index }}.cost_quantity' wire:change="{{ $recalcMethod }}" type="number" step="0.001"
+            <input wire:model.live.debounce.500ms='{{ $prefix }}.{{ $index }}.cost_quantity' wire:change="{{ $recalcMethod }}" type="number" step="0.001"
                 class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2"
                 placeholder="20">
         </div>
@@ -46,7 +46,7 @@
         {{-- Satuan Beli --}}
         <div>
             <label class="block mb-1 text-xs font-medium text-gray-700">Satuan Beli</label>
-            <select wire:model='{{ $prefix }}.{{ $index }}.cost_unit' wire:change="{{ $recalcMethod }}"
+            <select wire:model.live.debounce.500ms='{{ $prefix }}.{{ $index }}.cost_unit' wire:change="{{ $recalcMethod }}"
                 class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2">
                 <option value="">Pilih</option>
                 <optgroup label="Berat">
@@ -74,7 +74,7 @@
         {{-- Ukuran Per Porsi --}}
         <div>
             <label class="block mb-1 text-xs font-medium text-gray-700">Per Porsi</label>
-            <input wire:model.lazy='{{ $prefix }}.{{ $index }}.serving_size' wire:change="{{ $recalcMethod }}" type="number" step="0.001"
+            <input wire:model.live.debounce.500ms='{{ $prefix }}.{{ $index }}.serving_size' wire:change="{{ $recalcMethod }}" type="number" step="0.001"
                 class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2"
                 placeholder="200">
         </div>
@@ -82,7 +82,7 @@
         {{-- Satuan Porsi --}}
         <div>
             <label class="block mb-1 text-xs font-medium text-gray-700">Satuan Porsi</label>
-            <select wire:model='{{ $prefix }}.{{ $index }}.serving_unit' wire:change="{{ $recalcMethod }}"
+            <select wire:model.live.debounce.500ms='{{ $prefix }}.{{ $index }}.serving_unit' wire:change="{{ $recalcMethod }}"
                 class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2">
                 <option value="">Pilih</option>
                 <optgroup label="Berat">
