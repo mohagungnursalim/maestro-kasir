@@ -29,15 +29,26 @@
                 </div>
         
                 <!-- Omzet Penjualan (murni dari transaksi) -->
-                <div class="p-4 bg-green-50 shadow rounded-lg border border-green-200">
+                <div class="p-4 bg-green-50 shadow rounded-lg border border-green-200 flex flex-col justify-between">
                     @if(!$loaded)
                         <div class="h-4 bg-green-200 rounded-full w-36 mb-3 animate-pulse"></div>
                         <div class="h-8 bg-green-200 rounded-full w-40 animate-pulse"></div>
-                        <div class="h-3 bg-green-200 rounded-full w-32 mt-2 animate-pulse"></div>
+                        <div class="h-10 bg-green-200 rounded w-full mt-3 animate-pulse"></div>
                     @else
-                        <h3 class="text-lg font-semibold text-green-700">Omzet Penjualan</h3>
-                        <p class="text-2xl font-bold text-green-600">Rp{{ number_format($totalOmzet, 0, ',', '.') }}</p>
-                        <p class="text-xs text-green-500 mt-1">Pendapatan dari transaksi</p>
+                        <div>
+                            <h3 class="text-lg font-semibold text-green-700">Omzet Penjualan</h3>
+                            <p class="text-2xl font-bold text-green-600">Rp{{ number_format($totalOmzet, 0, ',', '.') }}</p>
+                        </div>
+                        <div class="mt-3 flex justify-between items-center text-sm border-t border-green-200 pt-2">
+                            <div class="flex flex-col">
+                                <span class="text-green-700 text-xs">Tunai</span>
+                                <span class="font-semibold text-green-800">Rp{{ number_format($totalTunai, 0, ',', '.') }}</span>
+                            </div>
+                            <div class="flex flex-col text-right">
+                                <span class="text-green-700 text-xs">QRIS</span>
+                                <span class="font-semibold text-green-800">Rp{{ number_format($totalQris, 0, ',', '.') }}</span>
+                            </div>
+                        </div>
                     @endif
                 </div>
 
