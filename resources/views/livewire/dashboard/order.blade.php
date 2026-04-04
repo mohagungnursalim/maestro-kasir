@@ -896,7 +896,7 @@
                     
                                 <div>
                                     <label class="block mb-2 text-sm font-medium text-gray-900">Meja/Nama</label>
-                                    <input type="text" wire:model.live="desk_number"
+                                    <input type="text" wire:model.live.debounce.400ms="desk_number"
                                         class="block w-full p-2 border rounded-lg text-sm bg-gray-50"
                                         placeholder="Contoh: A1, 12, VIP-3">
                                 </div>
@@ -1042,14 +1042,35 @@
 
                                 @endif
 
-                                {{-- ==================== ONGKIR ==================== --}}
-                                @if(!empty($cart))
-                                <div x-data="{ open: @entangle('shippingEnabled').live }"
+                                {{-- ==================== ONGKIR ==================== --}}                         @if(!empty($cart))
+                                <div x-data="{
+                                        open: @entangle('shippingEnabled').live,
+                                        display: '',
+                                        raw: @entangle('shippingCost').live,
+
+                                        format(v) {
+                                            return v ? new Intl.NumberFormat('id-ID').format(v) : '';
+                                        },
+
+                                        init() {
+                                            this.$watch('raw', v => {
+                                                this.display = this.format(v);
+                                            });
+                                            // Sinkron awal
+                                            this.display = this.format(this.raw);
+                                        },
+
+                                        onInput(e) {
+                                            let v = e.target.value.replace(/[^0-9]/g, '');
+                                            this.display = this.format(v);
+                                            this.raw = v === '' ? 0 : parseInt(v);
+                                        }
+                                    }"
                                      class="rounded-lg border transition-all"
                                      :class="open ? 'border-orange-300 bg-orange-50' : 'border-gray-200 bg-white'"
                                 >
                                     <button type="button"
-                                        @click="open = !open; $wire.set('shippingEnabled', open)"
+                                        @click="open = !open; $wire.set('shippingEnabled', open); if (!open) { raw = 0; display = ''; }"
                                         class="w-full flex items-center justify-between px-3 py-2 text-sm font-semibold transition"
                                         :class="open ? 'text-orange-700' : 'text-gray-700'"
                                     >
@@ -1060,17 +1081,16 @@
                                         <span x-show="open" class="text-xs text-orange-600 font-bold">Aktif ✓</span>
                                     </button>
                                     <div x-show="open" x-transition class="px-3 pb-3">
-                                        <div class="flex items-center gap-2">
-                                            <span class="text-xs text-gray-500 whitespace-nowrap">Rp</span>
-                                            <input
-                                                type="number"
-                                                min="0"
-                                                wire:model.live.debounce.400ms="shippingCost"
-                                                class="w-full p-2 border border-orange-200 rounded-lg text-sm bg-white focus:ring-2 focus:ring-orange-300"
-                                                placeholder="0"
-                                            >
-                                        </div>
-                                        <p class="text-xs text-orange-500 mt-1">Nominal akan ditambahkan ke total</p>
+                                        <label class="block mb-1 text-xs text-gray-700 font-medium">Nominal Ongkir</label>
+                                        <input
+                                            type="text"
+                                            inputmode="numeric"
+                                            x-on:input="onInput($event)"
+                                            x-bind:value="display"
+                                            class="w-full p-2 border border-orange-200 rounded-lg text-sm bg-white focus:ring-2 focus:ring-orange-300 focus:outline-none"
+                                            placeholder="Contoh: 15.000"
+                                        >
+                                        <p class="text-xs text-gray-500 mt-1">Nominal akan ditambahkan ke total</p>
                                     </div>
                                 </div>
                                 @endif
