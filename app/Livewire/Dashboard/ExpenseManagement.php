@@ -7,6 +7,7 @@ use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\Attributes\On;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 
 class ExpenseManagement extends Component
 {
@@ -91,6 +92,7 @@ class ExpenseManagement extends Component
             'amount' => $validated['amount'],
         ]);
 
+        Cache::put('expense_cache_version', Cache::get('expense_cache_version', 1) + 1, now()->addDays(7));
         $this->dispatch('expenseUpdated');
         $this->dispatch('addedSuccess');
         $this->dispatch('refreshDashboard');
@@ -119,6 +121,7 @@ class ExpenseManagement extends Component
             'amount' => $validated['amount'],
         ]);
 
+        Cache::put('expense_cache_version', Cache::get('expense_cache_version', 1) + 1, now()->addDays(7));
         $this->dispatch('expenseUpdated');
         $this->dispatch('updatedSuccess');
         $this->dispatch('refreshDashboard');
@@ -135,6 +138,7 @@ class ExpenseManagement extends Component
         $expense = Expense::findOrFail($this->expenseId);
         $expense->delete();
 
+        Cache::put('expense_cache_version', Cache::get('expense_cache_version', 1) + 1, now()->addDays(7));
         $this->dispatch('expenseUpdated');
         $this->dispatch('deletedSuccess');
         $this->dispatch('refreshDashboard');

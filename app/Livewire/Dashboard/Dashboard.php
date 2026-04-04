@@ -14,6 +14,8 @@ class Dashboard extends Component
 {
     public $totalOrders;
     public $totalOmzet;      // Pendapatan murni dari penjualan
+    public $totalQris;       // Pendapatan QRIS
+    public $totalTunai;      // Pendapatan Tunai (CASH)
     public $totalNetCash;   // Saldo kas bersih = Omzet + Top Up - Pengeluaran
     public $totalProductsSold;
     public $totalExpenses;
@@ -46,18 +48,22 @@ class Dashboard extends Component
         $userId  = Auth::id();
         $isAdmin = Auth::user()->hasRole('admin|owner');
 
-        // Sertakan product_cache_version agar cache stale otomatis saat ada update produk (misal: toggle use_stock)
-        $productVersion = Cache::get('product_cache_version', 1);
-        $activeBranch   = \Illuminate\Support\Facades\Session::get('active_branch_id', 'all');
+        // Sertakan versi cache dari produk, transaksi, dan expense agar dashboard otomatis direfresh
+        $productVersion     = Cache::get('product_cache_version', 1);
+        $transactionVersion = Cache::get('transaction_cache_version', 1);
+        $expenseVersion     = Cache::get('expense_cache_version', 1);
+        $activeBranch       = \Illuminate\Support\Facades\Session::get('active_branch_id', 'all');
 
-        // Key cache unik per filter + range + role/user + versi produk + branch active
+        // Key cache unik per filter + range + role/user + versi + branch active
         $cacheKey = sprintf(
-            'dashboard_stats:%s:%s:%s:%s:pv%s:br%s',
+            'dashboard_stats:%s:%s:%s:%s:pv%s:tv%s:ev%s:br%s',
             $this->filterType,
             $dates['start']->format('YmdHis'),
             $dates['end']->format('YmdHis'),
             $isAdmin ? 'admin' : 'user_' . $userId,
             $productVersion,
+            $transactionVersion,
+            $expenseVersion,
             $activeBranch
         );
 
@@ -72,7 +78,12 @@ class Dashboard extends Component
                 $queryOrders->where('user_id', $userId);
             }
             
-            $ordersAggregates = (clone $queryOrders)->selectRaw('COUNT(id) as total_orders, COALESCE(SUM(grandtotal), 0) as total_sales')->first();
+            $ordersAggregates = (clone $queryOrders)->selectRaw("
+                COUNT(id) as total_orders, 
+                COALESCE(SUM(grandtotal), 0) as total_sales,
+                COALESCE(SUM(CASE WHEN upper(payment_method) = 'QRIS' THEN grandtotal ELSE 0 END), 0) as total_qris,
+                COALESCE(SUM(CASE WHEN upper(payment_method) IN ('CASH', 'TUNAI') THEN grandtotal ELSE 0 END), 0) as total_cash
+            ")->first();
 
             // Query 2: Quantity produk terjual
             $queryTransactions = TransactionDetail::join('orders', 'transaction_details.order_id', '=', 'orders.id')
@@ -104,6 +115,8 @@ class Dashboard extends Component
             $result = [
                 'totalOrders'       => (int) ($ordersAggregates->total_orders ?? 0),
                 'totalOmzet'        => $sales_omzet,                              // Pendapatan murni penjualan
+                'totalQris'         => (float) ($ordersAggregates->total_qris ?? 0),
+                'totalTunai'        => (float) ($ordersAggregates->total_cash ?? 0),
                 'totalNetCash'      => $sales_omzet + $total_in - $total_out,     // Saldo kas bersih
                 'totalExpenses'     => $total_out,
                 'totalTopUps'       => $total_in,
@@ -126,6 +139,8 @@ class Dashboard extends Component
         // Assign ke state Livewire
         $this->totalOrders       = $stats['totalOrders'];
         $this->totalOmzet        = $stats['totalOmzet'];
+        $this->totalQris         = $stats['totalQris'] ?? 0;
+        $this->totalTunai        = $stats['totalTunai'] ?? 0;
         $this->totalNetCash      = $stats['totalNetCash'];
         $this->totalExpenses     = $stats['totalExpenses'];
         $this->totalTopUps       = $stats['totalTopUps'];
