@@ -284,6 +284,13 @@
         </tr>
         @endif
 
+        @if ($order->shipping_cost > 0)
+        <tr>
+            <td class="label">Ongkir</td>
+            <td class="value">Rp{{ number_format($order->shipping_cost, 0, ',', '.') }}</td>
+        </tr>
+        @endif
+
         <tr class="total">
             <td class="label">TOTAL</td>
             <td class="value">Rp{{ number_format($order->grandtotal, 0, ',', '.') }}</td>

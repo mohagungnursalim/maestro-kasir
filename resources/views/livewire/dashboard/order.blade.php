@@ -166,7 +166,6 @@
                                                     <button type="button"
                                                         x-data
                                                         @click="$dispatch('open-add-note', { id: {{ $product->id }}, name: @js($product->name), sku: @js($product->sku), image: @js($product->image) })"
-                                                        onclick="playSelectSound()"
                                                         @if($isOutOfStock) disabled @endif class="relative w-full bg-gray-900 text-white py-2 px-1 rounded text-xs
                                                                 hover:bg-gray-800 transition
                                                                 disabled:bg-gray-300 disabled:cursor-not-allowed
@@ -965,10 +964,6 @@
                                         class="block w-full border-b text-sm py-2 bg-transparent">
                                         <option value="CASH">Tunai</option>
                                         <option value="QRIS">QRIS</option>
-                                        <option value="DEBIT_CARD">Debit</option>
-                                        <option value="BCA">BCA</option>
-                                        <option value="BRI">BRI</option>
-                                        <option value="MANDIRI">Mandiri</option>
                                     </select>
                                 </div>
                                 @endif
@@ -1047,7 +1042,38 @@
 
                                 @endif
 
-                           
+                                {{-- ==================== ONGKIR ==================== --}}
+                                @if(!empty($cart))
+                                <div x-data="{ open: @entangle('shippingEnabled').live }"
+                                     class="rounded-lg border transition-all"
+                                     :class="open ? 'border-orange-300 bg-orange-50' : 'border-gray-200 bg-white'"
+                                >
+                                    <button type="button"
+                                        @click="open = !open; $wire.set('shippingEnabled', open)"
+                                        class="w-full flex items-center justify-between px-3 py-2 text-sm font-semibold transition"
+                                        :class="open ? 'text-orange-700' : 'text-gray-700'"
+                                    >
+                                        <span class="flex items-center gap-2">
+                                            <i class="fas fa-shipping-fast"></i> Ongkos Kirim
+                                        </span>
+                                        <span x-show="!open" class="text-xs text-gray-400">Tap untuk aktifkan</span>
+                                        <span x-show="open" class="text-xs text-orange-600 font-bold">Aktif ✓</span>
+                                    </button>
+                                    <div x-show="open" x-transition class="px-3 pb-3">
+                                        <div class="flex items-center gap-2">
+                                            <span class="text-xs text-gray-500 whitespace-nowrap">Rp</span>
+                                            <input
+                                                type="number"
+                                                min="0"
+                                                wire:model.live.debounce.400ms="shippingCost"
+                                                class="w-full p-2 border border-orange-200 rounded-lg text-sm bg-white focus:ring-2 focus:ring-orange-300"
+                                                placeholder="0"
+                                            >
+                                        </div>
+                                        <p class="text-xs text-orange-500 mt-1">Nominal akan ditambahkan ke total</p>
+                                    </div>
+                                </div>
+                                @endif
 
                                 {{-- ==================== RINGKASAN ==================== --}}
                                 <dl class="flex justify-between">
@@ -1070,6 +1096,12 @@
                                 <dl class="flex justify-between">
                                     <dt>Pajak</dt>
                                     <dd class="text-red-500">Rp{{ number_format($tax,0,',','.') }}</dd>
+                                </dl>
+                                @endif
+                                @if ($shippingEnabled && $shippingCost > 0)
+                                <dl class="flex justify-between">
+                                    <dt class="flex items-center gap-1 text-orange-600"><i class="fas fa-shipping-fast text-xs"></i> Ongkir</dt>
+                                    <dd class="text-orange-600 font-bold">Rp{{ number_format($shippingCost,0,',','.') }}</dd>
                                 </dl>
                                 @endif
                                 <dl class="flex justify-between font-bold border-t pt-2">

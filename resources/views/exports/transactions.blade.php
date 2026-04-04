@@ -138,10 +138,11 @@
     </table>
 
     @php
-        $grandTotalOmset = 0; // Total murni penjualan produk (tanpa Pajak & diskon)
+        $grandTotalOmset  = 0; // Total murni penjualan produk (tanpa Pajak & diskon)
         $grandTotalDiskon = 0;
-        $grandTotalPajak = 0;
-        $grandTotalNett = 0;
+        $grandTotalPajak  = 0;
+        $grandTotalOngkir = 0;
+        $grandTotalNett   = 0;
     @endphp
 
     @foreach ($transactions as $order_id => $details)
@@ -164,17 +165,19 @@
                     // Total murni dari harga produk (tanpa diskon dan pajak)
                     $subtotalProduk = $details->sum(fn($item) => $item->quantity * $item->product->price);
 
-                    $grandTotalOmset += $subtotalProduk;
+                    $grandTotalOmset  += $subtotalProduk;
 
-                    $totalPay = $first->order->grandtotal ?? 0;
-                    $taxAmount = $first->order->tax ?? 0;
-                    $discountAmount = $first->order->discount ?? 0;
+                    $totalPay      = $first->order->grandtotal ?? 0;
+                    $taxAmount     = $first->order->tax ?? 0;
+                    $discountAmount= $first->order->discount ?? 0;
+                    $shippingAmount= (float) ($first->order->shipping_cost ?? 0);
 
                     $grandTotalDiskon += $discountAmount;
-                    $grandTotalPajak += $taxAmount;
-                    $grandTotalNett += $totalPay;
+                    $grandTotalPajak  += $taxAmount;
+                    $grandTotalOngkir += $shippingAmount;
+                    $grandTotalNett   += $totalPay;
 
-                    $base = $totalPay - $taxAmount;
+                    $base = $totalPay - $taxAmount - $shippingAmount;
                     $taxPercentage = $base > 0 ? round(($taxAmount / $base) * 100) : 0;
 
                     $originalPrice = $subtotalProduk;
@@ -253,8 +256,13 @@
                     </td>
                 </tr>
                 <tr>
-                    <td colspan="7" class="bold center">Total Bayar (Setelah Diskon + Pajak): Rp{{ number_format($totalPay, 0, ',', '.') }}</td>
+                    <td colspan="7" class="bold center">Total Bayar (Setelah Diskon + Pajak + Ongkir): Rp{{ number_format($totalPay, 0, ',', '.') }}</td>
                 </tr>
+                @if ($shippingAmount > 0)
+                <tr>
+                    <td colspan="7" class="bold center">Ongkir: Rp{{ number_format($shippingAmount, 0, ',', '.') }}</td>
+                </tr>
+                @endif
                 <tr>
                     <td colspan="7" class="bold center">
                         @if(($first->order->payment_method ?? '') === 'QRIS')
@@ -300,6 +308,9 @@
                 -
             @endif
         </p>
+        @if((float)$grandTotalOngkir > 0)
+        <p style="margin: 0; padding-top: 4px;">Total Ongkir: Rp{{ number_format($grandTotalOngkir, 0, ',', '.') }}</p>
+        @endif
         <hr style="width: 300px; margin-left: auto; margin-right: 0;">
         <p style="margin: 0; font-size: 18px;">Total Pendapatan Bersih: Rp{{ number_format($grandTotalNett, 0, ',', '.') }}</p>
     </div>
