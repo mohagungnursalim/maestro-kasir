@@ -342,6 +342,13 @@
         </tr>
         @endif
 
+        @if (!empty($billData['shipping_cost']) && $billData['shipping_cost'] > 0)
+        <tr>
+            <td class="label">Ongkir</td>
+            <td class="value">Rp{{ number_format($billData['shipping_cost'], 0, ',', '.') }}</td>
+        </tr>
+        @endif
+
         <tr class="total">
             <td class="label">TOTAL</td>
             <td class="value">Rp{{ number_format($billData['total'], 0, ',', '.') }}</td>

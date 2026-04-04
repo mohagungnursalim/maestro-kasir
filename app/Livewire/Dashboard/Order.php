@@ -40,8 +40,10 @@ class Order extends Component
     
     public $familyDiscount = false; // Diskon 100% family
     public $friendDiscount = false; // Diskon 20% teman
-    
-    
+
+    public $shippingEnabled = false; // Toggle ongkir
+    public $shippingCost = 0;        // Biaya ongkir
+
     public $cart = []; // Keranjang belanja
     public $cartNotEmpty = false; // Status keranjang belanja
     public $subtotal = 0; // Subtotal belanja
@@ -284,6 +286,22 @@ class Order extends Component
         $this->calculateTotal();
     }
 
+    // Toggle ongkir
+    public function updatedShippingEnabled($value)
+    {
+        if (!$value) {
+            $this->shippingCost = 0;
+        }
+        $this->calculateTotal();
+    }
+
+    // Saat nominal ongkir diubah
+    public function updatedShippingCost($value)
+    {
+        $this->shippingCost = max(0, (float) $value);
+        $this->calculateTotal();
+    }
+
     // Hitung total belanja
     public function calculateTotal()
     {
@@ -306,10 +324,13 @@ class Order extends Component
             $tax = ($subtotalAfterDiscount * $this->tax_percentage) / 100;
         }
 
+        // Ongkir hanya ditambahkan jika diaktifkan
+        $shipping = $this->shippingEnabled ? (float) $this->shippingCost : 0;
+
         $this->subtotal = $subtotal;
         $this->tax = $tax;
-        $this->total = $subtotalAfterDiscount + $tax;
-        
+        $this->total = $subtotalAfterDiscount + $tax + $shipping;
+
         if ($this->total == 0) {
             $this->customerMoney = 0;
         } elseif ($this->total > 0 && $this->customerMoney === 0 && $this->payment_method === 'CASH') {
@@ -370,15 +391,18 @@ class Order extends Component
             $discountAmount = ($subtotalBefore * 20) / 100;
         }
 
+        $shipping = $this->shippingEnabled ? (float) $this->shippingCost : 0;
+
         $billData = [
-            'tanggal' => now()->format('d-m-Y H:i'),
-            'kasir' => Auth::user()->name ?? 'Owner',
-            'order_number' => $orderNumber,
-            'items' => [],
-            'subtotal' => 0,
-            'discount' => $discountAmount,
-            'tax' => $this->tax,
-            'total' => $this->total,
+            'tanggal'       => now()->format('d-m-Y H:i'),
+            'kasir'         => Auth::user()->name ?? 'Owner',
+            'order_number'  => $orderNumber,
+            'items'         => [],
+            'subtotal'      => 0,
+            'discount'      => $discountAmount,
+            'tax'           => $this->tax,
+            'shipping_cost' => $shipping,
+            'total'         => $this->total,
         ];
 
         $subtotal = 0;
@@ -748,14 +772,19 @@ class Order extends Component
 
                 
                 // =========== LOGIC BAYAR / SIMPAN ==========
+                $shippingCost = $this->shippingEnabled ? decimal($this->shippingCost) : null;
+                // Tambahkan ongkir ke total jika aktif
+                $totalWithShipping = $shippingCost ? bcadd($total, $shippingCost, 2) : $total;
+
                 $orderBaseUpdate = [
-                    'order_type' => $this->order_type,
-                    'desk_number' => $this->desk_number,
-                    'note' => $this->note,
-                    'payment_method' => $this->payment_method,
-                    'discount' => $discount,
-                    'tax' => $tax,
-                    'grandtotal' => $total,
+                    'order_type'    => $this->order_type,
+                    'desk_number'   => $this->desk_number,
+                    'note'          => $this->note,
+                    'payment_method'=> $this->payment_method,
+                    'discount'      => $discount,
+                    'tax'           => $tax,
+                    'shipping_cost' => $shippingCost,
+                    'grandtotal'    => $totalWithShipping,
                 ];
                 
                 if ($this->payment_mode === 'PAY_NOW') {
@@ -874,6 +903,12 @@ class Order extends Component
             $tax = decimal($this->tax);
             $total = bcadd($total, $tax, 2);
 
+            // Tambahkan ongkir jika aktif
+            $shippingCost = $this->shippingEnabled ? decimal($this->shippingCost) : null;
+            if ($shippingCost) {
+                $total = bcadd($total, $shippingCost, 2);
+            }
+
             if (bccomp($total, '0', 2) === -1 && !$this->familyDiscount) {
                 throw new \Exception("Total tidak valid");
             }
@@ -902,20 +937,21 @@ class Order extends Component
 
             // CREATE ORDER
             $order = ModelsOrder::create([
-                'user_id' => Auth::id(),
-                'order_number' => $this->generateOrderNumber(),
-                'order_type' => $this->order_type,
-                'desk_number' => $this->desk_number,
-                'note' => $this->note,
+                'user_id'        => Auth::id(),
+                'order_number'   => $this->generateOrderNumber(),
+                'order_type'     => $this->order_type,
+                'desk_number'    => $this->desk_number,
+                'note'           => $this->note,
                 'payment_method' => $this->payment_method,
-                'discount' => $discount,
-                'tax' => $tax,
+                'discount'       => $discount,
+                'tax'            => $tax,
+                'shipping_cost'  => $shippingCost,
                 'customer_money' => $customerMoney,
-                'change' => $change,
-                'grandtotal' => $total,
+                'change'         => $change,
+                'grandtotal'     => $total,
                 'payment_status' => $paymentStatus,
-                'payment_mode' => $this->payment_mode,
-                'paid_at' => $paidAt,
+                'payment_mode'   => $this->payment_mode,
+                'paid_at'        => $paidAt,
             ]);
 
             // INSERT DETAIL + POTONG STOK
@@ -1000,6 +1036,8 @@ class Order extends Component
         $this->splitCount = 2;
         $this->familyDiscount = false; // Reset diskon family
         $this->friendDiscount = false; // Reset diskon teman
+        $this->shippingEnabled = false; // Reset ongkir
+        $this->shippingCost = 0;
 
         $this->selectedUnpaidOrderId = null;
     }
