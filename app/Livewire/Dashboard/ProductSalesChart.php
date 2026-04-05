@@ -7,34 +7,41 @@ use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
+use Livewire\Attributes\On;
 use Livewire\Component;
 
 class ProductSalesChart extends Component
 {
-    public $dailySales = []; // Data penjualan hari ini
-    public $weeklySales = []; // Data penjualan minggu ini
-    public $monthlySales = []; // Data penjualan bulan ini
-    public $yearlySales = []; // Data penjualan tahun ini
+    public $salesData = [];
+    public $filterType = 'today';
 
     public function mount()
     {
-        $this->loadSalesData();
+        $this->loadData();
     }
 
-    public function loadSalesData()
+    #[On('globalFilterUpdated')]
+    public function updateFilter($filter)
     {
-        // Hari ini (00:00:00 - 23:59:59)
-        $this->dailySales = $this->getSalesData(Carbon::today()->startOfDay(), Carbon::today()->endOfDay());
-    
-        // Minggu ini
-        $this->weeklySales = $this->getSalesData(Carbon::now()->startOfWeek(), Carbon::now()->endOfWeek());
-    
-        // Bulan ini
-        $this->monthlySales = $this->getSalesData(Carbon::now()->startOfMonth(), Carbon::now()->endOfMonth());
-    
-        // Tahun ini
-        $this->yearlySales = $this->getSalesData(Carbon::now()->startOfYear(), Carbon::now()->endOfYear());
-   
+        $this->filterType = $filter;
+        $this->loadData();
+        $this->dispatch('productSalesDataUpdated', salesData: $this->salesData);
+    }
+
+    public function loadData()
+    {
+        $dates = $this->getDateRange($this->filterType);
+        $this->salesData = $this->getSalesData($dates['start'], $dates['end']);
+    }
+
+    protected function getDateRange($type)
+    {
+        return match ($type) {
+            'week'  => ['start' => Carbon::now()->startOfWeek(), 'end' => Carbon::now()->endOfWeek()],
+            'month' => ['start' => Carbon::now()->startOfMonth(), 'end' => Carbon::now()->endOfMonth()],
+            'year'  => ['start' => Carbon::now()->startOfYear(), 'end' => Carbon::now()->endOfYear()],
+            default => ['start' => Carbon::today(), 'end' => Carbon::today()->endOfDay()],
+        };
     }
     
     // Mengambil data penjualan produk berdasarkan rentang tanggal

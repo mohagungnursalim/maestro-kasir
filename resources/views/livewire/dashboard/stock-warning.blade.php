@@ -8,9 +8,9 @@
         </div>
 
         @if (!$productExists)
-            <p class="text-gray-500 text-center py-4">Belum ada produk yang menggunakan stok 😶‍🌫️</p>
+            <p class="text-gray-500 text-center py-4">Belum ada produk yang menggunakan stok <i class="fas fa-box-open ml-2 text-gray-400"></i></p>
         @elseif (count($lowStockProducts) === 0)
-            <p class="text-gray-500 text-center py-4">Semua stok aman 🎉</p>
+            <p class="text-gray-500 text-center py-4">Semua stok aman</p>
         @else
             <table class="w-full border-collapse">
                 <thead>

@@ -1,53 +1,30 @@
 <div class="bg-white shadow-md rounded-lg p-4">
     <h3 class="text-lg font-semibold text-gray-700 mb-4">Produk Terlaris</h3>
 
-    <!-- Tab Filter (Select List) -->
-    <div class="mb-4">
-        <select id="chartFilter" name="chartFilter" class="px-4 py-2 border rounded bg-white text-gray-700">
-            <option value="daily">Hari Ini</option>
-            <option value="weekly">Minggu Ini</option>
-            <option value="monthly">Bulan Ini</option>
-            <option value="yearly">Tahun Ini</option>
-        </select>
-    </div>
-
     <!-- Chart Canvas -->
-    <div class="mx-auto">
+    <div class="mx-auto" wire:ignore>
         <canvas id="salesChart"></canvas>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-    <script>
-        document.getElementById("chartFilter").addEventListener("change", function () {
-            if (typeof updateChart === "function") {
-                updateChart(this.value);
-            }
-        });
-    </script>
     
     <script>
-        function initChart() {
+        function initProductSalesChart() {
             setTimeout(() => {
                 const ctx = document.getElementById("salesChart")?.getContext("2d");
-                if (!ctx) return; // Cegah error jika elemen tidak ditemukan
+                if (!ctx) return;
     
                 if (window.salesChart instanceof Chart) {
                     window.salesChart.destroy();
                 }
     
-                let salesData = {
-                    daily: @json($dailySales),
-                    weekly: @json($weeklySales),
-                    monthly: @json($monthlySales),
-                    yearly: @json($yearlySales),
-                };
+                let salesData = @json($salesData);
     
-                function getChartData(type) {
+                function applyChartData(dataArray) {
                     return {
-                        labels: (salesData[type] || []).map(item => item.name),
+                        labels: (dataArray || []).map(item => item.name),
                         datasets: [{
-                            data: (salesData[type] || []).map(item => item.total),
+                            data: (dataArray || []).map(item => item.total),
                             backgroundColor: [
                                 'rgba(54, 162, 235, 0.6)',
                                 'rgba(75, 192, 192, 0.6)',
@@ -69,12 +46,16 @@
     
                 window.salesChart = new Chart(ctx, {
                     type: 'bar',
-                    data: getChartData('daily'),
+                    data: applyChartData(salesData),
                     options: {
                         responsive: true,
                         scales: {
                             y: {
-                                beginAtZero: true
+                                beginAtZero: true,
+                                ticks: {
+                                    stepSize: 1,
+                                    callback: v => Number.isInteger(v) ? v : ''
+                                }
                             }
                         },
                         plugins: {
@@ -85,19 +66,17 @@
                     }
                 });
     
-                window.updateChart = function (type) {
+                window.addEventListener('productSalesDataUpdated', (e) => {
+                    const freshData = e.detail.salesData;
                     if (window.salesChart) {
-                        window.salesChart.data = getChartData(type);
+                        window.salesChart.data = applyChartData(freshData);
                         window.salesChart.update();
                     }
-                };
+                });
             }, 300);
         }
     
-        document.addEventListener("livewire:navigated", initChart);
-        document.addEventListener("DOMContentLoaded", initChart);
+        document.addEventListener("livewire:navigated", initProductSalesChart);
+        document.addEventListener("DOMContentLoaded", initProductSalesChart);
     </script>
-    
-
-
 </div>

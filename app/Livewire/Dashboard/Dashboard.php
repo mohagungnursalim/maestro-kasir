@@ -21,6 +21,12 @@ class Dashboard extends Component
     public $totalExpenses;
     public $totalTopUps;
 
+    // New metrics
+    public $avgOrderValue  = 0;   // AOV: rata-rata belanja per transaksi
+    public $avgDiscount    = 0;   // Rata-rata diskon per order
+    public $yesterdayOmzet = 0;   // Omzet hari kemarin (hanya untuk filter 'today')
+    public $omzetGrowth    = null; // Persentase pertumbuhan vs periode sebelumnya (null = N/A)
+
     // Visitor stats
     public $totalPageViews;
     public $totalUniqueVisitors;
@@ -79,10 +85,12 @@ class Dashboard extends Component
             }
             
             $ordersAggregates = (clone $queryOrders)->selectRaw("
-                COUNT(id) as total_orders, 
+                COUNT(id) as total_orders,
                 COALESCE(SUM(grandtotal), 0) as total_sales,
                 COALESCE(SUM(CASE WHEN upper(payment_method) = 'QRIS' THEN grandtotal ELSE 0 END), 0) as total_qris,
-                COALESCE(SUM(CASE WHEN upper(payment_method) IN ('CASH', 'TUNAI') THEN grandtotal ELSE 0 END), 0) as total_cash
+                COALESCE(SUM(CASE WHEN upper(payment_method) IN ('CASH', 'TUNAI') THEN grandtotal ELSE 0 END), 0) as total_cash,
+                COALESCE(AVG(grandtotal), 0) as avg_order_value,
+                COALESCE(AVG(discount), 0) as avg_discount
             ")->first();
 
             // Query 2: Quantity produk terjual
@@ -114,16 +122,34 @@ class Dashboard extends Component
 
             $result = [
                 'totalOrders'       => (int) ($ordersAggregates->total_orders ?? 0),
-                'totalOmzet'        => $sales_omzet,                              // Pendapatan murni penjualan
+                'totalOmzet'        => $sales_omzet,
                 'totalQris'         => (float) ($ordersAggregates->total_qris ?? 0),
                 'totalTunai'        => (float) ($ordersAggregates->total_cash ?? 0),
-                'totalNetCash'      => $sales_omzet + $total_in - $total_out,     // Saldo kas bersih
+                'totalNetCash'      => $sales_omzet + $total_in - $total_out,
                 'totalExpenses'     => $total_out,
                 'totalTopUps'       => $total_in,
                 'totalProductsSold' => (int) ($salesAggregates->total_qty ?? 0),
+                'avgOrderValue'     => (float) ($ordersAggregates->avg_order_value ?? 0),
+                'avgDiscount'       => (float) ($ordersAggregates->avg_discount ?? 0),
             ];
 
-            // Query 3 (admin only): Visitor stats digabung jadi 1 query dengan selectRaw
+            // Query 4: Yesterday / previous period comparison
+            $prevDates = $this->getPreviousPeriodRange($this->filterType, $dates['start'], $dates['end']);
+            $prevQuery = Order::whereBetween('created_at', [$prevDates['start'], $prevDates['end']])
+                ->where('payment_status', 'PAID');
+            if (!$isAdmin) {
+                $prevQuery->where('user_id', $userId);
+            }
+            if (session()->has('active_branch_id')) {
+                $prevQuery->where('branch_id', session('active_branch_id'));
+            }
+            $prevOmzet = (float) ($prevQuery->sum('grandtotal') ?? 0);
+            $result['yesterdayOmzet'] = $prevOmzet;
+            $result['omzetGrowth']    = $prevOmzet > 0
+                ? round((($sales_omzet - $prevOmzet) / $prevOmzet) * 100, 1)
+                : ($sales_omzet > 0 ? 100.0 : null);
+
+            // Query 5 (admin only): Stats Pengunjung
             if ($isAdmin) {
                 $visitorAggregates = Visitor::whereBetween('visited_at', [$dates['start'], $dates['end']])
                     ->selectRaw('COUNT(*) as total_views, COUNT(DISTINCT ip_address) as unique_visitors')
@@ -145,6 +171,10 @@ class Dashboard extends Component
         $this->totalExpenses     = $stats['totalExpenses'];
         $this->totalTopUps       = $stats['totalTopUps'];
         $this->totalProductsSold = $stats['totalProductsSold'];
+        $this->avgOrderValue     = $stats['avgOrderValue'] ?? 0;
+        $this->avgDiscount       = $stats['avgDiscount'] ?? 0;
+        $this->yesterdayOmzet    = $stats['yesterdayOmzet'] ?? 0;
+        $this->omzetGrowth       = $stats['omzetGrowth'] ?? null;
 
         if ($isAdmin) {
             $this->totalPageViews      = $stats['totalPageViews'] ?? 0;
@@ -156,17 +186,30 @@ class Dashboard extends Component
     public function getDateRange($type)
     {
         return match ($type) {
-            'week'  => ['start' => Carbon::now()->startOfWeek(), 'end' => Carbon::now()->endOfWeek()],
+            'week'  => ['start' => Carbon::now()->startOfWeek(),  'end' => Carbon::now()->endOfWeek()],
             'month' => ['start' => Carbon::now()->startOfMonth(), 'end' => Carbon::now()->endOfMonth()],
-            'year'  => ['start' => Carbon::now()->startOfYear(), 'end' => Carbon::now()->endOfYear()],
-            default => ['start' => Carbon::today(), 'end' => Carbon::today()->endOfDay()],
+            'year'  => ['start' => Carbon::now()->startOfYear(),  'end' => Carbon::now()->endOfYear()],
+            default => ['start' => Carbon::today(),               'end' => Carbon::today()->endOfDay()],
         };
+    }
+
+    /**
+     * Mengembalikan rentang periode sebelumnya untuk perbandingan (kemarin, minggu lalu, dst.)
+     */
+    protected function getPreviousPeriodRange(string $type, $currentStart, $currentEnd): array
+    {
+        $diff = $currentStart->diffInSeconds($currentEnd);
+        return [
+            'start' => $currentStart->copy()->subSeconds($diff + 1)->startOfDay(),
+            'end'   => $currentStart->copy()->subSecond(),
+        ];
     }
 
     // Mengupdate statistik ketika filter diubah
     public function updatedFilterType()
     {
         $this->updateStats();
+        $this->dispatch('globalFilterUpdated', filter: $this->filterType);
     }
 
     public function render()

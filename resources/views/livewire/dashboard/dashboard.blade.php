@@ -36,8 +36,19 @@
                         <div class="h-10 bg-green-200 rounded w-full mt-3 animate-pulse"></div>
                     @else
                         <div>
-                            <h3 class="text-lg font-semibold text-green-700">Omzet Penjualan</h3>
+                            <div class="flex items-start justify-between gap-1">
+                                <h3 class="text-lg font-semibold text-green-700">Omzet Penjualan</h3>
+                                @if ($omzetGrowth !== null)
+                                    @php $isUp = $omzetGrowth >= 0; @endphp
+                                    <span class="inline-flex items-center gap-1 text-xs font-bold px-1.5 py-0.5 rounded-full {{ $isUp ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-600' }}">
+                                        <i class="fas {{ $isUp ? 'fa-arrow-up' : 'fa-arrow-down' }}"></i> {{ abs($omzetGrowth) }}%
+                                    </span>
+                                @endif
+                            </div>
                             <p class="text-2xl font-bold text-green-600">Rp{{ number_format($totalOmzet, 0, ',', '.') }}</p>
+                            @if ($yesterdayOmzet > 0)
+                                <p class="text-xs text-green-500 mt-0.5">vs Rp{{ number_format($yesterdayOmzet, 0, ',', '.') }} sblmnya</p>
+                            @endif
                         </div>
                         <div class="mt-3 flex justify-between items-center text-sm border-t border-green-200 pt-2">
                             <div class="flex flex-col">
@@ -130,18 +141,45 @@
                 </div>
                 @endrole
             </div>
+
+            {{-- ── AOV + Avg Diskon row ─────────────────────────────────────────── --}}
+            @if ($loaded)
+            <div class="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <!-- Average Order Value -->
+                <div class="flex items-center gap-4 p-3 bg-purple-50 border border-purple-200 rounded-lg">
+                    <div class="text-3xl text-purple-600"><i class="fas fa-shopping-cart"></i></div>
+                    <div>
+                        <p class="text-xs text-purple-500 font-semibold uppercase tracking-wide">Rata-rata / Transaksi (AOV)</p>
+                        <p class="text-xl font-bold text-purple-700">Rp{{ number_format($avgOrderValue, 0, ',', '.') }}</p>
+                    </div>
+                </div>
+                <!-- Rata-rata Diskon -->
+                <div class="flex items-center gap-4 p-3 bg-amber-50 border border-amber-200 rounded-lg">
+                    <div class="text-3xl text-amber-500"><i class="fas fa-tag"></i></div>
+                    <div>
+                        <p class="text-xs text-amber-500 font-semibold uppercase tracking-wide">Rata-rata Diskon / Order</p>
+                        <p class="text-xl font-bold text-amber-700">Rp{{ number_format($avgDiscount, 0, ',', '.') }}</p>
+                    </div>
+                </div>
+            </div>
+            @endif
         </div>
     
         @livewire('dashboard.monthly-turnover-chart')
-        
 
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-6 mb-2">
+        {{-- ── Peak Hour + Payment Split ────────────────────────────────────── --}}
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-3">
+            @livewire('dashboard.peak-hour-chart')
+            @livewire('dashboard.payment-split-chart')
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-2">
 
             @livewire('dashboard.product-sales-chart')
+
             @livewire('dashboard.stock-warning')
 
         </div>
-
         
     </div>
     @endcan
