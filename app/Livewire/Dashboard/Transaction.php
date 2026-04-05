@@ -6,7 +6,7 @@ use App\Models\TransactionDetail;
 use App\Models\Branch;
 use Maatwebsite\Excel\Facades\Excel;
 use Barryvdh\DomPDF\Facade\Pdf;
-use App\Exports\TransactionExport;
+use App\Exports\TransactionWorkbook;
 use App\Jobs\GenerateTransactionReport;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
@@ -192,7 +192,7 @@ class Transaction extends Component
                 $branchSlug = $branch ? Str::slug($branch->name) : 'cabang';
             }
         
-            return Excel::download(new TransactionExport($startDate,$endDate, $activeBranchId), "transaksi_{$branchSlug}_{$date}.xlsx");
+            return Excel::download(new TransactionWorkbook($startDate, $endDate, $activeBranchId, auth()->user()->name), "transaksi_{$branchSlug}_{$date}.xlsx");
         }
     
         // Export PDF

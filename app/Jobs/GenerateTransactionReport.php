@@ -14,7 +14,7 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
-use App\Exports\TransactionExport;
+use App\Exports\TransactionWorkbook;
 use Carbon\Carbon;
 
 class GenerateTransactionReport implements ShouldQueue
@@ -57,7 +57,7 @@ class GenerateTransactionReport implements ShouldQueue
 
         if ($this->type === 'excel') {
             $filePath = "{$branchFolder}/transaksi_{$branchSlug}_{$date}.xlsx";
-            Excel::store(new TransactionExport($this->startDate, $this->endDate, $this->branchId), $filePath, 'local');
+            Excel::store(new TransactionWorkbook($this->startDate, $this->endDate, $this->branchId, $this->userName), $filePath, 'local');
         } else {
             
             $startDate = Carbon::parse($this->startDate)->startOfDay(); // 00:00:00
