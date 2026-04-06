@@ -799,6 +799,53 @@
                                 </div>
                             </div>
 
+                            {{-- Modal Konfirmasi Hapus Order Unpaid --}}
+                            <div x-data="{ show: false, orderId: null, orderNumber: '', orderDesk: '' }" x-on:open-delete-order-modal.window="show = true; orderId = $event.detail.id; orderNumber = $event.detail.number; orderDesk = $event.detail.desk;" x-show="show" x-cloak @keydown.window.escape.prevent
+                                class="fixed inset-0 z-50 flex items-center justify-center">
+                                <!-- Backdrop -->
+                                <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" @click="show = false"></div>
+
+                                <!-- Modal Box -->
+                                <div x-show="show" x-transition
+                                    class="relative bg-white w-full max-w-md rounded-xl shadow-2xl p-6">
+                                    
+                                    <!-- Icon -->
+                                    <div class="flex justify-center mb-4">
+                                        <div class="w-12 h-12 flex items-center justify-center rounded-full bg-red-100 text-red-600">
+                                            <i class="fas fa-trash-alt fa-2x"></i>
+                                        </div>
+                                    </div>
+
+                                    <!-- Title -->
+                                    <h2 class="text-lg font-bold text-center text-gray-800 mb-2">
+                                        Konfirmasi Hapus
+                                    </h2>
+
+                                    <!-- Desc -->
+                                    <p class="text-center text-gray-600 mb-6">
+                                        Yakin ingin menghapus pesanan <span class="font-bold text-gray-800" x-text="orderNumber"></span> (Meja/Nama: <span class="font-bold text-gray-800" x-text="orderDesk"></span>)? Tindakan ini tidak dapat dibatalkan.
+                                    </p>
+
+                                    <!-- Actions -->
+                                    <div class="flex justify-center gap-3">
+                                        <button @click="show = false"
+                                            class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition">
+                                            Batal
+                                        </button>
+
+                                        <button
+                                            type="button"
+                                            @click="$wire.deleteUnpaidOrder(orderId); show = false;"
+                                            class="inline-flex items-center justify-center
+                                                w-28 h-10
+                                                bg-red-600 text-white rounded-lg
+                                                hover:bg-red-700 transition">
+                                            Hapus
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
                             {{-- Modal Diskon --}}
                             <div x-data="{ show: false }" x-on:open-discount-modal.window="show = true" x-show="show" x-cloak @keydown.window.escape.prevent
                                 class="fixed inset-0 z-50 flex items-center justify-center">
@@ -1217,17 +1264,23 @@
 
                         <div class="space-y-1 max-h-[250px] overflow-y-auto custom-scrollbar">
                             @foreach($unpaidOrders as $order)
-                            <button wire:click="selectUnpaidOrder({{ $order->id }})"
-                                class="w-full text-left p-2 rounded border bg-white hover:bg-orange-100 transition flex items-center gap-2 text-xs">
-                                <div class="flex-1 min-w-0">
-                                    <div class="font-semibold text-[11px] truncate"> {{ $order->desk_number ?? '?' }}</div>
-                                    <div class="text-[10px] text-gray-500 truncate">{{ $order->order_number }}</div>
-                                </div>
-                                <div class="text-right">
-                                    <div class="text-[11px] font-extrabold text-orange-600">Rp{{ number_format($order->grandtotal,0,',','.') }}</div>
-                                    <div class="text-[10px] text-gray-400">{{ $order->created_at->locale('id')->diffForHumans() }}</div>
-                                </div>
-                            </button>
+                            <div class="flex items-center gap-1">
+                                <button wire:click="selectUnpaidOrder({{ $order->id }})"
+                                    class="flex-1 text-left p-2 rounded border bg-white hover:bg-orange-100 transition flex items-center gap-2 text-xs min-w-0">
+                                    <div class="flex-1 min-w-0">
+                                        <div class="font-semibold text-[11px] truncate"> {{ $order->desk_number ?? '?' }}</div>
+                                        <div class="text-[10px] text-gray-500 truncate">{{ $order->order_number }}</div>
+                                    </div>
+                                    <div class="text-right whitespace-nowrap">
+                                        <div class="text-[11px] font-extrabold text-orange-600">Rp{{ number_format($order->grandtotal,0,',','.') }}</div>
+                                        <div class="text-[10px] text-gray-400">{{ $order->created_at->locale('id')->diffForHumans() }}</div>
+                                    </div>
+                                </button>
+                                <button x-data @click="$dispatch('open-delete-order-modal', { id: {{ $order->id }}, number: '{{ $order->order_number }}', desk: '{{ $order->desk_number ?? '?' }}' })"
+                                    class="flex-shrink-0 p-2 rounded border bg-white text-red-500 hover:bg-red-50 hover:text-red-700 transition flex items-center justify-center h-[52px]">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
                             @endforeach
                         </div>
                     </div>

@@ -113,6 +113,18 @@ document.addEventListener('livewire:navigated', () => {
             });
         });
 
+        Livewire.on('successDeleteOrder', () => {
+            Swal.fire({
+                toast: true,
+                position: "top-end",
+                icon: "success",
+                title: "Pesanan berhasil dihapus!",
+                showConfirmButton: false,
+                timer: 3000,
+                timerProgressBar: true
+            });
+        });
+
         Livewire.on('errorPayment', () => {
             playErrorSound();
             Swal.fire({

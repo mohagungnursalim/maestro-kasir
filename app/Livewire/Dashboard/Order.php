@@ -1013,6 +1013,61 @@ class Order extends Component
         }
     }
 
+    // Hapus pesanan bayar nanti (unpaid)
+    public function deleteUnpaidOrder($orderId)
+    {
+        try {
+            DB::beginTransaction();
+
+            $order = ModelsOrder::with('transactionDetails')->where('id', $orderId)->where('payment_status', 'UNPAID')->firstOrFail();
+
+            // Kembalikan stok / kurangi sold_count
+            foreach ($order->transactionDetails as $item) {
+                $product = Product::find($item->product_id);
+                if ($product) {
+                    if ($product->use_stock ?? true) {
+                        $product->update([
+                            'stock' => DB::raw("stock + {$item->quantity}"),
+                            'sold_count' => DB::raw("sold_count - {$item->quantity}"),
+                        ]);
+                    } else {
+                        $product->update([
+                            'sold_count' => DB::raw("sold_count - {$item->quantity}"),
+                        ]);
+                    }
+                }
+            }
+
+            // Hapus detail transaksi dan order
+            $order->transactionDetails()->delete();
+            $order->delete();
+
+            DB::commit();
+
+            // Jika order yang sedang dipilih dihapus, reset keranjang
+            if ($this->selectedUnpaidOrderId == $orderId) {
+                $this->resetCart();
+            }
+
+            // Refresh cache stok
+            $this->refreshCacheStock();
+            $this->refreshCacheTransactionDetail();
+
+            // Refresh daftar produk di UI
+            $this->dispatch('refreshProductStock');
+
+            // Muat ulang daftar order bayar nanti
+            $this->loadUnpaidOrders();
+
+            $this->dispatch('successDeleteOrder');
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error($e->getMessage());
+            $this->dispatch('errorPayment', 'Gagal menghapus pesanan.');
+        }
+    }
+
     // Reset keranjang
     public function resetCart()
     {

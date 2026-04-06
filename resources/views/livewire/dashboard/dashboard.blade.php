@@ -63,16 +63,33 @@
                     @endif
                 </div>
 
-                <!-- Saldo Kas Bersih (Omzet + Top Up - Pengeluaran) -->
-                <div class="p-4 bg-blue-50 shadow rounded-lg border border-blue-200">
+                <!-- Uang Keuntungan (Omzet - Pengeluaran) -->
+                <div class="p-4 bg-emerald-50 shadow rounded-lg border border-emerald-200 flex flex-col justify-between">
+                    @if(!$loaded)
+                        <div class="h-4 bg-emerald-200 rounded-full w-36 mb-3 animate-pulse"></div>
+                        <div class="h-8 bg-emerald-200 rounded-full w-40 animate-pulse"></div>
+                        <div class="h-3 bg-emerald-200 rounded-full w-32 mt-auto animate-pulse"></div>
+                    @else
+                        <div>
+                            <h3 class="text-lg font-semibold text-emerald-700">Uang Keuntungan</h3>
+                            <p class="text-2xl font-bold text-emerald-600">Rp{{ number_format($uangKeuntungan, 0, ',', '.') }}</p>
+                        </div>
+                        <p class="text-xs text-emerald-500 mt-2 border-t border-emerald-200 pt-1">Omzet − Pengeluaran</p>
+                    @endif
+                </div>
+
+                <!-- Uang di Laci (Tunai + Top Up - Pengeluaran) -->
+                <div class="p-4 bg-blue-50 shadow rounded-lg border border-blue-200 flex flex-col justify-between">
                     @if(!$loaded)
                         <div class="h-4 bg-blue-200 rounded-full w-36 mb-3 animate-pulse"></div>
                         <div class="h-8 bg-blue-200 rounded-full w-40 animate-pulse"></div>
-                        <div class="h-3 bg-blue-200 rounded-full w-32 mt-2 animate-pulse"></div>
+                        <div class="h-3 bg-blue-200 rounded-full w-32 mt-auto animate-pulse"></div>
                     @else
-                        <h3 class="text-lg font-semibold text-blue-700">Saldo Kas Bersih</h3>
-                        <p class="text-2xl font-bold text-blue-600">Rp{{ number_format($totalNetCash, 0, ',', '.') }}</p>
-                        <p class="text-xs text-blue-500 mt-1">Omzet + Top Up − Keluar</p>
+                        <div>
+                            <h3 class="text-lg font-semibold text-blue-700">Uang di Laci</h3>
+                            <p class="text-2xl font-bold text-blue-600">Rp{{ number_format($uangDiLaci, 0, ',', '.') }}</p>
+                        </div>
+                        <p class="text-xs text-blue-500 mt-2 border-t border-blue-200 pt-1">Tunai + Top Up Kas − Keluar</p>
                     @endif
                 </div>
 
