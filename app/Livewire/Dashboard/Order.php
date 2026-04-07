@@ -7,6 +7,7 @@ use App\Models\Product;
 use App\Models\Order as ModelsOrder;
 use App\Models\StoreSetting;
 use App\Models\TransactionDetail;
+use App\Models\Expense;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Auth;
@@ -43,6 +44,9 @@ class Order extends Component
 
     public $shippingEnabled = false; // Toggle ongkir
     public $shippingCost = 0;        // Biaya ongkir
+    
+    public $platformFeeEnabled = false; // Toggle komisi platform
+    public $platformFee = 0;            // Komisi aplikasi (Gojek dll)
 
     public $cart = []; // Keranjang belanja
     public $cartNotEmpty = false; // Status keranjang belanja
@@ -163,6 +167,19 @@ class Order extends Component
     {
         if (isset($this->cart[$index])) {
             $this->cart[$index]['product_note'] = trim($note);
+        }
+    }
+
+    // Perbarui harga produk di keranjang
+    public function updateItemPrice($index, $price)
+    {
+        if (isset($this->cart[$index])) {
+            $price = max(0, (float) str_replace(['Rp', '.', ',', ' '], '', $price));
+            $this->cart[$index]['price'] = $price;
+            $this->cart[$index]['subtotal'] = $this->cart[$index]['quantity'] * $price;
+            $this->calculateTotal();
+            // recalculate change if necessary
+            $this->calculateChange();
         }
     }
 
@@ -576,6 +593,19 @@ class Order extends Component
         $this->payment_mode = 'PAY_NOW';
         // ensure payment method synced to a default of CASH when loading/resetting
         $this->payment_method = $order->payment_method ?? 'CASH';
+        
+        // Cek apakah ada komisi yang pernah dimasukkan
+        $expense = Expense::where('category', 'Komisi Aplikasi')
+            ->where('description', 'Potongan Komisi ' . $order->order_type . ' ' . $order->order_number)->first();
+            
+        if ($expense) {
+            $this->platformFeeEnabled = true;
+            $this->platformFee = $expense->amount;
+        } else {
+            $this->platformFeeEnabled = false;
+            $this->platformFee = 0;
+        }
+        
         $this->calculateTotal();
 
         // Notifikasi ke UI saat load ke cart
@@ -818,6 +848,24 @@ class Order extends Component
                     ]));
                 }
 
+                if ($this->platformFeeEnabled && $this->platformFee > 0) {
+                    Expense::updateOrCreate(
+                        [
+                            'user_id' => Auth::id(),
+                            'category' => 'Komisi Aplikasi',
+                            'description' => 'Potongan Komisi ' . $order->order_type . ' ' . $order->order_number,
+                        ],
+                        [
+                            'expense_date' => now()->format('Y-m-d'),
+                            'type' => 'out',
+                            'amount' => decimal($this->platformFee),
+                        ]
+                    );
+                } else {
+                    Expense::where('category', 'Komisi Aplikasi')
+                        ->where('description', 'Potongan Komisi ' . $order->order_type . ' ' . $order->order_number)
+                        ->delete();
+                }
 
                 DB::commit();
 
@@ -985,6 +1033,17 @@ class Order extends Component
                 }
             }
 
+            if ($this->platformFeeEnabled && $this->platformFee > 0) {
+                Expense::create([
+                    'user_id' => Auth::id(),
+                    'expense_date' => now()->format('Y-m-d'),
+                    'type' => 'out',
+                    'category' => 'Komisi Aplikasi',
+                    'description' => 'Potongan Komisi ' . $order->order_type . ' ' . $order->order_number,
+                    'amount' => decimal($this->platformFee),
+                ]);
+            }
+
             DB::commit();
 
             // UI RESET
@@ -1093,8 +1152,34 @@ class Order extends Component
         $this->friendDiscount = false; // Reset diskon teman
         $this->shippingEnabled = false; // Reset ongkir
         $this->shippingCost = 0;
+        
+        $this->platformFeeEnabled = false;
+        $this->platformFee = 0;
 
         $this->selectedUnpaidOrderId = null;
+    }
+
+    // Toggle komisi platform
+    public function updatedPlatformFeeEnabled($value)
+    {
+        if (!$value) {
+            $this->platformFee = 0;
+        }
+    }
+
+    // Saat komisi platform diubah
+    public function updatedPlatformFee($value)
+    {
+        $this->platformFee = max(0, (float) str_replace(['Rp', '.', ',', ' '], '', $value));
+    }
+
+    // Auto-hitung komisi platform (misal 20% + 1000)
+    public function calculatePlatformFee($percentage, $fixedAmount = 0)
+    {
+        if ($this->subtotal > 0) {
+            $fee = ($this->subtotal * $percentage / 100) + $fixedAmount;
+            $this->platformFee = $fee;
+        }
     }
     
 

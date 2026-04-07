@@ -114,11 +114,16 @@ class Dashboard extends Component
             }
             $expensesAggregates = $queryExpenses->selectRaw("
                 COALESCE(SUM(CASE WHEN type = 'out' THEN amount ELSE 0 END), 0) as total_out,
+                COALESCE(SUM(CASE WHEN type = 'out' AND category = 'Komisi Aplikasi' THEN amount ELSE 0 END), 0) as total_komisi,
                 COALESCE(SUM(CASE WHEN type = 'in' THEN amount ELSE 0 END), 0) as total_in
             ")->first();
 
             $total_out   = (float) ($expensesAggregates->total_out ?? 0);
             $total_in    = (float) ($expensesAggregates->total_in ?? 0);
+            
+            // Komisi Aplikasi is a digital deduction, so it shouldn't mathematically leave the physical cash drawer
+            $real_cash_out = $total_out - (float) ($expensesAggregates->total_komisi ?? 0);
+            
             $sales_omzet = (float) ($ordersAggregates->total_sales ?? 0);
 
             $result = [
@@ -127,7 +132,7 @@ class Dashboard extends Component
                 'totalQris'         => (float) ($ordersAggregates->total_qris ?? 0),
                 'totalTunai'        => (float) ($ordersAggregates->total_cash ?? 0),
                 'uangKeuntungan'    => $sales_omzet - $total_out,
-                'uangDiLaci'        => (float) ($ordersAggregates->total_cash ?? 0) + $total_in - $total_out,
+                'uangDiLaci'        => (float) ($ordersAggregates->total_cash ?? 0) + $total_in - $real_cash_out,
                 'totalExpenses'     => $total_out,
                 'totalTopUps'       => $total_in,
                 'totalProductsSold' => (int) ($salesAggregates->total_qty ?? 0),

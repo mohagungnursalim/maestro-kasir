@@ -517,9 +517,16 @@
                                                     </div>
 
                                                     <!-- SUBTOTAL -->
-                                                    <div class="text-right">
-                                                        <div class="text-[10px] text-gray-400">Subtotal</div>
-                                                        <div class="font-bold text-gray-900">
+                                                    <div class="text-right cursor-pointer group"
+                                                         @click="$dispatch('open-edit-price', {
+                                                             index: {{ $index }},
+                                                             price: @js($item['price']),
+                                                             name: @js($item['name'])
+                                                         })">
+                                                        <div class="text-[10px] text-gray-400 group-hover:text-blue-500 transition">
+                                                            Subtotal <i class="fas fa-edit ml-1"></i>
+                                                        </div>
+                                                        <div class="font-bold text-gray-900 group-hover:text-blue-600 transition">
                                                             Rp{{ number_format($item['price'] * $item['quantity'], 0, ',', '.') }}
                                                         </div>
                                                     </div>
@@ -799,6 +806,79 @@
                                 </div>
                             </div>
 
+                            {{-- Modal Edit Harga Satuan --}}
+                            <div x-data="{
+                                        show: false,
+                                        index: null,
+                                        price: '',
+                                        displayPrice: '',
+                                        productName: '',
+                                        
+                                        format(v) {
+                                            let val = v.toString().replace(/[^0-9]/g, '');
+                                            return val ? new Intl.NumberFormat('id-ID').format(val) : '';
+                                        },
+                                        
+                                        onInput(e) {
+                                            let v = e.target.value.replace(/[^0-9]/g, '');
+                                            this.displayPrice = this.format(v);
+                                            this.price = v;
+                                        }
+                                    }" x-on:open-edit-price.window="
+                                        show = true;
+                                        index = $event.detail.index;
+                                        let rawVal = Math.floor(Number($event.detail.price));
+                                        price = rawVal.toString();
+                                        displayPrice = format(price);
+                                        productName = $event.detail.name;
+                                    " x-show="show" x-cloak @keydown.window.escape.prevent class="fixed inset-0 z-50 flex items-center justify-center">
+                                <!-- Backdrop -->
+                                <div class="absolute inset-0 bg-black/50 backdrop-blur-sm"></div>
+
+                                <!-- Modal Box -->
+                                <div x-show="show" x-transition
+                                    class="relative bg-white w-full max-w-md rounded-xl shadow-2xl p-6">
+
+                                    <!-- Icon -->
+                                    <div class="flex justify-center mb-4">
+                                        <div class="w-16 h-16 flex items-center justify-center rounded-xl bg-green-100 text-green-600 shadow-sm border border-green-200">
+                                            <i class="fas fa-tag fa-2x"></i>
+                                        </div>
+                                    </div>
+
+                                    <!-- Title -->
+                                    <h2 class="text-lg font-bold text-center text-gray-800 mb-2">
+                                        Ubah Harga "<span x-text="productName"></span>"
+                                    </h2>
+
+                                    <!-- Desc -->
+                                    <p class="text-center text-gray-500 text-sm mb-4">
+                                        Sesuaikan harga satuan jika pesanan dari aplikasi Online (GoFood dll).
+                                    </p>
+
+                                    <div class="relative max-w-[200px] mx-auto">
+                                        <div class="absolute inset-y-0 start-0 flex items-center ps-4 pointer-events-none font-bold text-gray-500 text-lg">
+                                            Rp
+                                        </div>
+                                        <input type="text" inputmode="numeric" x-model="displayPrice" x-on:input="onInput($event)"
+                                            class="w-full border rounded-lg p-3 ps-12 text-lg font-bold focus:outline-none focus:ring-2 focus:ring-green-500 text-center"
+                                            placeholder="Harga Baru">
+                                    </div>
+
+                                    <!-- Actions -->
+                                    <div class="flex justify-center gap-3 mt-6">
+                                        <button @click="show = false"
+                                            class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition">
+                                            Batal
+                                        </button>
+
+                                        <button @click="$wire.updateItemPrice(index, price); show = false;" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition font-semibold">
+                                            Simpan Harga
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
                             {{-- Modal Konfirmasi Hapus Order Unpaid --}}
                             <div x-data="{ show: false, orderId: null, orderNumber: '', orderDesk: '' }" x-on:open-delete-order-modal.window="show = true; orderId = $event.detail.id; orderNumber = $event.detail.number; orderDesk = $event.detail.desk;" x-show="show" x-cloak @keydown.window.escape.prevent
                                 class="fixed inset-0 z-50 flex items-center justify-center">
@@ -935,6 +1015,12 @@
                                             class="py-2 rounded-lg text-sm font-semibold border transition
                                                 {{ $order_type === 'TAKEAWAY' ? 'bg-orange-500 text-white border-orange-500' : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-100' }}">
                                             🥡 Bungkus
+                                        </button>
+                                        
+                                        <button type="button" wire:click="$set('order_type', 'GOFOOD')"
+                                            class="py-2 rounded-lg text-sm font-semibold border transition col-span-2
+                                                {{ $order_type === 'GOFOOD' ? 'bg-green-500 text-white border-green-500' : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-100' }}">
+                                            🛵 GoFood / GrabFood
                                         </button>
                                     </div>
                                 </div>
@@ -1142,6 +1228,69 @@
                                 </div>
                                 @endif
 
+                                {{-- ==================== KOMISI APLIKASI ==================== --}}
+                                @if(!empty($cart) && in_array($order_type, ['GOFOOD', 'TAKEAWAY', 'DINE_IN']))
+                                <div x-data="{
+                                        open: @entangle('platformFeeEnabled').live,
+                                        display: '',
+                                        raw: @entangle('platformFee').live,
+
+                                        format(v) {
+                                            return v ? new Intl.NumberFormat('id-ID').format(v) : '';
+                                        },
+
+                                        init() {
+                                            this.$watch('raw', v => {
+                                                this.display = this.format(v);
+                                            });
+                                            // Sinkron awal
+                                            this.display = this.format(this.raw);
+                                        },
+
+                                        onInput(e) {
+                                            let v = e.target.value.replace(/[^0-9]/g, '');
+                                            this.display = this.format(v);
+                                            this.raw = v === '' ? 0 : parseInt(v);
+                                        }
+                                    }"
+                                     x-show="$wire.order_type === 'GOFOOD' || open"
+                                     class="rounded-lg border transition-all mt-2"
+                                     :class="open ? 'border-red-300 bg-red-50' : 'border-gray-200 bg-white'"
+                                >
+                                    <button type="button"
+                                        @click="open = !open; $wire.set('platformFeeEnabled', open); if (!open) { raw = 0; display = ''; }"
+                                        class="w-full flex items-center justify-between px-3 py-2 text-sm font-semibold transition"
+                                        :class="open ? 'text-red-700' : 'text-gray-700'"
+                                    >
+                                        <span class="flex items-center gap-2">
+                                            <i class="fas fa-percent"></i> Potongan Komisi App
+                                        </span>
+                                        <span x-show="!open" class="text-xs text-gray-400">Tap untuk isi komisi</span>
+                                        <span x-show="open" class="text-xs text-red-600 font-bold">Aktif ✓</span>
+                                    </button>
+                                    <div x-show="open" x-transition class="px-3 pb-3">
+                                        <label class="block mb-1 text-xs text-gray-700 font-medium">Nominal Komisi (Rupiah)</label>
+                                        <input
+                                            type="text"
+                                            inputmode="numeric"
+                                            x-on:input="onInput($event)"
+                                            x-bind:value="display"
+                                            class="w-full p-2 border border-red-200 rounded-lg text-sm bg-white focus:ring-2 focus:ring-red-300 focus:outline-none"
+                                            placeholder="Contoh: 6.000"
+                                        >
+                                        <div class="flex gap-2 mt-2">
+                                            <button type="button" @click="$wire.calculatePlatformFee(20, 1000)" class="flex-1 text-[10px] bg-red-100 text-red-700 py-1.5 rounded shadow-[0_1px_2px_rgba(0,0,0,0.05)] hover:bg-red-200 transition font-semibold border border-red-200">
+                                                GoFood/Grab (20%+1rb)
+                                            </button>
+                                            <button type="button" @click="$wire.calculatePlatformFee(20, 0)" class="flex-1 text-[10px] bg-red-100 text-red-700 py-1.5 rounded shadow-[0_1px_2px_rgba(0,0,0,0.05)] hover:bg-red-200 transition font-semibold border border-red-200">
+                                                Lainnya (20%)
+                                            </button>
+                                        </div>
+                                        <p class="text-[10px] text-red-400 mt-2 leading-tight">*Dicatat sebagai Pengeluaran otomatis.</p>
+                                    </div>
+                                </div>
+                                @endif
+
                                 {{-- ==================== RINGKASAN ==================== --}}
                                 <dl class="flex justify-between">
                                     <dt>Sub Total</dt>
@@ -1179,6 +1328,18 @@
                                     <dt>Kembalian</dt>
                                     <dd class="text-blue-500 font-bold">Rp{{ number_format($change,0,',','.') }}</dd>
                                 </dl>
+
+                                @if ($platformFeeEnabled && $platformFee > 0)
+                                <div class="bg-blue-50 border border-blue-100 rounded-lg p-2 mt-4 shadow-sm">
+                                    <dl class="flex justify-between items-center">
+                                        <dt class="flex flex-col">
+                                            <span class="text-xs font-semibold text-blue-800">Estimasi Laba Bersih</span>
+                                            <span class="text-[10px] text-red-500">(Sett/Penarikan Gojek)</span>
+                                        </dt>
+                                        <dd class="text-blue-800 font-extrabold text-lg">Rp{{ number_format($total - $platformFee,0,',','.') }}</dd>
+                                    </dl>
+                                </div>
+                                @endif
 
                             </div>
 

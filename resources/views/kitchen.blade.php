@@ -243,8 +243,10 @@
             <td class="order-type">
                 @if($kitchenData['order_type'] === 'DINE_IN')
                     Makan di Tempat
-                @else
+                @elseif($kitchenData['order_type'] === 'TAKEAWAY')
                     Bungkus
+                @else
+                    {{ $kitchenData['order_type'] }}
                 @endif
             </td>
         </tr>
