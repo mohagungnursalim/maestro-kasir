@@ -22,6 +22,7 @@ class Order extends Component
     public $search = ''; // Pencarian produk
     public $products = []; // Daftar produk
     public $limitProducts = 50; // Batas produk yang ditampilkan
+    public $filterSku = ''; // Filter SKU (MAKANAN / MINUMAN)
     public $order_type = 'DINE_IN';
     public $desk_number = '';
     public $note = null;
@@ -91,15 +92,21 @@ class Order extends Component
         $version = Cache::get('product_cache_version', 1);
         
         // 2. Hash keyword pencarian (Mencegah nama file cache kepanjangan / karakter terlarang)
-        $searchHash = md5($this->search);
+        $searchHash = md5($this->search . '_' . $this->filterSku);
         
         // 3. Gabungkan menjadi 1 unique key berbasis versi
         $activeBranch = \Illuminate\Support\Facades\Session::get('active_branch_id', 'all');
         $cacheKey = "products_br{$activeBranch}_v{$version}_{$searchHash}_{$this->limitProducts}";
 
         $this->products = Cache::remember($cacheKey, $this->ttl, function () {
-            return Product::where(function ($query) {
-                    $query->where('name', 'like', '%' . $this->search . '%')
+            $query = Product::query();
+
+            if ($this->filterSku !== '') {
+                $query->where('sku', $this->filterSku);
+            }
+
+            return $query->where(function ($q) {
+                    $q->where('name', 'like', '%' . $this->search . '%')
                         ->orWhere('sku', 'like', '%' . $this->search . '%')
                         ->orWhere('price', 'like', '%' . $this->search . '%')
                         ->orWhere('description', 'like', '%' . $this->search . '%');
@@ -108,6 +115,13 @@ class Order extends Component
                 ->take($this->limitProducts)
                 ->get(['id', 'name', 'sku', 'price', 'stock', 'use_stock', 'image', 'description']);
         });
+    }
+
+    // Ubah filter SKU
+    public function setFilterSku($sku)
+    {
+        $this->filterSku = $sku;
+        $this->searchProduct();
     }
 
     // Tambahkan produk ke keranjang dengan catatan

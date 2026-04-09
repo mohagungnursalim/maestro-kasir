@@ -48,6 +48,22 @@
                     </form>
                 </div>
 
+                <!-- Filter SKU Kategori -->
+                <div class="flex justify-center gap-2 mt-4">
+                    <button wire:click="setFilterSku('')" type="button" 
+                        class="px-4 py-2 text-sm font-medium rounded-full border shadow-sm transition-colors duration-200 {{ $filterSku === '' ? 'bg-gray-800 text-white border-gray-800' : 'bg-white text-gray-700 hover:bg-gray-100 border-gray-300' }}">
+                        Semua
+                    </button>
+                    <button wire:click="setFilterSku('MAKANAN')" type="button" 
+                        class="px-4 py-2 text-sm font-medium rounded-full border shadow-sm transition-colors duration-200 {{ $filterSku === 'MAKANAN' ? 'bg-orange-500 text-white border-orange-500' : 'bg-white text-gray-700 hover:bg-orange-50 border-gray-300' }}">
+                        <i class="fas fa-hamburger mr-1"></i> Makanan
+                    </button>
+                    <button wire:click="setFilterSku('MINUMAN')" type="button" 
+                        class="px-4 py-2 text-sm font-medium rounded-full border shadow-sm transition-colors duration-200 {{ $filterSku === 'MINUMAN' ? 'bg-blue-500 text-white border-blue-500' : 'bg-white text-gray-700 hover:bg-blue-50 border-gray-300' }}">
+                        <i class="fas fa-coffee mr-1"></i> Minuman
+                    </button>
+                </div>
+
                
                 {{-- SKELETON: tampil saat searchProduct loading --}}
                 <div wire:loading wire:target="searchProduct" class="container mx-auto mt-4 px-4 sm:px-8">
