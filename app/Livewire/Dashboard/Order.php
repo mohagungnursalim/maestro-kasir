@@ -21,7 +21,7 @@ class Order extends Component
 {
     public $search = ''; // Pencarian produk
     public $products = []; // Daftar produk
-    public $limitProducts = 8; // Batas produk yang ditampilkan
+    public $limitProducts = 50; // Batas produk yang ditampilkan
     public $order_type = 'DINE_IN';
     public $desk_number = '';
     public $note = null;
