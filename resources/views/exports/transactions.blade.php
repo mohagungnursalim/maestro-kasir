@@ -164,6 +164,17 @@
             $totalTunai += $totalPay;
         }
     }
+
+    $branchIdQuery = $firstOrder?->branch_id ?? null;
+    $totalExpense = \App\Models\Expense::whereBetween('expense_date', [
+        \Carbon\Carbon::parse($startDate)->format('Y-m-d'),
+        \Carbon\Carbon::parse($endDate)->format('Y-m-d')
+    ])
+    ->when($branchIdQuery, fn($q) => $q->where('branch_id', $branchIdQuery))
+    ->where('type', 'out')
+    ->sum('amount');
+
+    $totalKeuntungan = $grandTotalNett - $totalExpense;
 @endphp
 
 {{-- =====================================================================
@@ -209,6 +220,14 @@
         <tr>
             <td>Total Pendapatan (Nett)</td>
             <td class="val green">Rp{{ number_format($grandTotalNett, 0, ',', '.') }}</td>
+        </tr>
+        <tr class="">
+            <td>Total Kas Keluar</td>
+            <td class="val red">Rp{{ number_format($totalExpense, 0, ',', '.') }}</td>
+        </tr>
+        <tr>
+            <td>Total Keuntungan</td>
+            <td class="val green bold">Rp{{ number_format($totalKeuntungan, 0, ',', '.') }}</td>
         </tr>
         <tr class="">
             <td>Bayar via QRIS</td>
@@ -437,8 +456,9 @@
     @if ((float)$grandTotalOngkir > 0)
     <p style="margin:0; padding-top:4px;">Total Ongkir: Rp{{ number_format($grandTotalOngkir, 0, ',', '.') }}</p>
     @endif
+    <p style="margin:0; padding-top:4px; color:#dc2626;">Total Kas Keluar: Rp{{ number_format($totalExpense, 0, ',', '.') }}</p>
     <hr style="width:300px; margin-left:auto; margin-right:0;">
-    <p style="margin:0; font-size:16px;">Total Pendapatan Bersih: Rp{{ number_format($grandTotalNett, 0, ',', '.') }}</p>
+    <p style="margin:0; font-size:16px; color:#16a34a;">Total Keuntungan: Rp{{ number_format($totalKeuntungan, 0, ',', '.') }}</p>
 </div>
 
 </body>

@@ -3,6 +3,7 @@
 namespace App\Exports;
 
 use App\Models\Order;
+use App\Models\Expense;
 use Carbon\Carbon;
 use Maatwebsite\Excel\Concerns\FromArray;
 use Maatwebsite\Excel\Concerns\WithHeadings;
@@ -55,6 +56,16 @@ class TransactionSummaryExport implements FromArray, WithTitle, WithStyles
                  . ' s/d '
                  . Carbon::parse($this->endDate)->translatedFormat('d F Y');
 
+        $totalExpense = Expense::whereBetween('expense_date', [
+            Carbon::parse($this->startDate)->format('Y-m-d'),
+            Carbon::parse($this->endDate)->format('Y-m-d')
+        ])
+        ->when($this->branchId, fn($q) => $q->where('branch_id', $this->branchId))
+        ->where('type', 'out')
+        ->sum('amount');
+
+        $totalKeuntungan = $row->total_pendapatan - $totalExpense;
+
         return [
             ['RINGKASAN TRANSAKSI'],
             [''],
@@ -66,6 +77,8 @@ class TransactionSummaryExport implements FromArray, WithTitle, WithStyles
             ['METRIK', 'NILAI'],
             ['Total Order',              (int)   $row->total_order],
             ['Total Pendapatan (Nett)',  'Rp ' . number_format($row->total_pendapatan, 0, ',', '.')],
+            ['Total Kas Keluar',         'Rp ' . number_format($totalExpense,          0, ',', '.')],
+            ['Total Keuntungan',         'Rp ' . number_format($totalKeuntungan,       0, ',', '.')],
             ['Total QRIS',              'Rp ' . number_format($row->total_qris,        0, ',', '.')],
             ['Total Tunai',             'Rp ' . number_format($row->total_tunai,       0, ',', '.')],
             ['Total Diskon',            'Rp ' . number_format($row->total_diskon,      0, ',', '.')],
