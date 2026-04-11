@@ -515,7 +515,7 @@
                             <div class="text-6xl group-hover:scale-110 transition-transform duration-500">🍜</div>
                         @endif
                         
-                        @if (strtolower($product->name) === 'mie kering original')
+                        @if (strtolower($product->name) === 'Mie Kering Original')
                         <div class="absolute top-4 right-4 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full text-sm font-bold text-orange-600 shadow-sm">
                             Favorit
                         </div>
