@@ -21,7 +21,8 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Storage;
 
 Route::get('/', function () {
-    return view('welcome');
+    $products = \App\Models\Product::orderBy('sold_count', 'desc')->take(6)->get();
+    return view('welcome', compact('products'));
 })->middleware('track.visitor');
 
 Route::get('/dashboard', Dashboard::class)

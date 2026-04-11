@@ -16,7 +16,7 @@
     <meta property="og:type" content="website">
     <meta property="og:url" content="{{ url('/') }}">
     <meta property="og:title" content="{{ $settings->store_name ?? 'Kedai Mie-Mie' }} - Mie Kering Legendaris Khas Makassar">
-    <meta property="og:description" content="Nikmati kelezatan Mie Kering khas Makassar yang didukung langsung oleh Warung Mie Awa Makassar. Segera hadir di Kota Palu dengan cita rasa autentik warisan turun-temurun!">
+    <meta property="og:description" content="Nikmati kelezatan Mie Kering khas Makassar yang didukung langsung oleh Warung Mie Awa Makassar. Kini hadir di Kota Palu dengan cita rasa autentik warisan turun-temurun!">
     <meta property="og:image" content="{{ asset('images/mie-awa.jpg') }}">
     <meta property="og:locale" content="id_ID">
     <meta property="og:site_name" content="{{ $settings->store_name ?? 'Kedai Mie-Mie' }}">
@@ -24,7 +24,7 @@
     {{-- Twitter Card --}}
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="{{ $settings->store_name ?? 'Kedai Mie-Mie' }} - Mie Kering Legendaris Khas Makassar">
-    <meta name="twitter:description" content="Nikmati kelezatan Mie Kering khas Makassar, didukung langsung oleh Warung Mie Awa Makassar. Segera hadir di Kota Palu!">
+    <meta name="twitter:description" content="Nikmati kelezatan Mie Kering khas Makassar, didukung langsung oleh Warung Mie Awa Makassar. Kini hadir di Kota Palu!">
     <meta name="twitter:image" content="{{ asset('images/mie-awa.jpg') }}">
 
     {{-- Favicon --}}
@@ -353,6 +353,7 @@
                 {{-- Desktop Nav --}}
                 <div class="hidden md:flex items-center space-x-1">
                     <a href="#home" class="nav-link text-gray-600 hover:text-orange-500 px-4 py-2 text-sm font-semibold transition-colors">Beranda</a>
+                    <a href="#menu" class="nav-link text-gray-600 hover:text-orange-500 px-4 py-2 text-sm font-semibold transition-colors">Menu</a>
                     <a href="#tentang" class="nav-link text-gray-600 hover:text-orange-500 px-4 py-2 text-sm font-semibold transition-colors">Tentang Kami</a>
                     @auth
                         <a href="{{ url('/dashboard') }}" class="ml-4 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white px-6 py-2.5 rounded-xl text-sm font-bold transition-all shadow-md hover:shadow-lg transform hover:-translate-y-0.5 inline-flex items-center gap-2">
@@ -373,6 +374,7 @@
             <div id="mobile-menu" class="mobile-menu md:hidden">
                 <div class="pb-4 pt-2 space-y-1 border-t border-orange-100">
                     <a href="#home" class="block px-4 py-2.5 rounded-xl text-gray-600 hover:text-orange-500 hover:bg-orange-50 text-sm font-semibold transition-all">Beranda</a>
+                    <a href="#menu" class="block px-4 py-2.5 rounded-xl text-gray-600 hover:text-orange-500 hover:bg-orange-50 text-sm font-semibold transition-all">Menu</a>
                     <a href="#tentang" class="block px-4 py-2.5 rounded-xl text-gray-600 hover:text-orange-500 hover:bg-orange-50 text-sm font-semibold transition-all">Tentang Kami</a>
                     @auth
                         <a href="{{ url('/dashboard') }}" class="block mx-4 mt-2 bg-gradient-to-r from-orange-500 to-orange-600 text-white px-4 py-2.5 rounded-xl text-sm font-bold text-center transition-all shadow-md">Dashboard POS</a>
@@ -403,13 +405,13 @@
                     Warisan Kuliner Legendaris
                 </div>
 
-                {{-- Coming Soon Badge --}}
-                <div class="coming-soon-badge inline-flex items-center gap-2.5 bg-gradient-to-r from-red-500 to-orange-500 text-white px-5 py-2 rounded-full text-sm font-extrabold tracking-wide uppercase mb-6 shadow-lg shadow-red-500/20" style="animation: fadeInUp 0.6s ease-out 0.05s both;">
+                {{-- Open Badge --}}
+                <div class="inline-flex items-center gap-2.5 bg-gradient-to-r from-green-500 to-emerald-600 text-white px-5 py-2 rounded-full text-sm font-extrabold tracking-wide uppercase mb-6 shadow-lg shadow-green-500/20" style="animation: fadeInUp 0.6s ease-out 0.05s both;">
                     <span class="relative flex h-2.5 w-2.5">
                         <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
                         <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-white"></span>
                     </span>
-                    🚀 Segera Hadir di Palu!
+                    ✨ Kini Buka di Palu!
                 </div>
 
                 <h1 class="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-black text-gray-900 leading-[1.1] mb-6" style="animation: fadeInUp 0.7s ease-out 0.1s both;">
@@ -418,7 +420,7 @@
                 </h1>
 
                 <p class="text-base sm:text-lg text-gray-500 mb-8 max-w-xl mx-auto lg:mx-0 leading-relaxed font-light" style="animation: fadeInUp 0.7s ease-out 0.2s both;">
-                    Sajian istimewa perpaduan mie kering dan siraman kuah kental gurih yang kaya rasa, diracik dengan tetap mempertahankan tradisi serta keaslian warisan turun-temurun. <strong class="text-orange-600 font-semibold">Segera hadir untuk menyapa Anda di Kota Palu!</strong>
+                    Sajian istimewa perpaduan mie kering dan siraman kuah kental gurih yang kaya rasa, diracik dengan tetap mempertahankan tradisi serta keaslian warisan turun-temurun. <strong class="text-orange-600 font-semibold">Kini hadir menyapa Anda dan siap dihidangkan di Kota Palu!</strong>
                 </p>
 
                 <div class="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start" style="animation: fadeInUp 0.7s ease-out 0.3s both;">
@@ -480,73 +482,64 @@
         </div>
     </section>
 
-    {{-- ═══════════════ Coming Soon / Countdown Section ═══════════════ --}}
-    <section id="coming-soon" class="relative py-20 lg:py-28 overflow-hidden">
-        {{-- Background --}}
-        <div class="absolute inset-0 bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900"></div>
-        <div class="absolute inset-0 overflow-hidden pointer-events-none">
-            <div class="absolute top-0 left-1/4 w-96 h-96 bg-orange-500/10 rounded-full blur-3xl"></div>
-            <div class="absolute bottom-0 right-1/4 w-80 h-80 bg-amber-500/10 rounded-full blur-3xl"></div>
-            {{-- Animated particles --}}
-            <div class="particle w-2 h-2 bg-orange-400/20 top-[10%] left-[15%]" style="animation-delay: 0s;"></div>
-            <div class="particle w-3 h-3 bg-orange-300/15 top-[30%] right-[20%]" style="animation-delay: 1.5s;"></div>
-            <div class="particle w-2 h-2 bg-amber-400/20 bottom-[20%] left-[30%]" style="animation-delay: 0.7s;"></div>
-            <div class="particle w-2 h-2 bg-orange-300/15 top-[60%] right-[10%]" style="animation-delay: 2s;"></div>
+    {{-- ═══════════════ Menu Section ═══════════════ --}}
+    <section id="menu" class="relative py-20 lg:py-28 bg-white overflow-hidden">
+        {{-- Background Elements --}}
+        <div class="absolute inset-0 pointer-events-none">
+            <div class="absolute top-0 right-0 w-64 h-64 bg-orange-50 rounded-full blur-3xl opacity-60 transform translate-x-1/2 -translate-y-1/2"></div>
+            <div class="absolute bottom-0 left-0 w-80 h-80 bg-amber-50 rounded-full blur-3xl opacity-60 transform -translate-x-1/2 translate-y-1/2"></div>
         </div>
 
-        <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-            <div class="text-center">
-                {{-- Coming soon label --}}
-                <div class="animate-on-scroll">
-                    <div class="coming-soon-ribbon inline-flex items-center gap-2 bg-gradient-to-r from-orange-500/20 to-amber-500/20 backdrop-blur-sm text-orange-300 px-5 py-2 rounded-full text-xs font-bold tracking-[0.2em] uppercase mb-8 border border-orange-500/20">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                        Grand Opening
-                    </div>
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+            <div class="text-center max-w-3xl mx-auto mb-16">
+                <div class="animate-on-scroll inline-flex items-center gap-2 bg-orange-100/80 text-orange-600 px-4 py-1.5 rounded-full text-xs font-bold tracking-widest uppercase mb-4 border border-orange-200/50">
+                    Menu Spesial Kami
                 </div>
-
-                <h2 class="animate-on-scroll delay-1 text-3xl sm:text-4xl lg:text-5xl font-black text-white mb-4 leading-tight">
-                    Hitung Mundur Menuju
-                    <span class="block gradient-text mt-1">Grand Opening!</span>
+                <h2 class="animate-on-scroll delay-1 text-3xl sm:text-4xl lg:text-5xl font-black text-gray-900 mb-6 leading-tight">
+                    Sajian Otentik
+                    <span class="block gradient-text mt-1">Pilihan Terbaik</span>
                 </h2>
-                <p class="animate-on-scroll delay-2 text-base sm:text-lg text-gray-400 max-w-2xl mx-auto mb-12 font-light leading-relaxed">
-                    Kami sedang mempersiapkan yang terbaik untuk menyajikan kelezatan Mie Kering Mie Awa khas Makassar di Kota Palu. Nantikan kehadiran kami!
+                <p class="animate-on-scroll delay-2 text-base sm:text-lg text-gray-500 font-light">
+                    Nikmati varian menu favorit kami yang dimasak khusus menggunakan bahan-bahan pilihan berkualitas tinggi untuk menciptakan cita rasa khas Makassar yang menggugah selera.
                 </p>
+            </div>
 
-                {{-- Countdown Timer --}}
-                <div class="animate-on-scroll delay-3 grid grid-cols-2 sm:grid-cols-4 gap-4 sm:gap-6 max-w-2xl mx-auto mb-14">
-                    {{-- Days --}}
-                    <div class="countdown-card rounded-2xl p-5 sm:p-6 text-center" style="animation: glow-ring 3s ease-in-out infinite;">
-                        <p id="countdown-days" class="countdown-number text-4xl sm:text-5xl lg:text-6xl font-black leading-none mb-1">00</p>
-                        <p class="text-gray-500 text-xs sm:text-sm font-semibold uppercase tracking-wider">Hari</p>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                @foreach ($products as $index => $product)
+                {{-- Menu Item --}}
+                <div class="animate-on-scroll delay-{{ ($index % 3) + 1 }} menu-card bg-white rounded-3xl p-6 border border-gray-100 shadow-sm hover:shadow-xl transition-all duration-300">
+                    <div class="aspect-[4/3] rounded-2xl overflow-hidden mb-6 bg-gray-100 relative group flex items-center justify-center">
+                        @if ($product->image)
+                            <img src="{{ asset('storage/' . $product->image) }}" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" alt="{{ $product->name }}" />
+                        @else
+                            <div class="text-6xl group-hover:scale-110 transition-transform duration-500">🍜</div>
+                        @endif
+                        
+                        @if (strtolower($product->name) === 'mie kering original')
+                        <div class="absolute top-4 right-4 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full text-sm font-bold text-orange-600 shadow-sm">
+                            Favorit
+                        </div>
+                        @endif
                     </div>
-                    {{-- Hours --}}
-                    <div class="countdown-card rounded-2xl p-5 sm:p-6 text-center" style="animation: glow-ring 3s ease-in-out infinite 0.5s;">
-                        <p id="countdown-hours" class="countdown-number text-4xl sm:text-5xl lg:text-6xl font-black leading-none mb-1">00</p>
-                        <p class="text-gray-500 text-xs sm:text-sm font-semibold uppercase tracking-wider">Jam</p>
+                    <div class="flex justify-between items-start mb-2">
+                        <h3 class="text-xl font-bold text-gray-900">{{ $product->name }}</h3>
+                        <span class="text-lg font-black text-orange-500">Rp {{ number_format($product->price, 0, ',', '.') }}</span>
                     </div>
-                    {{-- Minutes --}}
-                    <div class="countdown-card rounded-2xl p-5 sm:p-6 text-center" style="animation: glow-ring 3s ease-in-out infinite 1s;">
-                        <p id="countdown-minutes" class="countdown-number text-4xl sm:text-5xl lg:text-6xl font-black leading-none mb-1">00</p>
-                        <p class="text-gray-500 text-xs sm:text-sm font-semibold uppercase tracking-wider">Menit</p>
-                    </div>
-                    {{-- Seconds --}}
-                    <div class="countdown-card rounded-2xl p-5 sm:p-6 text-center" style="animation: glow-ring 3s ease-in-out infinite 1.5s;">
-                        <p id="countdown-seconds" class="countdown-number text-4xl sm:text-5xl lg:text-6xl font-black leading-none mb-1">00</p>
-                        <p class="text-gray-500 text-xs sm:text-sm font-semibold uppercase tracking-wider">Detik</p>
-                    </div>
-                </div>
-
-                {{-- CTA --}}
-                <div class="animate-on-scroll delay-4 flex flex-col sm:flex-row gap-4 justify-center items-center">
-                    <a href="https://www.instagram.com/kedai_miemie/" target="_blank" rel="noopener noreferrer" class="group bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white px-8 py-4 rounded-2xl text-base font-bold transition-all shadow-lg hover:shadow-xl hover:shadow-orange-500/25 transform hover:-translate-y-1 inline-flex items-center justify-center gap-2.5">
-                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>
-                        Follow Kami di Instagram
-                        <svg class="w-4 h-4 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg>
-                    </a>
-                    <p class="text-gray-500 text-sm font-medium">
-                        Ikuti update terbaru kami ✨
+                    <p class="text-gray-500 text-sm mb-6 leading-relaxed">
+                        {{ $product->description ?? 'Nikmati kelezatan ' . $product->name . ' dengan cita rasa khas Makassar yang menggugah selera.' }}
                     </p>
+                    <a href="https://www.instagram.com/kedai_miemie/" target="_blank" class="block w-full py-3 bg-orange-50 hover:bg-orange-500 text-orange-600 hover:text-white rounded-xl text-center font-bold text-sm transition-colors duration-300">
+                        Cek Instagram Kami
+                    </a>
                 </div>
+                @endforeach
+            </div>
+            
+            <div class="mt-16 text-center animate-on-scroll">
+                <a href="https://www.instagram.com/kedai_miemie/" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-2 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white px-8 py-4 rounded-2xl text-base font-bold transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-1">
+                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>
+                    Kunjungi Instagram Kami
+                </a>
             </div>
         </div>
     </section>
@@ -759,45 +752,6 @@
             window.addEventListener('scroll', highlightActiveNav, { passive: true });
             highlightActiveNav();
 
-            // ── Countdown Timer ──
-            // Ubah tanggal target grand opening di sini (format: YYYY-MM-DD)
-            const grandOpeningDate = new Date('2026-03-27T10:00:00+08:00').getTime();
-
-            const daysEl = document.getElementById('countdown-days');
-            const hoursEl = document.getElementById('countdown-hours');
-            const minutesEl = document.getElementById('countdown-minutes');
-            const secondsEl = document.getElementById('countdown-seconds');
-
-            function updateCountdown() {
-                const now = new Date().getTime();
-                const distance = grandOpeningDate - now;
-
-                if (distance <= 0) {
-                    daysEl.textContent = '🎉';
-                    hoursEl.textContent = '🎉';
-                    minutesEl.textContent = '🎉';
-                    secondsEl.textContent = '🎉';
-
-                    daysEl.parentElement.querySelector('p:last-child').textContent = '';
-                    hoursEl.parentElement.querySelector('p:last-child').textContent = '';
-                    minutesEl.parentElement.querySelector('p:last-child').textContent = 'Sudah';
-                    secondsEl.parentElement.querySelector('p:last-child').textContent = 'Buka!';
-                    return;
-                }
-
-                const days = Math.floor(distance / (1000 * 60 * 60 * 24));
-                const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-                const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-                const seconds = Math.floor((distance % (1000 * 60)) / 1000);
-
-                daysEl.textContent = String(days).padStart(2, '0');
-                hoursEl.textContent = String(hours).padStart(2, '0');
-                minutesEl.textContent = String(minutes).padStart(2, '0');
-                secondsEl.textContent = String(seconds).padStart(2, '0');
-            }
-
-            updateCountdown();
-            setInterval(updateCountdown, 1000);
         });
     </script>
 </body>
