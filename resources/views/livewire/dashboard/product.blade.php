@@ -523,7 +523,7 @@
                         <label class="block mb-2 text-sm font-medium text-gray-900" for="image">Upload Gambar</label>
                         <input wire:model='image' type="file" id="image" name="image" autocomplete="image"
                             class="block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 focus:outline-none"
-                            accept=".png,.jpg,.jpeg,.gif,.svg" x-on:change="previewImage($event)">
+                            accept=".png,.jpg,.jpeg,.gif,.svg" x-on:change="previewImage($event)" x-ref="fileInput">
                         <p class="mt-1 text-sm text-gray-500">SVG, PNG, JPG or GIF (Max: 5MB)</p>
 
                         <!-- Progress Container -->
@@ -1353,9 +1353,13 @@
                 this.progress = 0;
 
                 // Also reset the file input
-                const fileInput = document.getElementById('image');
-                if (fileInput) {
-                    fileInput.value = '';
+                if (this.$refs && this.$refs.fileInput) {
+                    this.$refs.fileInput.value = '';
+                } else {
+                    const fileInput = document.getElementById('image');
+                    if (fileInput) fileInput.value = '';
+                    const fileInputUpdate = document.getElementById('imageUpdate');
+                    if (fileInputUpdate) fileInputUpdate.value = '';
                 }
             },
 
@@ -1374,6 +1378,9 @@
                 // Listener untuk event updatedSuccess dari Livewire
                 Livewire.on('updatedSuccess', () => {
                     this.resetPreview(); // Panggil untuk clear preview
+                });
+                Livewire.on('resetImagePreview', () => {
+                    this.resetPreview(); 
                 });
             },
         };

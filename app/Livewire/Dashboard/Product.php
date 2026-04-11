@@ -408,6 +408,8 @@ class Product extends Component
     
     public function editModal($id)
     {
+        $this->reset('imageUpdate'); // Bersihkan state gambar saat berganti produk
+
         $product = DB::table('products')
             ->leftJoin('suppliers', 'products.supplier_id', '=', 'suppliers.id')
             ->select(
@@ -509,6 +511,7 @@ class Product extends Component
             $this->ingredientsUpdate = [$this->emptyIngredient()];
         }
 
+        $this->dispatch('resetImagePreview'); // Beritahu Alpine.js untuk mereset input file
         $this->dispatch('showEditModal');
         $this->dispatch('setUnit', $this->unitUpdate); // Kirim ke Unit.php
     }
