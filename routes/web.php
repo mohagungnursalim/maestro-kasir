@@ -21,7 +21,7 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Storage;
 
 Route::get('/', function () {
-    $products = \App\Models\Product::orderBy('sold_count', 'desc')->take(6)->get();
+    $products = \App\Models\Product::orderBy('sold_count', 'desc')->take(50)->get();
     return view('welcome', compact('products'));
 })->middleware('track.visitor');
 

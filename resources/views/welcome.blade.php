@@ -528,9 +528,7 @@
                     <p class="text-gray-500 text-sm mb-6 leading-relaxed">
                         {{ $product->description ?? 'Nikmati kelezatan ' . $product->name . ' dengan cita rasa khas Makassar yang menggugah selera.' }}
                     </p>
-                    <a href="https://www.instagram.com/kedai_miemie/" target="_blank" class="block w-full py-3 bg-orange-50 hover:bg-orange-500 text-orange-600 hover:text-white rounded-xl text-center font-bold text-sm transition-colors duration-300">
-                        Cek Instagram Kami
-                    </a>
+                  
                 </div>
                 @endforeach
             </div>
