@@ -518,10 +518,10 @@
                     @endif
 
 
-                    <div class="sm:col-span-2" x-data="imageUploader()">
+                    <div class="sm:col-span-2" x-data="imageUploader('image')">
                         <!-- Input Upload -->
                         <label class="block mb-2 text-sm font-medium text-gray-900" for="image">Upload Gambar</label>
-                        <input wire:model='image' type="file" id="image" name="image" autocomplete="image"
+                        <input type="file" id="image" name="image" autocomplete="image"
                             class="block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 focus:outline-none"
                             accept=".png,.jpg,.jpeg,.gif,.svg" x-on:change="previewImage($event)" x-ref="fileInput">
                         <p class="mt-1 text-sm text-gray-500">SVG, PNG, JPG or GIF (Max: 5MB)</p>
@@ -839,10 +839,10 @@
                     @endif
 
 
-                    <div class="sm:col-span-2" x-data="imageUploader()" x-init="init()">
+                    <div class="sm:col-span-2" x-data="imageUploader('imageUpdate')" x-init="init()">
                         <!-- Input Upload -->
                         <label class="block mb-2 text-sm font-medium text-gray-900" for="image">Upload Gambar</label>
-                        <input wire:model='imageUpdate' type="file" id="imageUpdate" name="imageUpdate" autocomplete="imageUpdate"
+                        <input type="file" id="imageUpdate" name="imageUpdate" autocomplete="imageUpdate"
                             class="block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 focus:outline-none"
                             accept=".png,.jpg,.jpeg,.gif,.svg" x-on:change="previewImage($event)" x-ref="fileInput">
                         <p class="mt-1 text-sm text-gray-500">SVG, PNG, JPG or GIF (Max: 5MB)</p>
@@ -1283,8 +1283,9 @@
 
 {{-- Alpine FileUpload Form Update --}}
 <script>
-    function imageUploader() {
+    function imageUploader(propertyName) {
         return {
+            propertyName: propertyName,
             imagePreview: null,
             fileName: '',
             fileSize: '',
@@ -1294,9 +1295,48 @@
             existingImage: @entangle('currentImage') ?? null, // Bind gambar yang sudah ada
             hasImage: false,
 
+            async compressImage(file, maxWidth = 800, quality = 0.7) {
+                return new Promise((resolve, reject) => {
+                    const reader = new FileReader();
+                    reader.onload = (event) => {
+                        const img = new Image();
+                        img.onload = () => {
+                            let width = img.width;
+                            let height = img.height;
 
+                            if (width > maxWidth) {
+                                height = Math.round((height * maxWidth) / width);
+                                width = maxWidth;
+                            }
 
-            previewImage(event) {
+                            const canvas = document.createElement('canvas');
+                            canvas.width = width;
+                            canvas.height = height;
+                            const ctx = canvas.getContext('2d');
+                            ctx.drawImage(img, 0, 0, width, height);
+
+                            canvas.toBlob((blob) => {
+                                if (!blob) {
+                                    reject(new Error('Canvas is empty'));
+                                    return;
+                                }
+                                const newFileName = file.name.replace(/\.[^/.]+$/, "") + ".jpg";
+                                const newFile = new File([blob], newFileName, {
+                                    type: 'image/jpeg',
+                                    lastModified: Date.now()
+                                });
+                                resolve(newFile);
+                            }, 'image/jpeg', quality);
+                        };
+                        img.onerror = (err) => reject(err);
+                        img.src = event.target.result;
+                    };
+                    reader.onerror = (err) => reject(err);
+                    reader.readAsDataURL(file);
+                });
+            },
+
+            async previewImage(event) {
                 const file = event.target.files[0];
 
                 if (!file) {
@@ -1309,39 +1349,51 @@
                     return;
                 }
 
-                if (file.size > 5 * 1024 * 1024) {
-                    this.error = "Gambar tidak boleh lebih dari 5MB";
+                this.error = null;
+                this.uploading = true;
+                this.progress = 0;
+                
+                let finalFile = file;
+                // Hanya kompres jika gambar JPEG/PNG dan ukurannya > 300KB
+                if (file.size > 300 * 1024 && ['image/png', 'image/jpeg', 'image/jpg'].includes(file.type)) {
+                    try {
+                        finalFile = await this.compressImage(file, 800, 0.7);
+                    } catch (e) {
+                        console.error("Compression failed", e);
+                    }
+                }
+
+                if (finalFile.size > 5 * 1024 * 1024) {
+                    this.error = "Gambar tidak boleh lebih dari 5MB (setelah melalui kompresi jika ukuran sebelumnya terlalu besar).";
+                    this.uploading = false;
                     return;
                 }
 
-                this.error = null;
-                this.fileName = file.name;
-                this.fileSize = `${(file.size / 1024).toFixed(2)} KB`;
+                this.fileName = finalFile.name;
+                this.fileSize = `${(finalFile.size / 1024).toFixed(2)} KB`;
 
                 const reader = new FileReader();
                 reader.onload = (e) => {
                     this.imagePreview = e.target.result;
                     this.hasImage = true;
                 };
-                reader.readAsDataURL(file);
+                reader.readAsDataURL(finalFile);
 
-                // Simulate progress bar
-                this.simulateProgress();
-            },
-
-
-            simulateProgress() {
-                this.uploading = true;
-                this.progress = 0;
-
-                const interval = setInterval(() => {
-                    this.progress += 10;
-
-                    if (this.progress >= 100) {
-                        clearInterval(interval);
+                // Mulai upload ke Livewire
+                this.$wire.upload(this.propertyName, finalFile, 
+                    (uploadedFilename) => {
                         this.uploading = false;
+                        this.progress = 100;
+                    }, 
+                    () => {
+                        this.error = "Gagal mengunggah gambar.";
+                        this.uploading = false;
+                    }, 
+                    (progressEvent) => {
+                        // Event detail menampung progress dari livewire
+                        this.progress = progressEvent.detail.progress;
                     }
-                }, 200);
+                );
             },
 
             resetPreview() {
