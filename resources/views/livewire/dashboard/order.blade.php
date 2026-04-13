@@ -1007,6 +1007,71 @@
                                 </div>
                             </div>
 
+                            {{-- Modal Delivery App --}}
+                            <div x-data="{ show: false }" x-on:open-delivery-modal.window="show = true" x-show="show" x-cloak @keydown.window.escape.prevent
+                                class="fixed inset-0 z-50 flex items-center justify-center">
+                                <!-- Backdrop -->
+                                <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" @click="show = false"></div>
+
+                                <!-- Modal Box -->
+                                <div x-show="show" x-transition
+                                    class="relative bg-white w-full max-w-sm rounded-xl shadow-2xl p-6">
+                                    
+                                    <!-- Title -->
+                                    <h2 class="text-lg font-bold text-center text-gray-800 mb-4">
+                                        Pilih Aplikasi Online
+                                    </h2>
+
+                                    <!-- Content -->
+                                    <div class="flex flex-col gap-3">
+                                        <button @click="$wire.set('order_type', 'GOFOOD'); show = false;"
+                                            class="w-full flex items-center gap-3 p-3 rounded-lg border transition-all hover:bg-green-50
+                                            {{ $order_type === 'GOFOOD' ? 'border-green-500 bg-green-50' : 'border-gray-200 bg-white' }}">
+                                            <div class="w-10 h-10 flex-shrink-0 rounded-full flex items-center justify-center overflow-hidden">
+                                                <svg class="w-full h-full" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                                                    <circle cx="50" cy="50" r="50" fill="#00AA13" />
+                                                    <circle cx="50" cy="50" r="23" stroke="#FFFFFF" stroke-width="9" fill="none" />
+                                                    <circle cx="50" cy="50" r="10" fill="#FFFFFF" />
+                                                </svg>
+                                            </div>
+                                            <span class="font-semibold text-gray-800">GoFood</span>
+                                        </button>
+
+                                        <button @click="$wire.set('order_type', 'GRABFOOD'); show = false;"
+                                            class="w-full flex items-center gap-3 p-3 rounded-lg border transition-all hover:bg-green-50
+                                            {{ $order_type === 'GRABFOOD' ? 'border-green-500 bg-green-50' : 'border-gray-200 bg-white' }}">
+                                            <div class="w-10 h-10 flex-shrink-0 rounded-full flex items-center justify-center overflow-hidden">
+                                                <svg class="w-full h-full" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                                                    <circle cx="50" cy="50" r="50" fill="#00B14F" />
+                                                    <text x="50" y="61" fill="#FFFFFF" font-family="Arial, sans-serif" font-weight="bold" font-size="30" letter-spacing="-1" text-anchor="middle">Grab</text>
+                                                </svg>
+                                            </div>
+                                            <span class="font-semibold text-gray-800">GrabFood</span>
+                                        </button>
+
+                                        <button @click="$wire.set('order_type', 'MAXIM'); show = false;"
+                                            class="w-full flex items-center gap-3 p-3 rounded-lg border transition-all hover:bg-yellow-50
+                                            {{ $order_type === 'MAXIM' ? 'border-yellow-500 bg-yellow-50' : 'border-gray-200 bg-white' }}">
+                                            <div class="w-10 h-10 flex-shrink-0 rounded-full flex items-center justify-center overflow-hidden shadow-sm">
+                                                <svg class="w-full h-full" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                                                    <circle cx="50" cy="50" r="50" fill="#FFE300" />
+                                                    <text x="50" y="60" fill="#000000" font-family="Arial, sans-serif" font-weight="bold" font-size="26" letter-spacing="-1" text-anchor="middle">maxim</text>
+                                                </svg>
+                                            </div>
+                                            <span class="font-semibold text-gray-800">Maxim</span>
+                                        </button>
+                                    </div>
+
+                                    <!-- Actions -->
+                                    <div class="flex justify-center mt-6">
+                                        <button @click="show = false"
+                                            class="w-full px-4 py-2 bg-gray-200 text-gray-700 font-semibold rounded-lg hover:bg-gray-300 transition">
+                                            Batal
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
                     </div>
 
                     <!-- Total dan Pembayaran -->
@@ -1033,10 +1098,10 @@
                                             🥡 Bungkus
                                         </button>
                                         
-                                        <button type="button" wire:click="$set('order_type', 'GOFOOD')"
+                                        <button type="button" x-data @click="$dispatch('open-delivery-modal')"
                                             class="py-2 rounded-lg text-sm font-semibold border transition col-span-2
-                                                {{ $order_type === 'GOFOOD' ? 'bg-green-500 text-white border-green-500' : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-100' }}">
-                                            🛵 GoFood / GrabFood
+                                                {{ in_array($order_type, ['GOFOOD', 'GRABFOOD', 'MAXIM']) ? 'bg-green-500 text-white border-green-500' : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-100' }}">
+                                            🛵 @if($order_type === 'GOFOOD') GoFood @elseif($order_type === 'GRABFOOD') GrabFood @elseif($order_type === 'MAXIM') Maxim @else App Online @endif
                                         </button>
                                     </div>
                                 </div>
@@ -1245,7 +1310,7 @@
                                 @endif
 
                                 {{-- ==================== KOMISI APLIKASI ==================== --}}
-                                @if(!empty($cart) && in_array($order_type, ['GOFOOD', 'TAKEAWAY', 'DINE_IN']))
+                                @if(!empty($cart) && in_array($order_type, ['GOFOOD', 'GRABFOOD', 'MAXIM', 'TAKEAWAY', 'DINE_IN']))
                                 <div x-data="{
                                         open: @entangle('platformFeeEnabled').live,
                                         display: '',
@@ -1269,7 +1334,7 @@
                                             this.raw = v === '' ? 0 : parseInt(v);
                                         }
                                     }"
-                                     x-show="$wire.order_type === 'GOFOOD' || open"
+                                     x-show="['GOFOOD', 'GRABFOOD', 'MAXIM'].includes($wire.order_type) || open"
                                      class="rounded-lg border transition-all mt-2"
                                      :class="open ? 'border-red-300 bg-red-50' : 'border-gray-200 bg-white'"
                                 >
