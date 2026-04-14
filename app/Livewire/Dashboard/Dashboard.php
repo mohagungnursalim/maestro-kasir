@@ -17,7 +17,6 @@ class Dashboard extends Component
     public $totalQris;       // Pendapatan QRIS
     public $totalTunai;      // Pendapatan Tunai (CASH)
     public $uangKeuntungan;  // Profit kotor = Omzet - Pengeluaran
-    public $uangDiLaci;      // Uang fisik di kasir = Tunai + Top Up - Pengeluaran
     public $totalProductsSold;
     public $totalExpenses;
     public $totalTopUps;
@@ -132,7 +131,6 @@ class Dashboard extends Component
                 'totalQris'         => (float) ($ordersAggregates->total_qris ?? 0),
                 'totalTunai'        => (float) ($ordersAggregates->total_cash ?? 0),
                 'uangKeuntungan'    => $sales_omzet - $total_out,
-                'uangDiLaci'        => (float) ($ordersAggregates->total_cash ?? 0) + $total_in - $real_cash_out,
                 'totalExpenses'     => $total_out,
                 'totalTopUps'       => $total_in,
                 'totalProductsSold' => (int) ($salesAggregates->total_qty ?? 0),
@@ -175,7 +173,6 @@ class Dashboard extends Component
         $this->totalQris         = $stats['totalQris'] ?? 0;
         $this->totalTunai        = $stats['totalTunai'] ?? 0;
         $this->uangKeuntungan    = $stats['uangKeuntungan'];
-        $this->uangDiLaci        = $stats['uangDiLaci'];
         $this->totalExpenses     = $stats['totalExpenses'];
         $this->totalTopUps       = $stats['totalTopUps'];
         $this->totalProductsSold = $stats['totalProductsSold'];

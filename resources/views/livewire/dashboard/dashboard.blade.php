@@ -78,21 +78,6 @@
                     @endif
                 </div>
 
-                <!-- Uang di Laci (Tunai + Top Up - Pengeluaran) -->
-                <div class="p-4 bg-blue-50 shadow rounded-lg border border-blue-200 flex flex-col justify-between">
-                    @if(!$loaded)
-                        <div class="h-4 bg-blue-200 rounded-full w-36 mb-3 animate-pulse"></div>
-                        <div class="h-8 bg-blue-200 rounded-full w-40 animate-pulse"></div>
-                        <div class="h-3 bg-blue-200 rounded-full w-32 mt-auto animate-pulse"></div>
-                    @else
-                        <div>
-                            <h3 class="text-lg font-semibold text-blue-700">Uang di Laci</h3>
-                            <p class="text-2xl font-bold text-blue-600">Rp{{ number_format($uangDiLaci, 0, ',', '.') }}</p>
-                        </div>
-                        <p class="text-xs text-blue-500 mt-2 border-t border-blue-200 pt-1">Tunai + Top Up Kas − Keluar</p>
-                    @endif
-                </div>
-
                 <!-- Total Top Up Kas -->
                 <div class="p-4 bg-white shadow rounded-lg border border-gray-200">
                     @if(!$loaded)
