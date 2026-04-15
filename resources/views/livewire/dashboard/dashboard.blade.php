@@ -216,8 +216,9 @@
                 <div class="space-y-2">
                     @foreach ($orderTypeSplit as $type => $data)
                         @php
-                            $meta  = $typeLabels[$type] ?? $typeLabels['other'];
-                            $clr   = $colorMap[$meta['color']] ?? $colorMap['gray'];
+                            $meta = $typeLabels[$type] ?? null;
+                            if (!$meta) continue; // skip tipe yang tidak dikenal
+                            $clr  = $colorMap[$meta['color']];
                         @endphp
                         <div class="flex items-center gap-3">
                             <div class="w-24 shrink-0 flex items-center gap-1 {{ $clr['text'] }} text-xs font-semibold">

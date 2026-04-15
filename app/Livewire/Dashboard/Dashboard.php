@@ -145,7 +145,8 @@ class Dashboard extends Component
             $orderTypeSplit = [];
             $totalOrdersForSplit = max((int) ($ordersAggregates->total_orders ?? 0), 1);
             foreach ($orderTypeSplitRaw as $row) {
-                $key = strtoupper($row->order_type ?? 'OTHER');
+                if (empty($row->order_type)) continue; // skip null/kosong, tidak ada key fallback
+                $key = strtoupper($row->order_type);
                 $orderTypeSplit[$key] = [
                     'count'      => (int) $row->total_count,
                     'omzet'      => (float) $row->total_omzet,
