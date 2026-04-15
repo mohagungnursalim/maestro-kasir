@@ -27,6 +27,16 @@ class Dashboard extends Component
     public $yesterdayOmzet = 0;   // Omzet hari kemarin (hanya untuk filter 'today')
     public $omzetGrowth    = null; // Persentase pertumbuhan vs periode sebelumnya (null = N/A)
 
+    // Point 1: Piutang / Belum Lunas
+    public $totalUnpaidOrders  = 0;  // Jumlah order belum lunas
+    public $totalUnpaidAmount  = 0;  // Total nominal piutang
+
+    // Point 2: Rasio Tipe Order
+    public $orderTypeSplit = [];  // ['dine_in' => [...], 'take_away' => [...], ...]
+
+    // Point 5: Transaksi Terbaru
+    public $recentTransactions = [];  // 10 transaksi PAID terbaru
+
     // Visitor stats
     public $totalPageViews;
     public $totalUniqueVisitors;
@@ -125,6 +135,24 @@ class Dashboard extends Component
             
             $sales_omzet = (float) ($ordersAggregates->total_sales ?? 0);
 
+            // Query 4 (Point 2): Rasio Tipe Order — kunci uppercase sesuai nilai DB
+            $orderTypeSplitRaw = (clone $queryOrders)->selectRaw("
+                UPPER(order_type) as order_type,
+                COUNT(id) as total_count,
+                COALESCE(SUM(grandtotal), 0) as total_omzet
+            ")->groupBy('order_type')->get();
+
+            $orderTypeSplit = [];
+            $totalOrdersForSplit = max((int) ($ordersAggregates->total_orders ?? 0), 1);
+            foreach ($orderTypeSplitRaw as $row) {
+                $key = strtoupper($row->order_type ?? 'OTHER');
+                $orderTypeSplit[$key] = [
+                    'count'      => (int) $row->total_count,
+                    'omzet'      => (float) $row->total_omzet,
+                    'percentage' => round(($row->total_count / $totalOrdersForSplit) * 100, 1),
+                ];
+            }
+
             $result = [
                 'totalOrders'       => (int) ($ordersAggregates->total_orders ?? 0),
                 'totalOmzet'        => $sales_omzet,
@@ -136,9 +164,10 @@ class Dashboard extends Component
                 'totalProductsSold' => (int) ($salesAggregates->total_qty ?? 0),
                 'avgOrderValue'     => (float) ($ordersAggregates->avg_order_value ?? 0),
                 'avgDiscount'       => (float) ($ordersAggregates->avg_discount ?? 0),
+                'orderTypeSplit'    => $orderTypeSplit,
             ];
 
-            // Query 4: Yesterday / previous period comparison
+            // Query 5: Yesterday / previous period comparison
             $prevDates = $this->getPreviousPeriodRange($this->filterType, $dates['start'], $dates['end']);
             $prevQuery = Order::whereBetween('created_at', [$prevDates['start'], $prevDates['end']])
                 ->where('payment_status', 'PAID');
@@ -154,7 +183,21 @@ class Dashboard extends Component
                 ? round((($sales_omzet - $prevOmzet) / $prevOmzet) * 100, 1)
                 : ($sales_omzet > 0 ? 100.0 : null);
 
-            // Query 5 (admin only): Stats Pengunjung
+            // Query 6 (Point 5): 10 Transaksi Terbaru — di-cache bersama stats utama
+            $recentQuery = Order::with(['user:id,name'])
+                ->whereBetween('created_at', [$dates['start'], $dates['end']])
+                ->where('payment_status', 'PAID')
+                ->orderByDesc('created_at')
+                ->limit(10);
+            if (!$isAdmin) {
+                $recentQuery->where('user_id', $userId);
+            }
+            $result['recentTransactions'] = $recentQuery->get([
+                'id', 'order_number', 'grandtotal', 'payment_method',
+                'order_type', 'created_at', 'user_id', 'discount',
+            ])->toArray();
+
+            // Query 7 (admin only): Stats Pengunjung
             if ($isAdmin) {
                 $visitorAggregates = Visitor::whereBetween('visited_at', [$dates['start'], $dates['end']])
                     ->selectRaw('COUNT(*) as total_views, COUNT(DISTINCT ip_address) as unique_visitors')
@@ -168,23 +211,47 @@ class Dashboard extends Component
         });
 
         // Assign ke state Livewire
-        $this->totalOrders       = $stats['totalOrders'];
-        $this->totalOmzet        = $stats['totalOmzet'];
-        $this->totalQris         = $stats['totalQris'] ?? 0;
-        $this->totalTunai        = $stats['totalTunai'] ?? 0;
-        $this->uangKeuntungan    = $stats['uangKeuntungan'];
-        $this->totalExpenses     = $stats['totalExpenses'];
-        $this->totalTopUps       = $stats['totalTopUps'];
-        $this->totalProductsSold = $stats['totalProductsSold'];
-        $this->avgOrderValue     = $stats['avgOrderValue'] ?? 0;
-        $this->avgDiscount       = $stats['avgDiscount'] ?? 0;
-        $this->yesterdayOmzet    = $stats['yesterdayOmzet'] ?? 0;
-        $this->omzetGrowth       = $stats['omzetGrowth'] ?? null;
+        $this->totalOrders        = $stats['totalOrders'];
+        $this->totalOmzet         = $stats['totalOmzet'];
+        $this->totalQris          = $stats['totalQris'] ?? 0;
+        $this->totalTunai         = $stats['totalTunai'] ?? 0;
+        $this->uangKeuntungan     = $stats['uangKeuntungan'];
+        $this->totalExpenses      = $stats['totalExpenses'];
+        $this->totalTopUps        = $stats['totalTopUps'];
+        $this->totalProductsSold  = $stats['totalProductsSold'];
+        $this->avgOrderValue      = $stats['avgOrderValue'] ?? 0;
+        $this->avgDiscount        = $stats['avgDiscount'] ?? 0;
+        $this->yesterdayOmzet     = $stats['yesterdayOmzet'] ?? 0;
+        $this->omzetGrowth        = $stats['omzetGrowth'] ?? null;
+        $this->orderTypeSplit     = $stats['orderTypeSplit'] ?? [];
+        $this->recentTransactions = $stats['recentTransactions'] ?? [];
 
         if ($isAdmin) {
             $this->totalPageViews      = $stats['totalPageViews'] ?? 0;
             $this->totalUniqueVisitors = $stats['totalUniqueVisitors'] ?? 0;
         }
+
+        // Point 1: Piutang — cache key terpisah (tidak terikat filter tanggal),
+        // tapi ikut transaction_cache_version → invalidate otomatis saat ada perubahan transaksi.
+        $unpaidCacheKey = sprintf(
+            'dashboard_unpaid:%s:tv%s:br%s',
+            $isAdmin ? 'admin' : 'user_' . $userId,
+            $transactionVersion,
+            $activeBranch
+        );
+
+        $unpaidStats = Cache::remember($unpaidCacheKey, now()->addMinutes(5), function () use ($isAdmin, $userId) {
+            $unpaidQuery = Order::where('payment_status', 'UNPAID');
+            if (!$isAdmin) {
+                $unpaidQuery->where('user_id', $userId);
+            }
+            return $unpaidQuery->selectRaw(
+                'COUNT(id) as total_count, COALESCE(SUM(grandtotal), 0) as total_amount'
+            )->first();
+        });
+
+        $this->totalUnpaidOrders = (int) ($unpaidStats->total_count ?? 0);
+        $this->totalUnpaidAmount = (float) ($unpaidStats->total_amount ?? 0);
     }
 
     // Mengambil rentang tanggal berdasarkan filter yang dipilih
