@@ -76,12 +76,23 @@ class Order extends Component
         $this->ttl = 300; // Cache selama 5 menit (300 detik - format integer aman untuk Livewire)
     }
 
-    // Load unpaid orders
+    // Load unpaid orders (termasuk customer self-order yang branch_id-nya null)
     public function loadUnpaidOrders()
     {
-        $this->unpaidOrders = ModelsOrder::where('payment_status', 'UNPAID')
+        $activeBranchId = \Illuminate\Support\Facades\Session::get('active_branch_id');
+
+        $this->unpaidOrders = ModelsOrder::withoutGlobalScope('branch')
+            ->where('payment_status', 'UNPAID')
+            ->where(function ($q) use ($activeBranchId) {
+                if ($activeBranchId) {
+                    // Tampilkan order dari cabang aktif ATAU customer order tanpa branch
+                    $q->where('branch_id', $activeBranchId)
+                      ->orWhereNull('branch_id');
+                }
+                // Jika tidak ada active branch filter (owner global), ambil semua
+            })
             ->orderBy('created_at', 'asc')
-            ->limit(20)
+            ->limit(30)
             ->get();
     }
 
@@ -580,7 +591,7 @@ class Order extends Component
     // Pilih order unpaid untuk diload ke cart
     public function selectUnpaidOrder($orderId)
     {
-        $order = ModelsOrder::with('transactionDetails.product')->findOrFail($orderId);
+        $order = ModelsOrder::withoutGlobalScope('branch')->with('transactionDetails.product')->findOrFail($orderId);
 
         // Reset cart
         $this->resetCart();
@@ -659,7 +670,7 @@ class Order extends Component
             // ================= EDIT ORDER UNPAID =================
             if ($this->selectedUnpaidOrderId) {
 
-                $order = ModelsOrder::lockForUpdate()->findOrFail($this->selectedUnpaidOrderId);
+                $order = ModelsOrder::withoutGlobalScope('branch')->lockForUpdate()->findOrFail($this->selectedUnpaidOrderId);
 
                 // SIMPAN STATUS AWAL
                 $wasUnpaid = $order->payment_status === 'UNPAID';
@@ -1092,7 +1103,7 @@ class Order extends Component
         try {
             DB::beginTransaction();
 
-            $order = ModelsOrder::with('transactionDetails')->where('id', $orderId)->where('payment_status', 'UNPAID')->firstOrFail();
+            $order = ModelsOrder::withoutGlobalScope('branch')->with('transactionDetails')->where('id', $orderId)->where('payment_status', 'UNPAID')->firstOrFail();
 
             // Kembalikan stok / kurangi sold_count
             foreach ($order->transactionDetails as $item) {

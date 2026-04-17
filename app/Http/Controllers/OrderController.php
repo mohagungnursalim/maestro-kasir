@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Order;
+use App\Models\StoreSetting;
 use Illuminate\Http\Request;
 
 class OrderController extends Controller
@@ -55,4 +56,33 @@ class OrderController extends Controller
         return view('bill', compact('billData'));
     }
 
+    /**
+     * Generate QR code page untuk meja tertentu (cetak & pajang di meja)
+     * Menggunakan Token rahasia agar aman dari user yang coba tebak nama meja
+     */
+    public function generateQr(Request $request, string $desk)
+    {
+        $desk = urldecode($desk);
+        $activeBranchId = session('active_branch_id');
+
+        // Cari atau buat Record Meja
+        $table = \App\Models\Table::firstOrCreate(
+            ['name' => $desk, 'branch_id' => $activeBranchId],
+            ['token' => \Illuminate\Support\Str::random(12), 'is_active' => true]
+        );
+
+        // Jika meja tidak aktif
+        if (!$table->is_active) {
+            abort(403, 'Meja ini dinonaktifkan.');
+        }
+
+        // Build URL dengan TOKEN
+        $menuUrl = route('customer.order', ['token' => $table->token]);
+
+        $settings = StoreSetting::first();
+        $storeName = $settings->store_name ?? config('app.name');
+
+        return view('qr-table', compact('desk', 'menuUrl', 'storeName'));
+    }
 }
+

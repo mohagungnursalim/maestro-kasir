@@ -2,6 +2,8 @@
 
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\SupplierController;
+use App\Livewire\CustomerOrder;
+use App\Livewire\Dashboard\TableManagement;
 use App\Livewire\Dashboard\RolePermissionManagement;
 use App\Livewire\Dashboard\Settings;
 use App\Livewire\Dashboard\Product;
@@ -65,6 +67,9 @@ Route::get('/dashboard/units', UnitManagement::class)
     ->middleware(['auth','role:admin|owner'])
     ->name('units');
 
+Route::get('/dashboard/tables', TableManagement::class)
+    ->middleware(['auth','role:admin|owner'])
+    ->name('tables');
 
 Route::get('/dashboard/store-settings', Settings::class)
     ->middleware(['auth','role:admin|owner'])
@@ -133,5 +138,17 @@ Route::view('profile', 'profile')
     Route::get('/benchmark', function () {
         return view('hello');
     })->name('hello');
+
+// ========================
+// CUSTOMER SELF-ORDER (Publik, tanpa auth, by Token)
+// ========================
+// Halaman menu pelanggan via QR scan — URL menggunakan TOKEN, bukan nama meja
+Route::get('/scan/{token}', CustomerOrder::class)->name('customer.order');
+
+// QR Code generator endpoint (auth) — generate SVG/PNG QR untuk dicetak
+Route::get('/dashboard/qr-code/{desk}', [OrderController::class, 'generateQr'])
+    ->middleware(['auth'])
+    ->name('order.qr');
+
 require __DIR__ . '/auth.php';
 

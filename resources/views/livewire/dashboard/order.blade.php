@@ -1110,9 +1110,22 @@
                     
                                 <div>
                                     <label class="block mb-2 text-sm font-medium text-gray-900">Meja/Nama</label>
-                                    <input type="text" wire:model.live.debounce.400ms="desk_number"
-                                        class="block w-full p-2 border rounded-lg text-sm bg-gray-50"
-                                        placeholder="Contoh: A1, 12, VIP-3">
+                                    <div class="flex gap-2">
+                                        <input type="text" wire:model.live.debounce.400ms="desk_number"
+                                            class="flex-1 block w-full p-2 border rounded-lg text-sm bg-gray-50"
+                                            placeholder="Contoh: A1, 12, VIP-3">
+                                        {{-- Tombol Generate QR --}}
+                                        @if(!empty($desk_number))
+                                        <button
+                                            type="button"
+                                            onclick="window.open('{{ url('/dashboard/qr-code') }}/' + encodeURIComponent(document.querySelector('[wire\\:model\\.live\\.debounce\\.400ms=desk_number]').value), '_blank', 'width=500,height=700')"
+                                            title="Generate QR Code untuk meja ini"
+                                            class="flex-shrink-0 px-2.5 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition text-xs font-semibold flex items-center gap-1 shadow-sm">
+                                            <i class="fas fa-qrcode"></i>
+                                            <span class="hidden sm:inline">QR</span>
+                                        </button>
+                                        @endif
+                                    </div>
                                 </div>
                                 
 
@@ -1502,7 +1515,17 @@
 
                     @else
                     <div class="rounded-md border border-red-200 bg-red-50 p-2 shadow-sm text-xs">
-                        <h3 class="font-extrabold text-red-700 mb-2 text-xs">🕒 Belum Dibayar</h3>
+                        <div class="flex items-center justify-between mb-2">
+                            <h3 class="font-extrabold text-red-700 text-xs">🕒 Belum Dibayar</h3>
+                            {{-- QR Generator Shortcut --}}
+                            <button
+                                type="button"
+                                x-data
+                                @click="$dispatch('open-qr-generator-modal')"
+                                class="inline-flex items-center gap-1 text-[10px] font-semibold text-indigo-700 bg-indigo-50 border border-indigo-200 px-2 py-1 rounded-md hover:bg-indigo-100 transition">
+                                <i class="fas fa-qrcode"></i> Generate QR Meja
+                            </button>
+                        </div>
 
                         <div class="space-y-1 max-h-[250px] overflow-y-auto custom-scrollbar">
                             @foreach($unpaidOrders as $order)
@@ -1510,7 +1533,14 @@
                                 <button wire:click="selectUnpaidOrder({{ $order->id }})"
                                     class="flex-1 text-left p-2 rounded border bg-white hover:bg-orange-100 transition flex items-center gap-2 text-xs min-w-0">
                                     <div class="flex-1 min-w-0">
-                                        <div class="font-semibold text-[11px] truncate"> {{ $order->desk_number ?? '?' }}</div>
+                                        <div class="font-semibold text-[11px] truncate flex items-center gap-1">
+                                            {{ $order->desk_number ?? '?' }}
+                                            @if(($order->order_source ?? 'kasir') === 'customer')
+                                                <span class="inline-flex items-center bg-amber-100 text-amber-700 border border-amber-200 rounded px-1 py-0 text-[9px] font-bold leading-tight">
+                                                    📱 Self
+                                                </span>
+                                            @endif
+                                        </div>
                                         <div class="text-[10px] text-gray-500 truncate">{{ $order->order_number }}</div>
                                     </div>
                                     <div class="text-right whitespace-nowrap">
@@ -1534,6 +1564,56 @@
         </section>
     </div>
     @endcan
+
+    {{-- ====== MODAL QR GENERATOR ====== --}}
+    <div x-data="{
+            show: false,
+            deskInput: '',
+            get qrUrl() {
+                return this.deskInput ? `{{ url('/dashboard/qr-code') }}/` + encodeURIComponent(this.deskInput) : '';
+            }
+        }"
+        x-on:open-qr-generator-modal.window="show = true; deskInput = $wire.desk_number || '';"
+        x-show="show"
+        x-cloak
+        @keydown.window.escape="show = false"
+        class="fixed inset-0 z-50 flex items-center justify-center">
+
+        <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" @click="show = false"></div>
+
+        <div x-show="show" x-transition class="relative bg-white w-full max-w-sm rounded-2xl shadow-2xl p-6">
+
+            <div class="flex justify-center mb-4">
+                <div class="w-12 h-12 flex items-center justify-center rounded-full bg-indigo-100 text-indigo-600">
+                    <i class="fas fa-qrcode fa-lg"></i>
+                </div>
+            </div>
+
+            <h2 class="text-lg font-bold text-center text-gray-800 mb-1">Generate QR Code Meja</h2>
+            <p class="text-center text-gray-500 text-xs mb-5">QR akan dibuka di tab baru, siap dicetak &amp; dipajang di meja.</p>
+
+            <div class="mb-4">
+                <label class="block text-sm font-semibold text-gray-700 mb-1">Nomor / Nama Meja</label>
+                <input type="text" x-model="deskInput"
+                    placeholder="Contoh: A1, 5, VIP-1"
+                    class="w-full border rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400">
+            </div>
+
+            <div class="flex gap-3">
+                <button @click="show = false"
+                    class="flex-1 py-2.5 bg-gray-100 text-gray-700 font-semibold rounded-xl hover:bg-gray-200 transition">
+                    Batal
+                </button>
+                <button
+                    @click="if(deskInput) { window.open(qrUrl, '_blank', 'width=480,height=700'); show = false; }"
+                    :disabled="!deskInput"
+                    class="flex-1 py-2.5 bg-indigo-600 text-white font-bold rounded-xl hover:bg-indigo-700 disabled:opacity-40 disabled:cursor-not-allowed transition flex items-center justify-center gap-2">
+                    <i class="fas fa-qrcode"></i> Buka QR
+                </button>
+            </div>
+        </div>
+    </div>
+
     <script>
         Livewire.on('printReceipt', orderId => {
             let receiptUrl = `/dashboard/order-receipt/${orderId}`;

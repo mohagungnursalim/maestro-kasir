@@ -181,6 +181,17 @@
             </a>
         </li>
         
+        <li>
+            <a 
+                class="flex items-center p-2 rounded-lg {{ Request::is('dashboard/tables') ? 'bg-yellow-300 text-dark' : 'hover:bg-gray-200' }}"
+                @if (!Request::is('dashboard/tables'))
+                    wire:navigate href="/dashboard/tables"
+                @endif>
+                <i class="bi bi-ui-radios-grid"></i>
+                <span class="flex-1 ms-3 whitespace-nowrap">Manajemen Meja / QR</span>
+            </a>
+        </li>
+        
         @if(auth()->user()->hasRole('owner') || (auth()->user()->hasRole('admin') && is_null(auth()->user()->branch_id)))
         <li>
             <a 
