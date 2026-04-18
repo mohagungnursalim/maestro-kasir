@@ -13,10 +13,7 @@
         </div>
     @else
         <div class="flex flex-col sm:flex-row items-center gap-6">
-            {{-- Donut chart --}}
-            <div class="relative w-40 h-40 flex-shrink-0" wire:ignore>
-                <canvas id="paymentSplitChart" width="160" height="160"></canvas>
-            </div>
+
 
             {{-- Legend & breakdown --}}
             <div class="flex-1 w-full space-y-3">
@@ -70,68 +67,4 @@
         </div>
     @endif
 
-    <script>
-        (function () {
-            function renderPaymentSplitChart() {
-                setTimeout(() => {
-                    const ctx = document.getElementById('paymentSplitChart')?.getContext('2d');
-                    if (!ctx) return;
-
-                    if (window.paymentSplitChart instanceof Chart) {
-                        window.paymentSplitChart.destroy();
-                    }
-
-                    const qris  = {{ $qrisTotal }};
-                    const tunai = {{ $tunaiTotal }};
-                    const other = {{ $otherTotal }};
-
-                    if (qris + tunai + other === 0) return;
-
-                    window.paymentSplitChart = new Chart(ctx, {
-                        type: 'doughnut',
-                        data: {
-                            labels: ['QRIS', 'Tunai', 'Lainnya'],
-                            datasets: [{
-                                data: [qris, tunai, other],
-                                backgroundColor: [
-                                    'rgba(99, 102, 241, 0.85)',
-                                    'rgba(16, 185, 129, 0.85)',
-                                    'rgba(251, 191, 36, 0.85)',
-                                ],
-                                borderColor: ['#6366f1', '#10b981', '#fbbf24'],
-                                borderWidth: 2,
-                                hoverOffset: 6,
-                            }]
-                        },
-                        options: {
-                            responsive: false,
-                            cutout: '70%',
-                            plugins: {
-                                legend: { display: false },
-                                tooltip: {
-                                    callbacks: {
-                                        label: ctx => {
-                                            const val = ctx.raw;
-                                            return ' Rp ' + val.toLocaleString('id-ID');
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    });
-
-                    window.addEventListener('update-payment-split-chart', (e) => {
-                        const { qris, tunai, other } = e.detail;
-                        if(window.paymentSplitChart) {
-                            window.paymentSplitChart.data.datasets[0].data = [qris, tunai, other];
-                            window.paymentSplitChart.update();
-                        }
-                    });
-                }, 200);
-            }
-
-            document.addEventListener('DOMContentLoaded', renderPaymentSplitChart);
-            document.addEventListener('livewire:navigated', renderPaymentSplitChart);
-        })();
-    </script>
 </div>

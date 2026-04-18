@@ -21,9 +21,13 @@
     @endif
 
     <script>
-        (function () {
-            function renderPeakHourChart() {
+            window.renderPeakHourChart = function() {
                 setTimeout(() => {
+                    if (typeof Chart === 'undefined') {
+                        setTimeout(window.renderPeakHourChart, 100);
+                        return;
+                    }
+
                     const ctx = document.getElementById('peakHourChart')?.getContext('2d');
                     if (!ctx) return;
 
@@ -118,8 +122,7 @@
                 }, 200);
             }
 
-            document.addEventListener('DOMContentLoaded', renderPeakHourChart);
-            document.addEventListener('livewire:navigated', renderPeakHourChart);
-        })();
+        // Jalankan segera saat script di-evaluasi oleh Livewire
+        window.renderPeakHourChart();
     </script>
 </div>

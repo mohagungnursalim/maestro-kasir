@@ -19,6 +19,12 @@ document.addEventListener('livewire:navigated', () => {
         window.selectSound.preload = "auto";
     }
 
+    // Initialize charts if they exist
+    if (typeof window.initMonthlyTurnoverChart === 'function') window.initMonthlyTurnoverChart();
+    if (typeof window.renderDailyOmzetFromWire === 'function') window.renderDailyOmzetFromWire();
+    if (typeof window.renderPeakHourChart === 'function') window.renderPeakHourChart();
+    if (typeof window.initProductSalesChart === 'function') window.initProductSalesChart();
+
     if (!window.successSound) {
         window.successSound = new Audio("/audio/success-sound.mp3");
         window.successSound.volume = 1.0;

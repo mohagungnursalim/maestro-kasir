@@ -7,8 +7,13 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <script>
-        function initMonthlyTurnoverChart() {
+        window.initMonthlyTurnoverChart = function() {
             setTimeout(() => {
+                if (typeof Chart === 'undefined') {
+                    setTimeout(window.initMonthlyTurnoverChart, 100);
+                    return;
+                }
+
                 const ctx = document.getElementById('monthlyChart')?.getContext('2d');
                 if (!ctx) return;
 
@@ -65,8 +70,7 @@
                 });
             }, 300);
         }
-
-        document.addEventListener('DOMContentLoaded', initMonthlyTurnoverChart);
-        document.addEventListener('livewire:navigated', initMonthlyTurnoverChart);
+        // Jalankan segera saat script di-evaluasi oleh Livewire (saat navigasi tanpa refresh)
+        window.initMonthlyTurnoverChart();
     </script>
 </div>

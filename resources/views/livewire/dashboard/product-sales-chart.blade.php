@@ -9,8 +9,13 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     
     <script>
-        function initProductSalesChart() {
+        window.initProductSalesChart = function() {
             setTimeout(() => {
+                if (typeof Chart === 'undefined') {
+                    setTimeout(window.initProductSalesChart, 100);
+                    return;
+                }
+
                 const ctx = document.getElementById("salesChart")?.getContext("2d");
                 if (!ctx) return;
     
@@ -75,8 +80,8 @@
                 });
             }, 300);
         }
-    
-        document.addEventListener("livewire:navigated", initProductSalesChart);
-        document.addEventListener("DOMContentLoaded", initProductSalesChart);
+        
+        // Jalankan segera saat script di-evaluasi oleh Livewire
+        window.initProductSalesChart();
     </script>
 </div>

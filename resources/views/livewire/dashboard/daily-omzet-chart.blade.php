@@ -48,6 +48,11 @@
 
     <script>
         function initDailyOmzetChart(labels, data) {
+            if (typeof Chart === 'undefined') {
+                setTimeout(() => initDailyOmzetChart(labels, data), 100);
+                return;
+            }
+            
             const ctx = document.getElementById('dailyOmzetChart')?.getContext('2d');
             if (!ctx) return;
 
@@ -123,20 +128,22 @@
             });
         }
 
-        function renderDailyOmzetFromWire() {
-            const labels = @json(array_keys($dailyOmzet));
-            const data   = @json(array_values($dailyOmzet));
-            initDailyOmzetChart(labels, data);
+        window.renderDailyOmzetFromWire = function() {
+            setTimeout(() => {
+                const labels = @json(array_keys($dailyOmzet));
+                const data   = @json(array_values($dailyOmzet));
+                initDailyOmzetChart(labels, data);
+            }, 300);
         }
-
-        document.addEventListener('DOMContentLoaded', renderDailyOmzetFromWire);
-        document.addEventListener('livewire:navigated', renderDailyOmzetFromWire);
 
         // Re-render setelah Livewire update komponen ini
         document.addEventListener('livewire:updated', function (e) {
             if (document.getElementById('dailyOmzetChart')) {
-                renderDailyOmzetFromWire();
+                window.renderDailyOmzetFromWire();
             }
         });
+        
+        // Jalankan segera saat script di-evaluasi oleh Livewire
+        window.renderDailyOmzetFromWire();
     </script>
 </div>
