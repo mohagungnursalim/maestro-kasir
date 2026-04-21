@@ -280,7 +280,17 @@
                                         <td></td>
                                         <td class="px-4 py-2">{{ $trx->product_name }}</td>
                                         <td class="px-4 py-2 text-center">{{ $trx->quantity }}</td>
-                                        <td class="px-4 py-2 text-right">Rp{{ number_format($trx->price, 0, ',', '.') }}</td>
+                                        <td class="px-4 py-2 text-right">
+                                            @php
+                                                $originalPrice = $trx->product_price ?? $trx->price;
+                                                $itemDiscount = max(0, $originalPrice - $trx->price);
+                                            @endphp
+                                            @if($itemDiscount > 0)
+                                                <del class="text-xs text-gray-400 block">Rp{{ number_format($originalPrice, 0, ',', '.') }}</del>
+                                                <span class="text-xs text-red-500 block mb-1">-Rp{{ number_format($itemDiscount, 0, ',', '.') }}</span>
+                                            @endif
+                                            Rp{{ number_format($trx->price, 0, ',', '.') }}
+                                        </td>
                                         <td class="px-4 py-2 text-right">
                                             Rp{{ number_format($trx->price * $trx->quantity, 0, ',', '.') }}
                                         </td>

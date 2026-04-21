@@ -144,7 +144,7 @@
         $method = strtoupper($f->order->payment_method ?? '');
         $mode   = strtoupper($f->order->payment_mode   ?? '');
 
-        $subtotalProduk  = $details->sum(fn($i) => $i->quantity * $i->product->price);
+        $subtotalProduk  = $details->sum(fn($i) => $i->quantity * $i->price);
         $totalPay        = $f->order->grandtotal    ?? 0;
         $taxAmount       = $f->order->tax           ?? 0;
         $discountAmount  = $f->order->discount      ?? 0;
@@ -317,7 +317,7 @@
 @foreach ($transactions as $order_id => $details)
 @php
     $first          = $details->first();
-    $subtotalProduk = $details->sum(fn($i) => $i->quantity * $i->product->price);
+    $subtotalProduk = $details->sum(fn($i) => $i->quantity * $i->price);
     $totalPay       = $first->order->grandtotal  ?? 0;
     $taxAmount      = $first->order->tax         ?? 0;
     $discountAmount = $first->order->discount    ?? 0;
@@ -380,8 +380,16 @@
             <td>{{ $transaction->product->name ?? '-' }}</td>
             <td class="center">{{ $transaction->quantity }}</td>
             <td class="center">
-                {{ $transaction->quantity }}x Rp{{ number_format($transaction->product->price, 0, ',', '.') }}<br>
-                <small>= Rp{{ number_format($transaction->product->price * $transaction->quantity, 0, ',', '.') }}</small>
+                @php
+                    $originalPrice = $transaction->product->price ?? $transaction->price;
+                    $itemDiscount = max(0, $originalPrice - $transaction->price);
+                @endphp
+                @if($itemDiscount > 0)
+                    <del class="text-small-gray">Rp{{ number_format($originalPrice, 0, ',', '.') }}</del><br>
+                    <span class="text-red-500 text-small-gray" style="font-size: 8px;">-Rp{{ number_format($itemDiscount, 0, ',', '.') }}</span><br>
+                @endif
+                {{ $transaction->quantity }}x Rp{{ number_format($transaction->price, 0, ',', '.') }}<br>
+                <small>= Rp{{ number_format($transaction->price * $transaction->quantity, 0, ',', '.') }}</small>
             </td>
             <td></td>
             <td></td>

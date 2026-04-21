@@ -30,4 +30,35 @@ class Product extends Model
     {
         return $this->hasMany(ProductIngredient::class, 'product_id');
     }
+
+    public function getIsActiveDiscountAttribute()
+    {
+        if (empty($this->is_discounted)) {
+            return false;
+        }
+
+        $now = \Carbon\Carbon::now();
+        $startOk = empty($this->discount_start) || $now->greaterThanOrEqualTo(\Carbon\Carbon::parse($this->discount_start));
+        $endOk = empty($this->discount_end) || $now->lessThanOrEqualTo(\Carbon\Carbon::parse($this->discount_end));
+
+        return $startOk && $endOk;
+    }
+
+    public function getOriginalPriceAttribute()
+    {
+        return $this->attributes['price'] ?? 0;
+    }
+
+    public function getFinalPriceAttribute()
+    {
+        $price = $this->original_price;
+        if ($this->is_active_discount && !empty($this->discount_type) && !empty($this->discount_value)) {
+            if ($this->discount_type === 'fixed') {
+                return max(0, $price - $this->discount_value);
+            } else {
+                return max(0, $price - ($price * ($this->discount_value / 100)));
+            }
+        }
+        return $price;
+    }
 }

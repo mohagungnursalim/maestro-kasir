@@ -127,7 +127,8 @@ class Transaction extends Component
                         'orders.grandtotal as grand_total',
                         'orders.created_at as order_date',
                         'users.name as user_name',
-                        'products.name as product_name'
+                        'products.name as product_name',
+                        'products.price as product_price'
                     )
                     ->where('orders.payment_status', 'PAID')
                     ->when(session()->has('active_branch_id'), function ($query) {

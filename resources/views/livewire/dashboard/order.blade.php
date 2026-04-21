@@ -151,9 +151,22 @@
 
                                                 <!-- Price & Stock -->
                                                 <div class="flex justify-between items-center">
-                                                    <span class="text-xs font-bold text-gray-900">
-                                                        Rp{{ number_format($product->price, 0, ',', '.') }}
-                                                    </span>
+                                                    <div class="flex flex-col">
+                                                        @if($product->is_active_discount && $product->original_price > $product->final_price)
+                                                            <div class="flex items-center gap-1">
+                                                                <del class="text-[10px] text-gray-400">Rp{{ number_format($product->original_price, 0, ',', '.') }}</del>
+                                                                @if($product->discount_type === 'percent')
+                                                                    <span class="text-[9px] font-bold text-red-500 bg-red-100 px-1 rounded">{{ rtrim(rtrim(number_format($product->discount_value, 2, ',', '.'), '0'), ',') }}%</span>
+                                                                @else
+                                                                    @php $discVal = $product->original_price - $product->final_price; @endphp
+                                                                    <span class="text-[9px] font-bold text-red-500 bg-red-100 px-1 rounded">-Rp{{ number_format($discVal/1000, 0, ',', '.') }}K</span>
+                                                                @endif
+                                                            </div>
+                                                        @endif
+                                                        <span class="text-xs font-bold text-gray-900">
+                                                            Rp{{ number_format($product->final_price, 0, ',', '.') }}
+                                                        </span>
+                                                    </div>
 
                                                 @php
                                                     $useStock = $product->use_stock ?? true;

@@ -105,7 +105,7 @@ class Order extends Component
                 $query->where('sku', $this->filterSku);
             }
 
-            return $query->where(function ($q) {
+            $products = $query->where(function ($q) {
                     $q->where('name', 'like', '%' . $this->search . '%')
                         ->orWhere('sku', 'like', '%' . $this->search . '%')
                         ->orWhere('price', 'like', '%' . $this->search . '%')
@@ -113,7 +113,9 @@ class Order extends Component
                 })
                 ->orderByDesc('sold_count')
                 ->take($this->limitProducts)
-                ->get(['id', 'name', 'sku', 'price', 'stock', 'use_stock', 'image', 'description']);
+                ->get(['id', 'name', 'sku', 'price', 'stock', 'use_stock', 'image', 'description', 'is_discounted', 'discount_type', 'discount_value', 'discount_start', 'discount_end']);
+
+            return $products;
         });
     }
 
@@ -139,9 +141,9 @@ class Order extends Component
                 'name' => $product->name,
                 'sku' => $product->sku,
                 'image' => $product->image,
-                'price' => $product->price,
+                'price' => $product->final_price,
                 'quantity' => 1,
-                'subtotal' => $product->price,
+                'subtotal' => $product->final_price,
                 'product_note' => $note,
                 'assigned_to' => 1,
             ];
@@ -165,9 +167,9 @@ class Order extends Component
                 'name' => $product->name,
                 'sku' => $product->sku,
                 'image' => $product->image,
-                'price' => $product->price,
+                'price' => $product->final_price,
                 'quantity' => 1,
-                'subtotal' => $product->price, // Tambahkan subtotal di awal
+                'subtotal' => $product->final_price, // Tambahkan subtotal di awal
                 'product_note' => $product->product_note,
                 'assigned_to' => 1,
             ];
