@@ -1,29 +1,29 @@
 <div class="bg-white shadow rounded-lg p-4 mb-3">
-    <h3 class="text-lg font-semibold text-gray-700 mb-4">Omzet Bulanan</h3>
+    <h3 class="text-lg font-semibold text-gray-700 mb-4">Pengeluaran Bulanan</h3>
     <div class="relative h-64">
-        <canvas id="monthlyChart"></canvas>
+        <canvas id="monthlyExpenseChart"></canvas>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <script>
-        window.initMonthlyTurnoverChart = function() {
+        window.initMonthlyExpenseChart = function() {
             setTimeout(() => {
                 if (typeof Chart === 'undefined') {
-                    setTimeout(window.initMonthlyTurnoverChart, 100);
+                    setTimeout(window.initMonthlyExpenseChart, 100);
                     return;
                 }
 
-                const ctx = document.getElementById('monthlyChart')?.getContext('2d');
+                const ctx = document.getElementById('monthlyExpenseChart')?.getContext('2d');
                 if (!ctx) return;
 
-                if (window.monthlyChart instanceof Chart) {
-                    window.monthlyChart.destroy();
+                if (window.monthlyExpenseLineChart instanceof Chart) {
+                    window.monthlyExpenseLineChart.destroy();
                 }
 
-                const data = @json($monthlyTurnover);
+                const data = @json($monthlyExpense);
 
-                window.monthlyChart = new Chart(ctx, {
+                window.monthlyExpenseLineChart = new Chart(ctx, {
                     type: 'line',
                     data: {
                         labels: [
@@ -31,10 +31,10 @@
                             'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'
                         ],
                         datasets: [{
-                            label: 'Omset',
+                            label: 'Pengeluaran',
                             data: data,
-                            borderColor: 'rgba(75, 192, 192, 1)',
-                            backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                            borderColor: 'rgba(239, 68, 68, 1)',
+                            backgroundColor: 'rgba(239, 68, 68, 0.2)',
                             tension: 0.4,
                             fill: true,
                         }]
@@ -70,7 +70,6 @@
                 });
             }, 300);
         }
-        // Jalankan segera saat script di-evaluasi oleh Livewire (saat navigasi tanpa refresh)
-        window.initMonthlyTurnoverChart();
+        window.initMonthlyExpenseChart();
     </script>
 </div>

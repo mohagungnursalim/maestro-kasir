@@ -247,6 +247,9 @@
         @livewire('dashboard.monthly-turnover-chart')
         @livewire('dashboard.daily-omzet-chart')
 
+        @livewire('dashboard.monthly-expense-chart')
+        @livewire('dashboard.daily-expense-chart')
+
         {{-- ── Peak Hour + Payment Split ────────────────────────────────────── --}}
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-3">
             @livewire('dashboard.peak-hour-chart')
