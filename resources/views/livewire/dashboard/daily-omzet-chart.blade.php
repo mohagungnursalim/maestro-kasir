@@ -45,6 +45,13 @@
                     <span class="font-bold text-red-700">Rp{{ number_format($totalExpense, 0, ',', '.') }}</span>
                 </div>
             </div>
+            <div class="flex items-center gap-1.5 bg-emerald-50 border border-emerald-100 rounded-lg px-3 py-1.5">
+                <i class="fas fa-sack-dollar text-emerald-500"></i>
+                <div>
+                    <span class="text-gray-400 block leading-none">Total Keuntungan</span>
+                    <span class="font-bold text-emerald-700">Rp{{ number_format($totalProfit, 0, ',', '.') }}</span>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -54,9 +61,9 @@
     </div>
 
     <script>
-        function initDailyOmzetChart(labels, dataOmzet, dataExpense) {
+        function initDailyOmzetChart(labels, dataOmzet, dataExpense, dataProfit) {
             if (typeof Chart === 'undefined') {
-                setTimeout(() => initDailyOmzetChart(labels, dataOmzet, dataExpense), 100);
+                setTimeout(() => initDailyOmzetChart(labels, dataOmzet, dataExpense, dataProfit), 100);
                 return;
             }
             
@@ -88,11 +95,27 @@
             const colorsExpense  = dataExpense.map(() => 'rgba(239, 68, 68, 0.75)');
             const bordersExpense = dataExpense.map(() => 'rgba(220, 38, 38, 0.9)');
 
+            const lineBorderProfit = 'rgba(16, 185, 129, 1)'; // Emerald green
+
             window._dailyOmzetChart = new Chart(ctx, {
                 type: 'bar',
                 data: {
                     labels: shortLabels,
                     datasets: [
+                        {
+                            type: 'line',
+                            label: 'Keuntungan',
+                            data: dataProfit,
+                            borderColor: lineBorderProfit,
+                            backgroundColor: lineBorderProfit,
+                            borderWidth: 2.5,
+                            tension: 0.3,
+                            pointBackgroundColor: 'white',
+                            pointBorderColor: lineBorderProfit,
+                            pointRadius: 4,
+                            pointHoverRadius: 6,
+                            fill: false,
+                        },
                         {
                             label: 'Omset',
                             data: dataOmzet,
@@ -152,7 +175,8 @@
                 const labels       = @json(array_keys($dailyOmzet));
                 const dataOmzet    = @json(array_values($dailyOmzet));
                 const dataExpense  = @json(array_values($dailyExpense));
-                initDailyOmzetChart(labels, dataOmzet, dataExpense);
+                const dataProfit   = @json(array_values($dailyProfit));
+                initDailyOmzetChart(labels, dataOmzet, dataExpense, dataProfit);
             }, 300);
         }
 

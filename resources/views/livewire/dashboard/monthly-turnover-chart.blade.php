@@ -23,6 +23,7 @@
 
                 const dataTurnover = @json($monthlyTurnover);
                 const dataExpense  = @json($monthlyExpense);
+                const dataProfit   = @json($monthlyProfit);
 
                 window.monthlyChart = new Chart(ctx, {
                     type: 'line',
@@ -35,8 +36,8 @@
                             {
                                 label: 'Omset',
                                 data: dataTurnover,
-                                borderColor: 'rgba(75, 192, 192, 1)',
-                                backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                                borderColor: 'rgba(54, 162, 235, 1)', // biru solid
+                                backgroundColor: 'rgba(54, 162, 235, 0.2)', // biru transparan
                                 tension: 0.4,
                                 fill: true,
                             },
@@ -45,6 +46,14 @@
                                 data: dataExpense,
                                 borderColor: 'rgba(239, 68, 68, 1)',
                                 backgroundColor: 'rgba(239, 68, 68, 0.2)',
+                                tension: 0.4,
+                                fill: true,
+                            },
+                            {
+                                label: 'Keuntungan',
+                                data: dataProfit,
+                                borderColor: 'rgba(16, 185, 129, 1)',
+                                backgroundColor: 'rgba(16, 185, 129, 0.2)',
                                 tension: 0.4,
                                 fill: true,
                             }

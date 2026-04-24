@@ -11,12 +11,14 @@ class DailyOmzetChart extends Component
 {
     public array  $dailyOmzet   = [];   // ['01' => 0, '02' => 150000, ...]
     public array  $dailyExpense = [];
+    public array  $dailyProfit  = [];
     public float  $avgOmzet     = 0;    // Rata-rata omzet per hari aktif
     public float  $topDayOmzet  = 0;   // Omzet tertinggi
     public string $topDayLabel  = '';   // Label tanggal terlaris
     public int    $activeDays   = 0;    // Hari yang ada transaksi
     
     public float  $totalExpense = 0;
+    public float  $totalProfit  = 0;
 
     /**
      * Listener dari Dashboard saat filter diubah.
@@ -100,20 +102,26 @@ class DailyOmzetChart extends Component
         // Isi array dengan semua label periode (0 bila tidak ada transaksi)
         $dataOmzet = [];
         $dataExpense = [];
+        $dataProfit = [];
         foreach ($days as $label) {
-            $dataOmzet[$label]   = (float) ($results['orders'][$label]->total ?? 0);
-            $dataExpense[$label] = (float) ($results['expenses'][$label]->total ?? 0);
+            $omzet = (float) ($results['orders'][$label]->total ?? 0);
+            $exp   = (float) ($results['expenses'][$label]->total ?? 0);
+            $dataOmzet[$label]   = $omzet;
+            $dataExpense[$label] = $exp;
+            $dataProfit[$label]  = $omzet - $exp;
         }
 
         $nonZero = array_filter($dataOmzet, fn($v) => $v > 0);
 
         $this->dailyOmzet   = $dataOmzet;
         $this->dailyExpense = $dataExpense;
+        $this->dailyProfit  = $dataProfit;
         $this->activeDays   = count($nonZero);
         $this->avgOmzet     = $this->activeDays > 0 ? array_sum($nonZero) / $this->activeDays : 0;
         $this->topDayOmzet  = $nonZero ? max($nonZero) : 0;
         $this->topDayLabel  = $nonZero ? array_search($this->topDayOmzet, $dataOmzet) : '';
         $this->totalExpense = array_sum($dataExpense);
+        $this->totalProfit  = array_sum($dataProfit);
     }
 
     /**

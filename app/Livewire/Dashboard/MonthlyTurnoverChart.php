@@ -11,6 +11,7 @@ class MonthlyTurnoverChart extends Component
 {
     public $monthlyTurnover = [];
     public $monthlyExpense  = [];
+    public $monthlyProfit   = [];
 
     public function mount()
     {
@@ -72,6 +73,7 @@ class MonthlyTurnoverChart extends Component
         // Inisialisasi array dengan 12 bulan
         $this->monthlyTurnover = array_fill(0, 12, '0.00');
         $this->monthlyExpense  = array_fill(0, 12, '0.00');
+        $this->monthlyProfit   = array_fill(0, 12, '0.00');
 
         foreach ($results['orders'] as $result) {
             $this->monthlyTurnover[$result->month - 1] = (float) $result->total;
@@ -79,6 +81,10 @@ class MonthlyTurnoverChart extends Component
 
         foreach ($results['expenses'] as $result) {
             $this->monthlyExpense[$result->month - 1]  = (float) $result->total;
+        }
+
+        for ($i = 0; $i < 12; $i++) {
+            $this->monthlyProfit[$i] = $this->monthlyTurnover[$i] - $this->monthlyExpense[$i];
         }
     }
 
