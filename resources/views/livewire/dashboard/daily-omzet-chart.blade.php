@@ -6,11 +6,11 @@
     {{-- Header + Summary --}}
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
         <div>
-            <h3 class="text-lg font-semibold text-gray-700">Omzet Harian</h3>
-            <p class="text-xs text-gray-400 mt-0.5">Omzet nyata per hari dalam periode aktif</p>
+            <h3 class="text-lg font-semibold text-gray-700">Omzet & Pengeluaran Harian</h3>
+            <p class="text-xs text-gray-400 mt-0.5">Pendapatan dan Pengeluaran nyata per hari</p>
         </div>
 
-        {{-- 3 summary chips --}}
+        {{-- summary chips --}}
         <div class="flex flex-wrap gap-2 text-xs">
             <div class="flex items-center gap-1.5 bg-blue-50 border border-blue-100 rounded-lg px-3 py-1.5">
                 <i class="fas fa-calendar-check text-blue-400"></i>
@@ -38,6 +38,13 @@
                 </div>
             </div>
             @endif
+            <div class="flex items-center gap-1.5 bg-red-50 border border-red-100 rounded-lg px-3 py-1.5">
+                <i class="fas fa-money-bill-wave text-red-400"></i>
+                <div>
+                    <span class="text-gray-400 block leading-none">Total Pengeluaran</span>
+                    <span class="font-bold text-red-700">Rp{{ number_format($totalExpense, 0, ',', '.') }}</span>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -47,9 +54,9 @@
     </div>
 
     <script>
-        function initDailyOmzetChart(labels, data) {
+        function initDailyOmzetChart(labels, dataOmzet, dataExpense) {
             if (typeof Chart === 'undefined') {
-                setTimeout(() => initDailyOmzetChart(labels, data), 100);
+                setTimeout(() => initDailyOmzetChart(labels, dataOmzet, dataExpense), 100);
                 return;
             }
             
@@ -74,22 +81,35 @@
                 return l; // jam (HH:00) langsung
             });
 
-            const maxVal  = Math.max(...data, 1);
-            const colors  = data.map(v => v === maxVal && v > 0 ? 'rgba(234,179,8,0.85)' : 'rgba(99,102,241,0.65)');
-            const borders = data.map(v => v === maxVal && v > 0 ? 'rgba(161,98,7,1)'     : 'rgba(79,70,229,0.9)');
+            const maxVal  = Math.max(...dataOmzet, 1);
+            const colorsOmzet  = dataOmzet.map(v => v === maxVal && v > 0 ? 'rgba(234,179,8,0.85)' : 'rgba(99,102,241,0.65)');
+            const bordersOmzet = dataOmzet.map(v => v === maxVal && v > 0 ? 'rgba(161,98,7,1)'     : 'rgba(79,70,229,0.9)');
+            
+            const colorsExpense  = dataExpense.map(() => 'rgba(239, 68, 68, 0.75)');
+            const bordersExpense = dataExpense.map(() => 'rgba(220, 38, 38, 0.9)');
 
             window._dailyOmzetChart = new Chart(ctx, {
                 type: 'bar',
                 data: {
                     labels: shortLabels,
-                    datasets: [{
-                        label: 'Omzet',
-                        data: data,
-                        backgroundColor: colors,
-                        borderColor: borders,
-                        borderWidth: 1.5,
-                        borderRadius: 4,
-                    }]
+                    datasets: [
+                        {
+                            label: 'Omset',
+                            data: dataOmzet,
+                            backgroundColor: colorsOmzet,
+                            borderColor: bordersOmzet,
+                            borderWidth: 1.5,
+                            borderRadius: 4,
+                        },
+                        {
+                            label: 'Pengeluaran',
+                            data: dataExpense,
+                            backgroundColor: colorsExpense,
+                            borderColor: bordersExpense,
+                            borderWidth: 1.5,
+                            borderRadius: 4,
+                        }
+                    ]
                 },
                 options: {
                     responsive: true,
@@ -113,14 +133,13 @@
                         }
                     },
                     plugins: {
-                        legend: { display: false },
+                        legend: { display: true },
                         tooltip: {
                             callbacks: {
                                 title: (items) => {
-                                    // Tampilkan label asli (bukan shortLabel)
                                     return labels[items[0].dataIndex];
                                 },
-                                label: ctx => 'Rp ' + ctx.raw.toLocaleString('id-ID')
+                                label: ctx => ctx.dataset.label + ': Rp ' + ctx.raw.toLocaleString('id-ID')
                             }
                         }
                     }
@@ -130,9 +149,10 @@
 
         window.renderDailyOmzetFromWire = function() {
             setTimeout(() => {
-                const labels = @json(array_keys($dailyOmzet));
-                const data   = @json(array_values($dailyOmzet));
-                initDailyOmzetChart(labels, data);
+                const labels       = @json(array_keys($dailyOmzet));
+                const dataOmzet    = @json(array_values($dailyOmzet));
+                const dataExpense  = @json(array_values($dailyExpense));
+                initDailyOmzetChart(labels, dataOmzet, dataExpense);
             }, 300);
         }
 

@@ -1,5 +1,5 @@
 <div class="bg-white shadow rounded-lg p-4 mb-3">
-    <h3 class="text-lg font-semibold text-gray-700 mb-4">Omzet Bulanan</h3>
+    <h3 class="text-lg font-semibold text-gray-700 mb-4">Omzet & Pengeluaran Bulanan</h3>
     <div class="relative h-64">
         <canvas id="monthlyChart"></canvas>
     </div>
@@ -21,7 +21,8 @@
                     window.monthlyChart.destroy();
                 }
 
-                const data = @json($monthlyTurnover);
+                const dataTurnover = @json($monthlyTurnover);
+                const dataExpense  = @json($monthlyExpense);
 
                 window.monthlyChart = new Chart(ctx, {
                     type: 'line',
@@ -30,14 +31,24 @@
                             'Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun',
                             'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'
                         ],
-                        datasets: [{
-                            label: 'Omset',
-                            data: data,
-                            borderColor: 'rgba(75, 192, 192, 1)',
-                            backgroundColor: 'rgba(75, 192, 192, 0.2)',
-                            tension: 0.4,
-                            fill: true,
-                        }]
+                        datasets: [
+                            {
+                                label: 'Omset',
+                                data: dataTurnover,
+                                borderColor: 'rgba(75, 192, 192, 1)',
+                                backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                                tension: 0.4,
+                                fill: true,
+                            },
+                            {
+                                label: 'Pengeluaran',
+                                data: dataExpense,
+                                borderColor: 'rgba(239, 68, 68, 1)',
+                                backgroundColor: 'rgba(239, 68, 68, 0.2)',
+                                tension: 0.4,
+                                fill: true,
+                            }
+                        ]
                     },
                     options: {
                         responsive: true,
@@ -56,7 +67,7 @@
                         plugins: {
                             tooltip: {
                                 callbacks: {
-                                    label: ctx => 'Rp ' + ctx.raw.toLocaleString('id-ID', {
+                                    label: ctx => ctx.dataset.label + ': Rp ' + ctx.raw.toLocaleString('id-ID', {
                                         minimumFractionDigits: 2,
                                         maximumFractionDigits: 2
                                     })

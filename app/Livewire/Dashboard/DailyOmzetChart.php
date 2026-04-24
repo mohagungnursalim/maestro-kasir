@@ -10,10 +10,13 @@ use Livewire\Component;
 class DailyOmzetChart extends Component
 {
     public array  $dailyOmzet   = [];   // ['01' => 0, '02' => 150000, ...]
+    public array  $dailyExpense = [];
     public float  $avgOmzet     = 0;    // Rata-rata omzet per hari aktif
     public float  $topDayOmzet  = 0;   // Omzet tertinggi
     public string $topDayLabel  = '';   // Label tanggal terlaris
     public int    $activeDays   = 0;    // Hari yang ada transaksi
+    
+    public float  $totalExpense = 0;
 
     /**
      * Listener dari Dashboard saat filter diubah.
@@ -38,49 +41,79 @@ class DailyOmzetChart extends Component
         [$start, $end, $groupFmt, $labelFmt, $days] = $this->resolvePeriod($filter);
 
         $transactionVersion = Cache::get('transaction_cache_version', 1);
+        $expenseVersion     = Cache::get('expense_cache_version', 1);
         $activeBranch       = \Illuminate\Support\Facades\Session::get('active_branch_id', 'all');
 
         $cacheKey = sprintf(
-            'daily_omzet:%s:%s:%s:tv%s:br%s',
+            'daily_omzet_v2:%s:%s:%s:tv%s:ev%s:br%s',
             $filter,
             $start,
             $end,
             $transactionVersion,
+            $expenseVersion,
             $activeBranch
         );
 
         $results = Cache::remember($cacheKey, now()->addMinutes(5), function () use ($start, $end, $groupFmt, $isAdmin, $userId) {
-            $query = DB::table('orders')
+            
+            // Omzet
+            $queryOrders = DB::table('orders')
                 ->selectRaw("DATE_FORMAT(created_at, '$groupFmt') as day_label, SUM(grandtotal) as total")
                 ->whereBetween('created_at', [$start, $end])
                 ->where('payment_status', 'PAID');
 
             if (session()->has('active_branch_id')) {
-                $query->where('branch_id', session('active_branch_id'));
+                $queryOrders->where('branch_id', session('active_branch_id'));
             }
             if (!$isAdmin) {
-                $query->where('user_id', $userId);
+                $queryOrders->where('user_id', $userId);
+            }
+            $orders = $queryOrders->groupByRaw("DATE_FORMAT(created_at, '$groupFmt')")->get()->keyBy('day_label');
+
+            // Pengeluaran
+            $dateColForFormat = str_contains($groupFmt, '%H') ? 'created_at' : 'expense_date';
+            
+            $queryExpenses = DB::table('expenses')
+                ->selectRaw("DATE_FORMAT($dateColForFormat, '$groupFmt') as day_label, SUM(amount) as total")
+                ->where('type', 'out');
+
+            if ($dateColForFormat === 'expense_date') {
+                 // Format start & end as date for expense_date
+                 $startDt = substr($start, 0, 10);
+                 $endDt   = substr($end, 0, 10);
+                 $queryExpenses->whereBetween('expense_date', [$startDt, $endDt]);
+            } else {
+                 $queryExpenses->whereBetween('created_at', [$start, $end]);
             }
 
-            return $query->groupByRaw("DATE_FORMAT(created_at, '$groupFmt')")
-                ->orderBy('day_label')
-                ->get()
-                ->keyBy('day_label');
+            if (session()->has('active_branch_id')) {
+                $queryExpenses->where('branch_id', session('active_branch_id'));
+            }
+            if (!$isAdmin) {
+                $queryExpenses->where('user_id', $userId);
+            }
+            $expenses = $queryExpenses->groupByRaw("DATE_FORMAT($dateColForFormat, '$groupFmt')")->get()->keyBy('day_label');
+
+            return ['orders' => $orders, 'expenses' => $expenses];
         });
 
         // Isi array dengan semua label periode (0 bila tidak ada transaksi)
-        $data = [];
+        $dataOmzet = [];
+        $dataExpense = [];
         foreach ($days as $label) {
-            $data[$label] = (float) ($results[$label]->total ?? 0);
+            $dataOmzet[$label]   = (float) ($results['orders'][$label]->total ?? 0);
+            $dataExpense[$label] = (float) ($results['expenses'][$label]->total ?? 0);
         }
 
-        $nonZero = array_filter($data, fn($v) => $v > 0);
+        $nonZero = array_filter($dataOmzet, fn($v) => $v > 0);
 
-        $this->dailyOmzet  = $data;
-        $this->activeDays  = count($nonZero);
-        $this->avgOmzet    = $this->activeDays > 0 ? array_sum($nonZero) / $this->activeDays : 0;
-        $this->topDayOmzet = $nonZero ? max($nonZero) : 0;
-        $this->topDayLabel = $nonZero ? array_search($this->topDayOmzet, $data) : '';
+        $this->dailyOmzet   = $dataOmzet;
+        $this->dailyExpense = $dataExpense;
+        $this->activeDays   = count($nonZero);
+        $this->avgOmzet     = $this->activeDays > 0 ? array_sum($nonZero) / $this->activeDays : 0;
+        $this->topDayOmzet  = $nonZero ? max($nonZero) : 0;
+        $this->topDayLabel  = $nonZero ? array_search($this->topDayOmzet, $dataOmzet) : '';
+        $this->totalExpense = array_sum($dataExpense);
     }
 
     /**
