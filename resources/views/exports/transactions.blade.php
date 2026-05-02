@@ -218,7 +218,7 @@
             <td class="val bold">{{ $transactions->count() }} order</td>
         </tr>
         <tr>
-            <td>Total Pendapatan (Nett)</td>
+            <td>Pendapatan (Grand Total = Omzet Produk - Diskon + Ongkir + Pajak (jika ada))</td>
             <td class="val green">Rp{{ number_format($grandTotalNett, 0, ',', '.') }}</td>
         </tr>
         <tr class="">
@@ -226,7 +226,7 @@
             <td class="val red">Rp{{ number_format($totalExpense, 0, ',', '.') }}</td>
         </tr>
         <tr>
-            <td>Total Keuntungan</td>
+            <td>Keuntungan (Pendapatan - Kas Keluar, 'belum dikurangi HPP')</td>
             <td class="val green bold">Rp{{ number_format($totalKeuntungan, 0, ',', '.') }}</td>
         </tr>
         <tr class="">
@@ -238,7 +238,7 @@
             <td class="val">Rp{{ number_format($totalTunai, 0, ',', '.') }}</td>
         </tr>
         <tr class="">
-            <td>Total Omzet Produk (Murni)</td>
+            <td>Total Omzet Produk (Harga Produk x Quantity)</td>
             <td class="val">Rp{{ number_format($grandTotalOmset, 0, ',', '.') }}</td>
         </tr>
         <tr>
@@ -276,13 +276,23 @@
             <td class="val">{{ $totalPayLater }} order</td>
         </tr>
     </tbody>
+
     <tfoot>
         <tr>
-            <td>TOTAL PENDAPATAN BERSIH</td>
+            <td>TOTAL PENDAPATAN (GRAND TOTAL)</td>
             <td class="val green">Rp{{ number_format($grandTotalNett, 0, ',', '.') }}</td>
         </tr>
     </tfoot>
 </table>
+
+<div style="margin-top:8px; font-size:9px; color:#555;">
+    <strong>Catatan:</strong>
+    <ul style="margin:4px 0 0 18px; padding:0;">
+        <li>Pendapatan = jumlah <em>grandtotal</em> tiap order (termasuk pajak & ongkir).</li>
+        <li>Keuntungan yang dicetak = Pendapatan - Total Kas Keluar (pengeluaran bertipe `out`). Nilai ini <strong>belum</strong> mengurangkan HPP (biaya bahan) atau biaya yang belum dicatat di `Expense`.</li>
+        <li>Total Omzet Produk = jumlah (kuantitas × harga) sebelum diskon dan pajak.</li>
+    </ul>
+</div>
 
 
 
