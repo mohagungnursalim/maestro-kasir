@@ -226,7 +226,7 @@
             <td class="val red">Rp{{ number_format($totalExpense, 0, ',', '.') }}</td>
         </tr>
         <tr>
-            <td>Keuntungan (Pendapatan - Kas Keluar, 'belum dikurangi HPP')</td>
+            <td>Keuntungan (Pendapatan - Kas Keluar)</td>
             <td class="val green bold">Rp{{ number_format($totalKeuntungan, 0, ',', '.') }}</td>
         </tr>
         <tr class="">
