@@ -1120,9 +1120,9 @@
                                             🍽️ Makan di Tempat
                                         </button>
 
-                                        <button type="button" wire:click="$set('order_type', 'TAKEAWAY')"
+                                        <button type="button" wire:click="$set('order_type', 'TAKE_AWAY')"
                                             class="py-2 rounded-lg text-sm font-semibold border transition
-                                                {{ $order_type === 'TAKEAWAY' ? 'bg-orange-500 text-white border-orange-500' : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-100' }}">
+                                                {{ $order_type === 'TAKE_AWAY' ? 'bg-orange-500 text-white border-orange-500' : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-100' }}">
                                             🥡 Bungkus
                                         </button>
                                         

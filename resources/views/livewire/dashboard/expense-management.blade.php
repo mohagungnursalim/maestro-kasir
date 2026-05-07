@@ -203,8 +203,8 @@
             },
 
             handleAmountInput(e) {
-                let rawValue = e.target.value.replace(/[^0-9]/g, '');
-                this.amount = rawValue;
+                let rawValue = String(e.target.value).replace(/[^0-9]/g, '');
+                this.amount = rawValue === '' ? '' : parseInt(rawValue, 10);
                 this.formattedAmount = this.formatRupiah(rawValue);
             },
 
@@ -363,8 +363,9 @@
                                 <span class="inline-flex items-center px-3 text-sm text-gray-900 bg-gray-200 border border-r-0 border-gray-300 rounded-l-lg">
                                     Rp
                                 </span>
-                                <input x-model="formattedAmount" @input="handleAmountInput" type="text" class="rounded-none rounded-r-lg bg-gray-50 border border-gray-300 text-gray-900 text-sm focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5" placeholder="50.000">
+                                <input x-model.number="amount" @input="handleAmountInput" type="number" inputmode="numeric" min="0" step="1" class="rounded-none rounded-r-lg bg-gray-50 border border-gray-300 text-gray-900 text-sm focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5" placeholder="50000">
                             </div>
+                            <div class="mt-1 text-xs text-gray-500">Rp <span x-text="formatRupiah(amount)"></span></div>
                             <span x-show="errors.amount" x-text="errors.amount" class="text-red-500 text-xs"></span>
                         </div>
 

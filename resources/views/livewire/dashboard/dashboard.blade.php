@@ -194,15 +194,15 @@
             @if ($loaded)
             @php
                 $typeLabels = [
-                    'DINE_IN'   => ['label' => 'Dine-in',   'color' => 'blue',   'icon' => 'fa-utensils'],
-                    'TAKE_AWAY' => ['label' => 'Take Away',  'color' => 'violet', 'icon' => 'fa-bag-shopping'],
+                    'DINE_IN'   => ['label' => 'Dine-In',   'color' => 'blue',   'icon' => 'fa-utensils'],
+                    'TAKE_AWAY' => ['label' => 'Take-Away',  'color' => 'orange', 'icon' => 'fa-shopping-bag'],
                     'GOFOOD'    => ['label' => 'GoFood',     'color' => 'green',  'icon' => 'fa-motorcycle'],
                     'GRABFOOD'  => ['label' => 'GrabFood',   'color' => 'emerald','icon' => 'fa-motorcycle'],
                     'MAXIM'     => ['label' => 'Maxim',      'color' => 'yellow', 'icon' => 'fa-motorcycle'],
                 ];
                 $colorMap = [
                     'blue'    => ['bar' => 'bg-blue-500',    'text' => 'text-blue-700',    'bg' => 'bg-blue-50',    'border' => 'border-blue-200'],
-                    'violet'  => ['bar' => 'bg-violet-500',  'text' => 'text-violet-700',  'bg' => 'bg-violet-50',  'border' => 'border-violet-200'],
+                    'orange'  => ['bar' => 'bg-orange-500',  'text' => 'text-orange-700',  'bg' => 'bg-orange-50',  'border' => 'border-orange-200'],
                     'green'   => ['bar' => 'bg-green-500',   'text' => 'text-green-700',   'bg' => 'bg-green-50',   'border' => 'border-green-200'],
                     'emerald' => ['bar' => 'bg-emerald-500', 'text' => 'text-emerald-700', 'bg' => 'bg-emerald-50', 'border' => 'border-emerald-200'],
                     'yellow'  => ['bar' => 'bg-yellow-400',  'text' => 'text-yellow-700',  'bg' => 'bg-yellow-50',  'border' => 'border-yellow-200'],
@@ -270,8 +270,8 @@
                 'QRIS'  => 'bg-blue-100 text-blue-800',
             ];
             $typeIcon = [
-                'dine_in'   => ['icon' => 'fa-utensils',    'label' => 'Dine-in',  'color' => 'text-blue-500'],
-                'take_away' => ['icon' => 'fa-bag-shopping','label' => 'Take Away','color' => 'text-violet-500'],
+                'dine_in'   => ['icon' => 'fa-utensils',    'label' => 'Dine-In',  'color' => 'text-blue-500'],
+                    'take_away' => ['icon' => 'fa-shopping-bag','label' => 'Take-Away','color' => 'text-violet-500'],
                 'gofood'    => ['icon' => 'fa-motorcycle',  'label' => 'GoFood',   'color' => 'text-green-600'],
                 'grabfood'  => ['icon' => 'fa-motorcycle',  'label' => 'GrabFood', 'color' => 'text-emerald-600'],
                 'maxim'     => ['icon' => 'fa-motorcycle',  'label' => 'Maxim',    'color' => 'text-yellow-600'],
