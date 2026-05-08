@@ -387,7 +387,7 @@
 
 {{-- ── Rasio Tipe Order ────────────────────────────────────────────────── --}}
 @if (!empty($orderTypeSplit))
-<div class="section-title">🍽️ Rasio Tipe Pesanan</div>
+<div class="section-title">Rasio Tipe Pesanan</div>
 
 <table class="type-split-table">
     <thead>
@@ -419,7 +419,7 @@
 @endif
 
 {{-- ── Detail Keuangan ─────────────────────────────────────────────────── --}}
-<div class="section-title">💰 Rincian Keuangan</div>
+<div class="section-title">Rincian Keuangan</div>
 
 <table class="summary-table" style="margin-top:8px;">
     <thead>
