@@ -228,13 +228,95 @@ class Transaction extends Component
                 ->orderBy('order_id', 'desc')
                 ->get()
                 ->groupBy('order_id'); 
-        
-           
+
+            // ── Dashboard-quality metrics ──────────────────────────────────────
+            $orderQuery = \App\Models\Order::whereBetween('created_at', [$startDate, $endDate])
+                ->where('payment_status', 'PAID')
+                ->when($activeBranchId, fn($q) => $q->where('branch_id', $activeBranchId));
+
+            $ordersAgg = (clone $orderQuery)->selectRaw("
+                COUNT(id) as total_orders,
+                COALESCE(SUM(grandtotal), 0) as total_sales,
+                COALESCE(AVG(grandtotal), 0) as avg_order_value,
+                COALESCE(AVG(discount), 0) as avg_discount
+            ")->first();
+
+            // Total Produk Terjual
+            $totalProductsSold = TransactionDetail::join('orders', 'transaction_details.order_id', '=', 'orders.id')
+                ->whereBetween('orders.created_at', [$startDate, $endDate])
+                ->where('orders.payment_status', 'PAID')
+                ->when($activeBranchId, fn($q) => $q->where('orders.branch_id', $activeBranchId))
+                ->sum('transaction_details.quantity');
+
+            // Top Up Kas & Pengeluaran
+            $expensesAgg = \App\Models\Expense::whereBetween('expense_date', [
+                    $startDate->format('Y-m-d'), $endDate->format('Y-m-d')
+                ])
+                ->when($activeBranchId, fn($q) => $q->where('branch_id', $activeBranchId))
+                ->selectRaw("
+                    COALESCE(SUM(CASE WHEN type = 'out' THEN amount ELSE 0 END), 0) as total_out,
+                    COALESCE(SUM(CASE WHEN type = 'in'  THEN amount ELSE 0 END), 0) as total_in
+                ")->first();
+
+            // Rasio Tipe Order
+            $orderTypeSplitRaw = (clone $orderQuery)->selectRaw("
+                UPPER(order_type) as order_type,
+                COUNT(id) as total_count,
+                COALESCE(SUM(grandtotal), 0) as total_omzet
+            ")->groupBy('order_type')->get();
+
+            $totalOrdersForSplit = max((int) ($ordersAgg->total_orders ?? 0), 1);
+            $orderTypeSplit = [];
+            foreach ($orderTypeSplitRaw as $row) {
+                if (empty($row->order_type)) continue;
+                $key = strtoupper($row->order_type);
+                $orderTypeSplit[$key] = [
+                    'count'      => (int) $row->total_count,
+                    'omzet'      => (float) $row->total_omzet,
+                    'percentage' => round(($row->total_count / $totalOrdersForSplit) * 100, 1),
+                ];
+            }
+
+            // Piutang (unpaid orders — global, bukan per periode)
+            $unpaidStats = \App\Models\Order::where('payment_status', 'UNPAID')
+                ->when($activeBranchId, fn($q) => $q->where('branch_id', $activeBranchId))
+                ->selectRaw('COUNT(id) as total_count, COALESCE(SUM(grandtotal), 0) as total_amount')
+                ->first();
+
+            // Previous period comparison (growth)
+            $periodDays = $startDate->diffInDays($endDate);
+            $prevStart  = $startDate->copy()->subDays($periodDays + 1)->startOfDay();
+            $prevEnd    = $startDate->copy()->subSecond();
+            $prevOmzet  = (float) \App\Models\Order::whereBetween('created_at', [$prevStart, $prevEnd])
+                ->where('payment_status', 'PAID')
+                ->when($activeBranchId, fn($q) => $q->where('branch_id', $activeBranchId))
+                ->sum('grandtotal');
+
+            $salesOmzet  = (float) ($ordersAgg->total_sales ?? 0);
+            $omzetGrowth = $prevOmzet > 0
+                ? round((($salesOmzet - $prevOmzet) / $prevOmzet) * 100, 1)
+                : ($salesOmzet > 0 ? 100.0 : null);
+
+            $dashboardStats = [
+                'totalOrders'       => (int) ($ordersAgg->total_orders ?? 0),
+                'totalProductsSold' => (int) $totalProductsSold,
+                'avgOrderValue'     => (float) ($ordersAgg->avg_order_value ?? 0),
+                'avgDiscount'       => (float) ($ordersAgg->avg_discount ?? 0),
+                'totalTopUps'       => (float) ($expensesAgg->total_in ?? 0),
+                'totalExpenseOut'   => (float) ($expensesAgg->total_out ?? 0),
+                'orderTypeSplit'    => $orderTypeSplit,
+                'unpaidOrders'      => (int) ($unpaidStats->total_count ?? 0),
+                'unpaidAmount'      => (float) ($unpaidStats->total_amount ?? 0),
+                'prevOmzet'         => $prevOmzet,
+                'omzetGrowth'       => $omzetGrowth,
+            ];
+
             $pdf = Pdf::loadView('exports.transactions', [
-                'transactions' => $transactions,
-                'startDate' => $this->startDate,
-                'endDate' => $this->endDate,
-                'userName' => $userName,
+                'transactions'   => $transactions,
+                'startDate'      => $this->startDate,
+                'endDate'        => $this->endDate,
+                'userName'       => $userName,
+                'dashboardStats' => $dashboardStats,
             ]);
         
             return response()->streamDownload(fn() => print($pdf->output()), "transaksi_{$branchSlug}_{$date}.pdf");            
