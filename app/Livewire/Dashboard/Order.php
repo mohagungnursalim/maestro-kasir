@@ -70,10 +70,12 @@ class Order extends Component
     // Inisialisasi komponen
     public function mount()
     {
+        // 1 query instead of 2: ambil semua setting sekaligus
+        $setting = StoreSetting::first(['is_tax', 'tax']);
+        $this->is_tax = $setting->is_tax ?? false;
+        $this->tax_percentage = $setting->tax ?? 0;
+        $this->ttl = 300;
         $this->loadUnpaidOrders();
-        $this->is_tax = StoreSetting::value('is_tax') ?? false; // Ambil setting pajak dari tabel store_settings
-        $this->tax_percentage = StoreSetting::value('tax') ?? 0; // Ambil persentase pajak dari tabel store_settings
-        $this->ttl = 300; // Cache selama 5 menit (300 detik - format integer aman untuk Livewire)
     }
 
     // Load unpaid orders
@@ -720,18 +722,19 @@ class Order extends Component
 
                 
                 // =========== UPDATE / INSERT DETAIL ==============
-                
-                foreach ($newCart as $productId => $item) {
+                $stockDiffs = []; // Kumpulkan semua perubahan stok untuk batch update
+                $newDetails = []; // Kumpulkan detail baru untuk bulk insert
+                $now = now();
 
+                foreach ($newCart as $productId => $item) {
                     $price = decimal($item['price']);
                     $newQty = (int) $item['quantity'];
                     $oldQty = (int) ($oldDetails[$productId]->quantity ?? 0);
                     $diff   = $newQty - $oldQty;
-
                     $subtotal = bcmul($price, (string)$newQty, 2);
 
                     if ($oldDetails->has($productId)) {
-                        // UPDATE
+                        // UPDATE existing detail
                         TransactionDetail::where('order_id', $order->id)
                             ->where('product_id', $productId)
                             ->update([
@@ -741,53 +744,54 @@ class Order extends Component
                                 'product_note' => $item['product_note'] ?? null,
                             ]);
                     } else {
-                        // INSERT
-                        TransactionDetail::create([
+                        // Collect for bulk insert
+                        $newDetails[] = [
                             'order_id' => $order->id,
                             'product_id' => $productId,
                             'quantity' => $newQty,
                             'price' => $price,
                             'subtotal' => $subtotal,
                             'product_note' => $item['product_note'] ?? null,
-                        ]);
+                            'created_at' => $now,
+                            'updated_at' => $now,
+                        ];
                     }
 
-                    // Update stok berdasarkan selisih (hanya jika produk pakai stok)
-                    if ($diff !== 0 && ($products[$productId]->use_stock ?? true)) {
-                        Product::where('id', $productId)->update([
-                            'stock' => DB::raw("stock - ($diff)"),
-                            'sold_count' => DB::raw("sold_count + ($diff)"),
-                        ]);
-                    } elseif ($diff !== 0) {
-                        // Produk tanpa stok: hanya update sold_count
-                        Product::where('id', $productId)->update([
-                            'sold_count' => DB::raw("sold_count + ($diff)"),
-                        ]);
+                    // Collect stock diffs untuk batch update
+                    if ($diff !== 0) {
+                        $stockDiffs[(int) $productId] = [
+                            'diff' => $diff,
+                            'use_stock' => $products[$productId]->use_stock ?? true,
+                        ];
                     }
                 }
 
-                
+                // Bulk insert new details (1 query instead of N)
+                if (!empty($newDetails)) {
+                    TransactionDetail::insert($newDetails);
+                }
+
                 // ========== HAPUS ITEM YANG DIBUANG ==========
-                
+                $removedIds = [];
                 foreach ($oldDetails as $productId => $oldItem) {
                     if (!$newCart->has($productId)) {
                         $prod = $products[$productId] ?? null;
-
-                        // balikin stok hanya jika produk pakai stok
-                        if ($prod && ($prod->use_stock ?? true)) {
-                            Product::where('id', $productId)->update([
-                                'stock' => DB::raw("stock + {$oldItem->quantity}"),
-                                'sold_count' => DB::raw("sold_count - {$oldItem->quantity}"),
-                            ]);
-                        } else {
-                            Product::where('id', $productId)->update([
-                                'sold_count' => DB::raw("sold_count - {$oldItem->quantity}"),
-                            ]);
-                        }
-
-                        $oldItem->delete();
+                        // Collect negative diff untuk restore stock
+                        $stockDiffs[(int) $productId] = [
+                            'diff' => -((int) $oldItem->quantity),
+                            'use_stock' => $prod ? ($prod->use_stock ?? true) : true,
+                        ];
+                        $removedIds[] = $oldItem->id;
                     }
                 }
+
+                // Bulk delete removed details (1 query instead of N)
+                if (!empty($removedIds)) {
+                    TransactionDetail::whereIn('id', $removedIds)->delete();
+                }
+
+                // Batch update semua perubahan stok (max 2 query instead of 2N)
+                $this->batchUpdateProductStock($stockDiffs);
 
                 
                  // ========== HITUNG ULANG TOTAL ==========
@@ -1018,36 +1022,34 @@ class Order extends Component
                 'paid_at'        => $paidAt,
             ]);
 
-            // INSERT DETAIL + POTONG STOK
+            // BATCH INSERT DETAIL (1 query instead of N)
+            $details = [];
+            $stockDiffs = [];
+            $now = now();
             foreach ($this->cart as $item) {
-
                 $price = decimal($item['price']);
                 $qty   = (int) $item['quantity'];
-                $subtotal = bcmul($price, (string)$qty, 2);
-
-                TransactionDetail::create([
-                    'order_id' => $order->id,
-                    'product_id' => $item['id'],
-                    'quantity' => $qty,
-                    'price' => $price,
-                    'subtotal' => $subtotal,
+                $details[] = [
+                    'order_id'     => $order->id,
+                    'product_id'   => $item['id'],
+                    'quantity'     => $qty,
+                    'price'        => $price,
+                    'subtotal'     => bcmul($price, (string)$qty, 2),
                     'product_note' => $item['product_note'] ?? null,
-                ]);
+                    'created_at'   => $now,
+                    'updated_at'   => $now,
+                ];
 
                 $prod = $products[$item['id']] ?? null;
-                if ($prod && ($prod->use_stock ?? true)) {
-                    // Produk menggunakan stok: potong stok & tambah sold_count
-                    Product::where('id', $item['id'])->update([
-                        'stock' => DB::raw("stock - $qty"),
-                        'sold_count' => DB::raw("sold_count + $qty"),
-                    ]);
-                } else {
-                    // Produk tanpa stok: hanya tambah sold_count
-                    Product::where('id', $item['id'])->update([
-                        'sold_count' => DB::raw("sold_count + $qty"),
-                    ]);
-                }
+                $stockDiffs[(int) $item['id']] = [
+                    'diff'      => $qty,
+                    'use_stock' => $prod ? ($prod->use_stock ?? true) : true,
+                ];
             }
+            TransactionDetail::insert($details);
+
+            // BATCH UPDATE STOCK (max 2 queries instead of N)
+            $this->batchUpdateProductStock($stockDiffs);
 
             if ($this->platformFeeEnabled && $this->platformFee > 0) {
                 Expense::create([
@@ -1094,24 +1096,20 @@ class Order extends Component
         try {
             DB::beginTransaction();
 
-            $order = ModelsOrder::with('transactionDetails')->where('id', $orderId)->where('payment_status', 'UNPAID')->firstOrFail();
+            // Eager load product relationship (1 query instead of N)
+            $order = ModelsOrder::with('transactionDetails.product')->where('id', $orderId)->where('payment_status', 'UNPAID')->firstOrFail();
 
-            // Kembalikan stok / kurangi sold_count
+            // Batch kembalikan stok / kurangi sold_count (max 2 queries instead of N)
+            $stockDiffs = [];
             foreach ($order->transactionDetails as $item) {
-                $product = Product::find($item->product_id);
-                if ($product) {
-                    if ($product->use_stock ?? true) {
-                        $product->update([
-                            'stock' => DB::raw("stock + {$item->quantity}"),
-                            'sold_count' => DB::raw("sold_count - {$item->quantity}"),
-                        ]);
-                    } else {
-                        $product->update([
-                            'sold_count' => DB::raw("sold_count - {$item->quantity}"),
-                        ]);
-                    }
+                if ($item->product) {
+                    $stockDiffs[(int) $item->product_id] = [
+                        'diff' => -((int) $item->quantity), // negative = restore stock
+                        'use_stock' => $item->product->use_stock ?? true,
+                    ];
                 }
             }
+            $this->batchUpdateProductStock($stockDiffs);
 
             // Hapus detail transaksi dan order
             $order->transactionDetails()->delete();
@@ -1223,6 +1221,48 @@ class Order extends Component
         $this->dispatch('refreshProductStock');
     }
 
+
+    /**
+     * Batch update product stock & sold_count menggunakan SQL CASE WHEN.
+     * Mengurangi N individual queries menjadi max 2 queries.
+     *
+     * Convention: diff > 0 = item terjual (stock berkurang), diff < 0 = item dikembalikan (stock bertambah)
+     * Formula: stock = stock - diff, sold_count = sold_count + diff
+     *
+     * @param array $diffs [product_id => ['diff' => int, 'use_stock' => bool]]
+     */
+    private function batchUpdateProductStock(array $diffs): void
+    {
+        if (empty($diffs)) return;
+
+        $withStock = [];
+        $withoutStock = [];
+        foreach ($diffs as $id => $data) {
+            if ($data['use_stock']) {
+                $withStock[(int) $id] = (int) $data['diff'];
+            } else {
+                $withoutStock[(int) $id] = (int) $data['diff'];
+            }
+        }
+
+        // Products dengan stok: update stock & sold_count
+        if (!empty($withStock)) {
+            $stockCases = collect($withStock)->map(fn($diff, $id) =>
+                "WHEN id = {$id} THEN stock - ({$diff})")->implode(' ');
+            $soldCases = collect($withStock)->map(fn($diff, $id) =>
+                "WHEN id = {$id} THEN sold_count + ({$diff})")->implode(' ');
+            $ids = implode(',', array_keys($withStock));
+            DB::update("UPDATE products SET stock = CASE {$stockCases} ELSE stock END, sold_count = CASE {$soldCases} ELSE sold_count END WHERE id IN ({$ids})");
+        }
+
+        // Products tanpa stok: update hanya sold_count
+        if (!empty($withoutStock)) {
+            $soldCases = collect($withoutStock)->map(fn($diff, $id) =>
+                "WHEN id = {$id} THEN sold_count + ({$diff})")->implode(' ');
+            $ids = implode(',', array_keys($withoutStock));
+            DB::update("UPDATE products SET sold_count = CASE {$soldCases} ELSE sold_count END WHERE id IN ({$ids})");
+        }
+    }
 
     // Render komponen
     public function render()
