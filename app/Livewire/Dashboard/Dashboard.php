@@ -9,6 +9,7 @@ use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 use Livewire\Component;
+use Livewire\Attributes\Url;
 
 class Dashboard extends Component
 {
@@ -41,6 +42,7 @@ class Dashboard extends Component
     public $totalPageViews;
     public $totalUniqueVisitors;
 
+    #[Url(as: 'filter')]
     public $filterType = 'today'; // Default Hari Ini
     public $loaded = false;
 
@@ -282,7 +284,8 @@ class Dashboard extends Component
     public function updatedFilterType()
     {
         $this->updateStats();
-        $this->dispatch('globalFilterUpdated', filter: $this->filterType);
+        // User requested full page reload to guarantee all charts load
+        $this->js("window.location.href = window.location.pathname + '?filter=' + \$wire.filterType;");
     }
 
     public function render()
