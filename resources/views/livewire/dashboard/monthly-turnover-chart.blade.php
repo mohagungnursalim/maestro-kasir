@@ -1,6 +1,6 @@
 <div class="bg-white shadow rounded-lg p-4 mb-3">
     <h3 class="text-lg font-semibold text-gray-700 mb-4">Omzet & Pengeluaran Bulanan</h3>
-    <div class="relative h-64">
+    <div class="relative h-64" wire:ignore>
         <canvas id="monthlyChart"></canvas>
     </div>
 

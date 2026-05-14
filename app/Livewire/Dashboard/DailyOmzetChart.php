@@ -27,6 +27,12 @@ class DailyOmzetChart extends Component
     public function loadDailyOmzet(string $filter = 'month')
     {
         $this->generateDailyOmzet($filter);
+        $this->dispatch('update-daily-omzet-chart', 
+            labels: array_keys($this->dailyOmzet),
+            dataOmzet: array_values($this->dailyOmzet),
+            dataExpense: array_values($this->dailyExpense),
+            dataProfit: array_values($this->dailyProfit)
+        );
     }
 
     public function mount()

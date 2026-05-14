@@ -92,7 +92,8 @@
                     });
 
                     window.addEventListener('update-peak-chart', (e) => {
-                        const newRaw = e.detail.hourlyData;
+                        const ev = e.detail[0] || e.detail;
+                        const newRaw = ev.hourlyData;
                         const newLabels  = newRaw.map(r => r.hour);
                         const newOrders  = newRaw.map(r => r.total_orders);
                         const newRevenue = newRaw.map(r => r.total_revenue);

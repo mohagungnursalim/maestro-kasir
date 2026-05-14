@@ -72,7 +72,7 @@
                 });
     
                 window.addEventListener('productSalesDataUpdated', (e) => {
-                    const freshData = e.detail.salesData;
+                    const freshData = (e.detail[0] || e.detail).salesData;
                     if (window.salesChart) {
                         window.salesChart.data = applyChartData(freshData);
                         window.salesChart.update();

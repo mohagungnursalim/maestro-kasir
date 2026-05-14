@@ -1,7 +1,7 @@
 <div
     class="bg-white shadow rounded-lg p-4 mb-3"
     x-data
-    x-on:global-filter-updated.window="$wire.loadDailyOmzet($event.detail.filter)"
+    x-on:global-filter-updated.window="$wire.loadDailyOmzet($event.detail[0]?.filter || $event.detail.filter)"
 >
     {{-- Header + Summary --}}
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
@@ -56,7 +56,7 @@
     </div>
 
     {{-- Chart --}}
-    <div class="relative h-52">
+    <div class="relative h-52" wire:ignore>
         <canvas id="dailyOmzetChart"></canvas>
     </div>
 
@@ -180,10 +180,11 @@
             }, 300);
         }
 
-        // Re-render setelah Livewire update komponen ini
-        document.addEventListener('livewire:updated', function (e) {
+        // Re-render ketika Livewire mengirim data baru
+        window.addEventListener('update-daily-omzet-chart', function (e) {
+            const ev = e.detail[0] || e.detail;
             if (document.getElementById('dailyOmzetChart')) {
-                window.renderDailyOmzetFromWire();
+                initDailyOmzetChart(ev.labels, ev.dataOmzet, ev.dataExpense, ev.dataProfit);
             }
         });
         
