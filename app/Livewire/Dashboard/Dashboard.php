@@ -41,7 +41,6 @@ class Dashboard extends Component
     // Visitor stats
     public $totalPageViews;
     public $totalUniqueVisitors;
-
     #[Url(as: 'filter')]
     public $filterType = 'today'; // Default Hari Ini
     public $loaded = false;
@@ -284,8 +283,8 @@ class Dashboard extends Component
     public function updatedFilterType()
     {
         $this->updateStats();
-        // User requested full page reload to guarantee all charts load
-        $this->js("window.location.href = window.location.pathname + '?filter=' + \$wire.filterType;");
+        // Reload halaman untuk memastikan semua grafik kerender bersih dari nol
+        $this->js("window.location.search = '?filter=' + \$wire.get('filterType');");
     }
 
     public function render()
