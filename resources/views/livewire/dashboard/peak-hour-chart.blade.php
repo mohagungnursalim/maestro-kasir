@@ -3,8 +3,8 @@
         <h3 class="text-lg font-semibold text-gray-700"><i class="fas fa-clock text-indigo-500 mr-2"></i>Jam Tersibuk</h3>
     </div>
 
-    <div class="relative h-56" wire:ignore>
-        <canvas id="peakHourChart"></canvas>
+    <div class="relative h-56 w-full" wire:ignore>
+        <div id="peakHourChart" style="width: 100%; height: 100%;"></div>
     </div>
 
     {{-- Peak hour summary badge --}}
@@ -21,109 +21,56 @@
     @endif
 
     <script>
-            window.renderPeakHourChart = function() {
-                setTimeout(() => {
-                    if (typeof Chart === 'undefined') {
-                        setTimeout(window.renderPeakHourChart, 100);
-                        return;
-                    }
+        function doRenderPeakHourChart(raw) {
+            if (typeof google === 'undefined' || typeof google.visualization === 'undefined') {
+                setTimeout(() => doRenderPeakHourChart(raw), 100);
+                return;
+            }
+            
+            const data = new google.visualization.DataTable();
+            data.addColumn('string', 'Jam');
+            data.addColumn('number', 'Jumlah Order');
+            data.addColumn({type: 'string', role: 'style'});
+            data.addColumn({type: 'string', role: 'tooltip'});
 
-                    const ctx = document.getElementById('peakHourChart')?.getContext('2d');
-                    if (!ctx) return;
+            const orders = raw.map(r => r.total_orders);
+            const maxOrders = Math.max(...orders, 1);
 
-                    if (window.peakHourChart instanceof Chart) {
-                        window.peakHourChart.destroy();
-                    }
-
-                    const raw = @json($hourlyData);
-                    const labels  = raw.map(r => r.hour);
-                    const orders  = raw.map(r => r.total_orders);
-                    const revenue = raw.map(r => r.total_revenue);
-
-                    const maxOrders = Math.max(...orders);
-                    const bgColors = orders.map(v =>
-                        v === maxOrders && v > 0
-                            ? 'rgba(249, 115, 22, 0.85)'   // orange — peak
-                            : 'rgba(99, 102, 241, 0.55)'   // indigo — normal
-                    );
-
-                    window.peakHourChart = new Chart(ctx, {
-                        type: 'bar',
-                        data: {
-                            labels,
-                            datasets: [{
-                                label: 'Jumlah Order',
-                                data: orders,
-                                backgroundColor: bgColors,
-                                borderRadius: 4,
-                                borderSkipped: false,
-                            }]
-                        },
-                        options: {
-                            responsive: true,
-                            maintainAspectRatio: false,
-                            plugins: {
-                                legend: { display: false },
-                                tooltip: {
-                                    callbacks: {
-                                        afterLabel: function(ctx) {
-                                            const rev = revenue[ctx.dataIndex];
-                                            if (rev > 0) {
-                                                return 'Revenue: Rp ' + rev.toLocaleString('id-ID');
-                                            }
-                                        }
-                                    }
-                                }
-                            },
-                            scales: {
-                                x: {
-                                    grid: { display: false },
-                                    ticks: { font: { size: 10 } }
-                                },
-                                y: {
-                                    beginAtZero: true,
-                                    ticks: {
-                                        stepSize: 1,
-                                        callback: v => Number.isInteger(v) ? v : ''
-                                    }
-                                }
-                            }
-                        }
-                    });
-
-                    window.addEventListener('update-peak-chart', (e) => {
-                        const ev = e.detail[0] || e.detail;
-                        const newRaw = ev.hourlyData;
-                        const newLabels  = newRaw.map(r => r.hour);
-                        const newOrders  = newRaw.map(r => r.total_orders);
-                        const newRevenue = newRaw.map(r => r.total_revenue);
-
-                        const maxOrders = Math.max(...newOrders);
-                        const newBgColors = newOrders.map(v =>
-                            v === maxOrders && v > 0
-                                ? 'rgba(249, 115, 22, 0.85)'   // orange — peak
-                                : 'rgba(99, 102, 241, 0.55)'   // indigo — normal
-                        );
-
-                        if(window.peakHourChart) {
-                            window.peakHourChart.data.labels = newLabels;
-                            window.peakHourChart.data.datasets[0].data = newOrders;
-                            window.peakHourChart.data.datasets[0].backgroundColor = newBgColors;
-                            
-                            // Hacky way to inject revenue array back to tooltip via mapping
-                            window.peakHourChart.options.plugins.tooltip.callbacks.afterLabel = function(ctx) {
-                                const rev = newRevenue[ctx.dataIndex];
-                                if (rev > 0) {
-                                    return 'Revenue: Rp ' + rev.toLocaleString('id-ID');
-                                }
-                            };
-                            window.peakHourChart.update();
-                        }
-                    });
-                }, 200);
+            for (let i = 0; i < raw.length; i++) {
+                let r = raw[i];
+                let isPeak = (r.total_orders === maxOrders && r.total_orders > 0);
+                let style = isPeak ? 'color: #f97316' : 'color: #6366f1';
+                let revFormatted = 'Rp ' + r.total_revenue.toLocaleString('id-ID');
+                let tooltip = 'Jam: ' + r.hour + '\nOrder: ' + r.total_orders + '\nRevenue: ' + revFormatted;
+                
+                data.addRow([r.hour, r.total_orders, style, tooltip]);
             }
 
-        // Jalankan segera saat script di-evaluasi oleh Livewire
+            const options = {
+                legend: { position: 'none' },
+                chartArea: {width: '90%', height: '70%'},
+                vAxis: { minValue: 0, format: 'short' },
+                bar: { groupWidth: '80%' }
+            };
+
+            const chart = new google.visualization.ColumnChart(document.getElementById('peakHourChart'));
+            chart.draw(data, options);
+        }
+
+        window.renderPeakHourChart = function() {
+            setTimeout(() => {
+                const initialPeakData = @json($hourlyData);
+                doRenderPeakHourChart(initialPeakData);
+            }, 300);
+        }
+
+        window.addEventListener('update-peak-chart', (e) => {
+             const ev = e.detail[0] || e.detail;
+             setTimeout(() => {
+                 doRenderPeakHourChart(ev.hourlyData);
+             }, 600);
+        });
+
         window.renderPeakHourChart();
     </script>
 </div>

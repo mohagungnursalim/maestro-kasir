@@ -1,96 +1,66 @@
 <div class="bg-white shadow rounded-lg p-4 mb-3">
     <h3 class="text-lg font-semibold text-gray-700 mb-4">Omzet & Pengeluaran Bulanan</h3>
-    <div class="relative h-64" wire:ignore>
-        <canvas id="monthlyChart"></canvas>
+    <div class="relative h-64 w-full" wire:ignore>
+        <div id="monthlyChart" style="width: 100%; height: 100%;"></div>
     </div>
-
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <script>
         window.initMonthlyTurnoverChart = function() {
             setTimeout(() => {
-                if (typeof Chart === 'undefined') {
+                if (typeof google === 'undefined' || typeof google.visualization === 'undefined') {
                     setTimeout(window.initMonthlyTurnoverChart, 100);
                     return;
                 }
 
-                const ctx = document.getElementById('monthlyChart')?.getContext('2d');
-                if (!ctx) return;
+                const dataTurnover = Object.values(@json($monthlyTurnover) || {});
+                const dataExpense  = Object.values(@json($monthlyExpense) || {});
+                const dataProfit   = Object.values(@json($monthlyProfit) || {});
 
-                if (window.monthlyChart instanceof Chart) {
-                    window.monthlyChart.destroy();
+                var data = new google.visualization.DataTable();
+                data.addColumn('string', 'Bulan');
+                data.addColumn('number', 'Omset');
+                data.addColumn({type: 'string', role: 'style'}); // for Omset color
+                data.addColumn('number', 'Pengeluaran');
+                data.addColumn('number', 'Keuntungan');
+
+                var months = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
+                
+                const maxVal = Math.max(...dataTurnover, 1);
+
+                for (var i = 0; i < 12; i++) {
+                    var valOmzet = parseFloat(dataTurnover[i]) || 0;
+                    var style = (valOmzet === maxVal && valOmzet > 0) ? 'color: #eab308' : 'color: #6366f1';
+
+                    data.addRow([
+                        months[i], 
+                        valOmzet,
+                        style,
+                        parseFloat(dataExpense[i]) || 0,
+                        parseFloat(dataProfit[i]) || 0
+                    ]);
                 }
 
-                const dataTurnover = @json($monthlyTurnover);
-                const dataExpense  = @json($monthlyExpense);
-                const dataProfit   = @json($monthlyProfit);
-
-                window.monthlyChart = new Chart(ctx, {
-                    type: 'line',
-                    data: {
-                        labels: [
-                            'Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun',
-                            'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'
-                        ],
-                        datasets: [
-                            {
-                                label: 'Omset',
-                                data: dataTurnover,
-                                borderColor: 'rgba(54, 162, 235, 1)', // biru solid
-                                backgroundColor: 'rgba(54, 162, 235, 0.2)', // biru transparan
-                                tension: 0.4,
-                                fill: true,
-                            },
-                            {
-                                label: 'Pengeluaran',
-                                data: dataExpense,
-                                borderColor: 'rgba(239, 68, 68, 1)',
-                                backgroundColor: 'rgba(239, 68, 68, 0.2)',
-                                tension: 0.4,
-                                fill: true,
-                            },
-                            {
-                                label: 'Keuntungan',
-                                data: dataProfit,
-                                borderColor: 'rgba(16, 185, 129, 1)',
-                                backgroundColor: 'rgba(16, 185, 129, 0.2)',
-                                tension: 0.4,
-                                fill: true,
-                            }
-                        ]
+                var options = {
+                    seriesType: 'bars',
+                    series: {
+                        0: { color: '#6366f1' }, // Default Omset bar color (overridden by style role)
+                        1: { color: '#ef4444' }, // Expense bar
+                        2: { type: 'line', color: '#10b981', lineWidth: 2, pointSize: 4 }  // Profit line
                     },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        scales: {
-                            y: {
-                                beginAtZero: true,
-                                ticks: {
-                                    callback: value => 'Rp ' + value.toLocaleString('id-ID', {
-                                        minimumFractionDigits: 2,
-                                        maximumFractionDigits: 2
-                                    })
-                                }
-                            }
-                        },
-                        plugins: {
-                            tooltip: {
-                                callbacks: {
-                                    label: ctx => ctx.dataset.label + ': Rp ' + ctx.raw.toLocaleString('id-ID', {
-                                        minimumFractionDigits: 2,
-                                        maximumFractionDigits: 2
-                                    })
-                                }
-                            },
-                            legend: {
-                                display: true
-                            }
-                        }
-                    }
-                });
+                    chartArea: {width: '85%', height: '70%'},
+                    legend: { position: 'top' },
+                    vAxis: { minValue: 0, format: 'short' }
+                };
+
+                var chart = new google.visualization.ComboChart(document.getElementById('monthlyChart'));
+                chart.draw(data, options);
             }, 300);
         }
-        // Jalankan segera saat script di-evaluasi oleh Livewire (saat navigasi tanpa refresh)
+        
+        window.addEventListener('global-filter-updated', function(e) {
+            setTimeout(window.initMonthlyTurnoverChart, 600);
+        });
+        
         window.initMonthlyTurnoverChart();
     </script>
 </div>

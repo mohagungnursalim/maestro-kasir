@@ -56,139 +56,84 @@
     </div>
 
     {{-- Chart --}}
-    <div class="relative h-52" wire:ignore>
-        <canvas id="dailyOmzetChart"></canvas>
+    <div class="relative h-52 w-full" wire:ignore>
+        <div id="dailyOmzetChart" style="width: 100%; height: 100%;"></div>
     </div>
 
     <script>
         function initDailyOmzetChart(labels, dataOmzet, dataExpense, dataProfit) {
-            if (typeof Chart === 'undefined') {
+            if (typeof google === 'undefined' || typeof google.visualization === 'undefined') {
                 setTimeout(() => initDailyOmzetChart(labels, dataOmzet, dataExpense, dataProfit), 100);
                 return;
             }
-            
-            const ctx = document.getElementById('dailyOmzetChart')?.getContext('2d');
-            if (!ctx) return;
 
-            if (window._dailyOmzetChart instanceof Chart) {
-                window._dailyOmzetChart.destroy();
-            }
+            var data = new google.visualization.DataTable();
+            data.addColumn('string', 'Waktu');
+            data.addColumn('number', 'Omset');
+            data.addColumn({type: 'string', role: 'style'}); // for Omset color
+            data.addColumn('number', 'Pengeluaran');
+            data.addColumn('number', 'Keuntungan');
 
-            // Format label agar lebih ringkas (ambil bagian tanggal saja)
             const shortLabels = labels.map(l => {
-                if (l.match(/^\d{4}-\d{2}-\d{2}$/)) {
-                    // YYYY-MM-DD → "dd"
-                    return l.split('-')[2];
-                }
+                if (l.match(/^\d{4}-\d{2}-\d{2}$/)) return l.split('-')[2];
                 if (l.match(/^\d{4}-\d{2}$/)) {
-                    // YYYY-MM → Bulan singkat
                     const months = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];
                     return months[parseInt(l.split('-')[1]) - 1];
                 }
-                return l; // jam (HH:00) langsung
+                return l; 
             });
 
-            const maxVal  = Math.max(...dataOmzet, 1);
-            const colorsOmzet  = dataOmzet.map(v => v === maxVal && v > 0 ? 'rgba(234,179,8,0.85)' : 'rgba(99,102,241,0.65)');
-            const bordersOmzet = dataOmzet.map(v => v === maxVal && v > 0 ? 'rgba(161,98,7,1)'     : 'rgba(79,70,229,0.9)');
-            
-            const colorsExpense  = dataExpense.map(() => 'rgba(239, 68, 68, 0.75)');
-            const bordersExpense = dataExpense.map(() => 'rgba(220, 38, 38, 0.9)');
+            const maxVal = Math.max(...dataOmzet, 1);
+            for (var i = 0; i < labels.length; i++) {
+                var valOmzet = parseFloat(dataOmzet[i]) || 0;
+                var style = (valOmzet === maxVal && valOmzet > 0) ? 'color: #eab308' : 'color: #6366f1';
+                
+                data.addRow([
+                    shortLabels[i], 
+                    valOmzet,
+                    style,
+                    parseFloat(dataExpense[i]) || 0,
+                    parseFloat(dataProfit[i]) || 0
+                ]);
+            }
 
-            const lineBorderProfit = 'rgba(16, 185, 129, 1)'; // Emerald green
-
-            window._dailyOmzetChart = new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: shortLabels,
-                    datasets: [
-                        {
-                            type: 'line',
-                            label: 'Keuntungan',
-                            data: dataProfit,
-                            borderColor: lineBorderProfit,
-                            backgroundColor: lineBorderProfit,
-                            borderWidth: 2.5,
-                            tension: 0.3,
-                            pointBackgroundColor: 'white',
-                            pointBorderColor: lineBorderProfit,
-                            pointRadius: 4,
-                            pointHoverRadius: 6,
-                            fill: false,
-                        },
-                        {
-                            label: 'Omset',
-                            data: dataOmzet,
-                            backgroundColor: colorsOmzet,
-                            borderColor: bordersOmzet,
-                            borderWidth: 1.5,
-                            borderRadius: 4,
-                        },
-                        {
-                            label: 'Pengeluaran',
-                            data: dataExpense,
-                            backgroundColor: colorsExpense,
-                            borderColor: bordersExpense,
-                            borderWidth: 1.5,
-                            borderRadius: 4,
-                        }
-                    ]
+            var options = {
+                seriesType: 'bars',
+                series: {
+                    0: { color: '#6366f1' }, // Default Omset bar color (overridden by style role)
+                    1: { color: '#ef4444' }, // Expense bar
+                    2: { type: 'line', color: '#10b981', lineWidth: 2, pointSize: 4 }  // Profit line
                 },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: {
-                        x: {
-                            grid: { display: false },
-                            ticks: { font: { size: 10 }, maxRotation: 0 }
-                        },
-                        y: {
-                            beginAtZero: true,
-                            grid: { color: 'rgba(0,0,0,0.05)' },
-                            ticks: {
-                                font: { size: 10 },
-                                callback: v => v >= 1000000
-                                    ? 'Rp' + (v / 1000000).toFixed(1) + 'jt'
-                                    : v >= 1000
-                                        ? 'Rp' + (v / 1000).toFixed(0) + 'rb'
-                                        : 'Rp' + v
-                            }
-                        }
-                    },
-                    plugins: {
-                        legend: { display: true },
-                        tooltip: {
-                            callbacks: {
-                                title: (items) => {
-                                    return labels[items[0].dataIndex];
-                                },
-                                label: ctx => ctx.dataset.label + ': Rp ' + ctx.raw.toLocaleString('id-ID')
-                            }
-                        }
-                    }
-                }
-            });
+                chartArea: {width: '85%', height: '70%'},
+                legend: { position: 'top' },
+                vAxis: { minValue: 0, format: 'short' }
+            };
+
+            var chart = new google.visualization.ComboChart(document.getElementById('dailyOmzetChart'));
+            chart.draw(data, options);
         }
 
         window.renderDailyOmzetFromWire = function() {
             setTimeout(() => {
-                const labels       = @json(array_keys($dailyOmzet));
-                const dataOmzet    = @json(array_values($dailyOmzet));
-                const dataExpense  = @json(array_values($dailyExpense));
-                const dataProfit   = @json(array_values($dailyProfit));
+                const labels       = Object.values(@json(array_keys($dailyOmzet)) || {});
+                const dataOmzet    = Object.values(@json(array_values($dailyOmzet)) || {});
+                const dataExpense  = Object.values(@json(array_values($dailyExpense)) || {});
+                const dataProfit   = Object.values(@json(array_values($dailyProfit)) || {});
                 initDailyOmzetChart(labels, dataOmzet, dataExpense, dataProfit);
             }, 300);
         }
 
-        // Re-render ketika Livewire mengirim data baru
+
+        
         window.addEventListener('update-daily-omzet-chart', function (e) {
             const ev = e.detail[0] || e.detail;
-            if (document.getElementById('dailyOmzetChart')) {
-                initDailyOmzetChart(ev.labels, ev.dataOmzet, ev.dataExpense, ev.dataProfit);
-            }
+            setTimeout(() => {
+                if (document.getElementById('dailyOmzetChart')) {
+                    initDailyOmzetChart(ev.labels, ev.dataOmzet, ev.dataExpense, ev.dataProfit);
+                }
+            }, 600);
         });
-        
-        // Jalankan segera saat script di-evaluasi oleh Livewire
+
         window.renderDailyOmzetFromWire();
     </script>
 </div>

@@ -283,8 +283,9 @@ class Dashboard extends Component
     public function updatedFilterType()
     {
         $this->updateStats();
-        // Reload halaman untuk memastikan semua grafik kerender bersih dari nol
-        $this->js("window.location.search = '?filter=' + \$wire.get('filterType');");
+        // Emits events to SPA update charts without reload
+        $this->dispatch('globalFilterUpdated', $this->filterType);
+        $this->dispatch('global-filter-updated', filter: $this->filterType);
     }
 
     public function render()

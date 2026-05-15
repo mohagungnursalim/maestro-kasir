@@ -1,4 +1,27 @@
 <div class="py-12">
+    <script>
+        if (typeof window.initGoogleCharts === 'undefined') {
+            window.initGoogleCharts = function() {
+                if (window.googleChartsLoaded) return;
+                
+                if (typeof google === 'undefined' || !google.charts) {
+                    if (!document.getElementById('google-charts-script')) {
+                        const script = document.createElement('script');
+                        script.id = 'google-charts-script';
+                        script.src = 'https://www.gstatic.com/charts/loader.js';
+                        document.head.appendChild(script);
+                        script.onload = () => {
+                            google.charts.load('current', {'packages':['corechart', 'bar']});
+                            window.googleChartsLoaded = true;
+                        };
+                    }
+                } else {
+                    google.charts.load('current', {'packages':['corechart', 'bar']});
+                    window.googleChartsLoaded = true;
+                }
+            };
+        }
+    </script>
     @can('Lihat')
     <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
         

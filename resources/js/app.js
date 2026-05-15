@@ -2,6 +2,7 @@ import './bootstrap';
 
 document.addEventListener('livewire:navigated', () => {
     window.initFlowbite();
+    window.initGoogleCharts();
 
     document.getElementById('fullscreenBtn').addEventListener('click', function () {
         if (!document.fullscreenElement) {
