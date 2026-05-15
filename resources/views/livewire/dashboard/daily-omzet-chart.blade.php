@@ -67,7 +67,7 @@
 
     <script>
         function initDailyOmzetChart(labels, dataOmzet, dataExpense, dataProfit) {
-            if (typeof google === 'undefined' || typeof google.visualization === 'undefined') {
+            if (typeof google === 'undefined' || typeof google.visualization === 'undefined' || typeof google.visualization.DataTable === 'undefined') {
                 setTimeout(() => initDailyOmzetChart(labels, dataOmzet, dataExpense, dataProfit), 100);
                 return;
             }

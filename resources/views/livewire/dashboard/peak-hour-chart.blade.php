@@ -27,7 +27,7 @@
 
     <script>
         function doRenderPeakHourChart(raw) {
-            if (typeof google === 'undefined' || typeof google.visualization === 'undefined') {
+            if (typeof google === 'undefined' || typeof google.visualization === 'undefined' || typeof google.visualization.DataTable === 'undefined') {
                 setTimeout(() => doRenderPeakHourChart(raw), 100);
                 return;
             }
