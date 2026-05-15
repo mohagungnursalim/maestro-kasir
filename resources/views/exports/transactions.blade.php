@@ -495,7 +495,63 @@
     </ul>
 </div>
 
+{{-- ── Penjualan Produk ─────────────────────────────────────────────────── --}}
+<div style="page-break-before: always;"></div>
+<div class="report-header">
+    <h2>Daftar Produk Terjual</h2>
+    <p>Rincian Kuantitas dan Omzet per Produk</p>
+</div>
 
+<table class="summary-table" style="margin-top:8px;">
+    <thead>
+        <tr>
+            <th style="width: 5%; text-align:center;">No</th>
+            <th style="text-align:left;">Nama Produk</th>
+            <th style="width: 15%; text-align:center;">Terjual</th>
+            <th style="width: 30%; text-align:right;">Subtotal Omzet</th>
+        </tr>
+    </thead>
+    <tbody>
+        @php
+            $productSales = [];
+            foreach ($transactions as $details) {
+                foreach ($details as $item) {
+                    $prodName = $item->product ? $item->product->name : ($item->product_name ?? 'Produk Dihapus');
+                    if (!isset($productSales[$prodName])) {
+                        $productSales[$prodName] = [
+                            'qty' => 0,
+                            'omzet' => 0
+                        ];
+                    }
+                    $productSales[$prodName]['qty'] += $item->quantity;
+                    $productSales[$prodName]['omzet'] += ($item->quantity * $item->price);
+                }
+            }
+            $productSales = collect($productSales)->sortByDesc('qty');
+            $no = 1;
+        @endphp
+        
+        @forelse ($productSales as $name => $data)
+            <tr class="{{ $loop->iteration % 2 == 0 ? 'stripe' : '' }}">
+                <td style="text-align:center;">{{ $no++ }}</td>
+                <td>{{ $name }}</td>
+                <td style="text-align:center; font-weight:bold;">{{ number_format($data['qty'], 0, ',', '.') }}</td>
+                <td class="val">Rp{{ number_format($data['omzet'], 0, ',', '.') }}</td>
+            </tr>
+        @empty
+            <tr>
+                <td colspan="4" style="text-align:center;">Tidak ada data produk yang terjual</td>
+            </tr>
+        @endforelse
+    </tbody>
+    <tfoot>
+        <tr>
+            <td colspan="2" style="text-align:right;">TOTAL KESELURUHAN</td>
+            <td style="text-align:center;" class="val">{{ number_format($productSales->sum('qty'), 0, ',', '.') }}</td>
+            <td class="val green">Rp{{ number_format($productSales->sum('omzet'), 0, ',', '.') }}</td>
+        </tr>
+    </tfoot>
+</table>
 
 </body>
 </html>
