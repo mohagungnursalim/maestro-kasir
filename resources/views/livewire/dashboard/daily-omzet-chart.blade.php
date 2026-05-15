@@ -57,7 +57,12 @@
 
     {{-- Chart --}}
     <div class="relative h-52 w-full" wire:ignore>
-        <div id="dailyOmzetChart" style="width: 100%; height: 100%;"></div>
+        <div id="dailyOmzetChart" style="width: 100%; height: 100%;">
+            <div class="flex flex-col items-center justify-center w-full h-full text-gray-400">
+                <i class="fas fa-spinner fa-spin text-2xl mb-2 text-indigo-400"></i>
+                <span class="text-sm animate-pulse">Memuat grafik...</span>
+            </div>
+        </div>
     </div>
 
     <script>
