@@ -41,7 +41,7 @@ class Dashboard extends Component
     // Visitor stats
     public $totalPageViews;
     public $totalUniqueVisitors;
-    #[Url(as: 'filter')]
+    
     public $filterType = 'today'; // Default Hari Ini
     public $loaded = false;
 
