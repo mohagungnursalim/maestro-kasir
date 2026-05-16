@@ -6,8 +6,8 @@
     {{-- Header + Summary --}}
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
         <div>
-            <h3 class="text-lg font-semibold text-gray-700">Omzet & Pengeluaran Harian</h3>
-            <p class="text-xs text-gray-400 mt-0.5">Pendapatan dan Pengeluaran nyata per hari</p>
+            <h3 class="text-lg font-semibold text-gray-700">Omzet & Pengeluaran</h3>
+            <p class="text-xs text-gray-400 mt-0.5">Pendapatan dan Pengeluaran nyata</p>
         </div>
 
         {{-- summary chips --}}

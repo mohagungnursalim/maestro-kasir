@@ -266,8 +266,7 @@
             @endif
             @endif
         </div>
-    
-        @livewire('dashboard.monthly-turnover-chart')
+
         @livewire('dashboard.daily-omzet-chart')
 
         {{-- ── Peak Hour + Payment Split ────────────────────────────────────── --}}
