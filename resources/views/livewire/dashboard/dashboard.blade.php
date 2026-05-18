@@ -291,17 +291,17 @@
             @endif
         </div>
 
-        <div class="pr-20 sm:pr-24 lg:pr-80">
+        <div class="">
             @livewire('dashboard.daily-omzet-chart')
         </div>
 
         {{-- ── Peak Hour + Payment Split ────────────────────────────────────── --}}
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-3 pr-20 sm:pr-24 lg:pr-80">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-3">
             @livewire('dashboard.peak-hour-chart')
             @livewire('dashboard.payment-split-chart')
         </div>
 
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-2 pr-20 sm:pr-24 lg:pr-80">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-2">
 
             @livewire('dashboard.product-sales-chart')
 
