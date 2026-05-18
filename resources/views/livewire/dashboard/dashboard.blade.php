@@ -23,21 +23,45 @@
         }
     </script>
     @can('Lihat')
-    <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+    <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 relative">
         
-        
-        <div wire:init="loadInitialStats" class="bg-white shadow rounded-lg p-6 mb-6">
-            <!-- Filter -->
-            <div class="mb-4">
-                <label for="filterType" class="block text-gray-700 font-semibold mb-2">Filter Waktu:</label>
-                <select wire:model.live="filterType" id="filterType" class="px-4 py-2 border rounded w-full">
-                    <option value="today">Hari Ini</option>
-                    <option value="week">Minggu Ini</option>
-                    <option value="month">Bulan Ini</option>
-                    <option value="year">Tahun Ini</option>
-                </select>
+        <!-- Filter Dropdown Button - Tampil di Semua Device -->
+        <div class="fixed right-4 sm:right-6 top-20 sm:top-32 z-40">
+            <div class="sticky top-6" x-data="{ open: false }">
+                <button @click="open = !open" class="bg-blue-500 hover:bg-blue-600 text-white shadow-lg rounded-full p-3 transition-all duration-200 w-12 h-12 flex items-center justify-center">
+                    <i class="fas fa-filter text-lg"></i>
+                </button>
+                
+                <div x-show="open" @click.outside="open = false" class="absolute right-0 mt-2 w-40 sm:w-48 bg-white shadow-lg rounded-lg border border-gray-200 overflow-hidden"
+                    x-transition:enter="transition ease-out duration-100"
+                    x-transition:enter-start="opacity-0 -translate-y-2"
+                    x-transition:enter-end="opacity-100 translate-y-0"
+                    x-transition:leave="transition ease-in duration-75"
+                    x-transition:leave-start="opacity-100 translate-y-0"
+                    x-transition:leave-end="opacity-0 -translate-y-2">
+                    <div class="p-2">
+                        <button wire:click="$set('filterType', 'today')" @click="open = false"
+                            class="w-full text-left px-3 sm:px-4 py-2 sm:py-2.5 rounded-lg text-xs sm:text-sm font-medium transition-all duration-150 flex items-center gap-2 {{ $filterType === 'today' ? 'bg-blue-100 text-blue-700' : 'text-gray-700 hover:bg-gray-100' }}">
+                            <i class="fas fa-sun w-4"></i> Hari Ini
+                        </button>
+                        <button wire:click="$set('filterType', 'week')" @click="open = false"
+                            class="w-full text-left px-3 sm:px-4 py-2 sm:py-2.5 rounded-lg text-xs sm:text-sm font-medium transition-all duration-150 flex items-center gap-2 {{ $filterType === 'week' ? 'bg-blue-100 text-blue-700' : 'text-gray-700 hover:bg-gray-100' }}">
+                            <i class="fas fa-calendar-week w-4"></i> Minggu Ini
+                        </button>
+                        <button wire:click="$set('filterType', 'month')" @click="open = false"
+                            class="w-full text-left px-3 sm:px-4 py-2 sm:py-2.5 rounded-lg text-xs sm:text-sm font-medium transition-all duration-150 flex items-center gap-2 {{ $filterType === 'month' ? 'bg-blue-100 text-blue-700' : 'text-gray-700 hover:bg-gray-100' }}">
+                            <i class="fas fa-calendar-alt w-4"></i> Bulan Ini
+                        </button>
+                        <button wire:click="$set('filterType', 'year')" @click="open = false"
+                            class="w-full text-left px-3 sm:px-4 py-2 sm:py-2.5 rounded-lg text-xs sm:text-sm font-medium transition-all duration-150 flex items-center gap-2 {{ $filterType === 'year' ? 'bg-blue-100 text-blue-700' : 'text-gray-700 hover:bg-gray-100' }}">
+                            <i class="fas fa-calendar w-4"></i> Tahun Ini
+                        </button>
+                    </div>
+                </div>
             </div>
+        </div>
         
+        <div wire:init="loadInitialStats" class="bg-white shadow rounded-lg p-6 mb-6 pr-20 sm:pr-24 lg:pr-80">
             {{-- Statistik --}}
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-7 @role('admin|owner') xl:grid-cols-9 @endrole gap-6">
                 <!-- Total Order -->
@@ -267,15 +291,17 @@
             @endif
         </div>
 
-        @livewire('dashboard.daily-omzet-chart')
+        <div class="pr-20 sm:pr-24 lg:pr-80">
+            @livewire('dashboard.daily-omzet-chart')
+        </div>
 
         {{-- ── Peak Hour + Payment Split ────────────────────────────────────── --}}
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-3">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-3 pr-20 sm:pr-24 lg:pr-80">
             @livewire('dashboard.peak-hour-chart')
             @livewire('dashboard.payment-split-chart')
         </div>
 
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-2">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-2 pr-20 sm:pr-24 lg:pr-80">
 
             @livewire('dashboard.product-sales-chart')
 
@@ -299,7 +325,7 @@
                 'maxim'     => ['icon' => 'fa-motorcycle',  'label' => 'Maxim',    'color' => 'text-yellow-600'],
             ];
         @endphp
-        <div class="bg-white shadow rounded-lg p-5 mb-3">
+        <div class="bg-white shadow rounded-lg p-5 mb-3 pr-20 sm:pr-24 lg:pr-80">
             <h3 class="text-sm font-semibold text-gray-700 uppercase tracking-wide mb-3">
                 <i class="fas fa-clock-rotate-left mr-1 text-slate-500"></i>
                 10 Transaksi Terbaru
