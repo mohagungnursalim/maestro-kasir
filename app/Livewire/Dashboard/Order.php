@@ -381,6 +381,12 @@ class Order extends Component
     {
         $this->customerMoney = (float) $this->customerMoney;
 
+        if ($this->total <= 0) {
+            $this->customerMoney = null;
+            $this->change = 0;
+            return;
+        }
+
         if ($this->customerMoney > $this->total) {
             $this->change = $this->customerMoney - $this->total;
         } elseif ($this->customerMoney < $this->total) {

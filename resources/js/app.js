@@ -1,8 +1,8 @@
 import './bootstrap';
 
 document.addEventListener('livewire:navigated', () => {
-    window.initFlowbite();
-    window.initGoogleCharts();
+    if (typeof window.initFlowbite === 'function') window.initFlowbite();
+    if (typeof window.initGoogleCharts === 'function') window.initGoogleCharts();
 
     document.getElementById('fullscreenBtn').addEventListener('click', function () {
         if (!document.fullscreenElement) {
