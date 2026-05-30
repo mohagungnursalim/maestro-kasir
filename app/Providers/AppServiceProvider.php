@@ -5,6 +5,7 @@ namespace App\Providers;
 use App\Models\StoreSetting;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\View;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -22,6 +23,10 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        Gate::define('viewPulse', function ($user) {
+            return $user->hasRole('admin|owner');
+        });
+
         if (Schema::hasTable('store_settings')) {
             View::composer('*', function ($view) {
                 // Gunakan static variable agar querinya hanya dieksekusi 1x per request, 
