@@ -14,9 +14,9 @@ class OrderController extends Controller
         return view('receipt', compact('order'));
     }
 
-    public function kitchen(Request $request)
+    public function kitchen(Request $request, \App\Services\PrintService $printService)
     {
-        $kitchenData = cache()->get('kitchen-preview:' . auth()->id());
+        $kitchenData = $printService->getKitchenData(auth()->id());
 
         if (!$kitchenData) {
             abort(404, 'Data struk dapur tidak ditemukan');
@@ -25,11 +25,11 @@ class OrderController extends Controller
         return view('kitchen', compact('kitchenData'));
     }
 
-    public function bill(Request $request)
+    public function bill(Request $request, \App\Services\PrintService $printService)
     {
         // Multi-split preview (from cache)
         if ($request->has('multi')) {
-            $multi = cache()->get('bill-preview-multi:' . auth()->id());
+            $multi = $printService->getMultiBillData(auth()->id());
             if (!$multi) {
                 abort(404, 'Data bill tidak ditemukan');
             }
@@ -46,7 +46,7 @@ class OrderController extends Controller
         }
 
         // Fallback: single preview (existing behavior)
-        $billData = cache()->get('bill-preview:' . auth()->id());
+        $billData = $printService->getBillData(auth()->id());
 
         if (!$billData) {
             abort(404, 'Data bill tidak ditemukan');

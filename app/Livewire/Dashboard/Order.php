@@ -131,12 +131,19 @@ class Order extends Component
     // Tambahkan produk ke keranjang dengan catatan
     public function addToCartWithNote($productId, $note)
     {
-        $product = collect($this->products)->firstWhere('id', $productId);
+        $this->processAddToCart($productId, $note);
+    }
 
-        if (!$product){
-            $product = Product::findOrFail($productId);
-        }
+    // Tambahkan produk ke keranjang
+    public function addToCart($productId)
+    {
+        $this->processAddToCart($productId);
+    }
 
+    private function processAddToCart($productId, $note = null)
+    {
+        $product = collect($this->products)->firstWhere('id', $productId) ?? Product::findOrFail($productId);
+        
         if ($product) {
             $this->cart[] = [
                 'id' => $product->id,
@@ -146,36 +153,10 @@ class Order extends Component
                 'price' => $product->final_price,
                 'quantity' => 1,
                 'subtotal' => $product->final_price,
-                'product_note' => $note,
+                'product_note' => $note ?? $product->product_note,
                 'assigned_to' => 1,
             ];
             $this->cartNotEmpty = true;
-            $this->calculateTotal();
-        }
-    }
-
-    // Tambahkan produk ke keranjang
-    public function addToCart($productId)
-    {
-        $product = collect($this->products)->firstWhere('id', $productId);
-
-        if (!$product){
-            $product = Product::findOrFail($productId);
-        }
-
-        if ($product) {
-            $this->cart[] = [
-                'id' => $product->id,
-                'name' => $product->name,
-                'sku' => $product->sku,
-                'image' => $product->image,
-                'price' => $product->final_price,
-                'quantity' => 1,
-                'subtotal' => $product->final_price, // Tambahkan subtotal di awal
-                'product_note' => $product->product_note,
-                'assigned_to' => 1,
-            ];
-            $this->cartNotEmpty = true; // Set true
             $this->calculateTotal();
         }
     }
@@ -340,39 +321,49 @@ class Order extends Component
     // Hitung total belanja
     public function calculateTotal()
     {
-        $subtotal = collect($this->cart)->sum(fn($item) => $item['price'] * $item['quantity']);
+        $this->subtotal = $this->calculateSubtotal();
+        $discount = $this->calculateDiscount($this->subtotal);
+        $subtotalAfterDiscount = $this->subtotal - $discount;
+        
+        $this->tax = $this->calculateTaxAmount($subtotalAfterDiscount);
+        $shipping = $this->calculateShipping();
 
-        // Hitung diskon family 100% atau teman 20% jika diaktifkan
-        $discount = 0;
-        if ($this->familyDiscount) {
-            $discount = $subtotal;
-        } elseif ($this->friendDiscount) {
-            $discount = ($subtotal * 20) / 100;
-        }
+        $this->total = $subtotalAfterDiscount + $this->tax + $shipping;
 
-        // Subtotal setelah diskon
-        $subtotalAfterDiscount = $subtotal - $discount;
+        $this->adjustCustomerMoneyState();
+        
+        $this->change = max((float)$this->customerMoney - $this->total, 0);
+    }
 
-        // Pajak hanya dihitung jika is_tax true
-        $tax = 0;
-        if ($this->is_tax) {
-            $tax = ($subtotalAfterDiscount * $this->tax_percentage) / 100;
-        }
+    private function calculateSubtotal(): float
+    {
+        return collect($this->cart)->sum(fn($item) => $item['price'] * $item['quantity']);
+    }
 
-        // Ongkir hanya ditambahkan jika diaktifkan
-        $shipping = $this->shippingEnabled ? (float) $this->shippingCost : 0;
+    private function calculateDiscount(float $subtotal): float
+    {
+        if ($this->familyDiscount) return $subtotal;
+        if ($this->friendDiscount) return ($subtotal * 20) / 100;
+        return 0;
+    }
 
-        $this->subtotal = $subtotal;
-        $this->tax = $tax;
-        $this->total = $subtotalAfterDiscount + $tax + $shipping;
+    private function calculateTaxAmount(float $subtotalAfterDiscount): float
+    {
+        return $this->is_tax ? ($subtotalAfterDiscount * $this->tax_percentage) / 100 : 0;
+    }
 
+    private function calculateShipping(): float
+    {
+        return $this->shippingEnabled ? (float) $this->shippingCost : 0;
+    }
+
+    private function adjustCustomerMoneyState(): void
+    {
         if ($this->total == 0) {
             $this->customerMoney = 0;
         } elseif ($this->total > 0 && $this->customerMoney === 0 && $this->payment_method === 'CASH') {
             $this->customerMoney = null;
         }
-
-        $this->change = max((float)$this->customerMoney - $this->total, 0);
     }
 
 
@@ -418,51 +409,15 @@ class Order extends Component
             return;
         }
 
-        $orderNumber = $this->generateOrderNumber();
-
-        // Hitung diskon
-        $subtotalBefore = 0;
-        foreach ($this->cart as $item) {
-            $subtotalBefore += $item['price'] * $item['quantity'];
-        }
-        $discountAmount = 0;
-        if ($this->familyDiscount) {
-            $discountAmount = $subtotalBefore;
-        } elseif ($this->friendDiscount) {
-            $discountAmount = ($subtotalBefore * 20) / 100;
-        }
-
-        $shipping = $this->shippingEnabled ? (float) $this->shippingCost : 0;
-
-        $billData = [
-            'tanggal'       => now()->format('d-m-Y H:i'),
-            'kasir'         => Auth::user()->name ?? 'Owner',
-            'order_number'  => $orderNumber,
-            'items'         => [],
-            'subtotal'      => 0,
-            'discount'      => $discountAmount,
-            'tax'           => $this->tax,
-            'shipping_cost' => $shipping,
-            'total'         => $this->total,
-        ];
-
-        $subtotal = 0;
-        foreach ($this->cart as $item) {
-            $total = $item['price'] * $item['quantity'];
-            $subtotal += $total;
-
-            $billData['items'][] = [
-                'name' => $item['name'],
-                'qty' => $item['quantity'],
-                'price' => $item['price'],
-                'total' => $total,
-            ];
-        }
-
-        $billData['subtotal'] = $subtotal;
-
-        // Simpan sementara di cache (5 menit)
-        cache()->put('bill-preview:' . Auth::id(), $billData, now()->addMinutes(5));
+        app(\App\Services\PrintService::class)->generateBillPreview([
+            'cart' => $this->cart,
+            'familyDiscount' => $this->familyDiscount,
+            'friendDiscount' => $this->friendDiscount,
+            'shippingEnabled' => $this->shippingEnabled,
+            'shippingCost' => $this->shippingCost,
+            'tax' => $this->tax,
+            'total' => $this->total,
+        ]);
 
         // Dispatch JS untuk buka tab baru (single full bill)
         $this->dispatch('showBillPrintPopup', route('order.bill'));
@@ -476,27 +431,12 @@ class Order extends Component
             return;
         }
 
-        $orderNumber = $this->generateOrderNumber();
-
-        $kitchenData = [
-            'tanggal'      => now()->format('d-m-Y H:i'),
-            'order_number' => $orderNumber,
-            'desk_number'  => $this->desk_number,
-            'order_type'   => $this->order_type,
-            'note'         => $this->note,
-            'items'        => [],
-        ];
-
-        foreach ($this->cart as $item) {
-            $kitchenData['items'][] = [
-                'name' => $item['name'],
-                'qty'  => $item['quantity'],
-                'note' => $item['product_note'] ?? null,
-            ];
-        }
-
-        // Simpan sementara di cache (5 menit)
-        cache()->put('kitchen-preview:' . Auth::id(), $kitchenData, now()->addMinutes(5));
+        app(\App\Services\PrintService::class)->generateKitchenPreview([
+            'cart' => $this->cart,
+            'desk_number' => $this->desk_number,
+            'order_type' => $this->order_type,
+            'note' => $this->note,
+        ]);
 
         // Buka popup struk dapur
         $this->dispatch('showKitchenPrintPopup', route('order.kitchen'));
@@ -511,58 +451,16 @@ class Order extends Component
         }
 
         $count = max(1, (int) $this->splitCount);
-        $multi = [];
 
-        for ($i = 1; $i <= $count; $i++) {
-            $multi[$i] = [
-                'tanggal' => now()->format('d-m-Y H:i'),
-                'kasir' => Auth::user()->name ?? 'Owner',
-                'order_number' => $this->generateOrderNumber() . "-S$i",
-                'items' => [],
-                'subtotal' => 0,
-                'discount' => 0,
-                'tax' => 0,
-                'total' => 0,
-            ];
-        }
+        app(\App\Services\PrintService::class)->generateMultiSplitPreview([
+            'cart' => $this->cart,
+            'splitCount' => $count,
+            'familyDiscount' => $this->familyDiscount,
+            'friendDiscount' => $this->friendDiscount,
+            'is_tax' => $this->is_tax,
+            'tax_percentage' => $this->tax_percentage,
+        ]);
 
-        foreach ($this->cart as $item) {
-            $group = isset($item['assigned_to']) ? (int) $item['assigned_to'] : 1;
-            if ($group < 1 || $group > $count) $group = 1;
-
-            $total = $item['price'] * $item['quantity'];
-
-            $multi[$group]['items'][] = [
-                'name' => $item['name'],
-                'qty' => $item['quantity'],
-                'price' => $item['price'],
-                'total' => $total,
-            ];
-
-            $multi[$group]['subtotal'] += $total;
-        }
-
-        // compute discount/tax/total per split
-        foreach ($multi as $i => $md) {
-            $discount = 0;
-            if ($this->familyDiscount) {
-                $discount = $md['subtotal'];
-            } elseif ($this->friendDiscount) {
-                $discount = ($md['subtotal'] * 20) / 100;
-            }
-            
-            $tax = 0;
-            if ($this->is_tax) {
-                $subtotalAfterDiscount = $md['subtotal'] - $discount;
-                $tax = ($subtotalAfterDiscount * $this->tax_percentage) / 100;
-            }
-            
-            $multi[$i]['discount'] = $discount;
-            $multi[$i]['tax'] = $tax;
-            $multi[$i]['total'] = ($md['subtotal'] - $discount) + $tax;
-        }
-
-        cache()->put('bill-preview-multi:' . Auth::id(), $multi, now()->addMinutes(5));
         $this->preparedSplitCount = $count;
     }
 
@@ -570,21 +468,7 @@ class Order extends Component
     // Generate nomor order unik
     public static function generateOrderNumber(): string
     {
-        $today = now()->format('dmY');
-
-        $last = ModelsOrder::whereDate('created_at', now())
-            ->where('order_number', 'like', "ORD-$today-%")
-            ->orderBy('id', 'desc')
-            ->first();
-
-        if (!$last) {
-            $nextNumber = 1;
-        } else {
-            $lastNumber = (int) substr($last->order_number, -4);
-            $nextNumber = $lastNumber + 1;
-        }
-
-        return 'ORD-' . $today . '-' . str_pad($nextNumber, 4, '0', STR_PAD_LEFT);
+        return app(\App\Services\OrderService::class)->generateOrderNumber();
     }
 
     // Pilih order unpaid untuk diload ke cart
@@ -592,11 +476,17 @@ class Order extends Component
     {
         $order = ModelsOrder::with('transactionDetails.product')->findOrFail($orderId);
 
-        // Reset cart
         $this->resetCart();
+        $this->loadUnpaidOrderItemsIntoCart($order->transactionDetails);
+        $this->loadUnpaidOrderMetadata($order);
+        
+        $this->calculateTotal();
+        $this->dispatch('orderUnpaid');
+    }
 
-        // Load ke cart
-        foreach ($order->transactionDetails as $item) {
+    private function loadUnpaidOrderItemsIntoCart($transactionDetails): void
+    {
+        foreach ($transactionDetails as $item) {
             $this->cart[] = [
                 'id' => $item->product_id,
                 'name' => $item->product->name ?? 'Unknown',
@@ -608,36 +498,32 @@ class Order extends Component
                 'assigned_to' => 1,
             ];
         }
+    }
 
-        // Load metadata
+    private function loadUnpaidOrderMetadata($order): void
+    {
         $this->selectedUnpaidOrderId = $order->id;
         $this->order_type = $order->order_type;
         $this->desk_number = $order->desk_number ?? '';
         $this->note = $order->note;
         $this->payment_mode = 'PAY_NOW';
-        // ensure payment method synced to a default of CASH when loading/resetting
         $this->payment_method = $order->payment_method ?? 'CASH';
         
-        // Cek apakah ada komisi yang pernah dimasukkan
+        $this->loadPlatformFeeMetadata($order);
+    }
+    
+    private function loadPlatformFeeMetadata($order): void
+    {
         $expense = Expense::where('category', 'Komisi Aplikasi')
             ->where('description', 'Potongan Komisi ' . $order->order_type . ' ' . $order->order_number)->first();
             
-        if ($expense) {
-            $this->platformFeeEnabled = true;
-            $this->platformFee = $expense->amount;
-        } else {
-            $this->platformFeeEnabled = false;
-            $this->platformFee = 0;
-        }
-        
-        $this->calculateTotal();
-
-        // Notifikasi ke UI saat load ke cart
-        $this->dispatch('orderUnpaid');
+        $this->platformFeeEnabled = (bool) $expense;
+        $this->platformFee = $expense ? $expense->amount : 0;
     }
 
 
     // Proses order (baru atau edit unpaid)
+        // Proses order (baru atau edit unpaid)
     public function processOrder()
     {
         $userKey = 'order-process:user-' . Auth::id();
@@ -660,419 +546,47 @@ class Order extends Component
                 return;
             }
         }
-
-        DB::beginTransaction();
-
+        
         try {
-
-            
-            // ================= EDIT ORDER UNPAID =================
-            if ($this->selectedUnpaidOrderId) {
-
-                $order = ModelsOrder::lockForUpdate()->findOrFail($this->selectedUnpaidOrderId);
-
-                // SIMPAN STATUS AWAL
-                $wasUnpaid = $order->payment_status === 'UNPAID';
-
-                if ($order->payment_status === 'PAID') {
-                    throw new \Exception("Order ini sudah dibayar.");
-                }
-
-                // Ambil detail lama
-                $oldDetails = $order->transactionDetails()->get()->keyBy('product_id');
-
-                // Gabung semua product id lama + baru
-                $productIds = collect($this->cart)->pluck('id')
-                    ->merge($oldDetails->keys())
-                    ->unique();
-
-                // Lock semua product
-                $products = Product::whereIn('id', $productIds)->lockForUpdate()->get()->keyBy('id');
-
-                // Cart baru
-                $newCart = collect($this->cart)->keyBy('id');
-
-                
-                // ========== CEK STOK UNTUK SELISIH QTY ==========
-                
-                $insufficientProducts = [];
-
-                foreach ($newCart as $productId => $item) {
-                    $newQty = (int) $item['quantity'];
-                    $oldQty = (int) ($oldDetails[$productId]->quantity ?? 0);
-                    $diff   = $newQty - $oldQty;
-
-                    if ($diff > 0) {
-                        $prod = $products[$productId] ?? null;
-                        // Hanya cek stok jika produk menggunakan stok
-                        if ($prod && ($prod->use_stock ?? true)) {
-                            if ($prod->stock < $diff) {
-                                $insufficientProducts[] = $prod->name ?? 'Produk tidak diketahui';
-                            }
-                        }
-                    }
-                }
-
-                // Jika ada produk dengan stok tidak cukup
-                if (!empty($insufficientProducts)) {
-                    DB::rollBack();
-                    $this->dispatch('insufficientStock', $insufficientProducts);
-                    return;
-                }
-
-                // VALIDASI MEJA
-                if (empty($this->desk_number)) {
-                    $this->dispatch('errorOrderType');
-                    return;
-                }
-
-                
-                // =========== UPDATE / INSERT DETAIL ==============
-                $stockDiffs = []; // Kumpulkan semua perubahan stok untuk batch update
-                $newDetails = []; // Kumpulkan detail baru untuk bulk insert
-                $now = now();
-
-                foreach ($newCart as $productId => $item) {
-                    $price = decimal($item['price']);
-                    $newQty = (int) $item['quantity'];
-                    $oldQty = (int) ($oldDetails[$productId]->quantity ?? 0);
-                    $diff   = $newQty - $oldQty;
-                    $subtotal = bcmul($price, (string)$newQty, 2);
-
-                    if ($oldDetails->has($productId)) {
-                        // UPDATE existing detail
-                        TransactionDetail::where('order_id', $order->id)
-                            ->where('product_id', $productId)
-                            ->update([
-                                'quantity' => $newQty,
-                                'price' => $price,
-                                'subtotal' => $subtotal,
-                                'product_note' => $item['product_note'] ?? null,
-                            ]);
-                    } else {
-                        // Collect for bulk insert
-                        $newDetails[] = [
-                            'order_id' => $order->id,
-                            'product_id' => $productId,
-                            'quantity' => $newQty,
-                            'price' => $price,
-                            'subtotal' => $subtotal,
-                            'product_note' => $item['product_note'] ?? null,
-                            'created_at' => $now,
-                            'updated_at' => $now,
-                        ];
-                    }
-
-                    // Collect stock diffs untuk batch update
-                    if ($diff !== 0) {
-                        $stockDiffs[(int) $productId] = [
-                            'diff' => $diff,
-                            'use_stock' => $products[$productId]->use_stock ?? true,
-                        ];
-                    }
-                }
-
-                // Bulk insert new details (1 query instead of N)
-                if (!empty($newDetails)) {
-                    TransactionDetail::insert($newDetails);
-                }
-
-                // ========== HAPUS ITEM YANG DIBUANG ==========
-                $removedIds = [];
-                foreach ($oldDetails as $productId => $oldItem) {
-                    if (!$newCart->has($productId)) {
-                        $prod = $products[$productId] ?? null;
-                        // Collect negative diff untuk restore stock
-                        $stockDiffs[(int) $productId] = [
-                            'diff' => -((int) $oldItem->quantity),
-                            'use_stock' => $prod ? ($prod->use_stock ?? true) : true,
-                        ];
-                        $removedIds[] = $oldItem->id;
-                    }
-                }
-
-                // Bulk delete removed details (1 query instead of N)
-                if (!empty($removedIds)) {
-                    TransactionDetail::whereIn('id', $removedIds)->delete();
-                }
-
-                // Batch update semua perubahan stok (max 2 query instead of 2N)
-                $this->batchUpdateProductStock($stockDiffs);
-
-                
-                 // ========== HITUNG ULANG TOTAL ==========
-                
-                $subtotalAmount = '0';
-                foreach ($newCart as $item) {
-                    $subtotal = bcmul(decimal($item['price']), (string)$item['quantity'], 2);
-                    $subtotalAmount = bcadd($subtotalAmount, $subtotal, 2);
-                }
-
-                // Hitung diskon
-                $discount = '0';
-                if ($this->familyDiscount) {
-                    $discount = $subtotalAmount; // 100%
-                } elseif ($this->friendDiscount) {
-                    $discount = bcdiv(bcmul($subtotalAmount, '20', 2), '100', 2); // 20%
-                }
-
-                // Total setelah diskon
-                $total = bcsub($subtotalAmount, $discount, 2);
-
-                $tax = decimal($this->tax);
-                $total = bcadd($total, $tax, 2);
-
-                if (bccomp($total, '0', 2) === -1 && !$this->familyDiscount) {
-                    throw new \Exception("Total tidak valid");
-                }
-
-                
-                // =========== LOGIC BAYAR / SIMPAN ==========
-                $shippingCost = $this->shippingEnabled ? decimal($this->shippingCost) : null;
-                // Tambahkan ongkir ke total jika aktif
-                $totalWithShipping = $shippingCost ? bcadd($total, $shippingCost, 2) : $total;
-
-                $orderBaseUpdate = [
-                    'order_type'    => $this->order_type,
-                    'desk_number'   => $this->desk_number,
-                    'note'          => $this->note,
-                    'payment_method'=> $this->payment_method,
-                    'discount'      => $discount,
-                    'tax'           => $tax,
-                    'shipping_cost' => $shippingCost,
-                    'grandtotal'    => $totalWithShipping,
-                ];
-                
-                if ($this->payment_mode === 'PAY_NOW') {
-
-                    $customerMoney = decimal($this->customerMoney);
-
-                    if (bccomp($customerMoney, $total, 2) === -1) {
-                        $shortage = bcsub($total, $customerMoney, 2);
-                        DB::rollBack();
-                        $this->dispatch('insufficientPayment', $shortage);
-                        return;
-                    }
-
-                    $order->update(array_merge($orderBaseUpdate, [
-                        'payment_status' => 'PAID',
-                        'payment_mode' => 'PAY_NOW',
-                        'customer_money' => $customerMoney,
-                        'change' => bcsub($customerMoney, $total, 2),
-                        'paid_at' => now(),
-                    ]));
-
-                } else {
-
-                    // tetap UNPAID
-                    $order->update(array_merge($orderBaseUpdate, [
-                        'payment_status' => 'UNPAID',
-                        'payment_mode' => 'PAY_LATER',
-                        'customer_money' => null,
-                        'change' => null,
-                        'paid_at' => null,
-                    ]));
-                }
-
-                if ($this->platformFeeEnabled && $this->platformFee > 0) {
-                    Expense::updateOrCreate(
-                        [
-                            'user_id' => Auth::id(),
-                            'category' => 'Komisi Aplikasi',
-                            'description' => 'Potongan Komisi ' . $order->order_type . ' ' . $order->order_number,
-                        ],
-                        [
-                            'expense_date' => now()->format('Y-m-d'),
-                            'type' => 'out',
-                            'amount' => decimal($this->platformFee),
-                        ]
-                    );
-                } else {
-                    Expense::where('category', 'Komisi Aplikasi')
-                        ->where('description', 'Potongan Komisi ' . $order->order_type . ' ' . $order->order_number)
-                        ->delete();
-                }
-
-                DB::commit();
-
-      
-                // ============ UI RESET =============
-               
-                $this->selectedUnpaidOrderId = null;
-                $this->resetCart();
-
-                
-                
-                // =========== NOTIFIKASI + PRINT LOGIC ================
-                
-                if ($wasUnpaid && $order->payment_status === 'PAID') {
-                    $this->dispatch('successPayment');
-                    $this->dispatch('printReceipt', $order->id);
-                } else {
-                    $this->dispatch('successSaveOrder');
-                }
-
-                // REFRESH CACHE
-                $this->refreshCacheStock();
-                $this->refreshCacheTransactionDetail();
-
-                // refresh stock di UI
-                $this->dispatch('refreshProductStock');
-
-                // reload daftar unpaid orders
-                $this->loadUnpaidOrders();
-                return;
-            }
-
-
-            // ================== ORDER BARU ========================
-
-            // LOCK PRODUCT
-            $productIds = collect($this->cart)->pluck('id');
-            $products = Product::whereIn('id', $productIds)->lockForUpdate()->get()->keyBy('id');
-
-            $insufficientProducts = [];
-
-            foreach ($this->cart as $item) {
-                $prod = $products[$item['id']] ?? null;
-                // Hanya cek stok jika produk menggunakan stok
-                if ($prod && ($prod->use_stock ?? true)) {
-                    if ($prod->stock < $item['quantity']) {
-                        $insufficientProducts[] = $prod->name ?? 'Produk tidak diketahui';
-                    }
-                }
-            }
-
-            if (!empty($insufficientProducts)) {
-                DB::rollBack();
-                $this->dispatch('insufficientStock', $insufficientProducts);
-                return;
-            }
-
-
-            // VALIDASI MEJA
-            if (empty($this->desk_number)) {
-                $this->dispatch('errorOrderType');
-                return;
-            }
-
-            // HITUNG TOTAL
-            $subtotalAmount = '0';
-            foreach ($this->cart as $item) {
-                $subtotal = bcmul(decimal($item['price']), (string)$item['quantity'], 2);
-                $subtotalAmount = bcadd($subtotalAmount, $subtotal, 2);
-            }
-
-            // Hitung diskon
-            $discount = '0';
-            if ($this->familyDiscount) {
-                $discount = $subtotalAmount; // 100%
-            } elseif ($this->friendDiscount) {
-                $discount = bcdiv(bcmul($subtotalAmount, '20', 2), '100', 2); // 20%
-            }
-
-            // Total setelah diskon
-            $total = bcsub($subtotalAmount, $discount, 2);
-
-            $tax = decimal($this->tax);
-            $total = bcadd($total, $tax, 2);
-
-            // Tambahkan ongkir jika aktif
-            $shippingCost = $this->shippingEnabled ? decimal($this->shippingCost) : null;
-            if ($shippingCost) {
-                $total = bcadd($total, $shippingCost, 2);
-            }
-
-            if (bccomp($total, '0', 2) === -1 && !$this->familyDiscount) {
-                throw new \Exception("Total tidak valid");
-            }
-
-            // LOGIC PAYMENT
-            $customerMoney = null;
-            $change = null;
-            $paymentStatus = 'UNPAID';
-            $paidAt = null;
-
-            if ($this->payment_mode === 'PAY_NOW') {
-
-                $customerMoney = decimal($this->customerMoney);
-
-                if (bccomp($customerMoney, $total, 2) === -1) {
-                    $shortage = bcsub($total, $customerMoney, 2);
-                    DB::rollBack();
-                    $this->dispatch('insufficientPayment', $shortage);
-                    return;
-                }
-
-                $change = bcsub($customerMoney, $total, 2);
-                $paymentStatus = 'PAID';
-                $paidAt = now();
-            }
-
-            // CREATE ORDER
-            $order = ModelsOrder::create([
-                'user_id'        => Auth::id(),
-                'order_number'   => $this->generateOrderNumber(),
-                'order_type'     => $this->order_type,
-                'desk_number'    => $this->desk_number,
-                'note'           => $this->note,
+            $result = app(\App\Services\OrderService::class)->processOrder([
+                'cart' => $this->cart,
+                'selectedUnpaidOrderId' => $this->selectedUnpaidOrderId,
+                'desk_number' => $this->desk_number,
+                'order_type' => $this->order_type,
+                'note' => $this->note,
+                'familyDiscount' => $this->familyDiscount,
+                'friendDiscount' => $this->friendDiscount,
+                'tax' => $this->tax,
+                'shippingEnabled' => $this->shippingEnabled,
+                'shippingCost' => $this->shippingCost,
+                'payment_mode' => $this->payment_mode,
                 'payment_method' => $this->payment_method,
-                'discount'       => $discount,
-                'tax'            => $tax,
-                'shipping_cost'  => $shippingCost,
-                'customer_money' => $customerMoney,
-                'change'         => $change,
-                'grandtotal'     => $total,
-                'payment_status' => $paymentStatus,
-                'payment_mode'   => $this->payment_mode,
-                'paid_at'        => $paidAt,
+                'customerMoney' => $this->customerMoney,
+                'platformFeeEnabled' => $this->platformFeeEnabled,
+                'platformFee' => $this->platformFee,
+                'is_tax' => $this->is_tax,
+                'tax_percentage' => $this->tax_percentage,
             ]);
 
-            // BATCH INSERT DETAIL (1 query instead of N)
-            $details = [];
-            $stockDiffs = [];
-            $now = now();
-            foreach ($this->cart as $item) {
-                $price = decimal($item['price']);
-                $qty   = (int) $item['quantity'];
-                $details[] = [
-                    'order_id'     => $order->id,
-                    'product_id'   => $item['id'],
-                    'quantity'     => $qty,
-                    'price'        => $price,
-                    'subtotal'     => bcmul($price, (string)$qty, 2),
-                    'product_note' => $item['product_note'] ?? null,
-                    'created_at'   => $now,
-                    'updated_at'   => $now,
-                ];
-
-                $prod = $products[$item['id']] ?? null;
-                $stockDiffs[(int) $item['id']] = [
-                    'diff'      => $qty,
-                    'use_stock' => $prod ? ($prod->use_stock ?? true) : true,
-                ];
-            }
-            TransactionDetail::insert($details);
-
-            // BATCH UPDATE STOCK (max 2 queries instead of N)
-            $this->batchUpdateProductStock($stockDiffs);
-
-            if ($this->platformFeeEnabled && $this->platformFee > 0) {
-                Expense::create([
-                    'user_id' => Auth::id(),
-                    'expense_date' => now()->format('Y-m-d'),
-                    'type' => 'out',
-                    'category' => 'Komisi Aplikasi',
-                    'description' => 'Potongan Komisi ' . $order->order_type . ' ' . $order->order_number,
-                    'amount' => decimal($this->platformFee),
-                ]);
+            if (isset($result['status']) && $result['status'] === 'empty') {
+                return;
             }
 
-            DB::commit();
-
-            // UI RESET
+            // ============ UI RESET =============
+            $this->selectedUnpaidOrderId = null;
             $this->resetCart();
-            
+
+            // =========== NOTIFIKASI + PRINT LOGIC ================
+            if (!empty($result['was_unpaid']) && $result['payment_status'] === 'PAID') {
+                $this->dispatch('successPayment');
+                $this->dispatch('printReceipt', $result['order_id']);
+            } elseif ($result['payment_status'] === 'PAID') {
+                $this->dispatch('successPayment');
+                $this->dispatch('printReceipt', $result['order_id']);
+            } else {
+                $this->dispatch('successSaveOrder');
+            }
+
             // REFRESH CACHE
             $this->refreshCacheStock();
             $this->refreshCacheTransactionDetail();
@@ -1080,19 +594,21 @@ class Order extends Component
             // refresh stock di UI
             $this->dispatch('refreshProductStock');
 
-            if ($paymentStatus === 'PAID') {
-                $this->dispatch('successPayment');
-                $this->dispatch('printReceipt', $order->id);
-            } else {
-                $this->dispatch('successSaveOrder');
-            }
-
+            // reload daftar unpaid orders
             $this->loadUnpaidOrders();
 
         } catch (\Exception $e) {
-            DB::rollBack();
-            Log::error($e->getMessage());
-            $this->dispatch('errorPayment', $e->getMessage());
+            $msg = $e->getMessage();
+            if (str_starts_with($msg, 'INSUFFICIENT_STOCK:')) {
+                $this->dispatch('insufficientStock', explode(', ', substr($msg, 19)));
+            } elseif (str_starts_with($msg, 'INSUFFICIENT_PAYMENT:')) {
+                $this->dispatch('insufficientPayment', substr($msg, 21));
+            } elseif ($msg === 'ERROR_ORDER_TYPE') {
+                $this->dispatch('errorOrderType');
+            } else {
+                \Illuminate\Support\Facades\Log::error($e->getMessage());
+                $this->dispatch('errorPayment', $msg);
+            }
         }
     }
 
@@ -1100,28 +616,7 @@ class Order extends Component
     public function deleteUnpaidOrder($orderId)
     {
         try {
-            DB::beginTransaction();
-
-            // Eager load product relationship (1 query instead of N)
-            $order = ModelsOrder::with('transactionDetails.product')->where('id', $orderId)->where('payment_status', 'UNPAID')->firstOrFail();
-
-            // Batch kembalikan stok / kurangi sold_count (max 2 queries instead of N)
-            $stockDiffs = [];
-            foreach ($order->transactionDetails as $item) {
-                if ($item->product) {
-                    $stockDiffs[(int) $item->product_id] = [
-                        'diff' => -((int) $item->quantity), // negative = restore stock
-                        'use_stock' => $item->product->use_stock ?? true,
-                    ];
-                }
-            }
-            $this->batchUpdateProductStock($stockDiffs);
-
-            // Hapus detail transaksi dan order
-            $order->transactionDetails()->delete();
-            $order->delete();
-
-            DB::commit();
+            app(\App\Services\OrderService::class)->deleteUnpaidOrder($orderId);
 
             // Jika order yang sedang dipilih dihapus, reset keranjang
             if ($this->selectedUnpaidOrderId == $orderId) {
@@ -1141,7 +636,6 @@ class Order extends Component
             $this->dispatch('successDeleteOrder');
 
         } catch (\Exception $e) {
-            DB::rollBack();
             Log::error($e->getMessage());
             $this->dispatch('errorPayment', 'Gagal menghapus pesanan.');
         }
@@ -1216,7 +710,6 @@ class Order extends Component
     protected function refreshCacheStock()
     {
         // Cukup naikkan versi cache 1 tingkat (sangat cepat, O(1))
-        // tanpa perlu melakukan looping lambat menggunakan Cache::forget($key) ratusan kali
         $newVersion = Cache::get('product_cache_version', 1) + 1;
         Cache::put('product_cache_version', $newVersion, now()->addDays(7));
 
@@ -1228,47 +721,7 @@ class Order extends Component
     }
 
 
-    /**
-     * Batch update product stock & sold_count menggunakan SQL CASE WHEN.
-     * Mengurangi N individual queries menjadi max 2 queries.
-     *
-     * Convention: diff > 0 = item terjual (stock berkurang), diff < 0 = item dikembalikan (stock bertambah)
-     * Formula: stock = stock - diff, sold_count = sold_count + diff
-     *
-     * @param array $diffs [product_id => ['diff' => int, 'use_stock' => bool]]
-     */
-    private function batchUpdateProductStock(array $diffs): void
-    {
-        if (empty($diffs)) return;
 
-        $withStock = [];
-        $withoutStock = [];
-        foreach ($diffs as $id => $data) {
-            if ($data['use_stock']) {
-                $withStock[(int) $id] = (int) $data['diff'];
-            } else {
-                $withoutStock[(int) $id] = (int) $data['diff'];
-            }
-        }
-
-        // Products dengan stok: update stock & sold_count
-        if (!empty($withStock)) {
-            $stockCases = collect($withStock)->map(fn($diff, $id) =>
-                "WHEN id = {$id} THEN stock - ({$diff})")->implode(' ');
-            $soldCases = collect($withStock)->map(fn($diff, $id) =>
-                "WHEN id = {$id} THEN sold_count + ({$diff})")->implode(' ');
-            $ids = implode(',', array_keys($withStock));
-            DB::update("UPDATE products SET stock = CASE {$stockCases} ELSE stock END, sold_count = CASE {$soldCases} ELSE sold_count END WHERE id IN ({$ids})");
-        }
-
-        // Products tanpa stok: update hanya sold_count
-        if (!empty($withoutStock)) {
-            $soldCases = collect($withoutStock)->map(fn($diff, $id) =>
-                "WHEN id = {$id} THEN sold_count + ({$diff})")->implode(' ');
-            $ids = implode(',', array_keys($withoutStock));
-            DB::update("UPDATE products SET sold_count = CASE {$soldCases} ELSE sold_count END WHERE id IN ({$ids})");
-        }
-    }
 
     // Render komponen
     public function render()
