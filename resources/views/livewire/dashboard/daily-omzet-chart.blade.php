@@ -11,18 +11,23 @@
         </div>
 
         {{-- summary chips --}}
+        @php
+            $unitLabel = 'Hari';
+            if ($currentFilter === 'today') $unitLabel = 'Jam';
+            elseif ($currentFilter === 'year') $unitLabel = 'Bulan';
+        @endphp
         <div class="flex flex-wrap gap-2 text-xs">
             <div class="flex items-center gap-1.5 bg-blue-50 border border-blue-100 rounded-lg px-3 py-1.5">
                 <i class="fas fa-calendar-check text-blue-400"></i>
                 <div>
-                    <span class="text-gray-400 block leading-none">Hari Aktif</span>
-                    <span class="font-bold text-blue-700">{{ $activeDays }} hari</span>
+                    <span class="text-gray-400 block leading-none">{{ $unitLabel }} Aktif</span>
+                    <span class="font-bold text-blue-700">{{ $activeDays }} {{ strtolower($unitLabel) }}</span>
                 </div>
             </div>
             <div class="flex items-center gap-1.5 bg-emerald-50 border border-emerald-100 rounded-lg px-3 py-1.5">
                 <i class="fas fa-chart-line text-emerald-400"></i>
                 <div>
-                    <span class="text-gray-400 block leading-none">Rata-rata / Hari</span>
+                    <span class="text-gray-400 block leading-none">Rata-rata / {{ $unitLabel }}</span>
                     <span class="font-bold text-emerald-700">Rp{{ number_format($avgOmzet, 0, ',', '.') }}</span>
                 </div>
             </div>
@@ -30,9 +35,17 @@
             <div class="flex items-center gap-1.5 bg-amber-50 border border-amber-100 rounded-lg px-3 py-1.5">
                 <i class="fas fa-trophy text-amber-400"></i>
                 <div>
-                    <span class="text-gray-400 block leading-none">Hari Terbaik</span>
+                    <span class="text-gray-400 block leading-none">{{ $unitLabel }} Terbaik</span>
                     <span class="font-bold text-amber-700">
-                        {{ \Carbon\Carbon::parse($topDayLabel)->translatedFormat('d M') }}
+                        @php
+                            $formattedLabel = $topDayLabel;
+                            if ($currentFilter === 'year') {
+                                $formattedLabel = \Carbon\Carbon::parse($topDayLabel)->translatedFormat('M Y');
+                            } elseif ($currentFilter === 'month' || $currentFilter === 'week') {
+                                $formattedLabel = \Carbon\Carbon::parse($topDayLabel)->translatedFormat('d M');
+                            }
+                        @endphp
+                        {{ $formattedLabel }}
                         · Rp{{ number_format($topDayOmzet, 0, ',', '.') }}
                     </span>
                 </div>

@@ -4,15 +4,22 @@ document.addEventListener('livewire:navigated', () => {
     if (typeof window.initFlowbite === 'function') window.initFlowbite();
     if (typeof window.initGoogleCharts === 'function') window.initGoogleCharts();
 
-    document.getElementById('fullscreenBtn').addEventListener('click', function () {
-        if (!document.fullscreenElement) {
-            document.documentElement.requestFullscreen().catch(err => {
-                alert(`Error attempting to enable full-screen mode: ${err.message}`);
-            });
-        } else {
-            document.exitFullscreen();
-        }
-    });
+    // Pastikan chart di-inisialisasi setiap navigasi SPA Livewire v3
+    window.initDashboardChartsOnly();
+
+    const fsBtn = document.getElementById('fullscreenBtn');
+    if (fsBtn && !window.fsBtnListenerRegistered) {
+        window.fsBtnListenerRegistered = true;
+        fsBtn.addEventListener('click', function () {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().catch(err => {
+                    alert(`Error attempting to enable full-screen mode: ${err.message}`);
+                });
+            } else {
+                document.exitFullscreen();
+            }
+        });
+    }
 
     // Pastikan hanya menginisialisasi audio sekali
     if (!window.selectSound) {
@@ -20,11 +27,7 @@ document.addEventListener('livewire:navigated', () => {
         window.selectSound.preload = "auto";
     }
 
-    // Initialize charts if they exist
-    if (typeof window.initMonthlyTurnoverChart === 'function') window.initMonthlyTurnoverChart();
-    if (typeof window.renderDailyOmzetFromWire === 'function') window.renderDailyOmzetFromWire();
-    if (typeof window.renderPeakHourChart === 'function') window.renderPeakHourChart();
-    if (typeof window.initProductSalesChart === 'function') window.initProductSalesChart();
+    // (Chart initialization is moved to initDashboardChartsOnly outside this block)
 
     if (!window.successSound) {
         window.successSound = new Audio("/audio/success-sound.mp3");
@@ -206,3 +209,19 @@ document.addEventListener('livewire:navigated', () => {
 
 
 });
+
+// Fungsi khusus untuk menginisialisasi chart saja agar lebih aman
+window.initDashboardChartsOnly = function() {
+    if (typeof window.initMonthlyTurnoverChart === 'function') window.initMonthlyTurnoverChart();
+    if (typeof window.renderDailyOmzetFromWire === 'function') window.renderDailyOmzetFromWire();
+    if (typeof window.renderPeakHourChart === 'function') window.renderPeakHourChart();
+    if (typeof window.initProductSalesChart === 'function') window.initProductSalesChart();
+};
+
+// Eksekusi untuk first load / refresh biasa agar chart tetap muncul
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', window.initDashboardChartsOnly);
+} else {
+    window.initDashboardChartsOnly();
+}
+

@@ -16,6 +16,8 @@ class DailyOmzetChart extends Component
     public float  $topDayOmzet  = 0;   // Omzet tertinggi
     public string $topDayLabel  = '';   // Label tanggal terlaris
     public int    $activeDays   = 0;    // Hari yang ada transaksi
+    public string $currentFilter = 'month'; // Track selected filter
+
     
     public float  $totalExpense = 0;
     public float  $totalProfit  = 0;
@@ -42,6 +44,7 @@ class DailyOmzetChart extends Component
 
     public function generateDailyOmzet(string $filter = 'month')
     {
+        $this->currentFilter = $filter;
         $userId   = Auth::id();
         $isAdmin  = Auth::user()->hasRole('admin|owner');
 
