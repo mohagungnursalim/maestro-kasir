@@ -44,6 +44,21 @@
             text-shadow: 0 0 1px rgba(0, 0, 0, 0.1);
         }
     </style>
+    <link rel="manifest" href="{{ asset('manifest.json') }}">
+
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js')
+                    .then(registration => {
+                        console.log('ServiceWorker registration successful with scope: ', registration.scope);
+                    })
+                    .catch(error => {
+                        console.log('ServiceWorker registration failed: ', error);
+                    });
+            });
+        }
+    </script>
 </head>
 
 <body class="font-sans text-gray-900 antialiased">

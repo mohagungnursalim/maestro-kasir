@@ -28,6 +28,21 @@
     @livewireScripts()
     @livewireStyles()
     <x-turnstile.scripts />
+    <link rel="manifest" href="{{ asset('manifest.json') }}">
+
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js')
+                    .then(registration => {
+                        console.log('ServiceWorker registration successful with scope: ', registration.scope);
+                    })
+                    .catch(error => {
+                        console.log('ServiceWorker registration failed: ', error);
+                    });
+            });
+        }
+    </script>
 </head>
 
 <nav class="fixed top-0 z-50 w-full bg-yellow-300 border-b border-gray-200">

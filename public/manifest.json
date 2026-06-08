@@ -1,0 +1,21 @@
+{
+    "name": "Maestro POS Kedai Mie-Mie",
+    "short_name": "Kedai Mie-Mie",
+    "start_url": "/dashboard",
+    "display": "standalone",
+    "background_color": "#ffffff",
+    "theme_color": "#fde047",
+    "description": "Point of Sale System - Kedai Mie-Mie",
+    "icons": [
+        {
+            "src": "/favicon.ico",
+            "sizes": "192x192",
+            "type": "image/x-icon"
+        },
+        {
+            "src": "/favicon.ico",
+            "sizes": "512x512",
+            "type": "image/x-icon"
+        }
+    ]
+}
