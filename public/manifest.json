@@ -1,7 +1,7 @@
 {
     "name": "Maestro POS Kedai Mie-Mie",
     "short_name": "Kedai Mie-Mie",
-    "start_url": "/dashboard/order",
+    "start_url": "/dashboard/orders",
     "display": "standalone",
     "background_color": "#ffffff",
     "theme_color": "#fde047",
