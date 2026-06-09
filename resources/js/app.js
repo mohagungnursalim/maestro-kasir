@@ -7,19 +7,6 @@ document.addEventListener('livewire:navigated', () => {
     // Pastikan chart di-inisialisasi setiap navigasi SPA Livewire v3
     window.initDashboardChartsOnly();
 
-    const fsBtn = document.getElementById('fullscreenBtn');
-    if (fsBtn && !window.fsBtnListenerRegistered) {
-        window.fsBtnListenerRegistered = true;
-        fsBtn.addEventListener('click', function () {
-            if (!document.fullscreenElement) {
-                document.documentElement.requestFullscreen().catch(err => {
-                    alert(`Error attempting to enable full-screen mode: ${err.message}`);
-                });
-            } else {
-                document.exitFullscreen();
-            }
-        });
-    }
 
     // Pastikan hanya menginisialisasi audio sekali
     if (!window.selectSound) {
