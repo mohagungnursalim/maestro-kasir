@@ -65,7 +65,7 @@
         
         <div wire:init="loadInitialStats" class="bg-white shadow rounded-lg p-6 mb-6 pr-20 sm:pr-24 lg:pr-80">
             {{-- Statistik --}}
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-7 @role('admin|owner') xl:grid-cols-9 @endrole gap-6">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-8 @role('admin|owner') xl:grid-cols-10 @endrole gap-6">
                 <!-- Total Order -->
                 <div class="p-4 bg-white shadow rounded-lg border border-gray-200">
                     @if(!$loaded)
@@ -109,6 +109,21 @@
                                 <span class="font-semibold text-green-800">Rp{{ number_format($totalQris, 0, ',', '.') }}</span>
                             </div>
                         </div>
+                    @endif
+                </div>
+
+                <!-- Uang Laci Kasir (Fisik) -->
+                <div class="p-4 bg-teal-50 shadow rounded-lg border border-teal-200 flex flex-col justify-between">
+                    @if(!$loaded)
+                        <div class="h-4 bg-teal-200 rounded-full w-36 mb-3 animate-pulse"></div>
+                        <div class="h-8 bg-teal-200 rounded-full w-40 animate-pulse"></div>
+                        <div class="h-3 bg-teal-200 rounded-full w-32 mt-auto animate-pulse"></div>
+                    @else
+                        <div>
+                            <h3 class="text-lg font-semibold text-teal-700 leading-tight">Uang Laci Kasir</h3>
+                            <p class="text-2xl font-bold {{ $uangLaciKasir < 0 ? 'text-red-500' : 'text-teal-600' }}">Rp{{ number_format($uangLaciKasir ?? 0, 0, ',', '.') }}</p>
+                        </div>
+                        <p class="text-xs text-teal-500 mt-2 border-t border-teal-200 pt-1 leading-tight">Uang Tunai + TopUp (Modal Awal) − Belanja</p>
                     @endif
                 </div>
 

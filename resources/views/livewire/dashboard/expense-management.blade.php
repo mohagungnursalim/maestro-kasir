@@ -226,9 +226,13 @@
 
                 this.$watch('type', value => {
                     if (value === 'in') {
-                        this.category = 'Top Up';
-                    } else if (value === 'out' && this.category === 'Top Up') {
-                        this.category = 'Bahan Baku';
+                        if (this.category !== 'Top Up' && this.category !== 'Modal Awal Kasir') {
+                            this.category = 'Modal Awal Kasir';
+                        }
+                    } else if (value === 'out') {
+                        if (this.category === 'Top Up' || this.category === 'Modal Awal Kasir') {
+                            this.category = 'Bahan Baku';
+                        }
                     }
                 });
 
@@ -343,7 +347,8 @@
                             <select x-model="category" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5">
                                 <template x-if="type === 'in'">
                                     <optgroup label="Pemasukan">
-                                        <option value="Top Up">Top Up (Kas Masuk)</option>
+                                        <option value="Modal Awal Kasir">Modal Awal Kasir / Uang Kembalian</option>
+                                        <option value="Top Up">Top Up / Suntikan Dana Tambahan</option>
                                     </optgroup>
                                 </template>
                                 <template x-if="type === 'out'">
