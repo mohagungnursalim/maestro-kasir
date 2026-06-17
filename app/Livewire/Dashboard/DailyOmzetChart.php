@@ -67,7 +67,8 @@ class DailyOmzetChart extends Component
 
         $results = Cache::remember($cacheKey, now()->addMinutes(5), function () use ($start, $end, $groupFmt, $isAdmin, $userId, $activeBranch) {
             
-            $concurrentResults = \Illuminate\Support\Facades\Concurrency::run([
+            $driver = function_exists('proc_open') ? config('concurrency.default', 'process') : 'sync';
+            $concurrentResults = \Illuminate\Support\Facades\Concurrency::driver($driver)->run([
                 // Query 1: Orders / Omzet
                 function () use ($start, $end, $groupFmt, $isAdmin, $userId, $activeBranch) {
                     $queryOrders = DB::table('orders')

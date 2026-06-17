@@ -91,7 +91,8 @@ class Dashboard extends Component
 
             $prevDates = $this->getPreviousPeriodRange($this->filterType, $dates['start'], $dates['end']);
 
-            $results = Concurrency::run([
+            $driver = function_exists('proc_open') ? config('concurrency.default', 'process') : 'sync';
+            $results = Concurrency::driver($driver)->run([
                 // 1. ordersAggregates
                 function () use ($dates, $isAdmin, $userId) {
                     $query = \App\Models\Order::whereBetween('created_at', [$dates['start'], $dates['end']])
