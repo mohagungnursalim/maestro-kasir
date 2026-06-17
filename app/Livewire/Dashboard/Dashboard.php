@@ -8,6 +8,7 @@ use App\Models\Visitor;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Concurrency;
 use Livewire\Component;
 use Livewire\Attributes\Url;
 
@@ -86,48 +87,101 @@ class Dashboard extends Component
         );
 
         // Semua stats (termasuk visitor jika admin) dalam 1 cache block
-        $stats = Cache::remember($cacheKey, now()->addMinutes(5), function () use ($dates, $isAdmin, $userId) {
+        $stats = Cache::remember($cacheKey, now()->addMinutes(5), function () use ($dates, $isAdmin, $userId, $activeBranch) {
 
-            // Query 1: Total orders (single count) & Total Pendapatan Bersih (Grandtotal = dengan diskon & pajak)
-            $queryOrders = Order::whereBetween('created_at', [$dates['start'], $dates['end']])
-                ->where('payment_status', 'PAID');
+            $prevDates = $this->getPreviousPeriodRange($this->filterType, $dates['start'], $dates['end']);
 
-            if (!$isAdmin) {
-                $queryOrders->where('user_id', $userId);
-            }
-            
-            $ordersAggregates = (clone $queryOrders)->selectRaw("
-                COUNT(id) as total_orders,
-                COALESCE(SUM(grandtotal), 0) as total_sales,
-                COALESCE(SUM(CASE WHEN upper(payment_method) = 'QRIS' THEN grandtotal ELSE 0 END), 0) as total_qris,
-                COALESCE(SUM(CASE WHEN upper(payment_method) IN ('CASH', 'TUNAI') THEN grandtotal ELSE 0 END), 0) as total_cash,
-                COALESCE(AVG(grandtotal), 0) as avg_order_value,
-                COALESCE(AVG(discount), 0) as avg_discount
-            ")->first();
+            $results = Concurrency::run([
+                // 1. ordersAggregates
+                function () use ($dates, $isAdmin, $userId) {
+                    $query = \App\Models\Order::whereBetween('created_at', [$dates['start'], $dates['end']])
+                        ->where('payment_status', 'PAID');
+                    if (!$isAdmin) $query->where('user_id', $userId);
+                    return $query->selectRaw("
+                        COUNT(id) as total_orders,
+                        COALESCE(SUM(grandtotal), 0) as total_sales,
+                        COALESCE(SUM(CASE WHEN upper(payment_method) = 'QRIS' THEN grandtotal ELSE 0 END), 0) as total_qris,
+                        COALESCE(SUM(CASE WHEN upper(payment_method) IN ('CASH', 'TUNAI') THEN grandtotal ELSE 0 END), 0) as total_cash,
+                        COALESCE(AVG(grandtotal), 0) as avg_order_value,
+                        COALESCE(AVG(discount), 0) as avg_discount
+                    ")->first();
+                },
+                
+                // 2. salesAggregates
+                function () use ($dates, $isAdmin, $userId) {
+                    $query = \App\Models\TransactionDetail::join('orders', 'transaction_details.order_id', '=', 'orders.id')
+                        ->whereBetween('orders.created_at', [$dates['start'], $dates['end']])
+                        ->where('orders.payment_status', 'PAID');
+                    if (!$isAdmin) $query->where('orders.user_id', $userId);
+                    return $query->selectRaw('COALESCE(SUM(transaction_details.quantity), 0) as total_qty')->first();
+                },
 
-            // Query 2: Quantity produk terjual
-            $queryTransactions = TransactionDetail::join('orders', 'transaction_details.order_id', '=', 'orders.id')
-                ->whereBetween('orders.created_at', [$dates['start'], $dates['end']])
-                ->where('orders.payment_status', 'PAID');
+                // 3. expensesAggregates
+                function () use ($dates, $isAdmin, $userId) {
+                    $startStr = $dates['start']->format('Y-m-d');
+                    $endStr   = $dates['end']->format('Y-m-d');
+                    $query = \App\Models\Expense::whereBetween('expense_date', [$startStr, $endStr]);
+                    if (!$isAdmin) $query->where('user_id', $userId);
+                    return $query->selectRaw("
+                        COALESCE(SUM(CASE WHEN type = 'out' THEN amount ELSE 0 END), 0) as total_out,
+                        COALESCE(SUM(CASE WHEN type = 'out' AND category = 'Komisi Aplikasi' THEN amount ELSE 0 END), 0) as total_komisi,
+                        COALESCE(SUM(CASE WHEN type = 'in' THEN amount ELSE 0 END), 0) as total_in
+                    ")->first();
+                },
 
-            if (!$isAdmin) {
-                $queryTransactions->where('orders.user_id', $userId);
-            }
+                // 4. orderTypeSplitRaw
+                function () use ($dates, $isAdmin, $userId) {
+                    $query = \App\Models\Order::whereBetween('created_at', [$dates['start'], $dates['end']])
+                        ->where('payment_status', 'PAID');
+                    if (!$isAdmin) $query->where('user_id', $userId);
+                    return $query->selectRaw("
+                        UPPER(order_type) as order_type,
+                        COUNT(id) as total_count,
+                        COALESCE(SUM(grandtotal), 0) as total_omzet
+                    ")->groupBy('order_type')->get();
+                },
 
-            $salesAggregates = $queryTransactions
-                ->selectRaw('COALESCE(SUM(transaction_details.quantity), 0) as total_qty')
-                ->first();
+                // 5. prevOmzet
+                function () use ($prevDates, $isAdmin, $userId, $activeBranch) {
+                    $query = \App\Models\Order::whereBetween('created_at', [$prevDates['start'], $prevDates['end']])
+                        ->where('payment_status', 'PAID');
+                    if (!$isAdmin) $query->where('user_id', $userId);
+                    if ($activeBranch !== 'all' && $activeBranch !== null) {
+                        $query->where('branch_id', $activeBranch);
+                    }
+                    return (float) ($query->sum('grandtotal') ?? 0);
+                },
 
-            // Query 3: Pengeluaran & Top Up Kas
-            $queryExpenses = \App\Models\Expense::whereBetween('expense_date', [$dates['start']->format('Y-m-d'), $dates['end']->format('Y-m-d')]);
-            if (!$isAdmin) {
-                $queryExpenses->where('user_id', $userId);
-            }
-            $expensesAggregates = $queryExpenses->selectRaw("
-                COALESCE(SUM(CASE WHEN type = 'out' THEN amount ELSE 0 END), 0) as total_out,
-                COALESCE(SUM(CASE WHEN type = 'out' AND category = 'Komisi Aplikasi' THEN amount ELSE 0 END), 0) as total_komisi,
-                COALESCE(SUM(CASE WHEN type = 'in' THEN amount ELSE 0 END), 0) as total_in
-            ")->first();
+                // 6. recentTransactions
+                function () use ($dates, $isAdmin, $userId) {
+                    $query = \App\Models\Order::with(['user:id,name'])
+                        ->whereBetween('created_at', [$dates['start'], $dates['end']])
+                        ->where('payment_status', 'PAID')
+                        ->orderByDesc('created_at')
+                        ->limit(10);
+                    if (!$isAdmin) $query->where('user_id', $userId);
+                    return $query->get([
+                        'id', 'order_number', 'grandtotal', 'payment_method',
+                        'order_type', 'created_at', 'user_id', 'discount',
+                    ])->toArray();
+                },
+
+                // 7. visitorAggregates
+                function () use ($dates, $isAdmin) {
+                    if (!$isAdmin) return null;
+                    return \App\Models\Visitor::whereBetween('visited_at', [$dates['start'], $dates['end']])
+                        ->selectRaw('COUNT(*) as total_views, COUNT(DISTINCT ip_address) as unique_visitors')
+                        ->first();
+                }
+            ]);
+
+            $ordersAggregates   = $results[0];
+            $salesAggregates    = $results[1];
+            $expensesAggregates = $results[2];
+            $orderTypeSplitRaw  = $results[3];
+            $prevOmzet          = $results[4];
+            $recentTransactions = $results[5];
+            $visitorAggregates  = $results[6];
 
             $total_out   = (float) ($expensesAggregates->total_out ?? 0);
             $total_in    = (float) ($expensesAggregates->total_in ?? 0);
@@ -136,13 +190,6 @@ class Dashboard extends Component
             $real_cash_out = $total_out - (float) ($expensesAggregates->total_komisi ?? 0);
             
             $sales_omzet = (float) ($ordersAggregates->total_sales ?? 0);
-
-            // Query 4 (Point 2): Rasio Tipe Order — kunci uppercase sesuai nilai DB
-            $orderTypeSplitRaw = (clone $queryOrders)->selectRaw("
-                UPPER(order_type) as order_type,
-                COUNT(id) as total_count,
-                COALESCE(SUM(grandtotal), 0) as total_omzet
-            ")->groupBy('order_type')->get();
 
             $orderTypeSplit = [];
             $totalOrdersForSplit = max((int) ($ordersAggregates->total_orders ?? 0), 1);
@@ -171,44 +218,15 @@ class Dashboard extends Component
                 'avgOrderValue'     => (float) ($ordersAggregates->avg_order_value ?? 0),
                 'avgDiscount'       => (float) ($ordersAggregates->avg_discount ?? 0),
                 'orderTypeSplit'    => $orderTypeSplit,
+                'yesterdayOmzet'    => $prevOmzet,
+                'omzetGrowth'       => $prevOmzet > 0
+                    ? round((($sales_omzet - $prevOmzet) / $prevOmzet) * 100, 1)
+                    : ($sales_omzet > 0 ? 100.0 : null),
+                'recentTransactions'=> $recentTransactions,
             ];
-
-            // Query 5: Yesterday / previous period comparison
-            $prevDates = $this->getPreviousPeriodRange($this->filterType, $dates['start'], $dates['end']);
-            $prevQuery = Order::whereBetween('created_at', [$prevDates['start'], $prevDates['end']])
-                ->where('payment_status', 'PAID');
-            if (!$isAdmin) {
-                $prevQuery->where('user_id', $userId);
-            }
-            if (session()->has('active_branch_id')) {
-                $prevQuery->where('branch_id', session('active_branch_id'));
-            }
-            $prevOmzet = (float) ($prevQuery->sum('grandtotal') ?? 0);
-            $result['yesterdayOmzet'] = $prevOmzet;
-            $result['omzetGrowth']    = $prevOmzet > 0
-                ? round((($sales_omzet - $prevOmzet) / $prevOmzet) * 100, 1)
-                : ($sales_omzet > 0 ? 100.0 : null);
-
-            // Query 6 (Point 5): 10 Transaksi Terbaru — di-cache bersama stats utama
-            $recentQuery = Order::with(['user:id,name'])
-                ->whereBetween('created_at', [$dates['start'], $dates['end']])
-                ->where('payment_status', 'PAID')
-                ->orderByDesc('created_at')
-                ->limit(10);
-            if (!$isAdmin) {
-                $recentQuery->where('user_id', $userId);
-            }
-            $result['recentTransactions'] = $recentQuery->get([
-                'id', 'order_number', 'grandtotal', 'payment_method',
-                'order_type', 'created_at', 'user_id', 'discount',
-            ])->toArray();
 
             // Query 7 (admin only): Stats Pengunjung
             if ($isAdmin) {
-                $visitorAggregates = Visitor::whereBetween('visited_at', [$dates['start'], $dates['end']])
-                    ->selectRaw('COUNT(*) as total_views, COUNT(DISTINCT ip_address) as unique_visitors')
-                    ->first();
-
                 $result['totalPageViews']      = (int) ($visitorAggregates->total_views ?? 0);
                 $result['totalUniqueVisitors'] = (int) ($visitorAggregates->unique_visitors ?? 0);
             }

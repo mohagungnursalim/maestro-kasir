@@ -65,47 +65,55 @@ class DailyOmzetChart extends Component
             $activeBranch
         );
 
-        $results = Cache::remember($cacheKey, now()->addMinutes(5), function () use ($start, $end, $groupFmt, $isAdmin, $userId) {
+        $results = Cache::remember($cacheKey, now()->addMinutes(5), function () use ($start, $end, $groupFmt, $isAdmin, $userId, $activeBranch) {
             
-            // Omzet
-            $queryOrders = DB::table('orders')
-                ->selectRaw("DATE_FORMAT(created_at, '$groupFmt') as day_label, SUM(grandtotal) as total")
-                ->whereBetween('created_at', [$start, $end])
-                ->where('payment_status', 'PAID');
+            $concurrentResults = \Illuminate\Support\Facades\Concurrency::run([
+                // Query 1: Orders / Omzet
+                function () use ($start, $end, $groupFmt, $isAdmin, $userId, $activeBranch) {
+                    $queryOrders = DB::table('orders')
+                        ->selectRaw("DATE_FORMAT(created_at, '$groupFmt') as day_label, SUM(grandtotal) as total")
+                        ->whereBetween('created_at', [$start, $end])
+                        ->where('payment_status', 'PAID');
 
-            if (session()->has('active_branch_id')) {
-                $queryOrders->where('branch_id', session('active_branch_id'));
-            }
-            if (!$isAdmin) {
-                $queryOrders->where('user_id', $userId);
-            }
-            $orders = $queryOrders->groupByRaw("DATE_FORMAT(created_at, '$groupFmt')")->get()->keyBy('day_label');
+                    if ($activeBranch !== 'all' && $activeBranch !== null) {
+                        $queryOrders->where('branch_id', $activeBranch);
+                    }
+                    if (!$isAdmin) {
+                        $queryOrders->where('user_id', $userId);
+                    }
+                    return $queryOrders->groupByRaw("DATE_FORMAT(created_at, '$groupFmt')")->get()->keyBy('day_label');
+                },
 
-            // Pengeluaran
-            $dateColForFormat = str_contains($groupFmt, '%H') ? 'created_at' : 'expense_date';
-            
-            $queryExpenses = DB::table('expenses')
-                ->selectRaw("DATE_FORMAT($dateColForFormat, '$groupFmt') as day_label, SUM(amount) as total")
-                ->where('type', 'out');
+                // Query 2: Expenses / Pengeluaran
+                function () use ($start, $end, $groupFmt, $isAdmin, $userId, $activeBranch) {
+                    $dateColForFormat = str_contains($groupFmt, '%H') ? 'created_at' : 'expense_date';
+                    
+                    $queryExpenses = DB::table('expenses')
+                        ->selectRaw("DATE_FORMAT($dateColForFormat, '$groupFmt') as day_label, SUM(amount) as total")
+                        ->where('type', 'out');
 
-            if ($dateColForFormat === 'expense_date') {
-                 // Format start & end as date for expense_date
-                 $startDt = substr($start, 0, 10);
-                 $endDt   = substr($end, 0, 10);
-                 $queryExpenses->whereBetween('expense_date', [$startDt, $endDt]);
-            } else {
-                 $queryExpenses->whereBetween('created_at', [$start, $end]);
-            }
+                    if ($dateColForFormat === 'expense_date') {
+                         $startDt = substr($start, 0, 10);
+                         $endDt   = substr($end, 0, 10);
+                         $queryExpenses->whereBetween('expense_date', [$startDt, $endDt]);
+                    } else {
+                         $queryExpenses->whereBetween('created_at', [$start, $end]);
+                    }
 
-            if (session()->has('active_branch_id')) {
-                $queryExpenses->where('branch_id', session('active_branch_id'));
-            }
-            if (!$isAdmin) {
-                $queryExpenses->where('user_id', $userId);
-            }
-            $expenses = $queryExpenses->groupByRaw("DATE_FORMAT($dateColForFormat, '$groupFmt')")->get()->keyBy('day_label');
+                    if ($activeBranch !== 'all' && $activeBranch !== null) {
+                        $queryExpenses->where('branch_id', $activeBranch);
+                    }
+                    if (!$isAdmin) {
+                        $queryExpenses->where('user_id', $userId);
+                    }
+                    return $queryExpenses->groupByRaw("DATE_FORMAT($dateColForFormat, '$groupFmt')")->get()->keyBy('day_label');
+                }
+            ]);
 
-            return ['orders' => $orders, 'expenses' => $expenses];
+            return [
+                'orders' => $concurrentResults[0], 
+                'expenses' => $concurrentResults[1]
+            ];
         });
 
         // Isi array dengan semua label periode (0 bila tidak ada transaksi)
