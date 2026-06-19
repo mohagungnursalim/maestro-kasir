@@ -276,6 +276,7 @@
     $omzetGrowth       = $ds['omzetGrowth']         ?? null;
 
     $totalKeuntungan = $grandTotalNett - $totalExpenseOut;
+    $uangLaciKasir   = $totalTunai + $totalTopUps - $totalExpenseOut;
 
     $typeLabels = [
         'DINE_IN'   => 'Dine-In',
@@ -381,7 +382,11 @@
             <div class="kpi-label text-blue">Bayar via QRIS</div>
             <div class="kpi-value text-blue">Rp{{ number_format($totalQris, 0, ',', '.') }}</div>
         </td>
-        <td></td>
+        <td style="background: #f0fdfa;">
+            <div class="kpi-label" style="color: #0f766e;">Uang Laci Kasir</div>
+            <div class="kpi-value" style="color: #0f766e;">Rp{{ number_format($uangLaciKasir, 0, ',', '.') }}</div>
+            <div class="kpi-sub" style="color: #14b8a6;">Tunai+TopUp-Belanja</div>
+        </td>
     </tr>
 </table>
 
@@ -478,6 +483,10 @@
     </tbody>
 
     <tfoot>
+        <tr>
+            <td>TARGET UANG FISIK DI LACI KASIR</td>
+            <td class="val" style="color: #0f766e;">Rp{{ number_format($uangLaciKasir, 0, ',', '.') }}</td>
+        </tr>
         <tr>
             <td>KEUNTUNGAN (Pendapatan - Kas Keluar)</td>
             <td class="val green">Rp{{ number_format($totalKeuntungan, 0, ',', '.') }}</td>
