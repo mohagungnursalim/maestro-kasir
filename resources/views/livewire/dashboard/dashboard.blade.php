@@ -2,27 +2,48 @@
     <script>
         if (typeof window.initGoogleCharts === 'undefined') {
             window.initGoogleCharts = function() {
-                if (window.googleChartsLoaded) return;
+                const runCharts = () => {
+                    if (typeof window.initDashboardChartsOnly === 'function') {
+                        requestAnimationFrame(() => window.initDashboardChartsOnly());
+                    }
+                };
+
+                if (window.googleChartsLoaded && typeof google !== 'undefined' && google.visualization) {
+                    runCharts();
+                    return;
+                }
                 
-                if (typeof google === 'undefined' || !google.charts) {
-                    if (!document.getElementById('google-charts-script')) {
-                        const script = document.createElement('script');
+                const loadCharts = () => {
+                    google.charts.load('current', {'packages':['corechart', 'bar']});
+                    google.charts.setOnLoadCallback(() => {
+                        window.googleChartsLoaded = true;
+                        runCharts();
+                    });
+                };
+
+                if (typeof google === 'undefined' || typeof google.charts === 'undefined') {
+                    let script = document.getElementById('google-charts-script');
+                    if (!script) {
+                        script = document.createElement('script');
                         script.id = 'google-charts-script';
                         script.src = 'https://www.gstatic.com/charts/loader.js';
                         document.head.appendChild(script);
-                        script.onload = () => {
-                            google.charts.load('current', {'packages':['corechart', 'bar']});
-                            window.googleChartsLoaded = true;
-                        };
+                        script.onload = loadCharts;
+                    } else {
+                        script.addEventListener('load', loadCharts);
                     }
                 } else {
-                    google.charts.load('current', {'packages':['corechart', 'bar']});
-                    window.googleChartsLoaded = true;
+                    loadCharts();
                 }
             };
         }
         // Initialize charts immediately on load or refresh
         window.initGoogleCharts();
+        
+        // Coba ulang setelah livewire selesai update state pada root level
+        document.addEventListener('livewire:load', function () {
+            window.initGoogleCharts();
+        });
     </script>
     @can('Lihat')
     <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 relative">

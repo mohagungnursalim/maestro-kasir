@@ -2,10 +2,12 @@ import './bootstrap';
 
 document.addEventListener('livewire:navigated', () => {
     if (typeof window.initFlowbite === 'function') window.initFlowbite();
-    if (typeof window.initGoogleCharts === 'function') window.initGoogleCharts();
-
-    // Pastikan chart di-inisialisasi setiap navigasi SPA Livewire v3
-    window.initDashboardChartsOnly();
+    
+    if (typeof window.initGoogleCharts === 'function') {
+        window.initGoogleCharts();
+    } else if (typeof window.google !== 'undefined' && window.google.visualization) {
+        window.initDashboardChartsOnly();
+    }
 
 
     // Pastikan hanya menginisialisasi audio sekali
@@ -206,9 +208,17 @@ window.initDashboardChartsOnly = function() {
 };
 
 // Eksekusi untuk first load / refresh biasa agar chart tetap muncul
+const initChartsSafe = () => {
+    if (typeof window.initGoogleCharts === 'function') {
+        window.initGoogleCharts();
+    } else if (typeof window.google !== 'undefined' && window.google.visualization) {
+        window.initDashboardChartsOnly();
+    }
+};
+
 if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', window.initDashboardChartsOnly);
+    document.addEventListener('DOMContentLoaded', initChartsSafe);
 } else {
-    window.initDashboardChartsOnly();
+    initChartsSafe();
 }
 
