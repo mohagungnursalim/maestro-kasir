@@ -21,7 +21,7 @@
             <a 
                 class="flex items-center p-2 rounded-lg {{ Request::is('dashboard') ? 'bg-yellow-300 text-dark' : 'hover:bg-gray-200' }}"
                 @if (!Request::is('dashboard'))
-                    wire:navigate href="/dashboard"
+                    wire:navigate.hover href="/dashboard"
                 @endif>
                 <i class="bi bi-speedometer"></i>
                 <span class="flex-1 ms-3 whitespace-nowrap">Dashboard</span>
@@ -37,7 +37,7 @@
             <a 
                 class="flex items-center p-2 rounded-lg {{ Request::is('dashboard/orders') ? 'bg-yellow-300 text-dark' : 'hover:bg-gray-200' }}"
                 @if (!Request::is('dashboard/orders'))
-                    wire:navigate href="/dashboard/orders"
+                    wire:navigate.hover href="/dashboard/orders"
                 @endif>
                 <i class="bi bi-cash-coin"></i>
                 <span class="flex-1 ms-3 whitespace-nowrap">Kasir</span>
@@ -65,7 +65,7 @@
                     @if (Request::is('dashboard/transactions'))
                         class="flex items-center p-2 rounded-lg bg-yellow-300 text-dark"
                     @else
-                        wire:navigate href="/dashboard/transactions" 
+                        wire:navigate.hover href="/dashboard/transactions" 
                         class="flex items-center p-2 rounded-lg hover:bg-gray-200"
                     @endif
                 >
@@ -77,7 +77,7 @@
                     @if (Request::is('dashboard/expenses'))
                         class="flex items-center p-2 rounded-lg bg-yellow-300 text-dark"
                     @else
-                        wire:navigate href="/dashboard/expenses" 
+                        wire:navigate.hover href="/dashboard/expenses" 
                         class="flex items-center p-2 rounded-lg hover:bg-gray-200"
                     @endif
                 >
@@ -90,7 +90,7 @@
                     @if (Request::is('dashboard/reports'))
                         class="flex items-center p-2 rounded-lg bg-yellow-300 text-dark"
                     @else
-                        wire:navigate href="/dashboard/reports" 
+                        wire:navigate.hover href="/dashboard/reports" 
                         class="flex items-center p-2 rounded-lg hover:bg-gray-200"
                     @endif
                 >
@@ -126,7 +126,7 @@
                     @if (Request::is('dashboard/products'))
                         class="flex items-center p-2 rounded-lg bg-yellow-300 text-dark"
                     @else
-                        wire:navigate href="/dashboard/products" 
+                        wire:navigate.hover href="/dashboard/products" 
                         class="flex items-center p-2 rounded-lg hover:bg-gray-200"
                     @endif
                 >
@@ -139,7 +139,7 @@
                     @if (Request::is('dashboard/suppliers'))
                         class="flex items-center p-2 rounded-lg bg-yellow-300 text-dark"
                     @else
-                        wire:navigate href="/dashboard/suppliers" 
+                        wire:navigate.hover href="/dashboard/suppliers" 
                         class="flex items-center p-2 rounded-lg hover:bg-gray-200"
                     @endif
                 >
@@ -153,7 +153,7 @@
                     @if (Request::is('dashboard/units'))
                         class="flex items-center p-2 rounded-lg bg-yellow-300 text-dark"
                     @else
-                        wire:navigate href="/dashboard/units" 
+                        wire:navigate.hover href="/dashboard/units" 
                         class="flex items-center p-2 rounded-lg hover:bg-gray-200"
                     @endif
                 >
@@ -174,7 +174,7 @@
             <a 
                 class="flex items-center p-2 rounded-lg {{ Request::is('dashboard/store-settings') ? 'bg-yellow-300 text-dark' : 'hover:bg-gray-200' }}"
                 @if (!Request::is('dashboard/store-settings'))
-                    wire:navigate href="/dashboard/store-settings"
+                    wire:navigate.hover href="/dashboard/store-settings"
                 @endif>
                 <i class="bi bi-shop"></i>
                 <span class="flex-1 ms-3 whitespace-nowrap">Pengaturan Toko</span>
@@ -186,7 +186,7 @@
             <a 
                 class="flex items-center p-2 rounded-lg {{ Request::is('dashboard/branches') ? 'bg-yellow-300 text-dark' : 'hover:bg-gray-200' }}"
                 @if (!Request::is('dashboard/branches'))
-                    wire:navigate href="/dashboard/branches"
+                    wire:navigate.hover href="/dashboard/branches"
                 @endif>
                 <i class="bi bi-diagram-3"></i>
                 <span class="flex-1 ms-3 whitespace-nowrap">Manajemen Cabang</span>
@@ -198,7 +198,7 @@
             <a 
                 class="flex items-center p-2 rounded-lg {{ Request::is('dashboard/users-management') ? 'bg-yellow-300 text-dark' : 'hover:bg-gray-200' }}"
                 @if (!Request::is('dashboard/users-management'))
-                    wire:navigate href="/dashboard/users-management"
+                    wire:navigate.hover href="/dashboard/users-management"
                 @endif>
                 <i class="bi bi-people"></i>
                 <span class="flex-1 ms-3 whitespace-nowrap">Manajemen User</span>
@@ -209,7 +209,7 @@
             <a 
                 class="flex items-center p-2 rounded-lg {{ Request::is('dashboard/roles-permission') ? 'bg-yellow-300 text-dark' : 'hover:bg-gray-200' }}"
                 @if (!Request::is('dashboard/roles-permission'))
-                    wire:navigate href="/dashboard/roles-permission"
+                    wire:navigate.hover href="/dashboard/roles-permission"
                 @endif>
                 <i class="bi bi-check2-square"></i>
                 <span class="flex-1 ms-3 whitespace-nowrap">Peran & Izin User</span>
