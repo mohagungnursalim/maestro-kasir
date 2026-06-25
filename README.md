@@ -7,11 +7,15 @@ Kasir Resto/Warung App berbasis Laravel, Livewire, AlpineJs dan TailwindCSS (Flo
 - Dashboard Interaktif
 - Manajemen Produk/Makanan
 - Manajemen Supplier
+- Manajemen Karyawan
+- Manajemen Gaji/Potongan
 - Manajemen User
 - Manajemen Role & Permision
 - Order & Transaksi
 - Filter berdasarkan kasir/admin/owner
+- Multi Cabang
 - Export laporan PDF & Excel
+  
 
 ## 🛠️ Instalasi Local
 
