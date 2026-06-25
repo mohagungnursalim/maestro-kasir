@@ -5,10 +5,11 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use App\Traits\BelongsToBranch;
 
 class Employee extends Model
 {
-    use HasFactory;
+    use HasFactory, BelongsToBranch;
 
     protected $fillable = [
         'name',
@@ -17,6 +18,7 @@ class Employee extends Model
         'deduction_per_day',
         'joined_at',
         'is_active',
+        'branch_id',
     ];
 
     protected $casts = [

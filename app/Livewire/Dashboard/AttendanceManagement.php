@@ -101,9 +101,15 @@ class AttendanceManagement extends Component
 
     public function saveAttendances()
     {
+        $branchId = session('active_branch_id');
+
         foreach ($this->attendances as $employee_id => $status) {
-            Attendance::updateOrCreate(
-                ['employee_id' => $employee_id, 'date' => $this->currentDate],
+            Attendance::withoutGlobalScope('branch')->updateOrCreate(
+                [
+                    'employee_id' => $employee_id,
+                    'date'        => $this->currentDate,
+                    'branch_id'   => $branchId,
+                ],
                 ['status' => $status]
             );
         }
