@@ -161,10 +161,57 @@
                     <span class="flex-1 ms-3 whitespace-nowrap">Master Satuan</span>
                 </a>
                 @endrole
-        
-            </ul>
+        </ul>
         </li>
 
+        @hasrole('admin|owner|kasir')
+        <div class="text-center">
+            <hr>
+            <a class="text-center text-xs text-gray-500">Karyawan</a>
+        </div>
+        <li>
+            <button 
+                type="button" 
+                class="flex items-center w-full p-2 text-base text-gray-900 transition duration-75 rounded-lg group {{ Request::is('dashboard/employees') || Request::is('dashboard/attendances') ? 'bg-gray-200' : 'hover:bg-gray-200' }}" 
+                aria-controls="dropdown-employee" 
+                data-collapse-toggle="dropdown-employee"
+                aria-expanded="{{ Request::is('dashboard/employees') || Request::is('dashboard/attendances') ? 'true' : 'false' }}">
+                <i class="bi bi-person-badge"></i>
+                <span class="flex-1 ms-3 text-left rtl:text-right whitespace-nowrap">Pegawai</span>
+                <i class="bi bi-caret-down-fill"></i>
+            </button>
+            <ul 
+                id="dropdown-employee" 
+                class="{{ Request::is('dashboard/employees') || Request::is('dashboard/attendances') ? '' : 'hidden' }} py-2 space-y-2">
+                
+                @hasrole('admin|owner')
+                <a 
+                    @if (Request::is('dashboard/employees'))
+                        class="flex items-center p-2 rounded-lg bg-yellow-300 text-dark"
+                    @else
+                        wire:navigate.hover href="/dashboard/employees" 
+                        class="flex items-center p-2 rounded-lg hover:bg-gray-200"
+                    @endif
+                >
+                    <i class="bi bi-arrow-return-right"></i>
+                    <span class="flex-1 ms-3 whitespace-nowrap">Data Karyawan</span>
+                </a>
+                @endrole
+        
+                <a 
+                    @if (Request::is('dashboard/attendances'))
+                        class="flex items-center p-2 rounded-lg bg-yellow-300 text-dark"
+                    @else
+                        wire:navigate.hover href="/dashboard/attendances" 
+                        class="flex items-center p-2 rounded-lg hover:bg-gray-200"
+                    @endif
+                >
+                    <i class="bi bi-arrow-return-right"></i>
+                    <span class="flex-1 ms-3 whitespace-nowrap">Absensi</span>
+                </a>
+            </ul>
+        </li>
+        @endrole
         @hasrole('admin|owner')
         <div class="text-center">
             <hr>

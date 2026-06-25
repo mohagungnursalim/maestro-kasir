@@ -15,6 +15,8 @@ use App\Livewire\Dashboard\UnitManagement;
 use App\Livewire\Dashboard\UserManagement;
 use App\Livewire\Dashboard\BranchManagement;
 use App\Livewire\Dashboard\ExpenseManagement;
+use App\Livewire\Dashboard\EmployeeManagement;
+use App\Livewire\Dashboard\AttendanceManagement;
 use App\Livewire\DownloadReport;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -114,6 +116,15 @@ Route::post('/logout', function () {
 Route::get('/dashboard/users-management', UserManagement::class)
     ->middleware(['auth', 'role:admin|owner'])
     ->name('users.management');
+
+// Karyawan & Absensi
+Route::get('/dashboard/employees', EmployeeManagement::class)
+    ->middleware(['auth', 'role:admin|owner'])
+    ->name('employees');
+
+Route::get('/dashboard/attendances', AttendanceManagement::class)
+    ->middleware(['auth', 'role:admin|owner|kasir'])
+    ->name('attendances');
 
 // Manajemen Cabang
 Route::get('/dashboard/branches', BranchManagement::class)
