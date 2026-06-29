@@ -45,8 +45,14 @@ class Transaction extends Component
             $version = Cache::get('transaction_cache_version', 1);
             $activeBranch = \Illuminate\Support\Facades\Session::get('active_branch_id', 'all');
             
-            $this->totalTransactions = Cache::remember("totalTransactions_paid_br{$activeBranch}_v{$version}", $this->ttl, function () {
-                return TransactionDetail::whereHas('order', fn ($q) => $q->where('payment_status', 'PAID'))->count();
+            $this->totalTransactions = Cache::remember("totalTransactions_paid_br{$activeBranch}_v{$version}", $this->ttl, function () use ($activeBranch) {
+                return DB::table('transaction_details')
+                    ->join('orders', 'transaction_details.order_id', '=', 'orders.id')
+                    ->where('orders.payment_status', 'PAID')
+                    ->when($activeBranch !== 'all', function ($query) use ($activeBranch) {
+                        $query->where('orders.branch_id', $activeBranch);
+                    })
+                    ->count();
             });
              
             $this->transactions = collect();
@@ -112,6 +118,44 @@ class Transaction extends Component
                 : "transactions_user_br{$activeBranch}_v{$version}_{$userId}_{$searchHash}_{$this->limit}";
         
             $transactions = Cache::remember($cacheKey, $ttl, function () use ($userId, $isAdminOrOwner) {
+                // 1. Get only the IDs of matching transaction details (deferred join to optimize pagination deep/offset access)
+                $idsQuery = DB::table('transaction_details')
+                    ->join('orders', 'transaction_details.order_id', '=', 'orders.id')
+                    ->where('orders.payment_status', 'PAID')
+                    ->when(session()->has('active_branch_id'), function ($query) {
+                        $query->where('orders.branch_id', session('active_branch_id'));
+                    })
+                    ->when(!$isAdminOrOwner, function ($query) use ($userId) {
+                        $query->where('orders.user_id', $userId);
+                    })
+                    ->when($this->search, function ($query) {
+                        // Dynamically join users only if search criteria demands it
+                        $query->join('users', 'orders.user_id', '=', 'users.id')
+                              ->where(function ($q) {
+                                  // Parse date search to use index-friendly date rage instead of slow orWhereDate function scans
+                                  if (preg_match('/^\d{4}-\d{2}-\d{2}$/', $this->search)) {
+                                      $q->whereBetween('orders.created_at', [
+                                          $this->search . ' 00:00:00',
+                                          $this->search . ' 23:59:59'
+                                      ]);
+                                  } else {
+                                      $q->where('orders.order_number', 'like', '%' . $this->search . '%')
+                                        ->orWhere('users.name', 'like', '%' . $this->search . '%')
+                                        ->orWhere('orders.payment_method', 'like', '%' . $this->search . '%');
+                                  }
+                              });
+                    })
+                    ->orderBy('orders.created_at', 'desc')
+                    ->orderBy('transaction_details.id', 'desc')
+                    ->limit($this->limit);
+
+                $ids = $idsQuery->pluck('transaction_details.id');
+
+                if ($ids->isEmpty()) {
+                    return collect();
+                }
+
+                // 2. Fetch the fully joined rows for the matched IDs
                 return DB::table('transaction_details')
                     ->join('orders', 'transaction_details.order_id', '=', 'orders.id')
                     ->join('users', 'orders.user_id', '=', 'users.id')
@@ -130,23 +174,9 @@ class Transaction extends Component
                         'products.name as product_name',
                         'products.price as product_price'
                     )
-                    ->where('orders.payment_status', 'PAID')
-                    ->when(session()->has('active_branch_id'), function ($query) {
-                        $query->where('orders.branch_id', session('active_branch_id'));
-                    })
-                    ->when(!$isAdminOrOwner, function ($query) use ($userId) {
-                        $query->where('orders.user_id', $userId);
-                    })
-                    ->when($this->search, function ($query) {
-                        $query->where(function ($q) {
-                            $q->where('orders.order_number', 'like', '%' . $this->search . '%')
-                              ->orWhereDate('orders.created_at', '=', $this->search)
-                              ->orWhere('users.name', 'like', '%' . $this->search . '%')
-                              ->orWhere('orders.payment_method', 'like', '%' . $this->search . '%');
-                        });
-                    })
+                    ->whereIn('transaction_details.id', $ids)
                     ->orderBy('orders.created_at', 'desc')
-                    ->limit($this->limit)
+                    ->orderBy('transaction_details.id', 'desc')
                     ->get();
             });
         

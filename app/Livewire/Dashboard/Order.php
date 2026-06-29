@@ -70,20 +70,35 @@ class Order extends Component
     // Inisialisasi komponen
     public function mount()
     {
-        // 1 query instead of 2: ambil semua setting sekaligus
-        $setting = StoreSetting::first(['is_tax', 'tax']);
+        $this->ttl = 300;
+        
+        // Caching Store Settings to reduce early heavy database loads
+        $setting = Cache::remember('store_settings_flags', $this->ttl, function () {
+            return StoreSetting::first(['is_tax', 'tax']);
+        });
+
         $this->is_tax = $setting->is_tax ?? false;
         $this->tax_percentage = $setting->tax ?? 0;
-        $this->ttl = 300;
+        
         $this->loadUnpaidOrders();
     }
 
     // Load unpaid orders
     public function loadUnpaidOrders()
     {
-        $this->unpaidOrders = ModelsOrder::where('payment_status', 'UNPAID')
+        // Gunakan deferred fetch pattern
+        $ids = ModelsOrder::where('payment_status', 'UNPAID')
             ->orderBy('created_at', 'asc')
             ->limit(20)
+            ->pluck('id');
+
+        if ($ids->isEmpty()) {
+            $this->unpaidOrders = collect();
+            return;
+        }
+
+        $this->unpaidOrders = ModelsOrder::whereIn('id', $ids)
+            ->orderBy('created_at', 'asc')
             ->get();
     }
 
@@ -107,7 +122,8 @@ class Order extends Component
                 $query->where('sku', $this->filterSku);
             }
 
-            $products = $query->where(function ($q) {
+            // 1. Ambil list ID terlebih dahulu untuk operasi sort/filter yang optimal
+            $ids = $query->where(function ($q) {
                     $q->where('name', 'like', '%' . $this->search . '%')
                         ->orWhere('sku', 'like', '%' . $this->search . '%')
                         ->orWhere('price', 'like', '%' . $this->search . '%')
@@ -115,9 +131,16 @@ class Order extends Component
                 })
                 ->orderByDesc('sold_count')
                 ->take($this->limitProducts)
-                ->get(['id', 'name', 'sku', 'price', 'stock', 'use_stock', 'image', 'description', 'is_discounted', 'discount_type', 'discount_value', 'discount_start', 'discount_end']);
+                ->pluck('id');
 
-            return $products;
+            if ($ids->isEmpty()) {
+                return collect();
+            }
+
+            // 2. Ambil data asli berdasar kumpulan ID 
+            return Product::whereIn('id', $ids)
+                ->orderByDesc('sold_count')
+                ->get(['id', 'name', 'sku', 'price', 'stock', 'use_stock', 'image', 'description', 'is_discounted', 'discount_type', 'discount_value', 'discount_start', 'discount_end']);
         });
     }
 

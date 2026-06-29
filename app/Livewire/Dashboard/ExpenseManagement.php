@@ -149,9 +149,15 @@ class ExpenseManagement extends Component
         $query = Expense::query();
         
         if (!empty($this->filterMonth)) {
-            $year = substr($this->filterMonth, 0, 4);
-            $month = substr($this->filterMonth, 5, 2);
-            $query->whereYear('expense_date', $year)->whereMonth('expense_date', $month);
+            try {
+                $startDate = \Carbon\Carbon::createFromFormat('Y-m', $this->filterMonth)->startOfMonth()->toDateString();
+                $endDate = \Carbon\Carbon::createFromFormat('Y-m', $this->filterMonth)->endOfMonth()->toDateString();
+                $query->whereBetween('expense_date', [$startDate, $endDate]);
+            } catch (\Exception $e) {
+                $year = substr($this->filterMonth, 0, 4);
+                $month = substr($this->filterMonth, 5, 2);
+                $query->whereYear('expense_date', $year)->whereMonth('expense_date', $month);
+            }
         }
 
         if (!Auth::user()->hasRole('admin|owner')) {
@@ -173,9 +179,16 @@ class ExpenseManagement extends Component
                   ->orWhere('category', 'like', '%' . $this->search . '%');
             });
 
-        $totalExpenses = (clone $query)->count();
-        $totalNominalOut = (clone $query)->where('type', 'out')->sum('amount');
-        $totalNominalIn = (clone $query)->where('type', 'in')->sum('amount');
+        // Consolidate three database aggregate queries into one single query to optimize performance
+        $aggregates = (clone $query)->selectRaw("
+            COUNT(id) as total_expenses,
+            COALESCE(SUM(CASE WHEN type = 'out' THEN amount ELSE 0 END), 0) as total_out,
+            COALESCE(SUM(CASE WHEN type = 'in' THEN amount ELSE 0 END), 0) as total_in
+        ")->first();
+
+        $totalExpenses = (int) ($aggregates->total_expenses ?? 0);
+        $totalNominalOut = (float) ($aggregates->total_out ?? 0);
+        $totalNominalIn = (float) ($aggregates->total_in ?? 0);
 
         $expenses = $query->latest('expense_date')->latest('id')
             ->take($this->limit)
