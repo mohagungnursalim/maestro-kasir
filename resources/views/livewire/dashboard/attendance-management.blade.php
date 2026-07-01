@@ -127,9 +127,11 @@
                                 <tr>
                                     <th scope="col" class="px-6 py-3">Nama Pegawai / Posisi</th>
                                     <th scope="col" class="px-6 py-3">Gaji Pokok</th>
+                                    <th scope="col" class="px-6 py-3">Hadir</th>
                                     <th scope="col" class="px-6 py-3">Alpha</th>
                                     <th scope="col" class="px-6 py-3 text-red-500">Total Potongan</th>
                                     <th scope="col" class="px-6 py-3 text-green-600 bg-green-50/50">Gaji Bersih</th>
+                                    <th scope="col" class="px-6 py-3 text-center rounded-tr-lg">Aksi</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -141,6 +143,11 @@
                                     </td>
                                     <td class="px-6 py-4 font-medium text-gray-900">Rp {{ number_format($data['base_salary'], 0, ',', '.') }}</td>
                                     <td class="px-6 py-4">
+                                        <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                            {{ $data['presents'] }} Hari
+                                        </span>
+                                    </td>
+                                    <td class="px-6 py-4">
                                         <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">
                                             {{ $data['absences'] }} Hari
                                         </span>
@@ -148,6 +155,11 @@
                                     <td class="px-6 py-4 text-red-600 font-bold">- Rp {{ number_format($data['deduction'], 0, ',', '.') }}</td>
                                     <td class="px-6 py-4 font-extrabold text-green-600 bg-green-50/30">
                                         Rp {{ number_format($data['total_salary'], 0, ',', '.') }}
+                                    </td>
+                                    <td class="px-6 py-4 text-center border-l border-gray-50">
+                                        <button wire:click="viewDetails({{ $data['employee']->id }})" class="text-white bg-gradient-to-br from-purple-500 to-indigo-500 hover:from-purple-600 hover:to-indigo-600 px-4 py-2 rounded-xl text-xs font-bold shadow-md shadow-purple-200 transition-all flex items-center justify-center gap-1.5 mx-auto focus:ring-4 focus:ring-purple-100">
+                                            <i class="bi bi-calendar-range"></i> Detail
+                                        </button>
                                     </td>
                                 </tr>
                                 @endforeach
@@ -198,6 +210,84 @@
             </div>
         </div>
     </div>
+
+    <!-- DETAIL MODAL -->
+    @if($showDetailModal && $detailEmployee)
+    <div class="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-gray-900/60 backdrop-blur-sm transition-opacity">
+        <div class="bg-white rounded-3xl shadow-2xl w-full max-w-2xl overflow-hidden transform transition-all duration-300 scale-100">
+            <div class="flex justify-between items-center px-6 py-5 border-b border-gray-100 bg-white">
+                <div class="flex items-center gap-4">
+                    <div class="w-12 h-12 rounded-full bg-purple-100 flex items-center justify-center text-purple-600 text-xl font-bold shadow-inner">
+                        <i class="bi bi-person"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-xl font-black text-gray-900 tracking-tight">Detail Kehadiran</h3>
+                        <p class="text-sm font-medium text-purple-600">{{ $detailEmployee->name }} <span class="text-gray-400 mx-1">•</span> Bulan {{ $reportMonth }}/{{ $reportYear }}</p>
+                    </div>
+                </div>
+                <button wire:click="closeDetailModal" class="w-10 h-10 rounded-full bg-gray-50 flex items-center justify-center text-gray-400 hover:text-red-500 hover:bg-red-50 transition-all">
+                    <i class="bi bi-x-lg text-lg"></i>
+                </button>
+            </div>
+            
+            <div class="p-6 overflow-y-auto max-h-[70vh] bg-gray-50/50">
+                <div class="mb-5 flex flex-wrap gap-2 sm:gap-3 justify-center text-[10px] sm:text-xs font-semibold text-gray-600">
+                    <div class="flex items-center gap-1.5 px-3 py-1.5 bg-white rounded-lg border border-gray-100 shadow-sm"><div class="w-3 h-3 rounded-full bg-green-500"></div> Hadir</div>
+                    <div class="flex items-center gap-1.5 px-3 py-1.5 bg-white rounded-lg border border-gray-100 shadow-sm"><div class="w-3 h-3 rounded-full bg-blue-500"></div> Libur/Izin</div>
+                    <div class="flex items-center gap-1.5 px-3 py-1.5 bg-white rounded-lg border border-gray-100 shadow-sm"><div class="w-3 h-3 rounded-full bg-red-500"></div> Alpha</div>
+                    <div class="flex items-center gap-1.5 px-3 py-1.5 bg-white rounded-lg border border-gray-100 shadow-sm"><div class="w-3 h-3 rounded-full bg-gray-200"></div> Belum Input/Akan Datang</div>
+                </div>
+
+                <div class="grid grid-cols-7 gap-1.5 sm:gap-2">
+                    @foreach(['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'] as $d)
+                    <div class="text-center font-bold text-gray-400 text-[10px] sm:text-xs py-1 uppercase tracking-wider">{{ $d }}</div>
+                    @endforeach
+
+                    @php 
+                        $firstDayOfWeek = \Carbon\Carbon::create($reportYear, $reportMonth, 1)->dayOfWeek;
+                    @endphp
+                    @for($i = 0; $i < $firstDayOfWeek; $i++)
+                    <div class="aspect-square bg-transparent"></div>
+                    @endfor
+
+                    @foreach($daysInMonth as $dm)
+                        @php
+                            $status = $detailAttendances[$dm['date']] ?? 'unrecorded';
+                            $bgColor = 'bg-white border-gray-200 text-gray-500 shadow-sm';
+                            $icon = '';
+                            if ($status == 'present') {
+                                $bgColor = 'bg-gradient-to-br from-green-400 to-green-500 text-white shadow-md shadow-green-200/50 border-transparent border-0';
+                                $icon = '<i class="bi bi-check-lg opacity-80 text-xs sm:text-sm"></i>';
+                            } elseif ($status == 'absent') {
+                                $bgColor = 'bg-gradient-to-br from-red-400 to-red-500 text-white shadow-md shadow-red-200/50 border-transparent border-0';
+                                $icon = '<i class="bi bi-x-lg opacity-80 text-xs sm:text-sm"></i>';
+                            } elseif ($status == 'leave' || $status == 'holiday') {
+                                $bgColor = 'bg-gradient-to-br from-blue-400 to-blue-500 text-white shadow-md shadow-blue-200/50 border-transparent border-0';
+                                $icon = $status == 'holiday' ? '<i class="bi bi-cup-hot opacity-80 text-[10px] sm:text-xs"></i>' : '<i class="bi bi-envelope-paper opacity-80 text-[10px] sm:text-xs"></i>';
+                            } elseif ($status == 'future') {
+                                $bgColor = 'bg-gray-50/50 border-dashed border-gray-200 text-gray-300';
+                            }
+                        @endphp
+                        <div class="aspect-square rounded-[0.8rem] border flex flex-col items-center justify-center {{ $bgColor }} transition-transform hover:-translate-y-0.5 hover:shadow-lg cursor-default relative overflow-hidden group">
+                            <!-- Shine effect -->
+                            <div class="absolute inset-0 bg-white opacity-0 group-hover:opacity-20 transition-opacity"></div>
+                            
+                            <span class="text-sm sm:text-base font-black z-10">{{ $dm['day'] }}</span>
+                            <div class="mt-0.5 z-10 {!! $icon ? '' : 'hidden' !!}">
+                                {!! $icon !!}
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
+            </div>
+            <div class="px-6 py-4 border-t border-gray-100 bg-white flex justify-end">
+                <button wire:click="closeDetailModal" class="px-6 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl font-bold transition-colors focus:ring-4 focus:ring-gray-200">
+                    Tutup Detail
+                </button>
+            </div>
+        </div>
+    </div>
+    @endif
 
     <script>
         document.addEventListener('livewire:navigated', () => {

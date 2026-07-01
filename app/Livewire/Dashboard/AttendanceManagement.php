@@ -129,13 +129,20 @@ class AttendanceManagement extends Component
         $month = $this->reportMonth;
         $year = $this->reportYear;
 
-        // Fetch employees with a filtered count of absences in ONE query (avoid N+1)
+        // Fetch employees with a filtered count of absences and presents in ONE query (avoid N+1)
         $employees = Employee::where('is_active', true)
-            ->withCount(['attendances as total_absences' => function ($query) use ($month, $year) {
-                $query->whereMonth('date', $month)
-                    ->whereYear('date', $year)
-                    ->where('status', 'absent');
-            }])
+            ->withCount([
+                'attendances as total_absences' => function ($query) use ($month, $year) {
+                    $query->whereMonth('date', $month)
+                        ->whereYear('date', $year)
+                        ->where('status', 'absent');
+                },
+                'attendances as total_presents' => function ($query) use ($month, $year) {
+                    $query->whereMonth('date', $month)
+                        ->whereYear('date', $year)
+                        ->where('status', 'present');
+                }
+            ])
             ->orderBy('name')
             ->get();
 
@@ -143,17 +150,78 @@ class AttendanceManagement extends Component
         foreach ($employees as $emp) {
             $base = $emp->base_salary;
             $absences = $emp->total_absences; // Already calculated via withCount
+            $presents = $emp->total_presents;
             $deduction = $absences * $emp->deduction_per_day;
             
             $data[] = [
                 'employee' => $emp,
                 'base_salary' => $base,
+                'presents' => $presents,
                 'absences' => $absences,
                 'deduction' => $deduction,
                 'total_salary' => $base - $deduction,
             ];
         }
         return $data;
+    }
+
+    // -- DETAIL ATTENDANCE --
+    public $showDetailModal = false;
+    public $detailEmployee = null;
+    public $detailAttendances = [];
+    public $daysInMonth = [];
+
+    public function viewDetails($employeeId)
+    {
+        $this->detailEmployee = Employee::find($employeeId);
+        if (!$this->detailEmployee) return;
+
+        $month = $this->reportMonth;
+        $year = $this->reportYear;
+
+        $records = Attendance::withoutGlobalScope('branch')
+            ->where('employee_id', $employeeId)
+            ->whereMonth('date', $month)
+            ->whereYear('date', $year)
+            ->get()
+            ->keyBy('date');
+
+        $daysInMonth = Carbon::create($year, $month, 1)->daysInMonth;
+        $this->daysInMonth = [];
+        $this->detailAttendances = [];
+
+        $today = Carbon::today();
+        $daysMap = [0 => 'Min', 1 => 'Sen', 2 => 'Sel', 3 => 'Rab', 4 => 'Kam', 5 => 'Jum', 6 => 'Sab'];
+
+        for ($i = 1; $i <= $daysInMonth; $i++) {
+            $dateObj = Carbon::create($year, $month, $i);
+            $dateStr = $dateObj->format('Y-m-d');
+            $this->daysInMonth[] = [
+                'date' => $dateStr,
+                'day' => $i,
+                'dayName' => $daysMap[$dateObj->dayOfWeek],
+            ];
+
+            if ($records->has($dateStr)) {
+                $this->detailAttendances[$dateStr] = $records[$dateStr]->status;
+            } else {
+                if ($dateObj->greaterThan($today)) {
+                    $this->detailAttendances[$dateStr] = 'future';
+                } else {
+                    $dayOfWeek = $dateObj->dayOfWeek;
+                    $isHoliday = in_array((string)$dayOfWeek, $this->offDays) || in_array((int)$dayOfWeek, $this->offDays);
+                    $this->detailAttendances[$dateStr] = $isHoliday ? 'holiday' : 'unrecorded';
+                }
+            }
+        }
+
+        $this->showDetailModal = true;
+    }
+
+    public function closeDetailModal()
+    {
+        $this->showDetailModal = false;
+        $this->detailEmployee = null;
     }
 
     public function render()
