@@ -34,9 +34,9 @@ class LoginForm extends Form
         $this->ensureIsNotRateLimited();
 
         // Validate Turnstile
-        validator(
-            ['form.captcha' => $this->captcha],
-            ['form.captcha' => ['required', new Turnstile()]]
+        $validated = validator(
+            ['cf-turnstile-response' => $this->captcha],
+            ['cf-turnstile-response' => ['required', new Turnstile()]]
         )->validate();
 
         if (! Auth::attempt($this->only(['email', 'password']), $this->remember)) {
